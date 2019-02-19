@@ -12,6 +12,6 @@ Example code for node is provided in `example_node` directory.
 ### Tests
 
 Automated tests are provided. There are two types of tests
-1) `yarn test-integration`. Tests JS api. 
-2) `yarn test-device`. Mostly tests vartious corner cases. There are some extensive tests which are disabled by default, see tests source code. Also note that for these tests it is advised to install developer version of Cardano app with *headless* mode enabled, otherwise you spend your entire life confirming various prompts on device.
+1) `yarn test-integration`. Tests JS api against real device
+2) `yarn test-direct`. Mostly tests vartious corner cases. There are some extensive tests which are disabled by default, see tests source code. Also note that for these tests it is advised to install developer version of Cardano app with *headless* mode enabled, otherwise you spend your entire life confirming various prompts on device.
 
