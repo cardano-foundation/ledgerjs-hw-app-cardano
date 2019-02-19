@@ -39,7 +39,7 @@ const results = {
   witnesses: [
     {
       path: str_to_path("44'/1815'/0'/0/0"),
-      witnessHex:
+      witnessSignatureHex:
         "f89f0d3e2ad34a29c36d9eebdceb951088b52d33638d0f55d49ba2f8baff6e29" +
         "056720be55fd2eb7198c05b424ce4308eaeed7195310e5879c41c1743245b000"
     }

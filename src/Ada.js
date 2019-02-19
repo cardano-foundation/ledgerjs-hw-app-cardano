@@ -75,11 +75,14 @@ export type GetExtendedPublicKeyResponse = {|
 
 export type Witness = {|
   path: BIP32Path,
-  witnessHex: string
+  // Note: this is *only* a signature
+  // you need to add proper extended public key
+  // to form a full witness
+  witnessSignatureHex: string
 |};
 
 export type SignTransactionResponse = {|
-  txHashHex: string, // Todo
+  txHashHex: string,
   witnesses: Array<Witness>
 |};
 
@@ -398,13 +401,13 @@ export default class Ada {
       path: BIP32Path
     ): Promise<{|
       path: BIP32Path,
-      witnessHex: string
+      witnessSignatureHex: string
     |}> => {
       const data = Buffer.concat([utils.path_to_buf(path)]);
       const response = await _send(P1_STAGE_WITNESSES, P2_UNUSED, data);
       return {
         path: path,
-        witnessHex: utils.buf_to_hex(response)
+        witnessSignatureHex: utils.buf_to_hex(response)
       };
     };
 
