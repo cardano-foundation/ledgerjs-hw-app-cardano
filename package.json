@@ -1,5 +1,5 @@
 {
-  "name": "@cardano-foundation/hw-app-ada",
+  "name": "@cardano-foundation/ledgerjs-hw-app-cardano",
   "version": "1.0.0",
   "description": "Ledger Hardware Wallet Cardano ADA API",
   "main": "lib/Ada.js",
@@ -48,6 +48,7 @@
     "clean": "bash ./script/clean.sh",
     "build": "bash ./script/build.sh",
     "watch": "bash ./script/watch.sh",
+    "build-example": "bash ./script/build_example.sh",
     "clean-test": "rm -rf test/lib",
     "build-test": "yarn run clean && yarn run build && yarn run clean-test && babel --source-maps -d test/lib test/src && flow-copy-source -v test/src test/lib",
     "test-integration": "yarn run build-test && mocha --timeout 15000 test/lib/integration",

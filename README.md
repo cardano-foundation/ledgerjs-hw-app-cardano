@@ -7,11 +7,13 @@ This library is compatible with the [Cardano ADA Ledger Application](https://git
 
 ### Example code
 
-Example code for node is provided in `example_node` directory.
+Example code interacting with `hw-app-cardano` is provided in `example_node` directory.
+To compile run `yarn build-example`.
+Run example by `node example-node/lib/index.js`.
 
 ### Tests
 
 Automated tests are provided. There are two types of tests
-1) `yarn test-integration`. Tests JS api against real device
-2) `yarn test-direct`. Mostly tests vartious corner cases. There are some extensive tests which are disabled by default, see tests source code. Also note that for these tests it is advised to install developer version of Cardano app with *headless* mode enabled, otherwise you spend your entire life confirming various prompts on device.
 
+1. `yarn test-integration`. Tests JS api.
+2. `yarn test-direct`. Mostly tests vartious corner cases. There are some extensive tests which are disabled by default, see tests source code. Also note that for these tests it is advised to install developer version of Cardano app with _headless_ mode enabled, otherwise you spend your entire life confirming various prompts on device.
