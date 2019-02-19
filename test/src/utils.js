@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
 // FIXME: import
