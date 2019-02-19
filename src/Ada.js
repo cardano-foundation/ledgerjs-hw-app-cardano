@@ -35,23 +35,54 @@ const INS = {
   RUN_TESTS: 0xf0
 };
 
-type BIP32Path = Array<number>;
+export type BIP32Path = Array<number>;
 
-type InputTypeUTxO = {|
+export type InputTypeUTxO = {|
   txDataHex: string,
   outputIndex: number,
   path: BIP32Path
 |};
 
-type OutputTypeAddress = {|
+export type OutputTypeAddress = {|
   amountStr: string,
   address58: string
 |};
 
-type OutputTypeChange = {|
+export type OutputTypeChange = {|
   amountStr: string,
   path: BIP32Path
 |};
+
+export type Flags = {|
+ isDebug: boolean
+|};
+
+export type GetVersionResponse = {|
+  major: string,
+  minor: string,
+  patch: string,
+  flags: Flags
+|};
+
+export type DeriveAddressResponse = {|
+  address58: string
+|};
+
+export type GetExtendedPublicKeyResponse = {|
+  publicKeyHex: string,
+  chainCodeHex: string
+|};
+
+export type Witness = {|
+  path: BIP32Path,
+  witnessHex: string
+|};
+
+export type SignTransactionResponse = {|
+  txHashHex: string, // Todo
+  witnesses: Array<Witness>
+|};
+
 
 /**
  * Cardano ADA API
@@ -78,18 +109,14 @@ export default class Ada {
   /**
    * Returns an object containing the app version.
    *
-   * @returns {Promise<{major:number, minor:number, patch:number}>} Result object containing the application version number.
+   * @returns {Promise<GetVersionResponse>} Result object containing the application version number.
    *
    * @example
    * const { major, minor, patch, flags } = await ada.getVersion();
    * console.log(`App version ${major}.${minor}.${patch}`);
    *
    */
-  async getVersion(): Promise<{
-    major: string,
-    minor: string,
-    patch: string
-  }> {
+  async getVersion(): Promise<GetVersionResponse> {
     const _send = (p1, p2, data) =>
       this.transport
         .send(CLA, INS.GET_VERSION, p1, p2, data)
@@ -207,8 +234,8 @@ export default class Ada {
   /**
    * @description Get a public key from the specified BIP 32 path.
    *
-   * @param {Array<number>} indexes The path indexes. Path must begin with `44'/1815'/n'`, and may be up to 10 indexes long.
-   * @return {Promise<{ publicKey:string, chainCode:string }>} The public key with chaincode for the given path.
+   * @param {BIP32Path} indexes The path indexes. Path must begin with `44'/1815'/n'`, and may be up to 10 indexes long.
+   * @return {Promise<GetExtendedPublicKeyResponse>} The public key with chaincode for the given path.
    *
    * @example
    * const { publicKey, chainCode } = await ada.getExtendedPublicKey([ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]);
@@ -217,7 +244,7 @@ export default class Ada {
    */
   async getExtendedPublicKey(
     path: BIP32Path
-  ): Promise<{ publicKeyHex: string, chainCodeHex: string }> {
+  ): Promise<GetExtendedPublicKeyResponse> {
     Precondition.checkIsValidPath(path);
 
     const _send = (p1, p2, data) =>
@@ -244,8 +271,8 @@ export default class Ada {
   /**
    * @description Gets an address from the specified BIP 32 path.
    *
-   * @param {Array<number>} indexes The path indexes. Path must begin with `44'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
-   * @return {Promise<{ address:string }>} The address for the given path.
+   * @param {BIP32Path} indexes The path indexes. Path must begin with `44'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
+   * @return {Promise<DeriveAddressResponse>} The address for the given path.
    *
    * @throws 5001 - The path provided does not have the first 3 indexes hardened or 4th index is not 0 or 1
    * @throws 5002 - The path provided is less than 5 indexes
@@ -255,7 +282,7 @@ export default class Ada {
    * const { address } = await ada.deriveAddress([ HARDENED + 44, HARDENED + 1815, HARDENED + 1, 0, 5 ]);
    *
    */
-  async deriveAddress(path: BIP32Path): Promise<{ address58: string }> {
+  async deriveAddress(path: BIP32Path): Promise<DeriveAddressResponse> {
     Precondition.checkIsValidPath(path);
 
     const _send = (p1, p2, data) =>
@@ -291,7 +318,7 @@ export default class Ada {
   async signTransaction(
     inputs: Array<InputTypeUTxO>,
     outputs: Array<OutputTypeAddress | OutputTypeChange>
-  ) {
+  ): Promise<SignTransactionResponse> {
     //console.log("sign");
 
     const P1_STAGE_INIT = 0x01;
@@ -369,10 +396,10 @@ export default class Ada {
 
     const signTx_getWitness = async (
       path: BIP32Path
-    ): Promise<{
+    ): Promise<{|
       path: BIP32Path,
       witnessHex: string
-    }> => {
+    |}> => {
       const data = Buffer.concat([utils.path_to_buf(path)]);
       const response = await _send(P1_STAGE_WITNESSES, P2_UNUSED, data);
       return {
