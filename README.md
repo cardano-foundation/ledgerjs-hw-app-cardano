@@ -1,43 +1,17 @@
-<img src="https://user-images.githubusercontent.com/211411/34776833-6f1ef4da-f618-11e7-8b13-f0697901d6a8.png" height="100" />
+![image](https://user-images.githubusercontent.com/837681/53001830-d7c8a600-342b-11e9-9038-e745cc91e543.png)
 
-## @ledgerhq/hw-app-ada
+### @cardano-foundation/hw-app-cardano
 
-Library for Ledger Hardware Wallets.
+JS Library for communication with Ledger Hardware Wallets.
+This library is compatible with the [Cardano ADA Ledger Application](https://github.com/cardano-foundation/ledger-app-cardano).
 
-[Github](https://github.com/LedgerHQ/ledgerjs/),
-[API Doc](http://ledgerhq.github.io/ledgerjs/),
-[Ledger Devs Slack](https://ledger-dev.slack.com/)
+### Example code
 
-### Application
-
-This library is compatible with the [Cardano ADA Ledger Application](https://github.com/HiddenField/ledger-cardano-app).
+Example code for node is provided in `example_node` directory.
 
 ### Tests
 
-As well as the tests in `@ledgerhq/test`, automated end-to-end tests are provided here using [mocha](https://mochajs.org/).
+Automated tests are provided. There are two types of tests
+1) `yarn test-integration`. Tests JS api. 
+2) `yarn test-device`. Mostly tests vartious corner cases. There are some extensive tests which are disabled by default, see tests source code. Also note that for these tests it is advised to install developer version of Cardano app with *headless* mode enabled, otherwise you spend your entire life confirming various prompts on device.
 
-#### Core Tests
-
-Core tests are provided for testing the base functionality of the device.
-
-First, ensure you have a **test** build installed on the device (see ledger app respository for details). Then run:
-
-```shell
-yarn run core-test
-```
-
-#### API Tests
-
-These test the production API and can be run either on a production build or headlessly for fully-automated testing.
-
-For tests which require user interaction, ensure you have a standard production build of the app and run:
-
-```shell
-yarn run api-test
-```
-
-For headless tests, ensure you have a **headless** build installed on the device (see ledger app repository for details). Then run:
-
-```shell
-yarn run api-test --headless
-```
