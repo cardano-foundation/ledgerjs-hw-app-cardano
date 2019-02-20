@@ -54,7 +54,7 @@ export type OutputTypeChange = {|
 |};
 
 export type Flags = {|
- isDebug: boolean
+  isDebug: boolean
 |};
 
 export type GetVersionResponse = {|
@@ -86,7 +86,68 @@ export type SignTransactionResponse = {|
   witnesses: Array<Witness>
 |};
 
+export const ErrorCodes = {
+  ERR_STILL_IN_CALL: 0x6e04, // internal
+  ERR_INVALID_DATA: 0x6e07,
+  ERR_INVALID_BIP_PATH: 0x6e08,
+  ERR_REJECTED_BY_USER: 0x6e09,
+  ERR_REJECTED_BY_POLICY: 0x6e10,
 
+  // Not thrown by ledger-app-cardano itself but other apps
+  ERR_CLA_NOT_SUPPORTED: 0x6e00
+};
+
+const GH_ERRORS_LINK =
+  "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h";
+
+const ErrorMsgs = {
+  [ErrorCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
+  [ErrorCodes.ERR_INVALID_BIP_PATH]:
+    "Invalid derivation path supplied to Ledger",
+  [ErrorCodes.ERR_REJECTED_BY_USER]: "Action rejected by user",
+  [ErrorCodes.ERR_REJECTED_BY_POLICY]:
+    "Action rejected by Ledger's security policy",
+  [ErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app"
+};
+
+export const getErrorDescription = (statusCode: number) => {
+  const statusCodeHex = `0x${statusCode.toString(16)}`;
+  const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_ERRORS_LINK}`;
+
+  return ErrorMsgs[statusCode] || defaultMsg;
+};
+
+// It can happen that we try to send a message to the device
+// when the device thinks it is still in a middle of previous ADPU stream.
+// This happens mostly if host does abort communication for some reason
+// leaving ledger mid-call.
+// In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
+// default. We can therefore transparently retry the request.
+// Note though that only the *first* request in an multi-APDU exchange should be retried.
+const wrapRetryStillInCall = fn => async (...args: any) => {
+  try {
+    return await fn(...args);
+  } catch (e) {
+    if (e && e.statusCode && e.statusCode === ErrorCodes.ERR_STILL_IN_CALL) {
+      // Do the retry
+      return await fn(...args);
+    }
+    throw e;
+  }
+};
+
+const wrapConvertError = fn => async (...args) => {
+  try {
+    return await fn(...args);
+  } catch (e) {
+    if (e && e.statusCode) {
+      // keep HwTransport.TransportStatusError
+      // just override the message
+      e.message = `Ledger device: ${getErrorDescription(e.statusCode)}`;
+    }
+    throw e;
+  }
+};
 /**
  * Cardano ADA API
  *
@@ -94,9 +155,13 @@ export type SignTransactionResponse = {|
  * import Ada from "@ledgerhq/hw-app-ada";
  * const ada = new Ada(transport);
  */
+
+type SendFn = (number, number, number, number, Buffer) => Promise<Buffer>;
+
 export default class Ada {
   transport: Transport<*>;
   methods: Array<string>;
+  send: SendFn;
 
   constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
     this.transport = transport;
@@ -107,6 +172,7 @@ export default class Ada {
       "deriveAddress"
     ];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
+    this.send = wrapConvertError(this.transport.send);
   }
 
   /**
@@ -121,13 +187,16 @@ export default class Ada {
    */
   async getVersion(): Promise<GetVersionResponse> {
     const _send = (p1, p2, data) =>
-      this.transport
-        .send(CLA, INS.GET_VERSION, p1, p2, data)
-        .then(utils.stripRetcodeFromResponse);
-
+      this.send(CLA, INS.GET_VERSION, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
     const P1_UNUSED = 0x00;
     const P2_UNUSED = 0x00;
-    const response = await _send(P1_UNUSED, P2_UNUSED, utils.hex_to_buf(""));
+    const response = await wrapRetryStillInCall(_send)(
+      P1_UNUSED,
+      P2_UNUSED,
+      utils.hex_to_buf("")
+    );
     Assert.assert(response.length == 4);
     const [major, minor, patch, flags_value] = response;
 
@@ -146,7 +215,7 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    await this.transport.send(CLA, INS.RUN_TESTS, 0x00, 0x00);
+    await wrapRetryStillInCall(this.send)(CLA, INS.RUN_TESTS, 0x00, 0x00);
   }
 
   async _attestUtxo(
@@ -163,9 +232,9 @@ export default class Ada {
     Precondition.checkIsUint32(outputIndex);
 
     const _send = (p1, p2, data) =>
-      this.transport
-        .send(CLA, INS.ATTEST_UTXO, p1, p2, data)
-        .then(utils.stripRetcodeFromResponse);
+      this.send(CLA, INS.ATTEST_UTXO, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
 
     const P1_INIT = 0x01;
     const P1_CONTINUE = 0x02;
@@ -177,7 +246,11 @@ export default class Ada {
     {
       // Initial request
       const data = utils.uint32_to_buf(outputIndex);
-      const result = await _send(P1_INIT, P2_UNUSED, data);
+      const result = await wrapRetryStillInCall(_send)(
+        P1_INIT,
+        P2_UNUSED,
+        data
+      );
       Assert.assert(result.length == 0);
     }
 
@@ -251,16 +324,20 @@ export default class Ada {
     Precondition.checkIsValidPath(path);
 
     const _send = (p1, p2, data) =>
-      this.transport
-        .send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data)
-        .then(utils.stripRetcodeFromResponse);
+      this.send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
 
     const P1_UNUSED = 0x00;
     const P2_UNUSED = 0x00;
 
     const data = utils.path_to_buf(path);
 
-    const response = await _send(P1_UNUSED, P2_UNUSED, data);
+    const response = await wrapRetryStillInCall(_send)(
+      P1_UNUSED,
+      P2_UNUSED,
+      data
+    );
 
     const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
     Assert.assert(rest.length == 0);
@@ -289,9 +366,9 @@ export default class Ada {
     Precondition.checkIsValidPath(path);
 
     const _send = (p1, p2, data) =>
-      this.transport
-        .send(CLA, INS.DERIVE_ADDRESS, p1, p2, data)
-        .then(utils.stripRetcodeFromResponse);
+      this.send(CLA, INS.DERIVE_ADDRESS, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
 
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
@@ -307,9 +384,9 @@ export default class Ada {
     Precondition.checkIsValidPath(path);
 
     const _send = (p1, p2, data) =>
-      this.transport
-        .send(CLA, INS.DERIVE_ADDRESS, p1, p2, data)
-        .then(utils.stripRetcodeFromResponse);
+      this.send(CLA, INS.DERIVE_ADDRESS, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
 
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
@@ -333,9 +410,9 @@ export default class Ada {
     const SIGN_TX_INPUT_TYPE_ATTESTED_UTXO = 0x01;
 
     const _send = (p1, p2, data) =>
-      this.transport
-        .send(CLA, INS.SIGN_TX, p1, p2, data)
-        .then(utils.stripRetcodeFromResponse);
+      this.send(CLA, INS.SIGN_TX, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
 
     const signTx_init = async (
       numInputs: number,
@@ -345,7 +422,11 @@ export default class Ada {
         utils.uint32_to_buf(numInputs),
         utils.uint32_to_buf(numOutputs)
       ]);
-      const response = await _send(P1_STAGE_INIT, P2_UNUSED, data);
+      const response = await wrapRetryStillInCall(_send)(
+        P1_STAGE_INIT,
+        P2_UNUSED,
+        data
+      );
       Assert.assert(response.length == 0);
     };
 
