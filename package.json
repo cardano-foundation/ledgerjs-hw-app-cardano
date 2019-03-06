@@ -6,7 +6,7 @@
   ],
   "description": "Ledger Hardware Wallet Cardano ADA API",
   "main": "lib/Ada.js",
-  "repository": "git+ssh://git@github.com/LedgerHQ/ledgerjs.git",
+  "repository": "github:cardano-foundation/ledgerjs-hw-app-cardano",
   "keywords": [
     "Ledger",
     "LedgerWallet",

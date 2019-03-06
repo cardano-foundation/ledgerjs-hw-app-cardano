@@ -1,6 +1,6 @@
 ![image](https://user-images.githubusercontent.com/837681/53001830-d7c8a600-342b-11e9-9038-e745cc91e543.png)
 
-### @cardano-foundation/hw-app-cardano
+### @cardano-foundation/ledgerjs-hw-app-cardano
 
 JS Library for communication with Ledger Hardware Wallets.
 This library is compatible with the [Cardano ADA Ledger Application](https://github.com/cardano-foundation/ledger-app-cardano).
