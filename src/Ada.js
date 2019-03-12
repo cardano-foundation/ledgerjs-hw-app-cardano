@@ -241,7 +241,9 @@ export default class Ada {
 
     const P2_UNUSED = 0x00;
 
-    const CHUNK_SIZE = 255;
+    // Note: U2F transport does not like APDU length longer than 255
+    // so we are leaving it some space
+    const CHUNK_SIZE = 245;
 
     {
       // Initial request
