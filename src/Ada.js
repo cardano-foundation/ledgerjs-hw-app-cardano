@@ -92,6 +92,7 @@ export const ErrorCodes = {
   ERR_INVALID_BIP_PATH: 0x6e08,
   ERR_REJECTED_BY_USER: 0x6e09,
   ERR_REJECTED_BY_POLICY: 0x6e10,
+  ERR_DEVICE_LOCKED: 0x6e11,
 
   // Not thrown by ledger-app-cardano itself but other apps
   ERR_CLA_NOT_SUPPORTED: 0x6e00
@@ -107,6 +108,7 @@ const ErrorMsgs = {
   [ErrorCodes.ERR_REJECTED_BY_USER]: "Action rejected by user",
   [ErrorCodes.ERR_REJECTED_BY_POLICY]:
     "Action rejected by Ledger's security policy",
+  [ErrorCodes.ERR_DEVICE_LOCKED]: "Device is locked",
   [ErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app"
 };
 
