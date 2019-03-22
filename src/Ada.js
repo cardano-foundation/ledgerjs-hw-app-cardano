@@ -171,7 +171,8 @@ export default class Ada {
       "getVersion",
       "getExtendedPublicKey",
       "signTransaction",
-      "deriveAddress"
+      "deriveAddress",
+      "showAddress"
     ];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
     this.send = wrapConvertError(this.transport.send);
