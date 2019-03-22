@@ -1,6 +1,7 @@
 /********************************************************************************
  *   Ledger Node JS API
  *   (c) 2016-2017 Ledger
+ *   (c) 2019 VacuumLabs
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,9 +16,6 @@
  *  limitations under the License.
  ********************************************************************************/
 // @flow
-
-import type Transport from "@ledgerhq/hw-transport";
-import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 import utils, { Precondition, Assert } from "./utils";
 
@@ -160,12 +158,28 @@ const wrapConvertError = fn => async (...args) => {
 
 type SendFn = (number, number, number, number, Buffer) => Promise<Buffer>;
 
+//
+type TransportBase = {
+  send: (
+    cla: number,
+    ins: number,
+    p1: number,
+    p2: number,
+    data: Buffer
+  ) => Promise<Buffer>,
+  decorateAppAPIMethods: (
+    instance: any,
+    methods: Array<string>,
+    scrambleKey: string
+  ) => void
+};
+
 export default class Ada {
-  transport: Transport<*>;
+  transport: TransportBase;
   methods: Array<string>;
   send: SendFn;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
+  constructor(transport: TransportBase, scrambleKey: string = "ADA") {
     this.transport = transport;
     this.methods = [
       "getVersion",
