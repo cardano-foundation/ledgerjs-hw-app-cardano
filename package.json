@@ -20,13 +20,13 @@
   "author": "VacuumLabs <adalite@vacuumlabs.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.35.0",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "base-x": "^3.0.5",
     "node-int64": "^0.4.0"
   },
   "devDependencies": {
+    "@ledgerhq/hw-transport": "^4.35.0",
     "@ledgerhq/hw-transport-node-hid": "^4.35.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",

@@ -16,9 +16,6 @@
  ********************************************************************************/
 // @flow
 
-import type Transport from "@ledgerhq/hw-transport";
-import { TransportStatusError } from "@ledgerhq/hw-transport";
-
 import utils, { Precondition, Assert } from "./utils";
 
 const CLA = 0xd7;
@@ -160,12 +157,28 @@ const wrapConvertError = fn => async (...args) => {
 
 type SendFn = (number, number, number, number, Buffer) => Promise<Buffer>;
 
+//
+type TransportBase = {
+  send: (
+    cla: number,
+    ins: number,
+    p1: number,
+    p2: number,
+    data: Buffer
+  ) => Promise<Buffer>,
+  decorateAppAPIMethods: (
+    instance: any,
+    methods: Array<string>,
+    scrambleKey: string
+  ) => void
+};
+
 export default class Ada {
-  transport: Transport<*>;
+  transport: TransportBase;
   methods: Array<string>;
   send: SendFn;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
+  constructor(transport: TransportBase, scrambleKey: string = "ADA") {
     this.transport = transport;
     this.methods = [
       "getVersion",
