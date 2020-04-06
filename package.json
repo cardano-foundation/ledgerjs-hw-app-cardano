@@ -20,27 +20,26 @@
   "author": "VacuumLabs <adalite@vacuumlabs.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.35.0",
+    "@ledgerhq/hw-transport": "^5.12.0",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "base-x": "^3.0.5",
     "node-int64": "^0.4.0"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^4.35.0",
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-flow": "^6.23.0",
-    "babel-preset-stage-0": "^6.24.1",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-flow": "^7.9.0",
+    "@ledgerhq/hw-transport-node-hid": "^5.12.0",
     "chai": "^4.2.0",
-    "chalk": "^2.3.1",
-    "flow-bin": "^0.78.0",
-    "flow-copy-source": "^2.0.3",
-    "flow-typed": "^2.4.0",
-    "lerna": "^3.13.0",
-    "mocha": "^5.0.1",
-    "prettier": "^1.16.4"
+    "chalk": "^4.0.0",
+    "flow-bin": "^0.122.0",
+    "flow-copy-source": "^2.0.9",
+    "flow-typed": "^3.1.0",
+    "mocha": "^7.1.1",
+    "prettier": "^2.0.3"
   },
   "bugs": {
     "url": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/issues"

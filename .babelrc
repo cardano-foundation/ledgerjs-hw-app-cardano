@@ -1,7 +1,7 @@
 {
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
           "browsers": [
@@ -12,14 +12,12 @@
         "forceAllTransforms": true
       }
     ],
-    "flow",
-    "stage-0"
+    "@babel/preset-flow"
   ],
   "plugins": [
     [
-      "transform-runtime",
+      "@babel/transform-runtime",
       {
-        "polyfill": false,
         "regenerator": true
       }
     ]
