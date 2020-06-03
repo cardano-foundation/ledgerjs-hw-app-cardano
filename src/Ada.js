@@ -25,6 +25,7 @@ const CLA = 0xd7;
 
 const INS = {
   GET_VERSION: 0x00,
+  GET_SERIAL: 0x01,
 
   GET_EXT_PUBLIC_KEY: 0x10,
   DERIVE_ADDRESS: 0x11,
@@ -62,6 +63,10 @@ export type GetVersionResponse = {|
   minor: string,
   patch: string,
   flags: Flags
+|};
+
+export type GetSerialResponse = {|
+  serial: string
 |};
 
 export type DeriveAddressResponse = {|
@@ -169,6 +174,7 @@ export default class Ada {
     this.transport = transport;
     this.methods = [
       "getVersion",
+      "getSerial",
       "getExtendedPublicKey",
       "signTransaction",
       "deriveAddress",
@@ -178,17 +184,7 @@ export default class Ada {
     this.send = wrapConvertError(this.transport.send);
   }
 
-  /**
-   * Returns an object containing the app version.
-   *
-   * @returns {Promise<GetVersionResponse>} Result object containing the application version number.
-   *
-   * @example
-   * const { major, minor, patch, flags } = await ada.getVersion();
-   * console.log(`App version ${major}.${minor}.${patch}`);
-   *
-   */
-  async getVersion(): Promise<GetVersionResponse> {
+  async _getVersion(): Promise<GetVersionResponse> {
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_VERSION, p1, p2, data).then(
         utils.stripRetcodeFromResponse
@@ -210,6 +206,68 @@ export default class Ada {
       isDebug: (flags_value & FLAG_IS_DEBUG) == FLAG_IS_DEBUG
     };
     return { major, minor, patch, flags };
+  }
+
+  /**
+   * Returns an object containing the app version.
+   *
+   * @returns {Promise<GetVersionResponse>} Result object containing the application version number.
+   *
+   * @example
+   * const { major, minor, patch, flags } = await ada.getVersion();
+   * console.log(`App version ${major}.${minor}.${patch}`);
+   *
+   */
+  async getVersion(): Promise<GetVersionResponse> {
+    return this._getVersion();
+  }
+
+  _isGetSerialSupported(version: GetVersionResponse): boolean {
+    const major = parseInt(version.major);
+    const minor = parseInt(version.minor);
+    const patch = parseInt(version.patch);
+    if (isNaN(major) || isNaN(minor) || isNaN(patch))
+      return false;
+
+    if (major > 1) {
+      return true;
+    } else if (major == 1) {
+      return minor >= 2;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Returns an object containing the device serial number.
+   *
+   * @returns {Promise<GetSerialResponse>} Result object containing the device serial number.
+   *
+   * @example
+   * const { serial } = await ada.getSerial();
+   * console.log(`Serial number ${serial}`);
+   *
+   */
+  async getSerial(): Promise<GetSerialResponse> {
+    const version = await this._getVersion();
+    if (!this._isGetSerialSupported(version))
+      throw new Error("getSerial not supported by device firmware");
+
+    const _send = (p1, p2, data) =>
+      this.send(CLA, INS.GET_SERIAL, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
+    const P1_UNUSED = 0x00;
+    const P2_UNUSED = 0x00;
+    const response = await wrapRetryStillInCall(_send)(
+      P1_UNUSED,
+      P2_UNUSED,
+      utils.hex_to_buf("")
+    );
+    Assert.assert(response.length == 7);
+
+    const serial = utils.buf_to_hex(response);
+    return { serial };
   }
 
   /**

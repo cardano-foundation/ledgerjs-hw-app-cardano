@@ -14,7 +14,7 @@ describe("attestUtxo", async () => {
     await ada.t.close();
   });
 
-  it("Should succesfuly attest utxo", async () => {
+  it("Should successfully attest utxo", async () => {
     const transaction = transactions[0];
 
     for (let i = 0; i < transaction.outputs.length; i++) {
