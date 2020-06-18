@@ -19,7 +19,7 @@ const inputs = {
 const outputs = {
   adalite: {
     amountStr: "700000",
-    address58:
+    humanAddress:
       "DdzFFzCqrhsoarXqLakMBEiURCGPCUL7qRvPf2oGknKN2nNix5b9SQKj2YckgXZK" +
       "6q1Ym7BNLxgEX3RQFjS2C41xt54yJHeE1hhMUfSG"
   },

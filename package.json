@@ -24,6 +24,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "base-x": "^3.0.5",
+    "bech32": "^1.1.4",
     "node-int64": "^0.4.0"
   },
   "devDependencies": {
@@ -60,6 +61,7 @@
     "test-direct": "yarn build-test && yarn test-direct-run",
     "test": "yarn build-test && yarn test-integration-run && yarn test-direct-run",
     "test-device": "yarn run build-test && mocha --timeout 3600000 test/lib/device",
-    "test-device-quick": "echo && echo 'Warning: running test without rebuilding' && mocha --timeout 3600000 test/lib/device"
+    "test-device-quick": "echo && echo 'Warning: running test without rebuilding' && mocha --timeout 3600000 test/lib/device",
+    "xxx": "yarn build-test && mocha --timeout 3600000 test/lib/integration/deriveAddress.js"
   }
 }

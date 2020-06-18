@@ -2,9 +2,10 @@ import "babel-polyfill";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
 // FIXME: import
-import Ada, { utils } from "../..";
+import Ada, { utils, cardano } from "../..";
 
-export const str_to_path = utils.str_to_path;
+export const str_to_path = cardano.str_to_path;
+export const hex_to_buf = utils.hex_to_buf;
 export const pathToBuffer = str => utils.path_to_buf(utils.str_to_path(str));
 
 export async function getTransport() {
