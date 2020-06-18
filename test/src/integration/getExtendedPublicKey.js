@@ -29,6 +29,9 @@ describe("getExtendedPublicKey", async () => {
     await test("44'/1815'/1'");
     await test("44'/1815'/1'/0/12'");
     await test("44'/1815'/1'/0/10'/1/2/3");
+
+    await test("1852'/1815'/0'/0/1");
+    await test("1852'/1815'/0'/2/0");
   });
 
   it("Should return the same public key with the same path consistently", async () => {

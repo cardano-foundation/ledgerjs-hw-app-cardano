@@ -48,5 +48,27 @@ export default {
     privateKey:
       "1843fa0d93d219fe32f828dcb0b099371efd76ad61835b882520b0b430e69d419478ef007b937df52bafdd6f00e3750649edf47ee9323d81cf128c1c2faa84d2",
     address: "Ae2tdPwUPEZHeGEoTBN63KPFcT1MyRDSy4nk4m9sVFmCxm3SxP7h9ujJaap"
-  }
+  },
+
+  // TODO supply missing values for deadbeefs?
+  "1852'/1815'/0'/0/1": {
+    path: "1852'/1815'/0'/0/1",
+    publicKey:
+      "b3d5f4158f0c391ee2a28a2e285f218f3e895ff6ff59cb9369c64b03b5bab5eb",
+    chainCode:
+      "27e1d1f3a3d0fafc0884e02a2d972e7e5b1be8a385ecc1bc75a977b4073dbd08",
+    privateKey:
+      "deadbeef22",
+    address: "deadbeef33"
+  },
+  "1852'/1815'/0'/2/0": {
+    path: "1852'/1815'/0'/2/0",
+    publicKey:
+      "66610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8",
+    chainCode:
+      "e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58",
+    privateKey:
+      "deadbeef66",
+    address: "deadbeef77"
+  },
 };
