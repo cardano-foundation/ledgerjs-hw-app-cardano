@@ -20,6 +20,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 import utils, { Precondition, Assert } from "./utils";
+import cardano from "./cardano";
 
 const CLA = 0xd7;
 
@@ -45,7 +46,7 @@ export type InputTypeUTxO = {|
 
 export type OutputTypeAddress = {|
   amountStr: string,
-  address58: string
+  humanAddress: string
 |};
 
 export type OutputTypeChange = {|
@@ -65,7 +66,7 @@ export type GetVersionResponse = {|
 |};
 
 export type DeriveAddressResponse = {|
-  address58: string
+  humanAddress: string
 |};
 
 export type GetExtendedPublicKeyResponse = {|
@@ -150,6 +151,7 @@ const wrapConvertError = fn => async (...args) => {
     throw e;
   }
 };
+
 /**
  * Cardano ADA API
  *
@@ -366,10 +368,14 @@ export default class Ada {
    * @example
    * const { address } = await ada.deriveAddress([ HARDENED + 44, HARDENED + 1815, HARDENED + 1, 0, 5 ]);
    *
+   * TODO update this
    */
-  async deriveAddress(path: BIP32Path): Promise<DeriveAddressResponse> {
-    Precondition.checkIsValidPath(path);
-
+  async deriveAddress(
+      addressHeader: number, spendingPath: BIP32Path,
+      stakingPath: ?BIP32Path = null,
+      stakingKeyHash: ?Buffer = null,
+      stakingBlockchainPointer: ?[number, number, number] = null
+      ): Promise<DeriveAddressResponse> {
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.DERIVE_ADDRESS, p1, p2, data).then(
         utils.stripRetcodeFromResponse
@@ -377,17 +383,31 @@ export default class Ada {
 
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
-    const data = utils.path_to_buf(path);
+    const data = cardano.serializeserializeStakingInfo(addressHeader, spendingPath,
+        stakingPath, stakingKeyHash, stakingBlockchainPointer);
+
     const response = await _send(P1_RETURN, P2_UNUSED, data);
 
+    Assert.assert(response.length > 0);
+    var encodedResponse: string;
+    if ((response[0] & 0xF0) == 0x80) // byron address
+        encodedResponse = utils.base58_encode(response);
+    else // shelley address
+        encodedResponse = utils.bech32_encodeAddress(response);
+
+    console.log("returned address: " + encodedResponse);
+
     return {
-      address58: utils.base58_encode(response)
+      humanAddress: encodedResponse
     };
   }
 
-  async showAddress(path: BIP32Path): Promise<void> {
-    Precondition.checkIsValidPath(path);
-
+  async showAddress(
+      addressHeader: number, spendingPath: BIP32Path,
+      stakingPath: ?BIP32Path = null,
+      stakingKeyHash: ?Buffer = null,
+      stakingBlockchainPointer: ?[number, number, number] = null
+  ): Promise<void> {
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.DERIVE_ADDRESS, p1, p2, data).then(
         utils.stripRetcodeFromResponse
@@ -395,7 +415,9 @@ export default class Ada {
 
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
-    const data = utils.path_to_buf(path);
+    const data = cardano.serializeStakingInfo(addressHeader, spendingPath,
+        stakingPath, stakingKeyHash, stakingBlockchainPointer);
+
     const response = await _send(P1_DISPLAY, P2_UNUSED, data);
     Assert.assert(response.length == 0);
   }
@@ -445,13 +467,13 @@ export default class Ada {
     };
 
     const signTx_addAddressOutput = async (
-      address58: string,
+      humanAddress: string,
       amountStr: string
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(0x01),
-        utils.base58_decode(address58)
+        utils.base58_decode(humanAddress)
       ]);
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
       Assert.assert(response.length == 0);
@@ -518,8 +540,8 @@ export default class Ada {
     // outputs
     //console.log("outputs");
     for (const output of outputs) {
-      if (output.address58) {
-        await signTx_addAddressOutput(output.address58, output.amountStr);
+      if (output.humanAddress) {
+        await signTx_addAddressOutput(output.humanAddress, output.amountStr);
       } else if (output.path) {
         await signTx_addChangeOutput(output.path, output.amountStr);
       } else {

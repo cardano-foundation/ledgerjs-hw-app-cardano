@@ -1,11 +1,10 @@
 //@flow
 import basex from "base-x";
+import bech32 from "bech32";
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
-
-const HARDENED = 0x80000000;
 
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
@@ -199,6 +198,13 @@ export function base58_decode(data: string): Buffer {
   return bs58.decode(data);
 }
 
+export function bech32_encodeAddress(data: Buffer): string {
+  Precondition.checkIsBuffer(data);
+
+  const data5bit = bech32.toWords(data);
+  return bech32.encode("addr", data5bit, 1000); // TODO what is a reasonable limit?
+}
+
 function safe_parseInt(str: string): number {
   Precondition.checkIsString(str);
   const i = parseInt(str);
@@ -211,28 +217,9 @@ function safe_parseInt(str: string): number {
   return i;
 }
 
-function parseBIP32Index(str: string): number {
-  let base = 0;
-  if (str.endsWith("'")) {
-    str = str.slice(0, -1);
-    base = HARDENED;
-  }
-  const i = safe_parseInt(str);
-  Precondition.check(i >= 0);
-  Precondition.check(i < HARDENED);
-  return base + i;
-}
 
-export function str_to_path(data: string): Array<number> {
-  Precondition.checkIsString(data);
-  Precondition.check(data.length > 0);
-
-  return data.split("/").map(parseBIP32Index);
-}
 
 export default {
-  HARDENED,
-
   hex_to_buf,
   buf_to_hex,
 
@@ -251,8 +238,8 @@ export default {
   base58_encode,
   base58_decode,
 
-  chunkBy,
-  stripRetcodeFromResponse,
+  bech32_encodeAddress,
 
-  str_to_path
+  chunkBy,
+  stripRetcodeFromResponse
 };
