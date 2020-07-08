@@ -40,7 +40,7 @@ const INS = {
 export type BIP32Path = Array<number>;
 
 export type InputTypeUTxO = {|
-  txDataHex: string,
+  txHashHex: string,
   outputIndex: number,
   path: BIP32Path
 |};
@@ -481,14 +481,21 @@ export default class Ada {
 
   async signTransaction(
     inputs: Array<InputTypeUTxO>,
-    outputs: Array<OutputTypeAddress | OutputTypeChange>
+    outputs: Array<OutputTypeAddress | OutputTypeChange>,
+    feeStr: string,
+    ttlStr: string,
   ): Promise<SignTransactionResponse> {
     //console.log("sign");
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
     const P1_STAGE_OUTPUTS = 0x03;
-    const P1_STAGE_CONFIRM = 0x04;
+    const P1_STAGE_FEE = 0x04;
+    const P1_STAGE_TTL = 0x05;
+    const P1_STAGE_CERTIFICATES = 0x06;
+    const P1_STAGE_WITHDRAWALS = 0x07;
+    const P1_STAGE_METADATA = 0x08;
+    const P1_STAGE_CONFIRM = 0x09;
     const P1_STAGE_WITNESSES = 0x05;
     const P2_UNUSED = 0x00;
     const SIGN_TX_INPUT_TYPE_ATTESTED_UTXO = 0x01;
@@ -500,11 +507,17 @@ export default class Ada {
 
     const signTx_init = async (
       numInputs: number,
-      numOutputs: number
+      numOutputs: number,
+      numCertificates: number,
+      numWithdrawals: number,
+      numWitnesses: number
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.uint32_to_buf(numInputs),
-        utils.uint32_to_buf(numOutputs)
+        utils.uint32_to_buf(numOutputs),
+        utils.uint32_to_buf(numCertificates),
+        utils.uint32_to_buf(numWithdrawals),
+        utils.uint32_to_buf(numWitnesses),
       ]);
       const response = await wrapRetryStillInCall(_send)(
         P1_STAGE_INIT,
@@ -514,10 +527,12 @@ export default class Ada {
       Assert.assert(response.length == 0);
     };
 
-    const signTx_addInput = async (attestation): Promise<void> => {
+    const signTx_addInput = async (
+      input: InputTypeUTxO
+    ): Promise<void> => {
       const data = Buffer.concat([
-        utils.uint8_to_buf(SIGN_TX_INPUT_TYPE_ATTESTED_UTXO),
-        attestation.rawBuffer
+        utils.hex_to_buf(input.txHashHex),
+        utils.uint32_to_buf(input.outputIndex),
       ]);
       const response = await _send(P1_STAGE_INPUTS, P2_UNUSED, data);
       Assert.assert(response.length == 0);
@@ -549,6 +564,26 @@ export default class Ada {
       Assert.assert(response.length == 0);
     };
 
+    const signTx_setFee = async (
+      feeStr: string
+    ): Promise<void> => {
+      const data = Buffer.concat([
+        utils.amount_to_buf(feeStr),
+      ]);
+      const response = await _send(P1_STAGE_FEE, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
+    const signTx_setTtl = async (
+      ttlStr: string
+    ): Promise<void> => {
+      const data = Buffer.concat([
+        utils.amount_to_buf(ttlStr),
+      ]);
+      const response = await _send(P1_STAGE_TTL, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
     const signTx_awaitConfirm = async (): Promise<{
       txHashHex: string
     }> => {
@@ -576,22 +611,16 @@ export default class Ada {
       };
     };
 
-    //console.log("attest");
-    const attestedInputs = [];
-    // attest
-    for (const { txDataHex, outputIndex } of inputs) {
-      const attestation = await this._attestUtxo(txDataHex, outputIndex);
-      attestedInputs.push(attestation);
-    }
-
     // init
     //console.log("init");
-    await signTx_init(attestedInputs.length, outputs.length);
+
+    // TODO implement passing certificates, withdrawals
+    await signTx_init(inputs.length, outputs.length, 0, 0, 0);
 
     // inputs
     //console.log("inputs");
-    for (const attestation of attestedInputs) {
-      await signTx_addInput(attestation);
+    for (const input of inputs) {
+      await signTx_addInput(input);
     }
 
     // outputs
@@ -605,6 +634,10 @@ export default class Ada {
         throw new Error("TODO");
       }
     }
+
+    await signTx_setFee(feeStr);
+
+    await signTx_setTtl(ttlStr);
 
     // confirm
     //console.log("confirm");
