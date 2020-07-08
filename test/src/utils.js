@@ -1,7 +1,6 @@
 import "babel-polyfill";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
-// FIXME: import
 import Ada, { utils, cardano } from "../..";
 
 export const str_to_path = cardano.str_to_path;

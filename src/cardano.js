@@ -1,3 +1,5 @@
+import utils, { Precondition } from "./utils";
+
 const HARDENED = 0x80000000;
 
 function parseBIP32Index(str: string): number {
@@ -6,7 +8,7 @@ function parseBIP32Index(str: string): number {
     str = str.slice(0, -1);
     base = HARDENED;
   }
-  const i = safe_parseInt(str);
+  const i = utils.safe_parseInt(str);
   Precondition.check(i >= 0);
   Precondition.check(i < HARDENED);
   return base + i;
