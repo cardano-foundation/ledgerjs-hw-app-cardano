@@ -232,6 +232,8 @@ export default {
   // no pair for now
   path_to_buf,
 
+  safe_parseInt,
+
   amount_to_buf,
   buf_to_amount,
 

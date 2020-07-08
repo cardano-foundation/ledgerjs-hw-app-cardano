@@ -441,7 +441,7 @@ export default class Ada {
 
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
-    const data = cardano.serializeserializeStakingInfo(addressHeader, spendingPath,
+    const data = cardano.serializeStakingInfo(addressHeader, spendingPath,
         stakingPath, stakingKeyHash, stakingBlockchainPointer);
 
     const response = await _send(P1_RETURN, P2_UNUSED, data);
@@ -625,5 +625,6 @@ export default class Ada {
 }
 
 export {
-  utils // reexport
+  utils, // reexport
+  cardano
 };
