@@ -447,11 +447,12 @@ export default class Ada {
     const response = await _send(P1_RETURN, P2_UNUSED, data);
 
     Assert.assert(response.length > 0);
-    var encodedResponse: string;
-    if ((response[0] & 0xF0) == 0x80) // byron address
+    let encodedResponse: string;
+    if ((response[0] & 0xF0) === 0x80) { // byron address
         encodedResponse = utils.base58_encode(response);
-    else // shelley address
+    } else { // shelley address
         encodedResponse = utils.bech32_encodeAddress(response);
+    }
 
     return {
       humanAddress: encodedResponse
