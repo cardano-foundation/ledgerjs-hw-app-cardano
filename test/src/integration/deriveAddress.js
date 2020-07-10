@@ -63,7 +63,7 @@ describe("deriveAddress", async () => {
         "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcqqqqqnnd32q");
 
         // TODO add more, reward addresses at least
-  });
+  }).timeout(60000);
 
   it("Should not permit invalid path", async () => {
     const test = async path => {

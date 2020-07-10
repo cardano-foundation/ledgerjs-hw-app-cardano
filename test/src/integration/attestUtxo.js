@@ -4,7 +4,7 @@ import transactions from "./__fixtures__/transactions";
 import { getAda } from "../test_utils";
 
 describe("attestUtxo", async () => {
-  let ada = {};
+  /*let ada = {};
 
   beforeEach(async () => {
     ada = await getAda();
@@ -39,5 +39,5 @@ describe("attestUtxo", async () => {
     } catch (error) {
       expect(error.message).not.to.have.string("Should not be here");
     }
-  });
+  });*/
 });
