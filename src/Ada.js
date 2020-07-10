@@ -99,6 +99,11 @@ export const ErrorCodes = {
   ERR_CLA_NOT_SUPPORTED: 0x6e00
 };
 
+export const MetadataCodes = {
+	SIGN_TX_METADATA_NO: 1,
+	SIGN_TX_METADATA_YES: 2
+}
+
 const GH_ERRORS_LINK =
   "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h";
 
@@ -426,6 +431,7 @@ export default class Ada {
     outputs: Array<OutputTypeAddress | OutputTypeChange>,
     feeStr: string,
     ttlStr: string,
+    metadataHex: string
   ): Promise<SignTransactionResponse> {
     //console.log("sign");
 
@@ -438,7 +444,7 @@ export default class Ada {
     const P1_STAGE_WITHDRAWALS = 0x07;
     const P1_STAGE_METADATA = 0x08;
     const P1_STAGE_CONFIRM = 0x09;
-    const P1_STAGE_WITNESSES = 0x05;
+    const P1_STAGE_WITNESSES = 0x0a;
     const P2_UNUSED = 0x00;
     const SIGN_TX_INPUT_TYPE_ATTESTED_UTXO = 0x01;
 
@@ -526,6 +532,19 @@ export default class Ada {
       Assert.assert(response.length == 0);
     };
 
+    const signTx_setMetadata = async (
+      metadataHex: string
+    ): Promise<void> => {
+      const data = Buffer.concat([
+        metadataHex.length > 0
+          ? utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_YES)
+          : utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_NO),
+        utils.hex_to_buf(metadataHex),
+      ]);
+      const response = await _send(P1_STAGE_METADATA, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
     const signTx_awaitConfirm = async (): Promise<{
       txHashHex: string
     }> => {
@@ -557,7 +576,7 @@ export default class Ada {
     //console.log("init");
 
     // TODO implement passing certificates, withdrawals
-    await signTx_init(inputs.length, outputs.length, 0, 0, 0);
+    await signTx_init(inputs.length, outputs.length, 0, 0, inputs.length);
 
     // inputs
     //console.log("inputs");
@@ -580,6 +599,8 @@ export default class Ada {
     await signTx_setFee(feeStr);
 
     await signTx_setTtl(ttlStr);
+
+    await signTx_setMetadata(metadataHex);
 
     // confirm
     //console.log("confirm");

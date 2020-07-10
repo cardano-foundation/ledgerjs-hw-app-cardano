@@ -56,12 +56,12 @@
     "clean-test": "rm -rf test/lib",
     "build-test": "yarn run clean && yarn run build && yarn run clean-test && babel --source-maps -d test/lib test/src && flow-copy-source -v test/src test/lib",
     "test-integration-run": "mocha --timeout 120000 test/lib/integration",
+    "//": "run single test by specifying --grep <name> parameter in test-integration",
     "test-integration": "yarn run build-test && yarn run test-integration-run",
     "test-direct-run": "mocha --timeout 3600000 test/lib/direct",
     "test-direct": "yarn build-test && yarn test-direct-run",
     "test": "yarn build-test && yarn test-integration-run && yarn test-direct-run",
     "test-device": "yarn run build-test && mocha --timeout 3600000 test/lib/device",
-    "test-device-quick": "echo && echo 'Warning: running test without rebuilding' && mocha --timeout 3600000 test/lib/device",
-    "xxx": "yarn build-test && mocha --timeout 3600000 test/lib/integration/deriveAddress.js"
+    "test-device-quick": "echo && echo 'Warning: running test without rebuilding' && mocha --timeout 3600000 test/lib/device"
   }
 }
