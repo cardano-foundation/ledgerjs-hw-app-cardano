@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import pathDerivations from "./__fixtures__/pathDerivations";
 
-import { getAda, str_to_path } from "../utils";
+import { getAda, str_to_path } from "../test_utils";
 
 describe("getExtendedPublicKey", async () => {
   let ada = {};

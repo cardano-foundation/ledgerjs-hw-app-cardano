@@ -1,4 +1,4 @@
-import { getAda } from "../utils";
+import { getAda } from "../test_utils";
 import { expect } from "chai";
 
 describe("getVersion", async () => {

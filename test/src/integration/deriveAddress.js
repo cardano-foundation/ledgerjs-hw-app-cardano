@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import pathDerivations from "./__fixtures__/pathDerivations";
 
-import { getAda, str_to_path, hex_to_buf } from "../utils";
+import { getAda, str_to_path, hex_to_buf } from "../test_utils";
 
 describe("deriveAddress", async () => {
   let ada = {};
