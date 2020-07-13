@@ -2,9 +2,6 @@ export const CLA = 0xd7;
 
 export const INS_GET_EXT_PUBLIC_KEY = 0x10;
 export const INS_DERIVE_ADDRESS = 0x11;
-export const INS_ATTEST_UTXO = 0x20;
-
-export const INS_SET_ATTEST_KEY = 0xF3;
 
 export const ERRORS = {
   INVALID_REQUEST_PARAMETERS: "0x6e05",
