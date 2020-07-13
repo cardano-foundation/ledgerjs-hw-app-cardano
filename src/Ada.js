@@ -31,7 +31,6 @@ const INS = {
   GET_EXT_PUBLIC_KEY: 0x10,
   DERIVE_ADDRESS: 0x11,
 
-  ATTEST_UTXO: 0x20,
   SIGN_TX: 0x21,
 
   RUN_TESTS: 0xf0
@@ -418,7 +417,6 @@ export default class Ada {
     const P1_STAGE_CONFIRM = 0x09;
     const P1_STAGE_WITNESSES = 0x0a;
     const P2_UNUSED = 0x00;
-    const SIGN_TX_INPUT_TYPE_ATTESTED_UTXO = 0x01;
 
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.SIGN_TX, p1, p2, data).then(
