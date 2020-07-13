@@ -3,11 +3,6 @@ import { getAda, str_to_path } from "../test_utils";
 
 const inputs = {
   utxo0: {
-    txHashHex: "01f54c866c778568c01b9e4c0a2cbab29e0af285623404e0ef922c6b63f9b222",
-    outputIndex: 0,
-    path: str_to_path("44'/1815'/0'/0/0")
-  },
-  utxoTrezor: {
     txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
     outputIndex: 0,
     path: str_to_path("44'/1815'/0'/0/0")
@@ -15,52 +10,85 @@ const inputs = {
 };
 
 const outputs = {
-  adalite: {
-    amountStr: "700000",
-    humanAddress:
-      "DdzFFzCqrhsoarXqLakMBEiURCGPCUL7qRvPf2oGknKN2nNix5b9SQKj2YckgXZK" +
-      "6q1Ym7BNLxgEX3RQFjS2C41xt54yJHeE1hhMUfSG"
-  },
-  trezor: {
+  externalByron: {
     amountStr: "3003112",
     humanAddress:
       "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
   },
-  ledgerChange: {
-    amountStr: "100000",
-    path: str_to_path("44'/1815'/0'/1/0")
+  internalBaseNoStaking: {
+    "addressType": 0,
+    "spendingPath": "m/1852'/1815'/0'/0/0",
+    "amount": "7120787",
   },
-  ledgerChangeTooMuch: {
-    amountStr: "1000000",
-    path: str_to_path("44'/1815'/0'/1/0")
+  internalBaseWithStakingKeyHash: {
+      "addressType": 0,
+      "spendingPath": "m/1852'/1815'/0'/0/0",
+      "stakingKeyHash": "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+      "amount": "7120787",
+  },
+  internalBaseWithStakingPath: {
+      "addressType": 0,
+      "spendingPath": "m/1852'/1815'/0'/0/0",
+      "stakingKeyPath": "m/1852'/1815'/0'",
+      "amount": "7120787",
+  },
+  internalPointer: {
+      "addressType": 1,
+      "path": "m/1852'/1815'/0'/0/0",
+      "pointer": {"block_index": 1, "tx_index": 2, "certificate_index": 3},
+      "amount": "7120787",
   },
 };
+
+const sampleMetadata = "deadbeef";
+const sampleFeeStr = "42";
+const sampleTtlStr = "10";
 
 const results = {
-  txHashHex: "01f54c866c778568c01b9e4c0a2cbab29e0af285623404e0ef922c6b63f9b222",
-
-  witnesses: [
-    {
-      path: str_to_path("44'/1815'/0'/0/0"),
-      witnessSignatureHex:
-        "f89f0d3e2ad34a29c36d9eebdceb951088b52d33638d0f55d49ba2f8baff6e29" +
-        "056720be55fd2eb7198c05b424ce4308eaeed7195310e5879c41c1743245b000"
-    }
-  ]
+  noChange: {
+    /*
+    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63d
+    * cfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
+    */
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "248e6f443503febbaa46a71f2007b024bc6d64f4ecd8897c4827b39ca45802377ed19d" +
+          "84a0565d50e681414748a884503a1aee224207878b0062aa179eeb4400"
+      }
+    ]
+  },
+  changeBaseNoStaking: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changeBaseWithStakingPath: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changeBaseWithStakingKeyHash: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changePointer: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withMetadata: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  }
 };
 
-const resultsTrezor = {
-  txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
 
-  witnesses: [
-    {
-      path: str_to_path("44'/1815'/0'/0/0"),
-      witnessSignatureHex:
-        "f89f0d3e2ad34a29c36d9eebdceb951088b52d33638d0f55d49ba2f8baff6e29" +
-        "056720be55fd2eb7198c05b424ce4308eaeed7195310e5879c41c1743245b000"
-    }
-  ]
-};
 
 describe("signTx", async () => {
   let ada = {};
@@ -73,32 +101,86 @@ describe("signTx", async () => {
     await ada.t.close();
   });
 
-  it("Should correctly sign Tx (trezor)", async () => {
-    const response = await ada.signTransaction(
-      [inputs.utxoTrezor],
-      [
-        outputs.trezor,
-        // outputs.ledgerChange // TODO fix failing change address in ledger app
-      ],
-      "42",
-      "10",
-      ""
-    );
-    expect(response).to.deep.equal(resultsTrezor);
-  });
-  /*
-  it("Should correctly sign Tx", async () => {
+  it("Should correctly sign tx without change address", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
       [
-        outputs.adalite,
-        // outputs.ledgerChange // TODO fix failing change address in ledger app
+        outputs.externalByron,
       ],
-      "0",
-      "100",
-      ""
+      sampleFeeStr,
+      sampleTtlStr,
+      null
     );
-    expect(response).to.deep.equal(results);
+    expect(response).to.deep.equal(results.noChange);
   });
-  */
+/*
+  it("Should correctly sign tx with base change address without staking", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalBaseNoStaking,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      null
+    );
+    expect(response).to.deep.equal(results.changeBaseNoStaking);
+  });
+
+  it("Should correctly sign tx with change base address with staking path", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalBaseWithStakingPath,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      null
+    );
+    expect(response).to.deep.equal(resultWithChangeBaseWithStakingPath);
+  });
+
+  it("Should correctly sign tx with change base address with staking key hash", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalBaseWithStakingKeyHash,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      null
+    );
+    expect(response).to.deep.equal(resultWithChangeBaseWithStakingKeyHash);
+  });
+
+  it("Should correctly sign tx with pointer change address", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalPointer, // TODO fix failing change address in ledger app
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      null
+    );
+    expect(response).to.deep.equal(resultChangeInternalPointer);
+  });
+
+  it("Should correctly sign tx with nonempty metadata", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      sampleMetadata
+    );
+    expect(response).to.deep.equal(resultWithMetadata);
+  });
+*/
 });

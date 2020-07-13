@@ -51,8 +51,12 @@ export type OutputTypeAddress = {|
 |};
 
 export type OutputTypeChange = {|
-  amountStr: string,
-  path: BIP32Path
+  addressHeader: number,
+  spendingPath: BIP32Path,
+  stakingPath: ?BIP32Path,
+  stakingKeyHash: ?Buffer,
+  stakingBlockchainPointer: ?[number, number, number],
+  amountStr: string
 |};
 
 export type Flags = {|
@@ -286,97 +290,6 @@ export default class Ada {
     await wrapRetryStillInCall(this.send)(CLA, INS.RUN_TESTS, 0x00, 0x00);
   }
 
-  async _attestUtxo(
-    txDataHex: string,
-    outputIndex: number
-  ): Promise<{
-    txHashHex: string,
-    outputIndex: number,
-    amountStr: string,
-    hmacHex: string,
-    rawBuffer: Buffer
-  }> {
-    Precondition.checkIsHexString(txDataHex);
-    Precondition.checkIsUint32(outputIndex);
-
-    const _send = (p1, p2, data) =>
-      this.send(CLA, INS.ATTEST_UTXO, p1, p2, data).then(
-        utils.stripRetcodeFromResponse
-      );
-
-    const P1_INIT = 0x01;
-    const P1_CONTINUE = 0x02;
-
-    const P2_UNUSED = 0x00;
-
-    // Note: U2F transport does not like APDU length longer than 255
-    // so we are leaving it some space
-    const CHUNK_SIZE = 245;
-
-    {
-      // Initial request
-      const data = utils.uint32_to_buf(outputIndex);
-      const result = await wrapRetryStillInCall(_send)(
-        P1_INIT,
-        P2_UNUSED,
-        data
-      );
-      Assert.assert(result.length == 0);
-    }
-
-    const txData = utils.hex_to_buf(txDataHex);
-
-    let i = 0;
-    {
-      // middle requests
-      while (i + CHUNK_SIZE < txData.length) {
-        const chunk = txData.slice(i, i + CHUNK_SIZE);
-        const result = await _send(P1_CONTINUE, P2_UNUSED, chunk);
-        Assert.assert(result.length == 0);
-        i += CHUNK_SIZE;
-      }
-    }
-
-    // final request
-    {
-      const chunk = txData.slice(i);
-      const result = await _send(P1_CONTINUE, P2_UNUSED, chunk);
-
-      const sum = arr => arr.reduce((x, y) => x + y, 0);
-
-      const sizes = [32, 4, 8, 16];
-      Assert.assert(result.length == sum(sizes));
-
-      const [txHash, outputNumber, amount, hmac] = utils.chunkBy(result, sizes);
-
-      return {
-        rawBuffer: result,
-        txHashHex: utils.buf_to_hex(txHash),
-        outputIndex: utils.buf_to_uint32(outputNumber),
-        amountStr: utils.buf_to_amount(amount),
-        hmacHex: utils.buf_to_hex(hmac)
-      };
-    }
-  }
-
-  /**
-   * @param string Raw transaction data (without witnesses) encoded as hex string
-   * @param number Output indes
-   *
-   */
-  async attestUtxo(
-    txDataHex: string,
-    outputIndex: number
-  ): Promise<{
-    txHashHex: string,
-    outputIndex: number,
-    amountStr: string,
-    hmacHex: string,
-    rawBuffer: Buffer
-  }> {
-    return this._attestUtxo(txDataHex, outputIndex);
-  }
-
   /**
    * @description Get a public key from the specified BIP 32 path.
    *
@@ -434,7 +347,8 @@ export default class Ada {
    * TODO update this
    */
   async deriveAddress(
-      addressHeader: number, spendingPath: BIP32Path,
+      addressHeader: number,
+      spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
       stakingKeyHash: ?Buffer = null,
       stakingBlockchainPointer: ?[number, number, number] = null
@@ -489,7 +403,7 @@ export default class Ada {
     outputs: Array<OutputTypeAddress | OutputTypeChange>,
     feeStr: string,
     ttlStr: string,
-    metadataHex: string
+    metadataHex: ?string
   ): Promise<SignTransactionResponse> {
     //console.log("sign");
 
@@ -558,13 +472,22 @@ export default class Ada {
     };
 
     const signTx_addChangeOutput = async (
-      path: BIP32Path,
+      addressHeader: number,
+      spendingPath: BIP32Path,
+      stakingPath: ?BIP32Path = null,
+      stakingKeyHash: ?Buffer = null,
+      stakingBlockchainPointer: ?[number, number, number] = null,
       amountStr: string
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
-        utils.uint8_to_buf(0x02),
-        utils.path_to_buf(path)
+        cardano.serializeStakingInfo(
+          addressHeader,
+          spendingPath,
+          stakingPath,
+          stakingKeyHash,
+          stakingBlockchainPointer
+        )
       ]);
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
       Assert.assert(response.length == 0);
@@ -591,14 +514,21 @@ export default class Ada {
     };
 
     const signTx_setMetadata = async (
-      metadataHex: string
+      metadataHex: ?string
     ): Promise<void> => {
-      const data = Buffer.concat([
-        metadataHex.length > 0
-          ? utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_YES)
-          : utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_NO),
-        utils.hex_to_buf(metadataHex),
-      ]);
+      let data: Buffer;
+      if (metadataHex == null) {
+        data = Buffer.concat([
+          utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_NO),
+          utils.hex_to_buf(""),
+        ]);
+      } else {
+        data = Buffer.concat([
+          utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_YES),
+          utils.hex_to_buf(metadataHex)
+        ]);
+      }
+
       const response = await _send(P1_STAGE_METADATA, P2_UNUSED, data);
       Assert.assert(response.length == 0);
     };
@@ -647,8 +577,15 @@ export default class Ada {
     for (const output of outputs) {
       if (output.humanAddress) {
         await signTx_addAddressOutput(output.humanAddress, output.amountStr);
-      } else if (output.path) {
-        await signTx_addChangeOutput(output.path, output.amountStr);
+      } else if (output.spendingPath) {
+        await signTx_addChangeOutput(
+          output.addressHeader,
+          output.spendingPath,
+          output.stakingPath,
+          output.stakingKeyHash,
+          output.stakingBlockchainPointer,
+          output.amountStr
+        );
       } else {
         throw new Error("TODO");
       }
