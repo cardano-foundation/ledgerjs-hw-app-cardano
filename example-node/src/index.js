@@ -1,6 +1,6 @@
 import "babel-polyfill";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
-import AppAda, { utils } from "../../lib/Ada"; //"@cardano-foundation/ledgerjs-hw-app-cardano";
+import AppAda, { utils, cardano } from "../../lib/Ada";
 
 const makeExamples = appAda => ({
   getVersion: async () => {
@@ -22,14 +22,14 @@ const makeExamples = appAda => ({
   deriveAddress: async () => {
     console.log("deriveAddress");
     console.log(
-      await appAda.deriveAddress(utils.str_to_path("44'/1815'/0'/1/0"))
+      await appAda.deriveAddress(cardano.str_to_path("44'/1815'/0'/1/0"))
     );
   },
 
   showAddress: async () => {
     console.log("showAddress");
     console.log(
-      await appAda.showAddress(utils.str_to_path("44'/1815'/1000'/1/0"))
+      await appAda.showAddress(cardano.str_to_path("44'/1815'/1000'/1/0"))
     );
   },
 
@@ -70,7 +70,7 @@ const makeExamples = appAda => ({
           "8c4f45d84c06fb532c63f9479a40a101581e581c6b8487e9d22850b7539db255" +
           "e27dd48dc0a50c7994d678696be64f21001ac5000d871a03dc396fffa0",
         outputIndex: 0,
-        path: utils.str_to_path("44'/1815'/0'/0/0")
+        path: cardano.str_to_path("44'/1815'/0'/0/0")
         // Details:
         // txHashHex:
         //    'd5c5c15054228da1f1a973ff36098658ce5147a989cf2c4a92c8a2a84686afc6',
@@ -89,7 +89,7 @@ const makeExamples = appAda => ({
       },
       {
         amountStr: "100000",
-        path: utils.str_to_path("44'/1815'/0'/1/0")
+        path: cardano.str_to_path("44'/1815'/0'/1/0")
         //humanAddress:
         //    'Ae2tdPwUPEZLrRBShqCSucUymQSfXHEx3EthwabAYSYLyG52i6QaXTDwNVL'
       }

@@ -453,8 +453,6 @@ export default class Ada {
     else // shelley address
         encodedResponse = utils.bech32_encodeAddress(response);
 
-    console.log("returned address: " + encodedResponse);
-
     return {
       humanAddress: encodedResponse
     };
@@ -624,7 +622,8 @@ export default class Ada {
   }
 }
 
+// reexport
 export {
-  utils, // reexport
-  cardano
+  cardano,
+  utils
 };

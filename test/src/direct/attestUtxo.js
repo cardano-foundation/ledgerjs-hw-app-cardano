@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import transactions from "./__fixtures__/transactions";
 
-import { getTransport } from "../utils";
+import { getTransport } from "../test_utils";
 import { CLA, INS_ATTEST_UTXO, INS_SET_ATTEST_KEY, ERRORS } from "./constants";
 
 const P1_INIT = 0x01;
@@ -165,7 +165,7 @@ describe("attestUtxo", async () => {
           bits.some(bit => string.includes(bit));
 
         expect(error.message).to.satisfy(
-          checkError([ERRORS.INVALID_PARAMETERS, ERRORS.INVALID_STATE])
+          checkError([ERRORS.INVALID_REQUEST_PARAMETERS, ERRORS.INVALID_STATE])
         );
       }
     };

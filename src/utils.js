@@ -205,7 +205,7 @@ export function bech32_encodeAddress(data: Buffer): string {
   return bech32.encode("addr", data5bit, 1000); // TODO what is a reasonable limit?
 }
 
-function safe_parseInt(str: string): number {
+export function safe_parseInt(str: string): number {
   Precondition.checkIsString(str);
   const i = parseInt(str);
   // Check that we parsed everything
@@ -242,6 +242,7 @@ export default {
 
   bech32_encodeAddress,
 
+  safe_parseInt,
   chunkBy,
   stripRetcodeFromResponse
 };

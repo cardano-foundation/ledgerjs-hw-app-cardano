@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { getTransport, pathToBuffer } from "../utils";
+import { getTransport, pathToBuffer } from "../test_utils";
 import { CLA, INS_GET_EXT_PUBLIC_KEY, ERRORS } from "./constants";
 
 describe("getExtendedPublicKey", async () => {
@@ -50,7 +50,7 @@ describe("getExtendedPublicKey", async () => {
 
   it("Should not permit unknown P1/P2 parameters", async () => {
     const testcase = async (p1, p2) =>
-      await checkThrows(p1, p2, validDataBuffer, ERRORS.INVALID_PARAMETERS);
+      await checkThrows(p1, p2, validDataBuffer, ERRORS.INVALID_REQUEST_PARAMETERS);
 
     // Invalid P1
     await testcase(0x01, 0x00);

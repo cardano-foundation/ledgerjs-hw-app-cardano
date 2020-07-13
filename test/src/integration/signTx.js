@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { getAda, str_to_path } from "../utils";
+import { getAda, str_to_path } from "../test_utils";
 
 const inputs = {
   utxo0: {

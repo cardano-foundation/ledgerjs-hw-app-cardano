@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import transactions from "./__fixtures__/transactions";
 
-import { getAda } from "../utils";
+import { getAda } from "../test_utils";
 
 describe("attestUtxo", async () => {
   let ada = {};
