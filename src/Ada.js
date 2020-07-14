@@ -370,7 +370,8 @@ export default class Ada {
       numOutputs: number,
       numCertificates: number,
       numWithdrawals: number,
-      numWitnesses: number
+      numWitnesses: number,
+      includeMetadata: boolean,
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.uint32_to_buf(numInputs),
@@ -378,6 +379,11 @@ export default class Ada {
         utils.uint32_to_buf(numCertificates),
         utils.uint32_to_buf(numWithdrawals),
         utils.uint32_to_buf(numWitnesses),
+        utils.uint8_to_buf(
+          includeMetadata
+          ? MetadataCodes.SIGN_TX_METADATA_YES
+          : MetadataCodes.SIGN_TX_METADATA_NO
+        ),
       ]);
       const response = await wrapRetryStillInCall(_send)(
         P1_STAGE_INIT,
@@ -456,18 +462,7 @@ export default class Ada {
     const signTx_setMetadata = async (
       metadataHex: ?string
     ): Promise<void> => {
-      let data: Buffer;
-      if (metadataHex == null) {
-        data = Buffer.concat([
-          utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_NO),
-          utils.hex_to_buf(""),
-        ]);
-      } else {
-        data = Buffer.concat([
-          utils.uint8_to_buf(MetadataCodes.SIGN_TX_METADATA_YES),
-          utils.hex_to_buf(metadataHex)
-        ]);
-      }
+      const data = utils.hex_to_buf(metadataHex);
 
       const response = await _send(P1_STAGE_METADATA, P2_UNUSED, data);
       Assert.assert(response.length == 0);
@@ -504,8 +499,7 @@ export default class Ada {
     //console.log("init");
 
     // TODO implement passing certificates, withdrawals
-    await signTx_init(inputs.length, outputs.length, 0, 0, inputs.length);
-
+    await signTx_init(inputs.length, outputs.length, 0, 0, inputs.length, metadataHex != null)
     // inputs
     //console.log("inputs");
     for (const input of inputs) {
@@ -535,7 +529,9 @@ export default class Ada {
 
     await signTx_setTtl(ttlStr);
 
-    await signTx_setMetadata(metadataHex);
+    if (metadataHex != null) {
+      await signTx_setMetadata(metadataHex);
+    }
 
     // confirm
     //console.log("confirm");
