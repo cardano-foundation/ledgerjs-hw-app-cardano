@@ -468,7 +468,7 @@ export default class Ada {
       }
 
       const data = Buffer.concat(dataFields);
-      const response = await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
+      const response = await _send(P1_STAGE_CERTIFICATES, P2_UNUSED, data);
       Assert.assert(response.length == 0);
     }
 
