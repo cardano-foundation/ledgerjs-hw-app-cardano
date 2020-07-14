@@ -53,10 +53,16 @@ export type OutputTypeChange = {|
   spendingPath: BIP32Path,
   amountStr: string,
   stakingPath: ?BIP32Path,
-  stakingKeyHash: ?Buffer,
-  stakingBlockchainPointer: ?[number, number, number],
+  stakingKeyHashHex: ?string,
+  stakingBlockchainPointer: ?StakingBlockchainPointer,
   amountStr: string
 |};
+
+export type StakingBlockchainPointer = {|
+  blockIndex: number,
+  txIndex: number,
+  certificateIndex: number
+|}
 
 export type Certificate = {|
   type: number,
@@ -102,6 +108,16 @@ export type SignTransactionResponse = {|
   witnesses: Array<Witness>
 |};
 
+const MetadataCodes = {
+	SIGN_TX_METADATA_NO: 1,
+	SIGN_TX_METADATA_YES: 2
+}
+
+const TxOutputTypeCodes = {
+  SIGN_TX_OUTPUT_TYPE_ADDRESS: 1,
+  SIGN_TX_OUTPUT_TYPE_PATH: 2
+}
+
 export const ErrorCodes = {
   ERR_STILL_IN_CALL: 0x6e04, // internal
   ERR_INVALID_DATA: 0x6e07,
@@ -113,11 +129,6 @@ export const ErrorCodes = {
   // Not thrown by ledger-app-cardano itself but other apps
   ERR_CLA_NOT_SUPPORTED: 0x6e00
 };
-
-export const MetadataCodes = {
-	SIGN_TX_METADATA_NO: 1,
-	SIGN_TX_METADATA_YES: 2
-}
 
 const GH_ERRORS_LINK =
   "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h";
@@ -303,8 +314,8 @@ export default class Ada {
       addressHeader: number,
       spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
-      stakingKeyHash: ?Buffer = null,
-      stakingBlockchainPointer: ?[number, number, number] = null
+      stakingKeyHashHex: ?string = null,
+      stakingBlockchainPointer: ?StakingBlockchainPointer = null
       ): Promise<DeriveAddressResponse> {
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.DERIVE_ADDRESS, p1, p2, data).then(
@@ -314,7 +325,7 @@ export default class Ada {
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
     const data = cardano.serializeStakingInfo(addressHeader, spendingPath,
-        stakingPath, stakingKeyHash, stakingBlockchainPointer);
+        stakingPath, stakingKeyHashHex, stakingBlockchainPointer);
 
     const response = await _send(P1_RETURN, P2_UNUSED, data);
 
@@ -334,8 +345,8 @@ export default class Ada {
   async showAddress(
       addressHeader: number, spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
-      stakingKeyHash: ?Buffer = null,
-      stakingBlockchainPointer: ?[number, number, number] = null
+      stakingKeyHashHex: ?string = null,
+      stakingBlockchainPointer: ?StakingBlockchainPointer = null
   ): Promise<void> {
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.DERIVE_ADDRESS, p1, p2, data).then(
@@ -345,13 +356,15 @@ export default class Ada {
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
     const data = cardano.serializeStakingInfo(addressHeader, spendingPath,
-        stakingPath, stakingKeyHash, stakingBlockchainPointer);
+        stakingPath, stakingKeyHashHex, stakingBlockchainPointer);
 
     const response = await _send(P1_DISPLAY, P2_UNUSED, data);
     Assert.assert(response.length == 0);
   }
 
   async signTransaction(
+    networkId: number,
+    protocolMagic: number,
     inputs: Array<InputTypeUTxO>,
     outputs: Array<OutputTypeAddress | OutputTypeChange>,
     feeStr: string,
@@ -380,6 +393,8 @@ export default class Ada {
       );
 
     const signTx_init = async (
+      networkId: number,
+      protocolMagic: number,
       numInputs: number,
       numOutputs: number,
       numCertificates: number,
@@ -388,16 +403,18 @@ export default class Ada {
       includeMetadata: boolean,
     ): Promise<void> => {
       const data = Buffer.concat([
-        utils.uint32_to_buf(numInputs),
-        utils.uint32_to_buf(numOutputs),
-        utils.uint32_to_buf(numCertificates),
-        utils.uint32_to_buf(numWithdrawals),
-        utils.uint32_to_buf(numWitnesses),
+        utils.uint8_to_buf(networkId),
+        utils.uint32_to_buf(protocolMagic),
         utils.uint8_to_buf(
           includeMetadata
           ? MetadataCodes.SIGN_TX_METADATA_YES
           : MetadataCodes.SIGN_TX_METADATA_NO
         ),
+        utils.uint32_to_buf(numInputs),
+        utils.uint32_to_buf(numOutputs),
+        utils.uint32_to_buf(numCertificates),
+        utils.uint32_to_buf(numWithdrawals),
+        utils.uint32_to_buf(numWitnesses),
       ]);
       const response = await wrapRetryStillInCall(_send)(
         P1_STAGE_INIT,
@@ -424,7 +441,7 @@ export default class Ada {
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
-        utils.uint8_to_buf(0x01),
+        utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS),
         utils.base58_decode(humanAddress)
       ]);
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
@@ -436,16 +453,17 @@ export default class Ada {
       spendingPath: BIP32Path,
       amountStr: string,
       stakingPath: ?BIP32Path = null,
-      stakingKeyHash: ?Buffer = null,
-      stakingBlockchainPointer: ?[number, number, number] = null,
+      stakingKeyHashHex: ?string = null,
+      stakingBlockchainPointer: ?StakingBlockchainPointer = null,
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
+        utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_PATH),
         cardano.serializeStakingInfo(
           addressHeader,
           spendingPath,
           stakingPath,
-          stakingKeyHash,
+          stakingKeyHashHex,
           stakingBlockchainPointer
         )
       ]);
@@ -543,6 +561,8 @@ export default class Ada {
     // init
     //console.log("init");
     await signTx_init(
+      networkId,
+      protocolMagic,
       inputs.length,
       outputs.length,
       certificates.length,
@@ -567,7 +587,7 @@ export default class Ada {
           output.spendingPath,
           output.amountStr,
           output.stakingPath,
-          output.stakingKeyHash,
+          output.stakingKeyHashHex,
           output.stakingBlockchainPointer,
         );
       } else {

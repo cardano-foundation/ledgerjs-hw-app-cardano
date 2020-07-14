@@ -31,9 +31,20 @@ describe("deriveAddress", async () => {
     const test = async (header, spendingPathStr, stakingPathStr, stakingKeyHashHex, stakingBlockchainPointer, expectedResult) => {
       const spendingPath: BIP32Path = str_to_path(spendingPathStr);
       const stakingPath: ?BIP32Path = (stakingPathStr !== null) ? str_to_path(stakingPathStr) : null;
-      const stakingKeyHash: ?Buffer = (stakingKeyHashHex !== null) ? hex_to_buf(stakingKeyHashHex) : null;
 
-      const result = await ada.deriveAddress(header, spendingPath, stakingPath, stakingKeyHash, stakingBlockchainPointer);
+      const result = await ada.deriveAddress(
+        header,
+        spendingPath,
+        stakingPath,
+        stakingKeyHashHex,
+        stakingBlockchainPointer
+        ? {
+          blockIndex: stakingBlockchainPointer[0],
+          txIndex: stakingBlockchainPointer[1],
+          certificateIndex: stakingBlockchainPointer[2]
+        }
+        : null
+      );
 
       expect(result.humanAddress).to.equal(expectedResult);
     };
