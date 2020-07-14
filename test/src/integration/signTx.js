@@ -15,28 +15,28 @@ const outputs = {
     humanAddress:
       "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
   },
-  internalBaseNoStaking: {
-    addressType: 0,
+  internalBaseWithStakingKeyHash: {
+    addressHeader: 0x00,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingKeyHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+    amountStr: "7120787"
+  },
+  internalBaseWithStakingPath: {
+    addressHeader: 0x00,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingKeyPath: str_to_path("1852'/1815'/0'"),
+    amountStr: "7120787"
+  },
+  internalEnterprise: {
+    addressHeader: 0x60,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     amountStr: "7120787"
   },
-  internalBaseWithStakingKeyHash: {
-      addressType: 0,
-      spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-      stakingKeyHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
-      amountStr: "7120787"
-  },
-  internalBaseWithStakingPath: {
-      addressType: 0,
-      spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-      stakingKeyPath: str_to_path("1852'/1815'/0'"),
-      amountStr: "7120787"
-  },
   internalPointer: {
-      addressType: 1,
-      path: str_to_path("1852'/1815'/0'/0/0"),
-      pointer: {"block_index": 1, "tx_index": 2, "certificate_index": 3},
-      amountStr: "7120787"
+    addressHeader: 0x40,
+    path: str_to_path("1852'/1815'/0'/0/0"),
+    pointer: {"block_index": 1, "tx_index": 2, "certificate_index": 3},
+    amountStr: "7120787"
   }
 };
 
@@ -159,7 +159,73 @@ describe("signTx", async () => {
     expect(response).to.deep.equal(results.noChange);
   });
 
-  it("Should correctly sign tx with withdrawal", async () => {
+  it("Should correctly sign tx with change base address with staking path", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalBaseWithStakingPath,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(resultWithChangeBaseWithStakingPath);
+  });
+
+  it("Should correctly sign tx with change base address with staking key hash", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalBaseWithStakingKeyHash,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(resultWithChangeBaseWithStakingKeyHash);
+  });
+*/
+
+  it("Should correctly sign tx with enterprise change address", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalEnterprise,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.changeBaseNoStaking);
+  });
+
+/*
+  it("Should correctly sign tx with pointer change address", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+        outputs.internalPointer, // TODO fix failing change address in ledger app
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(resultChangeInternalPointer);
+  });
+
+    it("Should correctly sign tx with withdrawal", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
       [
@@ -173,7 +239,6 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
-*/
 
   it("Should correctly sign tx with a stake registration certificate", async () => {
     const response = await ada.signTransaction(
@@ -189,7 +254,7 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
-/*
+
   it("Should correctly sign tx with a stake delegation certificate", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
@@ -220,62 +285,6 @@ describe("signTx", async () => {
     expect(response).to.deep.equal(results.noChange);
   });
 
-  it("Should correctly sign tx with base change address without staking", async () => {
-    const response = await ada.signTransaction(
-      [inputs.utxo0],
-      [
-        outputs.externalByron,
-        outputs.internalBaseNoStaking,
-      ],
-      sampleFeeStr,
-      sampleTtlStr,
-      null
-    );
-    expect(response).to.deep.equal(results.changeBaseNoStaking);
-  });
-
-  it("Should correctly sign tx with change base address with staking path", async () => {
-    const response = await ada.signTransaction(
-      [inputs.utxo0],
-      [
-        outputs.externalByron,
-        outputs.internalBaseWithStakingPath,
-      ],
-      sampleFeeStr,
-      sampleTtlStr,
-      null
-    );
-    expect(response).to.deep.equal(resultWithChangeBaseWithStakingPath);
-  });
-
-  it("Should correctly sign tx with change base address with staking key hash", async () => {
-    const response = await ada.signTransaction(
-      [inputs.utxo0],
-      [
-        outputs.externalByron,
-        outputs.internalBaseWithStakingKeyHash,
-      ],
-      sampleFeeStr,
-      sampleTtlStr,
-      null
-    );
-    expect(response).to.deep.equal(resultWithChangeBaseWithStakingKeyHash);
-  });
-
-  it("Should correctly sign tx with pointer change address", async () => {
-    const response = await ada.signTransaction(
-      [inputs.utxo0],
-      [
-        outputs.externalByron,
-        outputs.internalPointer, // TODO fix failing change address in ledger app
-      ],
-      sampleFeeStr,
-      sampleTtlStr,
-      null
-    );
-    expect(response).to.deep.equal(resultChangeInternalPointer);
-  });
-
   it("Should correctly sign tx with nonempty metadata", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
@@ -284,6 +293,8 @@ describe("signTx", async () => {
       ],
       sampleFeeStr,
       sampleTtlStr,
+      [],
+      [],
       sampleMetadata
     );
     expect(response).to.deep.equal(resultWithMetadata);
