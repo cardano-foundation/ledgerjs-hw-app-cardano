@@ -59,9 +59,9 @@ export type OutputTypeChange = {|
 |};
 
 export type Certificate = {|
+  type: number,
   path: BIP32Path,
-  type: ?number,
-  poolIdHex: ?string
+  poolIdHex: string
 |};
 
 export type Withdrawal = {|
@@ -454,11 +454,19 @@ export default class Ada {
     };
 
     const signTx_addCertificate = async (
-      type: ?number,
+      type: number,
       path: BIP32Path,
-      poolIdHex: ?string
+      poolIdHex: string
     ): Promise<void> => {
-      // TODO
+      const dataFields = [
+        type != null ? Buffer.from([type]) : null,
+        utils.path_to_buf(path),
+        poolIdHex != null ? utils.hex_to_buf(poolIdHex) : null,
+      ].filter((x) => x != null)
+
+      const data = Buffer.concat();
+      const response = await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
     }
 
     const signTx_addWithdrawal = async (
