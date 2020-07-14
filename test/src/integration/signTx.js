@@ -109,6 +109,8 @@ describe("signTx", async () => {
       ],
       sampleFeeStr,
       sampleTtlStr,
+      [],
+      [],
       null
     );
     expect(response).to.deep.equal(results.noChange);

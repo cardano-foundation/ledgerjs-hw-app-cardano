@@ -51,9 +51,21 @@ export type OutputTypeAddress = {|
 export type OutputTypeChange = {|
   addressHeader: number,
   spendingPath: BIP32Path,
+  amountStr: string,
   stakingPath: ?BIP32Path,
   stakingKeyHash: ?Buffer,
   stakingBlockchainPointer: ?[number, number, number],
+  amountStr: string
+|};
+
+export type Certificate = {|
+  path: BIP32Path,
+  type: ?number,
+  poolIdHex: ?string
+|};
+
+export type Withdrawal = {|
+  path: BIP32Path,
   amountStr: string
 |};
 
@@ -344,7 +356,9 @@ export default class Ada {
     outputs: Array<OutputTypeAddress | OutputTypeChange>,
     feeStr: string,
     ttlStr: string,
-    metadataHex: ?string
+    certificates: Array<Certificate>,
+    withdrawals: Array<Withdrawal>,
+    metadataHashHex: ?string
   ): Promise<SignTransactionResponse> {
     //console.log("sign");
 
@@ -420,10 +434,10 @@ export default class Ada {
     const signTx_addChangeOutput = async (
       addressHeader: number,
       spendingPath: BIP32Path,
+      amountStr: string,
       stakingPath: ?BIP32Path = null,
       stakingKeyHash: ?Buffer = null,
       stakingBlockchainPointer: ?[number, number, number] = null,
-      amountStr: string
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
@@ -438,6 +452,21 @@ export default class Ada {
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
       Assert.assert(response.length == 0);
     };
+
+    const signTx_addCertificate = async (
+      type: ?number,
+      path: BIP32Path,
+      poolIdHex: ?string
+    ): Promise<void> => {
+      // TODO
+    }
+
+    const signTx_addWithdrawal = async (
+      path: BIP32Path,
+      amountStr: string,
+    ): Promise<void> => {
+      // TODO
+    }
 
     const signTx_setFee = async (
       feeStr: string
@@ -460,9 +489,9 @@ export default class Ada {
     };
 
     const signTx_setMetadata = async (
-      metadataHex: ?string
+      metadataHashHex: string
     ): Promise<void> => {
-      const data = utils.hex_to_buf(metadataHex);
+      const data = utils.hex_to_buf(metadataHashHex);
 
       const response = await _send(P1_STAGE_METADATA, P2_UNUSED, data);
       Assert.assert(response.length == 0);
@@ -497,9 +526,14 @@ export default class Ada {
 
     // init
     //console.log("init");
-
-    // TODO implement passing certificates, withdrawals
-    await signTx_init(inputs.length, outputs.length, 0, 0, inputs.length, metadataHex != null)
+    await signTx_init(
+      inputs.length,
+      outputs.length,
+      certificates.length,
+      withdrawals.length,
+      inputs.length,
+      metadataHashHex != null
+    )
     // inputs
     //console.log("inputs");
     for (const input of inputs) {
@@ -515,10 +549,10 @@ export default class Ada {
         await signTx_addChangeOutput(
           output.addressHeader,
           output.spendingPath,
+          output.amountStr,
           output.stakingPath,
           output.stakingKeyHash,
           output.stakingBlockchainPointer,
-          output.amountStr
         );
       } else {
         throw new Error("TODO");
@@ -529,8 +563,27 @@ export default class Ada {
 
     await signTx_setTtl(ttlStr);
 
-    if (metadataHex != null) {
-      await signTx_setMetadata(metadataHex);
+    if (certificates.length > 0) {
+      for (const certificate of certificates) {
+        await signTx_addCertificate(
+          certificate.type,
+          certificate.path,
+          certificate.poolIdHex
+        )
+      }
+    }
+
+    if (withdrawals.length > 0) {
+      for (const withdrawal of withdrawals) {
+        await signTx_addWithdrawal(
+          withdrawal.path,
+          withdrawal.amountStr
+        )
+      }
+    }
+
+    if (metadataHashHex != null) {
+      await signTx_setMetadata(metadataHashHex);
     }
 
     // confirm
