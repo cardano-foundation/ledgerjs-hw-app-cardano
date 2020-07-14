@@ -524,8 +524,8 @@ export default class Ada {
       amountStr: string,
     ): Promise<void> => {
       const data = Buffer.concat([
-        utils.path_to_buf(path),
-        utils.amount_to_buf(amountStr)
+        utils.amount_to_buf(amountStr),
+        utils.path_to_buf(path)
       ]);
       const response = await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
       Assert.assert(response.length == 0);
