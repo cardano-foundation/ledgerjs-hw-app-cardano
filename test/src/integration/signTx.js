@@ -1,6 +1,14 @@
 import { expect } from "chai";
 import { getAda, str_to_path } from "../test_utils";
 
+const networkIds = {
+  mainnet: 0x00
+}
+
+const protocolMagics = {
+  mainnet: 764824073
+}
+
 const inputs = {
   utxo0: {
     txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
@@ -18,13 +26,13 @@ const outputs = {
   internalBaseWithStakingKeyHash: {
     addressHeader: 0x00,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-    stakingKeyHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+    stakingKeyHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
     amountStr: "7120787"
   },
   internalBaseWithStakingPath: {
     addressHeader: 0x00,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-    stakingKeyPath: str_to_path("1852'/1815'/0'"),
+    stakingPath: str_to_path("1852'/1815'/0'/2/0"),
     amountStr: "7120787"
   },
   internalEnterprise: {
@@ -34,8 +42,12 @@ const outputs = {
   },
   internalPointer: {
     addressHeader: 0x40,
-    path: str_to_path("1852'/1815'/0'/0/0"),
-    pointer: {"block_index": 1, "tx_index": 2, "certificate_index": 3},
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingBlockchainPointer: {
+      blockIndex: 1,
+      txIndex: 2,
+      certificateIndex: 3
+    },
     amountStr: "7120787"
   }
 };
@@ -43,7 +55,7 @@ const outputs = {
 const certificates = {
   stakeRegistration: {
     type: 0,
-    path: str_to_path("1852'/1815'/0'/2/0"),
+    path: str_to_path("1852'/1815'/0'/2/0")
   },
   stakeDeregistration: {
     type: 1,
@@ -84,11 +96,6 @@ const results = {
       }
     ]
   },
-  changeBaseNoStaking: {
-    txHashHex: "TODO",
-    witnesses: [
-    ]
-  },
   changeBaseWithStakingPath: {
     txHashHex: "TODO",
     witnesses: [
@@ -100,6 +107,11 @@ const results = {
     ]
   },
   changePointer: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changeEnterprise: {
     txHashHex: "TODO",
     witnesses: [
     ]
@@ -146,6 +158,8 @@ describe("signTx", async () => {
 /*
   it("Should correctly sign tx without change address", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -161,6 +175,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with change base address with staking path", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -172,11 +188,13 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(resultWithChangeBaseWithStakingPath);
+    expect(response).to.deep.equal(results.changeBaseWithStakingPath);
   });
-
+*/
   it("Should correctly sign tx with change base address with staking key hash", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -188,12 +206,13 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(resultWithChangeBaseWithStakingKeyHash);
+    expect(response).to.deep.equal(results.changeBaseWithStakingKeyHash);
   });
-*/
 
   it("Should correctly sign tx with enterprise change address", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -205,12 +224,14 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(results.changeBaseNoStaking);
+    expect(response).to.deep.equal(results.changeEnterprise);
   });
 
-/*
+
   it("Should correctly sign tx with pointer change address", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -222,11 +243,13 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(resultChangeInternalPointer);
+    expect(response).to.deep.equal(results.changePointer);
   });
-
-    it("Should correctly sign tx with withdrawal", async () => {
+/*
+  it("Should correctly sign tx with withdrawal", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -242,6 +265,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with a stake registration certificate", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -257,6 +282,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with a stake delegation certificate", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -272,6 +299,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with a stake deregistration certificate", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,
@@ -287,6 +316,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with nonempty metadata", async () => {
     const response = await ada.signTransaction(
+      networkIds.mainnet,
+      protocolMagics.mainnet,
       [inputs.utxo0],
       [
         outputs.externalByron,

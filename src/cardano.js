@@ -24,8 +24,8 @@ export function str_to_path(data: string): Array<number> {
 export function serializeStakingInfo(
     addressHeader: number, spendingPath: BIP32Path,
     stakingPath: ?BIP32Path = null,
-    stakingKeyHash: ?Buffer = null,
-    stakingBlockchainPointer: ?[number, number, number] = null
+    stakingKeyHashHex: ?string = null,
+    stakingBlockchainPointer: ?StakingBlockchainPointer = null
 ): Buffer {
 
   Precondition.checkIsUint8(addressHeader);
@@ -43,29 +43,30 @@ export function serializeStakingInfo(
   type StakingChoice = $Values<typeof stakingChoices>;
 
   // serialize staking info
-  var stakingChoice: StakingChoice;
-  var stakingInfoBuf: Buffer;
-  if (!stakingPath && !stakingKeyHash && !stakingBlockchainPointer) {
+  let stakingChoice: StakingChoice;
+  let stakingInfoBuf: Buffer;
+  if (!stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
     stakingChoice = stakingChoices.NO_STAKING;
     stakingInfoBuf = Buffer.alloc(0);
-  } else if ( stakingPath && !stakingKeyHash && !stakingBlockchainPointer) {
+  } else if ( stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
     stakingChoice = stakingChoices.STAKING_KEY_PATH;
     Precondition.checkIsValidPath(stakingPath);
     stakingInfoBuf = utils.path_to_buf(stakingPath);
-  } else if (!stakingPath &&  stakingKeyHash && !stakingBlockchainPointer) {
+  } else if (!stakingPath &&  stakingKeyHashHex && !stakingBlockchainPointer) {
+    const stakingKeyHash = utils.hex_to_buf(stakingKeyHashHex);
     stakingChoice = stakingChoices.STAKING_KEY_HASH;
     Precondition.check(stakingKeyHash.length == 28); // TODO some global constant for key hash length
     stakingInfoBuf = stakingKeyHash;
-  } else if (!stakingPath && !stakingKeyHash &&  stakingBlockchainPointer) {
+  } else if (!stakingPath && !stakingKeyHashHex &&  stakingBlockchainPointer) {
     stakingChoice = stakingChoices.BLOCKCHAIN_POINTER;
     stakingInfoBuf = Buffer.alloc(3 * 4); // 3 x uint32
-    Precondition.checkIsArray(stakingBlockchainPointer);
-    Precondition.check(stakingBlockchainPointer.length == 3);
-    for (var i = 0; i < 3; i++) {
-      Precondition.checkIsUint32(stakingBlockchainPointer[i]);
-      // $FlowFixMe
-      stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer[i], 4 * i);
-    }
+    
+    Precondition.checkIsUint32(stakingBlockchainPointer.blockIndex);
+    stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.blockIndex, 0);
+    Precondition.checkIsUint32(stakingBlockchainPointer.txIndex);
+    stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.txIndex, 4);
+    Precondition.checkIsUint32(stakingBlockchainPointer.certificateIndex);
+    stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.certificateIndex, 8);
   } else {
     throw new Error("Invalid staking info");
   }
