@@ -52,7 +52,7 @@ const certificates = {
   stakeDelegation: {
     type: 2,
     path: str_to_path("1852'/1815'/0'/2/0"),
-    poolIdHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49733c37b8f6"
+    poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49733c37b8f6"
   }
 }
 
@@ -158,7 +158,6 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
-*/
 
   it("Should correctly sign tx with withdrawal", async () => {
     const response = await ada.signTransaction(
@@ -174,8 +173,8 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
+*/
 
-/*
   it("Should correctly sign tx with a stake registration certificate", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
@@ -190,7 +189,7 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
-
+/*
   it("Should correctly sign tx with a stake delegation certificate", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
