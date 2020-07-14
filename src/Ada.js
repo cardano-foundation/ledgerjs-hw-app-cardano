@@ -465,7 +465,12 @@ export default class Ada {
       path: BIP32Path,
       amountStr: string,
     ): Promise<void> => {
-      // TODO
+      const data = Buffer.concat([
+        utils.path_to_buf(path),
+        utils.amount_to_buf(amountStr)
+      ]);
+      const response = await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
     }
 
     const signTx_setFee = async (

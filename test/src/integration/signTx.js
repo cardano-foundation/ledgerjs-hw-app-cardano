@@ -16,29 +16,52 @@ const outputs = {
       "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
   },
   internalBaseNoStaking: {
-    "addressType": 0,
-    "spendingPath": "m/1852'/1815'/0'/0/0",
-    "amount": "7120787",
+    addressType: 0,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    amountStr: "7120787"
   },
   internalBaseWithStakingKeyHash: {
-      "addressType": 0,
-      "spendingPath": "m/1852'/1815'/0'/0/0",
-      "stakingKeyHash": "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
-      "amount": "7120787",
+      addressType: 0,
+      spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+      stakingKeyHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+      amountStr: "7120787"
   },
   internalBaseWithStakingPath: {
-      "addressType": 0,
-      "spendingPath": "m/1852'/1815'/0'/0/0",
-      "stakingKeyPath": "m/1852'/1815'/0'",
-      "amount": "7120787",
+      addressType: 0,
+      spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+      stakingKeyPath: str_to_path("1852'/1815'/0'"),
+      amountStr: "7120787"
   },
   internalPointer: {
-      "addressType": 1,
-      "path": "m/1852'/1815'/0'/0/0",
-      "pointer": {"block_index": 1, "tx_index": 2, "certificate_index": 3},
-      "amount": "7120787",
-  },
+      addressType: 1,
+      path: str_to_path("1852'/1815'/0'/0/0"),
+      pointer: {"block_index": 1, "tx_index": 2, "certificate_index": 3},
+      amountStr: "7120787"
+  }
 };
+
+const certificates = {
+  stakeRegistration: {
+    type: 0,
+    path: str_to_path("1852'/1815'/0'/2/0"),
+  },
+  stakeDeregistration: {
+    type: 1,
+    path: str_to_path("1852'/1815'/0'/2/0")
+  },
+  stakeDelegation: {
+    type: 2,
+    path: str_to_path("1852'/1815'/0'/2/0"),
+    poolIdHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49733c37b8f6"
+  }
+}
+
+const withdrawals = {
+  withdrawal0: {
+    path: str_to_path("1852'/1815'/0'/2/0"),
+    amountStr: "111"
+  }
+}
 
 const sampleMetadata = "deadbeef";
 const sampleFeeStr = "42";
@@ -81,6 +104,26 @@ const results = {
     witnesses: [
     ]
   },
+  withWithdrawal: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withRegistrationCertificate: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withDelegationCertificate: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withDeregistrationCertificate: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
   withMetadata: {
     txHashHex: "TODO",
     witnesses: [
@@ -100,7 +143,7 @@ describe("signTx", async () => {
   afterEach(async () => {
     await ada.t.close();
   });
-
+/*
   it("Should correctly sign tx without change address", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
@@ -115,7 +158,69 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
+*/
+
+  it("Should correctly sign tx with withdrawal", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [withdrawals.withdrawal0],
+      null
+    );
+    expect(response).to.deep.equal(results.noChange);
+  });
+
 /*
+  it("Should correctly sign tx with a stake registration certificate", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeRegistration],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChange);
+  });
+
+  it("Should correctly sign tx with a stake delegation certificate", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeDelegation],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChange);
+  });
+
+  it("Should correctly sign tx with a stake deregistration certificate", async () => {
+    const response = await ada.signTransaction(
+      [inputs.utxo0],
+      [
+        outputs.externalByron,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeDeregistration],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChange);
+  });
+
   it("Should correctly sign tx with base change address without staking", async () => {
     const response = await ada.signTransaction(
       [inputs.utxo0],
