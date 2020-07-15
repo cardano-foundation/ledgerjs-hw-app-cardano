@@ -114,11 +114,11 @@ export type SignTransactionResponse = {|
 |};
 
 export const AddressTypeNibbles = {
-  BASE: 0b00000000,
-  POINTER: 0b00000100,
-  ENTERPRISE: 0b00000110,
-  BYRON: 0b00001000,
-  REWARD: 0b00001110
+  BASE: 0b0000,
+  POINTER: 0b0100,
+  ENTERPRISE: 0b0110,
+  BYRON: 0b1000,
+  REWARD: 0b1110
 }
 
 const MetadataCodes = {
