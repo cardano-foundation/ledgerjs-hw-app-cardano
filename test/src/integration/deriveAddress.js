@@ -62,13 +62,13 @@ describe("deriveAddress", async () => {
     };
 
     // base
-    await test(AddressTypeNibbles.BYRON, 0x03, "1852'/1815'/0'/0/1", "1852'/1815'/0'/2/0", null, null,
+    await test(AddressTypeNibbles.BASE, 0x03, "1852'/1815'/0'/0/1", "1852'/1815'/0'/2/0", null, null,
         "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqdquehe");
-    await test(AddressTypeNibbles.BYRON, 0x00, "1852'/1815'/0'/0/1", "1852'/1815'/0'/2/0", null, null,
+    await test(AddressTypeNibbles.BASE, 0x00, "1852'/1815'/0'/0/1", "1852'/1815'/0'/2/0", null, null,
         "addr1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqhn8sgh");
-    await test(AddressTypeNibbles.BYRON, 0x00, "1852'/1815'/0'/0/1", null, "1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c", null,
+    await test(AddressTypeNibbles.BASE, 0x00, "1852'/1815'/0'/0/1", null, "1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c", null,
         "addr1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqhn8sgh");
-    await test(AddressTypeNibbles.BYRON, 0x03, "1852'/1815'/0'/0/1", null, "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277", null,
+    await test(AddressTypeNibbles.BASE, 0x03, "1852'/1815'/0'/0/1", null, "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277", null,
         "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmswz93l5");
 
     // enterprise
