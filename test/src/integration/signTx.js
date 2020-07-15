@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { getAda, str_to_path } from "../test_utils";
-import { AddressTypeNibbles } from "../../../lib/Ada";
+import { AddressTypeNibbles, utils } from "../../../lib/Ada";
 
 const networkIds = {
   mainnet: 0x00
@@ -21,8 +21,9 @@ const inputs = {
 const outputs = {
   externalByron: {
     amountStr: "3003112",
-    humanAddress:
+    addressHex: utils.buf_to_hex(utils.base58_decode(
       "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
+    ))
   },
   internalBaseWithStakingKeyHash: {
     addressTypeNibble: AddressTypeNibbles.BASE,
@@ -76,7 +77,7 @@ const withdrawals = {
   }
 }
 
-const sampleMetadata = "deadbeef";
+const sampleMetadata = "deadbeef".repeat(8);
 const sampleFeeStr = "42";
 const sampleTtlStr = "10";
 
