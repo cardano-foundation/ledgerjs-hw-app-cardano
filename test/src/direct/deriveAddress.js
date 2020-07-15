@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { str_to_path, serializeStakingInfo, getTransport, pathToBuffer } from "../test_utils";
+import { str_to_path, serializeAddressInfo, getTransport, pathToBuffer } from "../test_utils";
 import { CLA, INS_DERIVE_ADDRESS, ERRORS } from "./constants";
 
 const P1_RETURN = 0x01;
@@ -24,7 +24,7 @@ describe("deriveAddress", async () => {
     transport = await getTransport();
 
     // legacy Byron address
-    validDataBuffer = serializeStakingInfo(0x80, str_to_path("44'/1815'/0'/0/0"));
+    validDataBuffer = serializeAddressInfo(0x80, str_to_path("44'/1815'/0'/0/0"));
     send = (p1, p2, data) =>
       transport.send(CLA, INS_DERIVE_ADDRESS, p1, p2, data);
   });
@@ -81,7 +81,7 @@ describe("deriveAddress", async () => {
         P1_RETURN,
         0x00,
         // legacy Byron address
-        serializeStakingInfo(0x80, str_to_path(path)),
+        serializeAddressInfo(0x80, str_to_path(path)),
         ERRORS.REJECTED_BY_POLICY
       );
 

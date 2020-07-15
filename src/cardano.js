@@ -22,7 +22,7 @@ export function str_to_path(data: string): Array<number> {
   return data.split("/").map(parseBIP32Index);
 }
 
-export function serializeStakingInfo(
+export function serializeAddressInfo(
     addressTypeNibble: number,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
@@ -98,5 +98,5 @@ export default {
 
   str_to_path,
 
-  serializeStakingInfo
+  serializeAddressInfo
 };
