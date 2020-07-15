@@ -330,6 +330,6 @@ describe("signTx", async () => {
       [],
       sampleMetadata
     );
-    expect(response).to.deep.equal(resultWithMetadata);
+    expect(response).to.deep.equal(results.withMetadata);
   });
 });
