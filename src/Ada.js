@@ -49,7 +49,7 @@ export type OutputTypeAddress = {|
 |};
 
 export type OutputTypeChange = {|
-  addressHeader: number,
+  addressTypeByte: number,
   spendingPath: BIP32Path,
   amountStr: string,
   stakingPath: ?BIP32Path,
@@ -107,6 +107,14 @@ export type SignTransactionResponse = {|
   txHashHex: string,
   witnesses: Array<Witness>
 |};
+
+export const AddressTypeNibbles = {
+  BASE: 0b00000000,
+  POINTER: 0b00000100,
+  ENTERPRISE: 0b00000110,
+  BYRON: 0b00001000,
+  REWARD: 0b00001110
+}
 
 const MetadataCodes = {
 	SIGN_TX_METADATA_NO: 1,
@@ -311,7 +319,8 @@ export default class Ada {
    * TODO update this
    */
   async deriveAddress(
-      addressHeader: number,
+      addressTypeNibble: number,
+      networkIdOrProtocolMagic: number,
       spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
       stakingKeyHashHex: ?string = null,
@@ -324,8 +333,16 @@ export default class Ada {
 
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
-    const data = cardano.serializeStakingInfo(addressHeader, spendingPath,
-        stakingPath, stakingKeyHashHex, stakingBlockchainPointer);
+
+    
+    const data = cardano.serializeStakingInfo(
+      addressTypeNibble,
+      networkIdOrProtocolMagic,
+      spendingPath,
+      stakingPath,
+      stakingKeyHashHex,
+      stakingBlockchainPointer
+    );
 
     const response = await _send(P1_RETURN, P2_UNUSED, data);
 
@@ -343,7 +360,9 @@ export default class Ada {
   }
 
   async showAddress(
-      addressHeader: number, spendingPath: BIP32Path,
+      addressTypeNibble: number,
+      networkIdOrProtocolMagic: number,
+      spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
       stakingKeyHashHex: ?string = null,
       stakingBlockchainPointer: ?StakingBlockchainPointer = null
@@ -355,8 +374,14 @@ export default class Ada {
 
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
-    const data = cardano.serializeStakingInfo(addressHeader, spendingPath,
-        stakingPath, stakingKeyHashHex, stakingBlockchainPointer);
+    const data = cardano.serializeStakingInfo(
+      addressTypeNibble,
+      networkIdOrProtocolMagic,
+      spendingPath,
+      stakingPath,
+      stakingKeyHashHex,
+      stakingBlockchainPointer
+    );
 
     const response = await _send(P1_DISPLAY, P2_UNUSED, data);
     Assert.assert(response.length == 0);
@@ -449,18 +474,21 @@ export default class Ada {
     };
 
     const signTx_addChangeOutput = async (
-      addressHeader: number,
+      addressTypeNibble: number,
       spendingPath: BIP32Path,
       amountStr: string,
       stakingPath: ?BIP32Path = null,
       stakingKeyHashHex: ?string = null,
       stakingBlockchainPointer: ?StakingBlockchainPointer = null,
     ): Promise<void> => {
+
+
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_PATH),
         cardano.serializeStakingInfo(
-          addressHeader,
+          addressTypeNibble,
+          addressTypeNibble == AddressTypeNibbles.BYRON ? protocolMagic : networkId,
           spendingPath,
           stakingPath,
           stakingKeyHashHex,
