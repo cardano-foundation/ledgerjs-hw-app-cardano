@@ -2,7 +2,7 @@ import { expect } from "chai";
 import pathDerivations from "./__fixtures__/pathDerivations";
 
 import { getAda, str_to_path, hex_to_buf } from "../test_utils";
-import { AddressTypeNibbles } from "../../../lib/Ada";
+import { AddressTypeNibbles, utils } from "../../../lib/Ada";
 
 const BYRON_PROTOCOL_MAGIC = 764824073;
 
@@ -21,9 +21,9 @@ describe("deriveAddress", async () => {
     const test = async path => {
       const derivation = pathDerivations[path];
 
-      const result = await ada.deriveAddress(0b1000, BYRON_PROTOCOL_MAGIC, str_to_path(derivation.path));
+      const { addressHex } = await ada.deriveAddress(0b1000, BYRON_PROTOCOL_MAGIC, str_to_path(derivation.path));
 
-      expect(result.humanAddress).to.equal(derivation.address);
+      expect(utils.base58_encode(utils.hex_to_buf(addressHex))).to.equal(derivation.address);
     };
 
    await test("44'/1815'/1'/0/12'");
@@ -43,7 +43,7 @@ describe("deriveAddress", async () => {
       const spendingPath: BIP32Path = str_to_path(spendingPathStr);
       const stakingPath: ?BIP32Path = (stakingPathStr !== null) ? str_to_path(stakingPathStr) : null;
 
-      const result = await ada.deriveAddress(
+      const { addressHex } = await ada.deriveAddress(
         addressTypeNibble,
         networkIdOrProtocolMagic,
         spendingPath,
@@ -58,7 +58,7 @@ describe("deriveAddress", async () => {
         : null
       );
 
-      expect(result.humanAddress).to.equal(expectedResult);
+      expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex))).to.equal(expectedResult);
     };
 
     // base

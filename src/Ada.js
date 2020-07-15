@@ -45,7 +45,7 @@ export type InputTypeUTxO = {|
 
 export type OutputTypeAddress = {|
   amountStr: string,
-  humanAddress: string
+  addressHex: string
 |};
 
 export type OutputTypeAddressParams = {|
@@ -87,7 +87,7 @@ export type GetVersionResponse = {|
 |};
 
 export type DeriveAddressResponse = {|
-  humanAddress: string
+  addressHex: string
 |};
 
 export type GetExtendedPublicKeyResponse = {|
@@ -346,16 +346,8 @@ export default class Ada {
 
     const response = await _send(P1_RETURN, P2_UNUSED, data);
 
-    Assert.assert(response.length > 0);
-    let encodedResponse: string;
-    if ((response[0] & 0xF0) === 0x80) { // byron address
-        encodedResponse = utils.base58_encode(response);
-    } else { // shelley address
-        encodedResponse = utils.bech32_encodeAddress(response);
-    }
-
     return {
-      humanAddress: encodedResponse
+      addressHex: response.toString('hex')
     };
   }
 
@@ -461,13 +453,13 @@ export default class Ada {
     };
 
     const signTx_addAddressOutput = async (
-      humanAddress: string,
+      addressHex: string,
       amountStr: string
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS),
-        utils.base58_decode(humanAddress)
+        utils.hex_to_buf(addressHex)
       ]);
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
       Assert.assert(response.length == 0);
@@ -607,8 +599,8 @@ export default class Ada {
     // outputs
     //console.log("outputs");
     for (const output of outputs) {
-      if (output.humanAddress) {
-        await signTx_addAddressOutput(output.humanAddress, output.amountStr);
+      if (output.addressHex) {
+        await signTx_addAddressOutput(output.addressHex, output.amountStr);
       } else if (output.spendingPath) {
         await signTx_addChangeOutput(
           output.addressTypeNibble,
