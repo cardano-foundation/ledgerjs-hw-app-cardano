@@ -48,7 +48,7 @@ export type OutputTypeAddress = {|
   humanAddress: string
 |};
 
-export type OutputTypeChange = {|
+export type OutputTypeAddressParams = {|
   addressTypeNibble: number,
   spendingPath: BIP32Path,
   amountStr: string,
@@ -391,7 +391,7 @@ export default class Ada {
     networkId: number,
     protocolMagic: number,
     inputs: Array<InputTypeUTxO>,
-    outputs: Array<OutputTypeAddress | OutputTypeChange>,
+    outputs: Array<OutputTypeAddress | OutputTypeAddressParams>,
     feeStr: string,
     ttlStr: string,
     certificates: Array<Certificate>,
