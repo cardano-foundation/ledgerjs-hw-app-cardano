@@ -335,7 +335,7 @@ export default class Ada {
     const P2_UNUSED = 0x00;
 
     
-    const data = cardano.serializeStakingInfo(
+    const data = cardano.serializeAddressInfo(
       addressTypeNibble,
       networkIdOrProtocolMagic,
       spendingPath,
@@ -366,7 +366,7 @@ export default class Ada {
 
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
-    const data = cardano.serializeStakingInfo(
+    const data = cardano.serializeAddressInfo(
       addressTypeNibble,
       networkIdOrProtocolMagic,
       spendingPath,
@@ -478,7 +478,7 @@ export default class Ada {
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_PATH),
-        cardano.serializeStakingInfo(
+        cardano.serializeAddressInfo(
           addressTypeNibble,
           addressTypeNibble == AddressTypeNibbles.BYRON ? protocolMagic : networkId,
           spendingPath,
