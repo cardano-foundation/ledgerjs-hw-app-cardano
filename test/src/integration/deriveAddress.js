@@ -43,7 +43,8 @@ describe("deriveAddress", async () => {
       const stakingPath: ?BIP32Path = (stakingPathStr !== null) ? str_to_path(stakingPathStr) : null;
 
       const result = await ada.deriveAddress(
-        header,
+        addressTypeNibble,
+        networkIdOrProtocolMagic,
         spendingPath,
         stakingPath,
         stakingKeyHashHex,
