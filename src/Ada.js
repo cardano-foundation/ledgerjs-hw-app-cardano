@@ -123,7 +123,7 @@ const MetadataCodes = {
 
 const TxOutputTypeCodes = {
   SIGN_TX_OUTPUT_TYPE_ADDRESS: 1,
-  SIGN_TX_OUTPUT_TYPE_PATH: 2
+  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2
 }
 
 export const ErrorCodes = {
@@ -133,6 +133,7 @@ export const ErrorCodes = {
   ERR_REJECTED_BY_USER: 0x6e09,
   ERR_REJECTED_BY_POLICY: 0x6e10,
   ERR_DEVICE_LOCKED: 0x6e11,
+  ERR_UNSUPPORTED_ADDRESS_TYPE: 0x6e12,
 
   // Not thrown by ledger-app-cardano itself but other apps
   ERR_CLA_NOT_SUPPORTED: 0x6e00
@@ -149,7 +150,8 @@ const ErrorMsgs = {
   [ErrorCodes.ERR_REJECTED_BY_POLICY]:
     "Action rejected by Ledger's security policy",
   [ErrorCodes.ERR_DEVICE_LOCKED]: "Device is locked",
-  [ErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app"
+  [ErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app",
+  [ErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type"
 };
 
 export const getErrorDescription = (statusCode: number) => {
@@ -313,10 +315,28 @@ export default class Ada {
    * @throws 5002 - The path provided is less than 5 indexes
    * @throws 5003 - Some of the indexes is not a number
    *
-   * @example
-   * const { address } = await ada.deriveAddress([ HARDENED + 44, HARDENED + 1815, HARDENED + 1, 0, 5 ]);
+   * TODO update error codes
    *
-   * TODO update this
+   * @example
+   * const { address } = await ada.deriveAddress(
+   *   0b1000, // byron address
+   *   764824073,
+   *   [ HARDENED | 44, HARDENED | 1815, HARDENED | 1, 0, 5 ],
+   *   null
+   *   null
+   *   null
+   * );
+   *
+   * @example
+   * const { address } = await ada.deriveAddress(
+   *   0b0000, // base address
+   *   0x00,
+   *   [ HARDENED | 1852, HARDENED | 1815, HARDENED | 0, 0, 5 ],
+   *   [ HARDENED | 1852, HARDENED | 1815, HARDENED | 0, 2, 0 ]
+   *   null
+   *   null
+   * );
+   *
    */
   async deriveAddress(
       addressTypeNibble: number,
@@ -477,7 +497,7 @@ export default class Ada {
 
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
-        utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_PATH),
+        utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
         cardano.serializeAddressInfo(
           addressTypeNibble,
           addressTypeNibble == AddressTypeNibbles.BYRON ? protocolMagic : networkId,
