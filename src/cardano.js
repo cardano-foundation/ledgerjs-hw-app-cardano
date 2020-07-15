@@ -22,14 +22,20 @@ export function str_to_path(data: string): Array<number> {
 }
 
 export function serializeStakingInfo(
-    addressHeader: number, spendingPath: BIP32Path,
+    addressTypeNibble: number,
+    networkIdOrProtocolMagic: number,
+    spendingPath: BIP32Path,
     stakingPath: ?BIP32Path = null,
     stakingKeyHashHex: ?string = null,
     stakingBlockchainPointer: ?StakingBlockchainPointer = null
 ): Buffer {
 
-  Precondition.checkIsUint8(addressHeader);
-  const headerBuf = Buffer.from([addressHeader]);
+  console.log(addressTypeNibble)
+  Precondition.checkIsUint8(addressTypeNibble << 4);
+  const addressTypeNibbleBuf = Buffer.from([addressTypeNibble]);
+
+  Precondition.checkIsUint32(networkIdOrProtocolMagic);
+  const networkIdOrProtocolMagicBuf = Buffer.from([networkIdOrProtocolMagic]);
 
   Precondition.checkIsValidPath(spendingPath);
   const spendingPathBuf = utils.path_to_buf(spendingPath);
@@ -72,7 +78,13 @@ export function serializeStakingInfo(
   }
   const stakingChoiceBuf = Buffer.from([stakingChoice]);
 
-  return Buffer.concat([headerBuf, spendingPathBuf, stakingChoiceBuf, stakingInfoBuf]);
+  return Buffer.concat([
+    addressTypeNibbleBuf,
+    networkIdOrProtocolMagicBuf,
+    spendingPathBuf,
+    stakingChoiceBuf,
+    stakingInfoBuf
+  ]);
 }
   
 export default {
