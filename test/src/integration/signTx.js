@@ -157,7 +157,7 @@ describe("signTx", async () => {
   afterEach(async () => {
     await ada.t.close();
   });
-/*
+
   it("Should correctly sign tx without change address", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
@@ -280,7 +280,7 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChange);
   });
-*/
+
   it("Should correctly sign tx with a stake delegation certificate", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
@@ -298,7 +298,7 @@ describe("signTx", async () => {
     expect(response).to.deep.equal(results.noChange);
   });
 
-/*
+
   it("Should correctly sign tx with a stake deregistration certificate", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
@@ -332,5 +332,4 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.withMetadata);
   });
-*/
 });
