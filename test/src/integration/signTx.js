@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { getAda, str_to_path } from "../test_utils";
+import { AddressTypeNibbles } from "../../../lib/Ada";
 
 const networkIds = {
   mainnet: 0x00
@@ -24,24 +25,24 @@ const outputs = {
       "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
   },
   internalBaseWithStakingKeyHash: {
-    addressHeader: 0x00,
+    addressTypeNibble: AddressTypeNibbles.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingKeyHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
     amountStr: "7120787"
   },
   internalBaseWithStakingPath: {
-    addressHeader: 0x00,
+    addressTypeNibble: AddressTypeNibbles.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingPath: str_to_path("1852'/1815'/0'/2/0"),
     amountStr: "7120787"
   },
   internalEnterprise: {
-    addressHeader: 0x60,
+    addressTypeNibble: AddressTypeNibbles.ENTERPRISE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     amountStr: "7120787"
   },
   internalPointer: {
-    addressHeader: 0x40,
+    addressTypeNibble: AddressTypeNibbles.POINTER,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingBlockchainPointer: {
       blockIndex: 1,
@@ -155,7 +156,7 @@ describe("signTx", async () => {
   afterEach(async () => {
     await ada.t.close();
   });
-/*
+
   it("Should correctly sign tx without change address", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
@@ -190,7 +191,7 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.changeBaseWithStakingPath);
   });
-*/
+
   it("Should correctly sign tx with change base address with staking key hash", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
@@ -245,7 +246,7 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.changePointer);
   });
-/*
+
   it("Should correctly sign tx with withdrawal", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
@@ -330,5 +331,4 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(resultWithMetadata);
   });
-*/
 });
