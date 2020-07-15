@@ -73,7 +73,7 @@ describe("deriveAddress", async () => {
     // enterprise
     await test(0x60, 0x00, "1852'/1815'/0'/0/1", null, null, null,
         "addr1vpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vc93wyej");
-    await test(0x63, 0x03, "1852'/1815'/0'/0/1", null, null, null,
+    await test(0x60, 0x03, "1852'/1815'/0'/0/1", null, null, null,
         "addr1vdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vc9wh7em");
 
     // pointer

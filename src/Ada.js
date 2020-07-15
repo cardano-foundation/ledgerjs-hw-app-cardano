@@ -49,7 +49,7 @@ export type OutputTypeAddress = {|
 |};
 
 export type OutputTypeChange = {|
-  addressTypeByte: number,
+  addressTypeNibble: number,
   spendingPath: BIP32Path,
   amountStr: string,
   stakingPath: ?BIP32Path,
@@ -611,7 +611,7 @@ export default class Ada {
         await signTx_addAddressOutput(output.humanAddress, output.amountStr);
       } else if (output.spendingPath) {
         await signTx_addChangeOutput(
-          output.addressHeader,
+          output.addressTypeNibble,
           output.spendingPath,
           output.amountStr,
           output.stakingPath,
