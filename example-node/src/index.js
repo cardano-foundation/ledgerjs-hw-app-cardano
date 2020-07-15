@@ -51,9 +51,9 @@ const makeExamples = appAda => ({
         // txHashHex:
         //    'd5c5c15054228da1f1a973ff36098658ce5147a989cf2c4a92c8a2a84686afc6',
         // amountStr: "1000000",
-        // addressHex: utils.base58_encode(
+        // addressHex: utils.buf_to_hex(utils.base58_decode(
         //      'Ae2tdPwUPEZF4a8fNdkUt8HSyyWgsq2DqP2AKGFKiF3SLsXNDuu6wYp15Dp'
-        // )
+        // ))
       }
     ];
 
@@ -61,17 +61,17 @@ const makeExamples = appAda => ({
       {
         amountStr: "700000",
         addressHex:
-          utils.base58_decode(
+          utils.buf_to_hex(utils.base58_decode(
             "DdzFFzCqrhsoarXqLakMBEiURCGPCUL7qRvPf2oGknKN2nNix5b9SQKj2YckgXZK" +
             "6q1Ym7BNLxgEX3RQFjS2C41xt54yJHeE1hhMUfSG"
-          )
+          ))
       },
       {
         amountStr: "100000",
         path: cardano.str_to_path("44'/1815'/0'/1/0")
-        // addressHex: utils.base58_encode(
+        // addressHex: utils.buf_to_hex(utils.base58_decode(
         //    'Ae2tdPwUPEZLrRBShqCSucUymQSfXHEx3EthwabAYSYLyG52i6QaXTDwNVL'
-        // )
+        // ))
       }
     ];
 
