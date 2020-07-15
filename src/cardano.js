@@ -1,4 +1,5 @@
 import utils, { Precondition } from "./utils";
+import {AddressTypeNibbles} from './Ada';
 
 const HARDENED = 0x80000000;
 
@@ -29,13 +30,18 @@ export function serializeStakingInfo(
     stakingKeyHashHex: ?string = null,
     stakingBlockchainPointer: ?StakingBlockchainPointer = null
 ): Buffer {
-
-  console.log(addressTypeNibble)
   Precondition.checkIsUint8(addressTypeNibble << 4);
-  const addressTypeNibbleBuf = Buffer.from([addressTypeNibble]);
+  const addressTypeNibbleBuf = utils.uint8_to_buf(addressTypeNibble);
 
-  Precondition.checkIsUint32(networkIdOrProtocolMagic);
-  const networkIdOrProtocolMagicBuf = Buffer.from([networkIdOrProtocolMagic]);
+  let networkIdOrProtocolMagicBuf;
+
+  if (addressTypeNibble == AddressTypeNibbles.BYRON) {
+    Precondition.checkIsUint32(networkIdOrProtocolMagic);
+    networkIdOrProtocolMagicBuf = utils.uint32_to_buf(networkIdOrProtocolMagic);
+  } else {
+    Precondition.checkIsUint8(networkIdOrProtocolMagic);
+    networkIdOrProtocolMagicBuf = utils.uint8_to_buf(networkIdOrProtocolMagic);
+  }
 
   Precondition.checkIsValidPath(spendingPath);
   const spendingPathBuf = utils.path_to_buf(spendingPath);
