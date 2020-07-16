@@ -1,14 +1,6 @@
 import { expect } from "chai";
-import { getAda, str_to_path } from "../test_utils";
+import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
 import { AddressTypeNibbles, utils } from "../../../lib/Ada";
-
-const networkIds = {
-  mainnet: 0x00
-}
-
-const protocolMagics = {
-  mainnet: 764824073
-}
 
 const inputs = {
   utxoByron: {
@@ -19,7 +11,7 @@ const inputs = {
   utxoShelley: {
     txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     outputIndex: 0,
-    path: str_to_path("/1852'/1815'/0'/0/0"),
+    path: str_to_path("1852'/1815'/0'/0/0"),
   }
 };
 
@@ -216,11 +208,11 @@ describe("signTx", async () => {
   afterEach(async () => {
     await ada.t.close();
   });
-/*
+
   it("Should correctly sign tx without change address with Byron output", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoByron],
       [
         outputs.externalByron,
@@ -233,11 +225,11 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChangeByron);
   });
-*/
+
   it("Should correctly sign tx without change address with Shelley output", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalShelley,
@@ -250,11 +242,11 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.noChangeShelley);
   });
-/*
+
   it("Should correctly sign tx with change base address with staking path", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -271,8 +263,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with change base address with staking key hash", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -289,8 +281,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with enterprise change address", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -307,8 +299,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with pointer change address", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -325,8 +317,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with withdrawal", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -342,8 +334,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with a stake registration certificate", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -359,8 +351,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with a stake delegation certificate", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -376,8 +368,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with a stake deregistration certificate", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -393,8 +385,8 @@ describe("signTx", async () => {
 
   it("Should correctly sign tx with nonempty metadata", async () => {
     const response = await ada.signTransaction(
-      networkIds.mainnet,
-      protocolMagics.mainnet,
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
         outputs.externalByron,
@@ -407,5 +399,4 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.withMetadata);
   });
-*/
 });

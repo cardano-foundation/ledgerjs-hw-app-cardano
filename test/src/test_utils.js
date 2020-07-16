@@ -19,3 +19,13 @@ export async function getAda() {
   ada.t = transport;
   return Promise.resolve(ada);
 }
+
+export const ProtocolMagics = {
+  MAINNET: 764824073,
+  TESTNET: 42
+}
+
+export const NetworkIds = {
+  MAINNET: 0x00,
+  TESTNET: 0x03
+}
