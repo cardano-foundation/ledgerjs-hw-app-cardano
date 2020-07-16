@@ -6,6 +6,9 @@ const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
 
+const BECH32_ALPHABET =
+  "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
 
@@ -74,6 +77,14 @@ export const Precondition = {
     Precondition.checkIsString(data);
     for (const c of data) {
       Precondition.check(BASE58_ALPHABET.includes(c));
+    }
+  },
+  checkIsValidBech32Address: (data: string) => {
+    Precondition.check(data.startsWith("addr1"));
+
+    Precondition.checkIsString(data);
+    for (const c of data.slice("addr1".length)) {
+      Precondition.check(BECH32_ALPHABET.includes(c));
     }
   }
 };
@@ -205,6 +216,13 @@ export function bech32_encodeAddress(data: Buffer): string {
   return bech32.encode("addr", data5bit, 1000); // TODO what is a reasonable limit?
 }
 
+export function bech32_decodeAddress(data: string): Buffer {
+  Precondition.checkIsValidBech32Address(data);
+
+  const { words } = bech32.decode(data, 1000)
+  return Buffer.from(bech32.fromWords(words));
+}
+
 export function safe_parseInt(str: string): number {
   Precondition.checkIsString(str);
   const i = parseInt(str);
@@ -241,6 +259,7 @@ export default {
   base58_decode,
 
   bech32_encodeAddress,
+  bech32_decodeAddress,
 
   safe_parseInt,
   chunkBy,
