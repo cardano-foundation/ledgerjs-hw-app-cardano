@@ -1,10 +1,9 @@
 import { expect } from "chai";
-import pathDerivations from "./__fixtures__/pathDerivations";
+import getPathDerivationFixture from "./__fixtures__/pathDerivations";
 
-import { getAda, str_to_path, hex_to_buf } from "../test_utils";
+import { getAda, str_to_path, hex_to_buf, NetworkIds, ProtocolMagics } from "../test_utils";
 import { AddressTypeNibbles, utils } from "../../../lib/Ada";
 
-const BYRON_PROTOCOL_MAGIC = 764824073;
 
 describe("deriveAddress", async () => {
   let ada = {};
@@ -18,16 +17,20 @@ describe("deriveAddress", async () => {
   });
 
   it("Should succesfully derive Byron address", async () => {
-    const test = async path => {
-      const derivation = pathDerivations[path];
+    const test = async (path, protocolMagic) => {
+      const derivation = getPathDerivationFixture({
+        path,
+        protocolMagic
+      });
 
-      const { addressHex } = await ada.deriveAddress(0b1000, BYRON_PROTOCOL_MAGIC, str_to_path(derivation.path));
+      const { addressHex } = await ada.deriveAddress(0b1000, protocolMagic, str_to_path(derivation.path));
 
       expect(utils.base58_encode(utils.hex_to_buf(addressHex))).to.equal(derivation.address);
     };
 
-   await test("44'/1815'/1'/0/12'");
-   await test("44'/1815'/1'/0/10'/1/2/3");
+    await test("44'/1815'/1'/0/12'", ProtocolMagics.MAINNET);
+    await test("44'/1815'/1'/0/10'/1/2/3", ProtocolMagics.MAINNET);
+    await test("44'/1815'/1'/0/12'", ProtocolMagics.TESTNET);
   });
 
   it("Should succesfully derive Shelley address", async () => {
