@@ -11,10 +11,15 @@ const protocolMagics = {
 }
 
 const inputs = {
-  utxo0: {
+  utxoByron: {
     txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
     outputIndex: 0,
     path: str_to_path("44'/1815'/0'/0/0")
+  },
+  utxoShelley: {
+    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    outputIndex: 0,
+    path: str_to_path("/1852'/1815'/0'/0/0"),
   }
 };
 
@@ -106,10 +111,10 @@ const results = {
   },
   noChangeShelley: {
     /*
-    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f
-    * 63dcfc000181825841007cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443
-    * ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a
-    * 030a
+    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc000181825841007cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea5454
+    * 43ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f346111401021
+    * 82a030a
     */
     txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
     witnesses: [
@@ -216,7 +221,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoByron],
       [
         outputs.externalByron,
       ],
@@ -233,7 +238,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalShelley,
       ],
@@ -250,7 +255,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
         outputs.internalBaseWithStakingPath,
@@ -268,7 +273,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
         outputs.internalBaseWithStakingKeyHash,
@@ -286,7 +291,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
         outputs.internalEnterprise,
@@ -304,7 +309,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
         outputs.internalPointer, // TODO fix failing change address in ledger app
@@ -322,7 +327,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
       ],
@@ -339,7 +344,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
       ],
@@ -356,7 +361,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
       ],
@@ -373,7 +378,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
       ],
@@ -390,7 +395,7 @@ describe("signTx", async () => {
     const response = await ada.signTransaction(
       networkIds.mainnet,
       protocolMagics.mainnet,
-      [inputs.utxo0],
+      [inputs.utxoShelley],
       [
         outputs.externalByron,
       ],
