@@ -16,10 +16,22 @@ const inputs = {
 };
 
 const outputs = {
-  externalByron: {
+  externalByronMainnet: {
     amountStr: "3003112",
     addressHex: utils.buf_to_hex(utils.base58_decode(
       "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
+    ))
+  },
+  externalByronDaedalusMainnet: {
+    amountStr: "3003112",
+    addressHex: utils.buf_to_hex(utils.base58_decode(
+      "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
+    ))
+  },
+  externalByronTestnet: {
+    amountStr: "3003112",
+    addressHex: utils.buf_to_hex(utils.base58_decode(
+      "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
     ))
   },
   externalShelley: {
@@ -85,12 +97,34 @@ const sampleFeeStr = "42";
 const sampleTtlStr = "10";
 
 const results = {
-  noChangeByron: {
+  noChangeByronMainnet: {
     /*
     * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
     * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
     * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
     */
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "9c12b678a047bf3148e867d969fba4f9295042c4fff8410782425a356820c79e7549de" +
+          "798f930480ba83615a5e2a19389c795a3281a59077b7d37cd5a071a606"
+      }
+    ]
+  },
+  noChangeByronDaedalusMainnet: {
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "248e6f443503febbaa46a71f2007b024bc6d64f4ecd8897c4827b39ca45802377ed19d" +
+          "84a0565d50e681414748a884503a1aee224207878b0062aa179eeb4400"
+      }
+    ]
+  },
+  noChangeByronTestnet: {
     txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
     witnesses: [
       {
@@ -209,13 +243,13 @@ describe("signTx", async () => {
     await ada.t.close();
   });
 
-  it("Should correctly sign tx without change address with Byron output", async () => {
+  it("Should correctly sign tx without change address with Byron mainnet output", async () => {
     const response = await ada.signTransaction(
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoByron],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
       ],
       sampleFeeStr,
       sampleTtlStr,
@@ -223,7 +257,41 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(results.noChangeByron);
+    expect(response).to.deep.equal(results.noChangeByronMainnet);
+  });
+
+  it("Should correctly sign tx without change address with Byron Daedalus mainnet output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoByron],
+      [
+        outputs.externalByronDaedalusMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChangeByronDaedalusMainnet);
+  });
+
+  it("Should correctly sign tx without change address with Byron testnet output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.TESTNET,
+      ProtocolMagics.TESTNET,
+      [inputs.utxoByron],
+      [
+        outputs.externalByronTestnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChangeByronTestnet);
   });
 
   it("Should correctly sign tx without change address with Shelley output", async () => {
@@ -249,7 +317,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
         outputs.internalBaseWithStakingPath,
       ],
       sampleFeeStr,
@@ -267,7 +335,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
         outputs.internalBaseWithStakingKeyHash,
       ],
       sampleFeeStr,
@@ -285,7 +353,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
         outputs.internalEnterprise,
       ],
       sampleFeeStr,
@@ -303,7 +371,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
         outputs.internalPointer, // TODO fix failing change address in ledger app
       ],
       sampleFeeStr,
@@ -321,7 +389,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
       ],
       sampleFeeStr,
       sampleTtlStr,
@@ -329,7 +397,7 @@ describe("signTx", async () => {
       [withdrawals.withdrawal0],
       null
     );
-    expect(response).to.deep.equal(results.noChange);
+    expect(response).to.deep.equal(results.withWithdrawal);
   });
 
   it("Should correctly sign tx with a stake registration certificate", async () => {
@@ -338,7 +406,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
       ],
       sampleFeeStr,
       sampleTtlStr,
@@ -346,7 +414,7 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(results.noChange);
+    expect(response).to.deep.equal(results.withRegistrationCertificate);
   });
 
   it("Should correctly sign tx with a stake delegation certificate", async () => {
@@ -355,7 +423,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
       ],
       sampleFeeStr,
       sampleTtlStr,
@@ -363,7 +431,7 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(results.noChange);
+    expect(response).to.deep.equal(results.withDelegationCertificate);
   });
 
   it("Should correctly sign tx with a stake deregistration certificate", async () => {
@@ -372,7 +440,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
       ],
       sampleFeeStr,
       sampleTtlStr,
@@ -380,7 +448,7 @@ describe("signTx", async () => {
       [],
       null
     );
-    expect(response).to.deep.equal(results.noChange);
+    expect(response).to.deep.equal(results.withDeregistrationCertificate);
   });
 
   it("Should correctly sign tx with nonempty metadata", async () => {
@@ -389,7 +457,7 @@ describe("signTx", async () => {
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
       [
-        outputs.externalByron,
+        outputs.externalByronMainnet,
       ],
       sampleFeeStr,
       sampleTtlStr,
@@ -399,4 +467,5 @@ describe("signTx", async () => {
     );
     expect(response).to.deep.equal(results.withMetadata);
   });
+
 });
