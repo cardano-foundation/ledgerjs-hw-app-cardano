@@ -90,9 +90,9 @@ describe("deriveAddress", async () => {
       
     // reward
     await test(AddressTypeNibbles.REWARD, 0x00, "1852'/1815'/0'/2/0", null, null, null,
-        "addr1gpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcpqgpsh506pr");
+        "stake_test1uqwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8q8mmqwc");
     await test(AddressTypeNibbles.REWARD, 0x03, "1852'/1815'/0'/2/0", null, null, null,
-        "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vuph3wczvf288aeyu");
+        "stake1uvwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8qqucf2t");
   }).timeout(60000);
 
   it("Should not permit invalid path", async () => {
