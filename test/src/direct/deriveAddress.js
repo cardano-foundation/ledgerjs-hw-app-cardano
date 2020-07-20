@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { str_to_path, serializeAddressInfo, getTransport, pathToBuffer } from "../test_utils";
+import { str_to_path, serializeAddressInfo, getTransport, pathToBuffer, uint32_to_buf } from "../test_utils";
 import { CLA, INS_DERIVE_ADDRESS, ERRORS } from "./constants";
 
 const P1_RETURN = 0x01;
@@ -23,8 +23,14 @@ describe("deriveAddress", async () => {
   beforeEach(async () => {
     transport = await getTransport();
 
-    // legacy Byron address
-    validDataBuffer = serializeAddressInfo(0x80, str_to_path("44'/1815'/0'/0/0"));
+    validDataBuffer = Buffer.concat([
+      Buffer.from([0b0000]), // base address nibble
+      Buffer.from([0x00]), // testnet network id
+      pathToBuffer("1852'/1815'/0'/0/1"), // spending path
+      Buffer.from([0x22]), // "staking key path" staking choice
+      pathToBuffer("1852'/1815'/0'/2/0") // staking path
+    ]);
+
     send = (p1, p2, data) =>
       transport.send(CLA, INS_DERIVE_ADDRESS, p1, p2, data);
   });
@@ -39,15 +45,16 @@ describe("deriveAddress", async () => {
     await send(P1_RETURN, 0x00, validDataBuffer);
   });
 
-  it("Should not permit mismatch between path length and according buffer length (longer)", async () => {
+  it("Should not permit mismatch between address data length and according buffer length (longer)", async () => {
     const data = Buffer.concat([validDataBuffer, Buffer.from("00", "hex")]);
     await checkThrows(P1_RETURN, 0x00, data, ERRORS.INVALID_DATA);
   });
 
-  it("Should not permit mismatch between path length and according buffer length (shorter)", async () => {
+  it("Should not permit mismatch between address data length and according buffer length (shorter)", async () => {
     const data = validDataBuffer.slice(0, -1);
     await checkThrows(P1_RETURN, 0x00, data, ERRORS.INVALID_DATA);
   });
+
 
   it("Should not permit zero data edge case", async () => {
     await checkThrows(P1_RETURN, 0x00, Buffer.alloc(0), ERRORS.INVALID_DATA);
@@ -65,23 +72,27 @@ describe("deriveAddress", async () => {
     await testcase(0x00, 0x01);
   });
 
-  // TODO some Shelley tests? e.g. for ERR_UNSUPPORTED_ADDRESS
-
-  it("Should not permit path not starting with 44'/1815'/x'/(0 or 1)/y", async () => {
+  it("Should not permit path not starting with 44'/1815'/x'/(0 or 1)/y for Byron addresses", async () => {
     const paths = [
       "44'",
       "44'/132'/1'",
       "33'/1815'/1'",
       "44'/1815'/1",
-      "44'/1815'/5'/3/6"
+      "44'/1815'/5'/3/6",
+      "1852'/1815'/0'/0/1",
     ];
 
     const testcase = async path =>
       checkThrows(
         P1_RETURN,
         0x00,
-        // legacy Byron address
-        serializeAddressInfo(0x80, str_to_path(path)),
+        Buffer.concat([
+          Buffer.from([0b1000]), // byron address nibble
+          uint32_to_buf(764824073), // mainnet protocol magic
+          pathToBuffer(path), // spending path
+          Buffer.from([0x11]), // "no staking" staking choice
+          Buffer.alloc(0) // staking path
+        ]),
         ERRORS.REJECTED_BY_POLICY
       );
 
@@ -90,9 +101,81 @@ describe("deriveAddress", async () => {
     }
   });
 
+  it("Should not permit spending path not starting with 1852'/1815'/x'/(0,1)/y for Shelley addresses", async () => {
+    const paths = [
+      "44'",
+      "44'/132'/1'",
+      "33'/1815'/1'",
+      "44'/1815'/1",
+      "44'/1815'/5'/3/6",
+      "1852'/1815'/0'/2/0",
+    ];
+
+    const testcase = async path =>
+      checkThrows(
+        P1_RETURN,
+        0x00,
+        Buffer.concat([
+          Buffer.from([0b0000]), // base address nibble
+          Buffer.from([0x00]), // testnet network id
+          pathToBuffer(path), // spending path
+          Buffer.from([0x22]), // "staking key path" staking choice
+          pathToBuffer("1852'/1815'/0'/2/0") // staking path
+        ]),
+        ERRORS.REJECTED_BY_POLICY
+      );
+
+    for (let path of paths) {
+      await testcase(path);
+    }
+  });
+
+  it("Should not permit staking path not starting with 1852'/1815'/x'/2/0 for Shelley addresses", async () => {
+    const paths = [
+      "44'",
+      "44'/132'/1'",
+      "33'/1815'/1'",
+      "44'/1815'/1",
+      "44'/1815'/5'/3/6",
+      "1852'/1815'/0'/1/1",
+      "1852'/1815'/0'/2/1",
+    ];
+
+    const testcase = async path =>
+      checkThrows(
+        P1_RETURN,
+        0x00,
+        Buffer.concat([
+          Buffer.from([0b0000]), // base address nibble
+          Buffer.from([0x00]), // testnet network id
+          pathToBuffer("1852'/1815'/0'/0/1"), // spending path
+          Buffer.from([0x22]), // "staking key path" staking choice
+          pathToBuffer(path) // staking path
+        ]),
+        ERRORS.REJECTED_BY_POLICY
+      );
+
+    for (let path of paths) {
+      await testcase(path);
+    }
+  });
+  
+
   it("Should not permit paths longer than 10 indexes", async () => {
     const path = "44'/1815'/1'/4/5/6/7/8/9/10/11";
 
-    await checkThrows(P1_RETURN, 0x00, pathToBuffer(path), ERRORS.INVALID_DATA);
+    await checkThrows(
+      P1_RETURN,
+      0x00,
+      Buffer.concat([
+        Buffer.from([0b1000]), // byron address nibble
+        uint32_to_buf(764824073), // mainnet protocol magic
+        pathToBuffer(path), // spending path
+        Buffer.from([0x11]), // "no staking" staking choice
+        Buffer.alloc(0) // staking path
+      ]),
+      ERRORS.INVALID_DATA
+    );
   });
+
 });
