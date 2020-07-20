@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import pathDerivations from "./__fixtures__/pathDerivations";
-
-import { getAda, str_to_path } from "../utils";
+import getPathDerivationFixture from "./__fixtures__/pathDerivations";
+import { AddressTypeNibbles, utils } from "../../../lib/Ada";
+import { getAda, str_to_path } from "../test_utils";
 
 describe("getExtendedPublicKey", async () => {
   let ada = {};
@@ -16,7 +16,9 @@ describe("getExtendedPublicKey", async () => {
 
   it("Should successfully get extended public key", async () => {
     const test = async path => {
-      const derivation = pathDerivations[path];
+      const derivation = getPathDerivationFixture({
+        path,
+      });
 
       const result = await ada.getExtendedPublicKey(
         str_to_path(derivation.path)
@@ -29,6 +31,9 @@ describe("getExtendedPublicKey", async () => {
     await test("44'/1815'/1'");
     await test("44'/1815'/1'/0/12'");
     await test("44'/1815'/1'/0/10'/1/2/3");
+
+    await test("1852'/1815'/0'/0/1");
+    await test("1852'/1815'/0'/2/0");
   });
 
   it("Should return the same public key with the same path consistently", async () => {

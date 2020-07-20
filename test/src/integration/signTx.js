@@ -1,50 +1,236 @@
 import { expect } from "chai";
-import { getAda, str_to_path } from "../utils";
+import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
+import { AddressTypeNibbles, utils } from "../../../lib/Ada";
 
 const inputs = {
-  utxo0: {
-    txDataHex:
-      "839f8200d8185824825820918c11e1c041a0cb04baea651b9fb1bdef7ee5295f" +
-      "032307e2e57d109de118b8008200d81858248258208f34e4f719effe82c28c8f" +
-      "f45e426233651fc03686130cb7e1d4bc6de20e689c01ff9f8282d81858218358" +
-      "1cb6f4b193e083530aca83ff03de4a60f4e7a6732b68b4fa6972f42c11a0001a" +
-      "907ab5c71a000f42408282d818584283581cb5bacd405a2dcedce19899f8647a" +
-      "8c4f45d84c06fb532c63f9479a40a101581e581c6b8487e9d22850b7539db255" +
-      "e27dd48dc0a50c7994d678696be64f21001ac5000d871a03dc396fffa0",
+  utxoByron: {
+    txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
     outputIndex: 0,
     path: str_to_path("44'/1815'/0'/0/0")
+  },
+  utxoShelley: {
+    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    outputIndex: 0,
+    path: str_to_path("1852'/1815'/0'/0/0"),
   }
 };
 
 const outputs = {
-  adalite: {
-    amountStr: "700000",
-    address58:
-      "DdzFFzCqrhsoarXqLakMBEiURCGPCUL7qRvPf2oGknKN2nNix5b9SQKj2YckgXZK" +
-      "6q1Ym7BNLxgEX3RQFjS2C41xt54yJHeE1hhMUfSG"
+  externalByronMainnet: {
+    amountStr: "3003112",
+    addressHex: utils.buf_to_hex(utils.base58_decode(
+      "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
+    ))
   },
-  ledgerChange: {
-    amountStr: "100000",
-    path: str_to_path("44'/1815'/0'/1/0")
+  externalByronDaedalusMainnet: {
+    amountStr: "3003112",
+    addressHex: utils.buf_to_hex(utils.base58_decode(
+      "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
+    ))
   },
-  ledgerChangeTooMuch: {
-    amountStr: "1000000",
-    path: str_to_path("44'/1815'/0'/1/0")
+  externalByronTestnet: {
+    amountStr: "3003112",
+    addressHex: utils.buf_to_hex(utils.base58_decode(
+      "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
+    ))
+  },
+  externalShelley: {
+    amountStr: "1",
+    addressHex: utils.buf_to_hex(utils.bech32_decodeAddress(
+      "addr1qp7tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5ejd3mr"
+    ))
+  },
+  internalBaseWithStakingKeyHash: {
+    addressTypeNibble: AddressTypeNibbles.BASE,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingKeyHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+    amountStr: "7120787"
+  },
+  internalBaseWithStakingPath: {
+    addressTypeNibble: AddressTypeNibbles.BASE,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+    amountStr: "7120787"
+  },
+  internalEnterprise: {
+    addressTypeNibble: AddressTypeNibbles.ENTERPRISE,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    amountStr: "7120787"
+  },
+  internalPointer: {
+    addressTypeNibble: AddressTypeNibbles.POINTER,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingBlockchainPointer: {
+      blockIndex: 1,
+      txIndex: 2,
+      certificateIndex: 3
+    },
+    amountStr: "7120787"
   }
 };
 
-const results = {
-  txHashHex: "01f54c866c778568c01b9e4c0a2cbab29e0af285623404e0ef922c6b63f9b222",
+const certificates = {
+  stakeRegistration: {
+    type: 0,
+    path: str_to_path("1852'/1815'/0'/2/0")
+  },
+  stakeDeregistration: {
+    type: 1,
+    path: str_to_path("1852'/1815'/0'/2/0")
+  },
+  stakeDelegation: {
+    type: 2,
+    path: str_to_path("1852'/1815'/0'/2/0"),
+    poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973"
+  }
+}
 
-  witnesses: [
-    {
-      path: str_to_path("44'/1815'/0'/0/0"),
-      witnessSignatureHex:
-        "f89f0d3e2ad34a29c36d9eebdceb951088b52d33638d0f55d49ba2f8baff6e29" +
-        "056720be55fd2eb7198c05b424ce4308eaeed7195310e5879c41c1743245b000"
-    }
-  ]
+const withdrawals = {
+  withdrawal0: {
+    path: str_to_path("1852'/1815'/0'/2/0"),
+    amountStr: "111"
+  }
+}
+
+const sampleMetadata = "deadbeef".repeat(8);
+const sampleFeeStr = "42";
+const sampleTtlStr = "10";
+
+const results = {
+  noChangeByronMainnet: {
+    /*
+    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
+    */
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "9c12b678a047bf3148e867d969fba4f9295042c4fff8410782425a356820c79e7549de" +
+          "798f930480ba83615a5e2a19389c795a3281a59077b7d37cd5a071a606"
+      }
+    ]
+  },
+  noChangeByronDaedalusMainnet: {
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "248e6f443503febbaa46a71f2007b024bc6d64f4ecd8897c4827b39ca45802377ed19d" +
+          "84a0565d50e681414748a884503a1aee224207878b0062aa179eeb4400"
+      }
+    ]
+  },
+  noChangeByronTestnet: {
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "248e6f443503febbaa46a71f2007b024bc6d64f4ecd8897c4827b39ca45802377ed19d" +
+          "84a0565d50e681414748a884503a1aee224207878b0062aa179eeb4400"
+      }
+    ]
+  },
+  noChangeShelley: {
+    /*
+    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc000181825841007cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea5454
+    * 43ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f346111401021
+    * 82a030a
+    */
+    txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+    witnesses: [
+      {
+        path: str_to_path("44'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "248e6f443503febbaa46a71f2007b024bc6d64f4ecd8897c4827b39ca45802377ed19d" +
+          "84a0565d50e681414748a884503a1aee224207878b0062aa179eeb4400"
+      }
+    ]
+  },
+  changeBaseWithStakingPath: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changeBaseWithStakingKeyHash: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changePointer: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  changeEnterprise: {
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withWithdrawal: {
+    /*
+    * txBody: a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a05a1581c1d227aefa4b7731491708
+    * 85aadba30aab3127cc611ddbc4999def61c186f
+    */
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withRegistrationCertificate: {
+    /*
+    * txBody: a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048182008200581c1d227aefa4b77
+    * 3149170885aadba30aab3127cc611ddbc4999def61c
+    */
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withDelegationCertificate: {
+    /*
+    * txBody: a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048183028200581c1d227aefa4b77
+    * 3149170885aadba30aab3127cc611ddbc4999def61c581cf61c42cbf7c8c53af3f520508212ad
+    * 3e72f674f957fe23ff0acb4973
+    */
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withDeregistrationCertificate: {
+    /*
+    * txBody: a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048182018200581c1d227aefa4b77
+    * 3149170885aadba30aab3127cc611ddbc4999def61c
+    */
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  },
+  withMetadata: {
+    /*
+    * txBody: a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
+    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
+    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a075820deadbeefdeadbeefdeadbee
+    * fdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+    */
+    txHashHex: "TODO",
+    witnesses: [
+    ]
+  }
 };
+
+
 
 describe("signTx", async () => {
   let ada = {};
@@ -57,11 +243,229 @@ describe("signTx", async () => {
     await ada.t.close();
   });
 
-  it("Should correctly sign Tx", async () => {
+  it("Should correctly sign tx without change address with Byron mainnet output", async () => {
     const response = await ada.signTransaction(
-      [inputs.utxo0],
-      [outputs.adalite, outputs.ledgerChange]
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoByron],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
     );
-    expect(response).to.deep.equal(results);
+    expect(response).to.deep.equal(results.noChangeByronMainnet);
   });
+
+  it("Should correctly sign tx without change address with Byron Daedalus mainnet output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoByron],
+      [
+        outputs.externalByronDaedalusMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChangeByronDaedalusMainnet);
+  });
+
+  it("Should correctly sign tx without change address with Byron testnet output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.TESTNET,
+      ProtocolMagics.TESTNET,
+      [inputs.utxoByron],
+      [
+        outputs.externalByronTestnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChangeByronTestnet);
+  });
+
+  it("Should correctly sign tx without change address with Shelley output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalShelley,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChangeShelley);
+  });
+
+  it("Should correctly sign tx with change base address with staking path", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+        outputs.internalBaseWithStakingPath,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.changeBaseWithStakingPath);
+  });
+
+  it("Should correctly sign tx with change base address with staking key hash", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+        outputs.internalBaseWithStakingKeyHash,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.changeBaseWithStakingKeyHash);
+  });
+
+  it("Should correctly sign tx with enterprise change address", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+        outputs.internalEnterprise,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.changeEnterprise);
+  });
+
+  it("Should correctly sign tx with pointer change address", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+        outputs.internalPointer, // TODO fix failing change address in ledger app
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.changePointer);
+  });
+
+  it("Should correctly sign tx with withdrawal", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [withdrawals.withdrawal0],
+      null
+    );
+    expect(response).to.deep.equal(results.withWithdrawal);
+  });
+
+  it("Should correctly sign tx with a stake registration certificate", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeRegistration],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.withRegistrationCertificate);
+  });
+
+  it("Should correctly sign tx with a stake delegation certificate", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeDelegation],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.withDelegationCertificate);
+  });
+
+  it("Should correctly sign tx with a stake deregistration certificate", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeDeregistration],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.withDeregistrationCertificate);
+  });
+
+  it("Should correctly sign tx with nonempty metadata", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      sampleMetadata
+    );
+    expect(response).to.deep.equal(results.withMetadata);
+  });
+
 });

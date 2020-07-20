@@ -1,17 +1,22 @@
 //@flow
 import basex from "base-x";
+import bech32 from "bech32";
+import {AddressTypeNibbles} from "./Ada"
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
 
-const HARDENED = 0x80000000;
+const BECH32_ALPHABET =
+  "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
 
 // Max supply in lovelace
 const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
+
+const TESTNET_NETWORK_ID = 0x00
 
 export const Precondition = {
   // Generic check
@@ -75,6 +80,14 @@ export const Precondition = {
     Precondition.checkIsString(data);
     for (const c of data) {
       Precondition.check(BASE58_ALPHABET.includes(c));
+    }
+  },
+  checkIsValidBech32Address: (data: string) => {
+    Precondition.check(data.startsWith("addr1"));
+
+    Precondition.checkIsString(data);
+    for (const c of data.slice("addr1".length)) {
+      Precondition.check(BECH32_ALPHABET.includes(c));
     }
   }
 };
@@ -199,7 +212,44 @@ export function base58_decode(data: string): Buffer {
   return bs58.decode(data);
 }
 
-function safe_parseInt(str: string): number {
+export function bech32_encodeAddress(data: Buffer): string {
+  Precondition.checkIsBuffer(data);
+
+  const networkId = data[0] & 0b00001111;
+
+  const data5bit = bech32.toWords(data);
+  return bech32.encode(getShelleyAddressPrefix(data), data5bit, 1000); // TODO what is a reasonable limit?
+}
+
+// based on https://github.com/cardano-foundation/CIPs/pull/6/files
+function getShelleyAddressPrefix(data: Buffer): string {
+  let result = "";
+
+  const addressType = (data[0] & 0b11110000) >> 4;
+  switch (addressType) {
+    case AddressTypeNibbles.REWARD:
+      result = "stake";
+      break;
+    default:
+      result = "addr";
+  }
+
+  const networkId = data[0] & 0b00001111;
+  if (networkId === TESTNET_NETWORK_ID) {
+      result += "_test";
+  }
+
+  return result;
+}
+
+export function bech32_decodeAddress(data: string): Buffer {
+  Precondition.checkIsValidBech32Address(data);
+
+  const { words } = bech32.decode(data, 1000)
+  return Buffer.from(bech32.fromWords(words));
+}
+
+export function safe_parseInt(str: string): number {
   Precondition.checkIsString(str);
   const i = parseInt(str);
   // Check that we parsed everything
@@ -211,28 +261,9 @@ function safe_parseInt(str: string): number {
   return i;
 }
 
-function parseBIP32Index(str: string): number {
-  let base = 0;
-  if (str.endsWith("'")) {
-    str = str.slice(0, -1);
-    base = HARDENED;
-  }
-  const i = safe_parseInt(str);
-  Precondition.check(i >= 0);
-  Precondition.check(i < HARDENED);
-  return base + i;
-}
 
-export function str_to_path(data: string): Array<number> {
-  Precondition.checkIsString(data);
-  Precondition.check(data.length > 0);
-
-  return data.split("/").map(parseBIP32Index);
-}
 
 export default {
-  HARDENED,
-
   hex_to_buf,
   buf_to_hex,
 
@@ -245,14 +276,18 @@ export default {
   // no pair for now
   path_to_buf,
 
+  safe_parseInt,
+
   amount_to_buf,
   buf_to_amount,
 
   base58_encode,
   base58_decode,
 
-  chunkBy,
-  stripRetcodeFromResponse,
+  bech32_encodeAddress,
+  bech32_decodeAddress,
 
-  str_to_path
+  safe_parseInt,
+  chunkBy,
+  stripRetcodeFromResponse
 };

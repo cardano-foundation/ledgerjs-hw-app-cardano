@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { getTransport, pathToBuffer } from "../utils";
+import { str_to_path, serializeAddressInfo, getTransport, pathToBuffer } from "../test_utils";
 import { CLA, INS_DERIVE_ADDRESS, ERRORS } from "./constants";
 
 const P1_RETURN = 0x01;
@@ -23,7 +23,8 @@ describe("deriveAddress", async () => {
   beforeEach(async () => {
     transport = await getTransport();
 
-    validDataBuffer = pathToBuffer("44'/1815'/0'/0/0");
+    // legacy Byron address
+    validDataBuffer = serializeAddressInfo(0x80, str_to_path("44'/1815'/0'/0/0"));
     send = (p1, p2, data) =>
       transport.send(CLA, INS_DERIVE_ADDRESS, p1, p2, data);
   });
@@ -54,7 +55,7 @@ describe("deriveAddress", async () => {
 
   it("Should not permit unknown P1/P2 parameters", async () => {
     const testcase = async (p1, p2) =>
-      checkThrows(p1, p2, validDataBuffer, ERRORS.INVALID_PARAMETERS);
+      checkThrows(p1, p2, validDataBuffer, ERRORS.INVALID_REQUEST_PARAMETERS);
 
     // Invalid P1
     await testcase(0x00, 0x00);
@@ -63,6 +64,8 @@ describe("deriveAddress", async () => {
     // // Invalid P2
     await testcase(0x00, 0x01);
   });
+
+  // TODO some Shelley tests? e.g. for ERR_UNSUPPORTED_ADDRESS
 
   it("Should not permit path not starting with 44'/1815'/x'/(0 or 1)/y", async () => {
     const paths = [
@@ -77,7 +80,8 @@ describe("deriveAddress", async () => {
       checkThrows(
         P1_RETURN,
         0x00,
-        pathToBuffer(path),
+        // legacy Byron address
+        serializeAddressInfo(0x80, str_to_path(path)),
         ERRORS.REJECTED_BY_POLICY
       );
 

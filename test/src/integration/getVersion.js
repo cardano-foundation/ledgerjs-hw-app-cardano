@@ -1,4 +1,4 @@
-import { getAda } from "../utils";
+import { getAda } from "../test_utils";
 import { expect } from "chai";
 
 describe("getVersion", async () => {
@@ -14,7 +14,8 @@ describe("getVersion", async () => {
 
   it("Should correctly get the semantic version of device", async () => {
     const response = await ada.getVersion();
-    expect(response.major).to.equal(1);
-    expect(response.minor).to.equal(2);
+
+    expect(response.major).to.equal(2);
+    expect(response.minor).to.equal(0);
   });
 });
