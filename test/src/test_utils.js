@@ -26,6 +26,6 @@ export const ProtocolMagics = {
 }
 
 export const NetworkIds = {
-  MAINNET: 0x00,
-  TESTNET: 0x03
+  TESTNET: 0x00,
+  MAINNET: 0x03
 }
