@@ -218,7 +218,8 @@ export function bech32_encodeAddress(data: Buffer): string {
   const networkId = data[0] & 0b00001111;
 
   const data5bit = bech32.toWords(data);
-  return bech32.encode(getShelleyAddressPrefix(data), data5bit, 1000); // TODO what is a reasonable limit?
+  const MAX_HUMAN_ADDRESS_LENGTH = 150; // see cardano.h in https://github.com/vacuumlabs/ledger-app-cardano-shelley
+  return bech32.encode(getShelleyAddressPrefix(data), data5bit, MAX_HUMAN_ADDRESS_LENGTH);
 }
 
 // based on https://github.com/cardano-foundation/CIPs/pull/6/files
