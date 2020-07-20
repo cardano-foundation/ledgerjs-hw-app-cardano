@@ -14,7 +14,7 @@ describe("deriveAddress", async () => {
     await ada.t.close();
   });
 
-  it("Should succesfuly derive address", async () => {
+  it("Should successfully derive address", async () => {
     const test = async path => {
       const derivation = pathDerivations[path];
 
