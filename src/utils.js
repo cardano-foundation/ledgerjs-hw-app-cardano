@@ -1,6 +1,7 @@
 //@flow
 import basex from "base-x";
 import bech32 from "bech32";
+import {AddressTypeNibbles} from "./Ada"
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -14,6 +15,8 @@ const bs10 = basex("0123456789");
 
 // Max supply in lovelace
 const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
+
+const TESTNET_NETWORK_ID = 0x00
 
 export const Precondition = {
   // Generic check
@@ -212,8 +215,31 @@ export function base58_decode(data: string): Buffer {
 export function bech32_encodeAddress(data: Buffer): string {
   Precondition.checkIsBuffer(data);
 
+  const networkId = data[0] & 0b00001111;
+
   const data5bit = bech32.toWords(data);
-  return bech32.encode("addr", data5bit, 1000); // TODO what is a reasonable limit?
+  return bech32.encode(getShelleyAddressPrefix(data), data5bit, 1000); // TODO what is a reasonable limit?
+}
+
+// based on https://github.com/cardano-foundation/CIPs/pull/6/files
+function getShelleyAddressPrefix(data: Buffer): string {
+  let result = "";
+
+  const addressType = (data[0] & 0b11110000) >> 4;
+  switch (addressType) {
+    case AddressTypeNibbles.REWARD:
+      result = "stake";
+      break;
+    default:
+      result = "addr";
+  }
+
+  const networkId = data[0] & 0b00001111;
+  if (networkId === TESTNET_NETWORK_ID) {
+      result += "_test";
+  }
+
+  return result;
 }
 
 export function bech32_decodeAddress(data: string): Buffer {
