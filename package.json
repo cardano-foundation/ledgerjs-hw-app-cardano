@@ -55,7 +55,7 @@
     "build-example": "bash ./script/build_example.sh",
     "clean-test": "rm -rf test/lib",
     "build-test": "yarn run clean && yarn run build && yarn run clean-test && babel --source-maps -d test/lib test/src && flow-copy-source -v test/src test/lib",
-    "test-integration-run": "mocha --timeout 120000 test/lib/integration",
+    "test-integration-run": "mocha --timeout 600000 test/lib/integration",
     "//": "run single test by specifying --grep <name> parameter in test-integration",
     "test-integration": "yarn run build-test && yarn run test-integration-run",
     "test-direct-run": "mocha --timeout 3600000 test/lib/direct",
