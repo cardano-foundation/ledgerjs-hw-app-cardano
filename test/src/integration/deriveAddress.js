@@ -29,8 +29,10 @@ describe("deriveAddress", async () => {
     };
 
     await test("44'/1815'/1'/0/12'", ProtocolMagics.MAINNET);
-    await test("44'/1815'/1'/0/10'/1/2/3", ProtocolMagics.MAINNET);
     await test("44'/1815'/1'/0/12'", ProtocolMagics.TESTNET);
+
+    // rejected by the present security policy, but we might want to return it in the future
+    // await test("44'/1815'/1'/0/10'/1/2/3", ProtocolMagics.MAINNET);
   });
 
   it("Should succesfully derive Shelley address", async () => {
