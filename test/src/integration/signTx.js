@@ -37,7 +37,7 @@ const outputs = {
   externalShelley: {
     amountStr: "1",
     addressHex: utils.buf_to_hex(utils.bech32_decodeAddress(
-      "addr1qp7tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5ejd3mr"
+      "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
     ))
   },
   internalBaseWithStakingKeyHash: {
@@ -99,9 +99,7 @@ const sampleTtlStr = "10";
 const results = {
   noChangeByronMainnet: {
     /*
-    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
-    * f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2
-    * e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
+    * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
     */
     txHashHex: "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
     witnesses: [
