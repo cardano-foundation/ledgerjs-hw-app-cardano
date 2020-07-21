@@ -8,7 +8,7 @@ const BASE58_ALPHABET =
 const bs58 = basex(BASE58_ALPHABET);
 
 const BECH32_ALPHABET =
-  "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+  "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
@@ -83,10 +83,10 @@ export const Precondition = {
     }
   },
   checkIsValidBech32Address: (data: string) => {
-    Precondition.check(data.startsWith("addr1"));
-
     Precondition.checkIsString(data);
-    for (const c of data.slice("addr1".length)) {
+    Precondition.check(data.split("1").length == 2);
+
+    for (const c of data.split("1")[1]) {
       Precondition.check(BECH32_ALPHABET.includes(c));
     }
   }
