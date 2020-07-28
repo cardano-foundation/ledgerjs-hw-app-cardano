@@ -197,6 +197,11 @@ const results = {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
           "d0f4bf6940ba4ab4d6ce99234afdfa974b8e3ecad209b699a2eda9d21087ee8a193e45e3ed5ec998d824bbc00eb1061dcf65184ae2b234485177f0c942150005"
+      },
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "afe06638f1fafa10719e9a9c9168e8de66a88e57bfcf502eb0ebdd9a8e4d9e5fc9bef991815015bdbc6a916d92cc6cbe67f4190262a6885dcd5f92080719490a",
       }
     ]
   },
@@ -213,6 +218,11 @@ const results = {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
           "9825594e5a91333b9f5762665ba316af34c2208bd7ef073178af5e48f2aae8673d50436045e292d5bb9be7492eeeda475a04e58621a326c91049a2ef26a33200"
+      },
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "a2a22faa4ac4ba4b5a89c770dd7b2afe877ba8c86f0205df8c01a2184275aaafada9b6be4640aa573cafbbca26ac2eccd98f804065b39b10a0559c7dc441fa0a",
       }
     ]
   },
@@ -230,6 +240,11 @@ const results = {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
           "d94c8f8fe73946c25f3bd0919d05a60b8373ef0a7261fa73eefe1f2a20e8a4c3401feb5eea701222184fceab2c45b47bd823ac76123e2d17f804d3e4ed2df909"
+      },
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "035b4e6ae6f7a8089f2a302ddcb60bc56d48bcf267fdcb071844da5ce3086d51e816777a6fb5eabfcb326a32b830674ac0de40ee1b2360a69adba4b64c662404",
       }
     ]
   },
@@ -246,6 +261,11 @@ const results = {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
           "6136510eb91449474f6137c8d1c7c69eb518e3844a3e63a626be8cf4af91afa24e12f4fa578398bf0e7992e22dcfc5f9773fb8546b88c19e3abfdaa3bbe7a304"
+      },
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "77210ce6533a76db3673af1076bf3933747a8d81cabda80c8bc9c852c78685f8a42c9372721bdfe9b47611039364afb3391031211b5c427cfec0c5c505cfec0c",
       }
     ]
   },
