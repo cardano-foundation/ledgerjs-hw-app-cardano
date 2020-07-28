@@ -665,7 +665,7 @@ export default class Ada {
       outputs.length,
       certificates.length,
       withdrawals.length,
-      inputs.length,
+      inputs.length + certificates.length + withdrawals.length,
       metadataHashHex != null
     )
     // inputs
@@ -726,10 +726,11 @@ export default class Ada {
 
     //console.log("witnesses");
     const witnesses = [];
-    for (const input of inputs) {
-      const witness = await signTx_getWitness(input.path);
+    for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
+      const witness = await signTx_getWitness(path);
       witnesses.push(witness);
     }
+
     return {
       txHashHex,
       witnesses
