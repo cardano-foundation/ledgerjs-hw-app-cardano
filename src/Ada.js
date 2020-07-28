@@ -658,6 +658,17 @@ export default class Ada {
 
     // init
     //console.log("init");
+    
+    // for unique witness paths
+    const witnessPathsSet = new Set();
+    const witnessPaths = [];
+    for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
+      const pathKey = JSON.stringify(path);
+      if (!witnessPathsSet.has(pathKey)) {
+        witnessPathsSet.add(pathKey);
+        witnessPaths.push(path);
+      }
+    }
     await signTx_init(
       networkId,
       protocolMagic,
@@ -665,7 +676,7 @@ export default class Ada {
       outputs.length,
       certificates.length,
       withdrawals.length,
-      inputs.length + certificates.length + withdrawals.length,
+      witnessPaths.length,
       metadataHashHex != null
     )
     // inputs
@@ -726,7 +737,7 @@ export default class Ada {
 
     //console.log("witnesses");
     const witnesses = [];
-    for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
+    for (const path of witnessPaths) {
       const witness = await signTx_getWitness(path);
       witnesses.push(witness);
     }
