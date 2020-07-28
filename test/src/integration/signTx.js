@@ -249,6 +249,22 @@ const results = {
       }
     ]
   },
+  withDuplicateWitnessPaths: {
+
+    txHashHex: "8d720755bcbc724fc71a1868bafbd057d855a176362417f62711a34f2d9b896d",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "04e071e39903e7e1e3ea9d26ce6822d5cbef88ee389f4f63a585668a5a6df98924dca16f8f61c01909162730014bb309fc7043b80ac54375697d6e9c01df0a0c"
+      },
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "7b53ba805658d801baa39546777b611ed071c89938daea50c2c3275358abec2c1d67c8062b24fc4778e09af13e58ea33dd7d0627e221574386716aaa25e1f20b",
+      }
+    ]
+  },
   withMetadata: {
     /*
     * txBody: a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163
@@ -486,6 +502,23 @@ describe("signTx", async () => {
       null
     );
     expect(response).to.deep.equal(results.withDeregistrationCertificate);
+  });
+
+  it("Should correctly sign tx and filter out witnesses with duplicate paths", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalByronMainnet,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [certificates.stakeDeregistration, certificates.stakeDeregistration],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.withDuplicateWitnessPaths);
   });
 
   it("Should correctly sign tx with nonempty metadata", async () => {
