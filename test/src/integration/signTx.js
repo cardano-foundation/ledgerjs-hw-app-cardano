@@ -40,6 +40,12 @@ const outputs = {
       "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
     ))
   },
+  externalShelleyScripthash: {
+    amountStr: "1",
+    addressHex: utils.buf_to_hex(utils.bech32_decodeAddress(
+      "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
+    ))
+  },
   internalBaseWithStakingKeyHash: {
     addressTypeNibble: AddressTypeNibbles.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
@@ -141,6 +147,16 @@ const results = {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
           "5137e748df308525b46deaef18e61e04994f6658c32ada286b06d32b99d6676aef94f36895a51b9025d94b2ab0776749eedc7451ac1f0e61bef8b9cf5ec0240e"
+      }
+    ]
+  },
+  noChangeShelleyScripthash: {
+    txHashHex: "23d82edc8fbd2d55237cba955a2280161ebd5643b23844e9b5abdc843b966e62",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "cbf9a954367715f15e5f0e68638b362676c5590c29498734af1c9ef59e7ec5ed7c3d1453d931e5d166cebab2bd3126a26acb39b5f1da43d2fbb73b6c2aeb1a03"
       }
     ]
   },
@@ -382,6 +398,23 @@ describe("signTx", async () => {
       null
     );
     expect(response).to.deep.equal(results.noChangeShelley);
+  });
+
+  it("Should correctly sign tx without change address with Shelley scripthash output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.TESTNET,
+      ProtocolMagics.TESTNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalShelleyScripthash,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noChangeShelleyScripthash);
   });
 
   it("Should correctly sign tx with change base address with staking path", async () => {
