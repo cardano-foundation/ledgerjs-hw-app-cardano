@@ -23,7 +23,7 @@ export function str_to_path(data: string): Array<number> {
 }
 
 export function serializeAddressInfo(
-    addressTypeNibble: number,
+    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
     stakingPath: ?BIP32Path = null,

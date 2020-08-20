@@ -36,6 +36,12 @@ const INS = {
   RUN_TESTS: 0xf0
 };
 
+export const CertTypes = Object.freeze({
+  staking_key_registration: 0,
+  staking_key_deregistration: 1,
+  delegation: 2,
+});
+
 export type BIP32Path = Array<number>;
 
 export type InputTypeUTxO = {|
@@ -50,7 +56,7 @@ export type OutputTypeAddress = {|
 |};
 
 export type OutputTypeAddressParams = {|
-  addressTypeNibble: number,
+  addressTypeNibble: $Values<typeof AddressTypeNibbles>,
   spendingPath: BIP32Path,
   amountStr: string,
   stakingPath: ?BIP32Path,
@@ -66,7 +72,7 @@ export type StakingBlockchainPointer = {|
 |}
 
 export type Certificate = {|
-  type: number,
+  type: $Values<typeof CertTypes>,
   path: BIP32Path,
   poolKeyHashHex: ?string
 |};
@@ -113,13 +119,13 @@ export type SignTransactionResponse = {|
   witnesses: Array<Witness>
 |};
 
-export const AddressTypeNibbles = {
+export const AddressTypeNibbles = Object.freeze({
   BASE: 0b0000,
   POINTER: 0b0100,
   ENTERPRISE: 0b0110,
   BYRON: 0b1000,
   REWARD: 0b1110
-}
+});
 
 const MetadataCodes = {
 	SIGN_TX_METADATA_NO: 1,
@@ -325,7 +331,7 @@ export default class Ada {
   /**
    * @description Get a public key from the specified BIP 32 path.
    *
-   * @param {BIP32Path} indexes The path indexes. Path must begin with `44'/1815'/n'`, and may be up to 10 indexes long.
+   * @param {BIP32Path} indexes The path indexes. Path must begin with `(44 or 1852)'/1815'/n'`, and may be up to 10 indexes long.
    * @return {Promise<GetExtendedPublicKeyResponse>} The public key with chaincode for the given path.
    *
    * @example
@@ -366,10 +372,10 @@ export default class Ada {
   /**
    * @description Gets an address from the specified BIP 32 path.
    *
-   * @param {BIP32Path} indexes The path indexes. Path must begin with `44'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
+   * @param {BIP32Path} indexes The path indexes. Path must begin with `(44 or 1852)'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
    * @return {Promise<DeriveAddressResponse>} The address for the given path.
    *
-   * @throws 5001 - The path provided does not have the first 3 indexes hardened or 4th index is not 0 or 1
+   * @throws 5001 - The path provided does not have the first 3 indexes hardened or 4th index is not 0, 1 or 2
    * @throws 5002 - The path provided is less than 5 indexes
    * @throws 5003 - Some of the indexes is not a number
    *
@@ -397,7 +403,7 @@ export default class Ada {
    *
    */
   async deriveAddress(
-      addressTypeNibble: number,
+      addressTypeNibble: $Values<typeof AddressTypeNibbles>,
       networkIdOrProtocolMagic: number,
       spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
@@ -430,7 +436,7 @@ export default class Ada {
   }
 
   async showAddress(
-      addressTypeNibble: number,
+      addressTypeNibble: $Values<typeof AddressTypeNibbles>,
       networkIdOrProtocolMagic: number,
       spendingPath: BIP32Path,
       stakingPath: ?BIP32Path = null,
@@ -544,7 +550,7 @@ export default class Ada {
     };
 
     const signTx_addChangeOutput = async (
-      addressTypeNibble: number,
+      addressTypeNibble: $Values<typeof AddressTypeNibbles>,
       spendingPath: BIP32Path,
       amountStr: string,
       stakingPath: ?BIP32Path = null,
@@ -570,7 +576,7 @@ export default class Ada {
     };
 
     const signTx_addCertificate = async (
-      type: number,
+      type: $Values<typeof CertTypes>,
       path: BIP32Path,
       poolKeyHashHex: ?string
     ): Promise<void> => {
