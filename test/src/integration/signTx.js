@@ -88,7 +88,109 @@ const certificates = {
     type: 2,
     path: str_to_path("1852'/1815'/0'/2/0"),
     poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973"
+  },
+  poolRegistrationValid: {
+    type: 3,
+    path: str_to_path("1852'/1815'/0'/2/0"),
+    poolRegistrationParams: {
+      poolKeyHashHex: "7d7ef6b9789d2e56f40d64fd68a0978263b78819c85d806517ba8531",
+      vrfKeyHashHex: "d318306e883533656c137a4b97101c011add371c6cb3f26de7c0084ebd2d08ac",
+      pledgeStr: "50000000000",
+      costStr: "340000000",
+      marginNumerator: 3,
+      marginDenominaror: 100,
+      rewardAccountKeyHash: "e0fc38b160e62718716922612711c277ae8b363977dcfb020c4189fba7",
+      poolOwnersCount: 1,
+      relaysCount: 1
+    }
   }
+}
+
+const poolMetadata = {
+  poolMetadata0: {
+    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
+    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
+  }
+}
+
+const stakingHashOwners = {
+  owner0: {
+    stakingKeyHashHex: "fc38b160e62718716922612711c277ae8b363977dcfb020c4189fba7"
+  },
+  owner1: {
+    stakingKeyHashHex: "0bd5d796f5e54866a14300ec2a18d706f7461b8f0502cc2a182bc88d"
+  }
+}
+
+
+const stakingPathOwners = {
+  owner0: {
+    stakingPath: str_to_path("1852'/1815'/0'/2/0")
+  }
+}
+
+const poolOwnerVariations = {
+  noOwners: [],
+  singleHashOwner: [stakingHashOwners.owner0],
+  singlePathOwner: [stakingPathOwners.owner0],
+  twoHashOwners: [
+    stakingHashOwners.owner0,
+    stakingHashOwners.owner1
+  ],
+  twoCombinedOwners: [
+    stakingHashOwners.owner0,
+    stakingPathOwners.owner0
+  ]
+}
+
+const relays = {
+  singleHostIPV4Relay0: {
+    type: 0,
+    params: {
+      portNumber: 3000,
+      ipv4Hex: "36e44b9a",
+      ipv6Hex: null
+    }
+  },
+  singleHostIPV4Relay1: {
+    type: 0,
+    params: {
+      portNumber: 4000,
+      ipv4Hex: "36e44b9a",
+      ipv6Hex: null
+    }
+  },
+  singleHostIPV6Relay: {
+    type: 0,
+    params: {
+      portNumber: 3000,
+      ipv4Hex: "36e44b9a",
+      ipv6Hex: "24ff780133a2e383a5c4340a07c276e5"
+    }
+  },
+  singleHostNameRelay: {
+    type: 1,
+    params: {
+      portNumber: 3000,
+      dnsName: "aaaa.bbbb.com"
+    }
+  },
+  multiHostNameRelay: {
+    type: 2,
+    params: {
+      dnsName: "aaaa.bbbb.com"
+    }
+  }
+}
+
+const relayVariations = {
+  noRelays: [],
+  singleHostIPV4Relay: [relays.singleHostIPV4Relay],
+  singleHostIPV6Relay: [relays.singleHostIPV6Relay],
+  singleHostNameRelay: [relays.singleHostNameRelay],
+  multiHostNameRelay: [relays.multiHostNameRelay],
+  combinedIPV4Relays: [relays.singleHostIPV4Relay, relays.singleHostIPV4Relay],
+  combinedIPV4SingleHostNameRelays: [relays.singleHostIPV4Relay, relays.singleHostNameRelay]
 }
 
 const withdrawals = {
@@ -591,4 +693,47 @@ describe("signTx", async () => {
     expect(response).to.deep.equal(results.withMetadata);
   });
 
+  it("Should correctly witness valid single path owner ipv4 relay pool registration", async () => {
+    // TODO
+  });
+
+  it("Should correctly witness valid multiple owners ipv4 relay pool registration", async () => {
+    // TODO
+  });
+
+  it("Should correctly witness valid multiple owners mixed relays pool registration", async () => {
+    // TODO
+  });
+
+  it("Should correctly witness valid single path owner no relays pool registration ", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration with no owners", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration with mismatch in specified and actual owner count", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration with mismatch in specified and actual relay count", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration with invalid relay params", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration with numerator bigger than denominator", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration along with other certificates", async () => {
+    // TODO
+  });
+
+  it("Should reject pool registration along with a withdrawal", async () => {
+    // TODO
+  });
 });
