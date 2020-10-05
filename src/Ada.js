@@ -65,10 +65,53 @@ export type StakingBlockchainPointer = {|
   certificateIndex: number
 |}
 
+export type PoolOwnerParams = {|
+  stakingPath: ?BIP32Path,
+  stakingKeyHashHex: ?string
+|}
+
+export type SingleHostIPRelay = {|
+  portNumber: number,
+  ipv4Hex: string,
+  ipv6Hex: string
+|}
+
+export type SingleHostNameRelay = {|
+  portNumber: number,
+  dnsName: string
+|}
+
+export type MultiHostNameRelay = {|
+  dnsName: string
+|}
+
+export type RelayParams = {|
+  type: number, // single host ip = 0, single hostname = 1, multi host name = 2
+  params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay
+|}
+
+export type PoolMetadataParams = {|
+  metadataUrl: string,
+  metadataHashHex: string
+|}
+
+export type PoolParams = {|
+  poolKeyHashHex: string,
+  vrfKeyHashHex: string,
+  pledgeStr: string,
+  costStr: string,
+  marginNumerator: number,
+  marginDenominaror: number,
+  rewardAccountKeyHash: string,
+  poolOwnersCount: number,
+  relaysCount: number
+|};
+
 export type Certificate = {|
   type: number,
   path: BIP32Path,
-  poolKeyHashHex: ?string
+  poolKeyHashHex: ?string,
+  poolRegistrationParams: ?PoolParams
 |};
 
 export type Withdrawal = {|
@@ -658,6 +701,11 @@ export default class Ada {
 
     // init
     //console.log("init");
+
+    // TODO: 
+    if (certificates.length > 1 && certificates.some(cert => cert.type === 3)) {
+      throw new Error("Pool registration certificate must be standalone")
+    }
     
     // for unique witness paths
     const witnessPathsSet = new Set();
