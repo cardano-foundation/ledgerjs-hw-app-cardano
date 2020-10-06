@@ -110,7 +110,8 @@ export type PoolParams = {|
   marginDenominaror: number,
   rewardAccountKeyHash: string,
   poolOwnersCount: number,
-  relaysCount: number
+  relaysCount: number,
+  metadata: PoolMetadataParams
 |};
 
 export type Certificate = {|
