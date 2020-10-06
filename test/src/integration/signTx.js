@@ -75,6 +75,32 @@ const outputs = {
   }
 };
 
+const poolMetadataVariations = {
+  poolMetadataDefault: {
+    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
+    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
+  },
+  poolMetadataUrlTooLong: {
+    metadataUrl: "https://www.vacuumlabs.com/aaaaaaaaaaaaaaaaaaaaaaaasampleUrl.json",
+    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
+  },
+  poolMetadataInvalidHexLength: {
+    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
+    metadataHashHex: "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
+  },
+  poolMetadataInvalidUrl: {
+    metadataUrl: "$.v#5fb2@euf)#i^9a|$;i8$l7v<aj)2<;bdmn9",
+    metadataHashHex: "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
+  },
+  poolMetadataMissingHash: {
+    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json"
+  },
+  poolMetadataMissingUrl: {
+    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
+  },
+  poolMetadataNone: {}
+}
+
 const defaultPoolRegistration = {
   type: 3,
   path: str_to_path("1852'/1815'/0'/2/0"),
@@ -87,7 +113,8 @@ const defaultPoolRegistration = {
     marginDenominaror: 100,
     rewardAccountKeyHash: "e0fc38b160e62718716922612711c277ae8b363977dcfb020c4189fba7",
     poolOwnersCount: 1,
-    relaysCount: 1
+    relaysCount: 1,
+    metadata: poolMetadataVariations.poolMetadataDefault
   }
 }
 
@@ -152,32 +179,13 @@ const certificates = {
       marginDenominaror: 1
     }
   },
-}
-
-const poolMetadataVariations = {
-  poolMetadataDefault: {
-    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
-    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
+  poolRegistrationNoMetadata: { 
+    ...defaultPoolRegistration,
+    poolRegistrationParams: {
+      ...defaultPoolRegistration.poolRegistrationParams,
+      metadata: poolMetadataVariations.poolMetadataNone
+    }
   },
-  poolMetadataUrlTooLong: {
-    metadataUrl: "https://www.vacuumlabs.com/aaaaaaaaaaaaaaaaaaaaaaaasampleUrl.json",
-    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
-  },
-  poolMetadataInvalidHexLength: {
-    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
-    metadataHashHex: "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
-  },
-  poolMetadataInvalidUrl: {
-    metadataUrl: "$.v#5fb2@euf)#i^9a|$;i8$l7v<aj)2<;bdmn9",
-    metadataHashHex: "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
-  },
-  poolMetadataMissingHash: {
-    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json"
-  },
-  poolMetadataMissingUrl: {
-    metadataHashHex: "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
-  },
-  poolMetadataNone: {}
 }
 
 const stakingHashOwners = {
@@ -814,7 +822,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistrationDefault
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -822,15 +829,13 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration2Owner
     const owners = poolOwnerVariations.twoCombinedOwners
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
   it("Should correctly witness valid multiple mixed owners mixed ipv4, single host relays pool registration", async () => {
     const cert = certificates.poolRegistration2Relay2Owner
     const owners = poolOwnerVariations.twoCombinedOwners
-    const relays = relayVariations.combinedIPV4SingleHostNameRelays
-    const metadata = poolMetadataVariations.poolMetadataDefault
+    const relays = relayVariations.combinedIPV4SingleHostNameRelays    
     // TODO
   });
 
@@ -838,7 +843,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration2Relay2Owner
     const owners = poolOwnerVariations.twoCombinedOwners
     const relays = relayVariations.combinedIPV4IPV6Relays
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -847,7 +851,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration0Relay
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.noRelays
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -855,7 +858,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration2Owner
     const owners = poolOwnerVariations.twoPathOwners
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -863,16 +865,14 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration2Owner
     const owners = poolOwnerVariations.twoHashOwners
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
   it("Should correctly witness default registration with no metadata", async () => {
     // works as a private pool not visible in yoroi, daedalus, etc.
-    const cert = certificates.poolRegistrationDefault
+    const cert = certificates.poolRegistrationNoMetadata
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataNone
     // TODO
   });
 
@@ -880,7 +880,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration0Owner
     const owners = poolOwnerVariations.noOwners
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -888,7 +887,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration2Owner
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostIPV4Relay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -896,33 +894,37 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistration2Relay
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostNameRelay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
   it("Should reject pool registration with invalid metadata params", async () => {
-    const cert = certificates.poolRegistrationDefault
+    const invalidMetadataVariations = [
+      poolMetadataVariations.poolMetadataUrlTooLong,
+      poolMetadataVariations.poolMetadataInvalidHexLength,
+      poolMetadataVariations.poolMetadataInvalidUrl,
+      poolMetadataVariations.poolMetadataMissingHash,
+      poolMetadataVariations.poolMetadataMissingUrl
+    ]
+
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostIPV4Relay
 
-    let metadata = poolMetadataVariations.poolMetadataUrlTooLong
-    //test
-    metadata = poolMetadataVariations.poolMetadataInvalidHexLength
-    //test
-    metadata = poolMetadataVariations.poolMetadataInvalidUrl
-    //test
-    metadata = poolMetadataVariations.poolMetadataMissingHash
-    //test
-    metadata = poolMetadataVariations.poolMetadataMissingUrl
-    //test
-
+    for (const metadataVariant of invalidMetadataVariations) {
+      const cert = { 
+        ...certificates.poolRegistrationDefault,
+        poolRegistrationParams: {
+          ...certificates.poolRegistrationDefault.poolRegistrationParams,
+          metadata: metadataVariant
+        }
+      }
+      // test and reject
+    }
     //reject all
   });
 
   it("Should reject pool registration with invalid relays", async () => {
     const cert = certificates.poolRegistrationDefault
     const owners = poolOwnerVariations.singlePathOwner
-    const metadata = poolMetadataVariations.poolMetadataDefault
 
     const relays = relayVariations.invalidRelays
     for (const relay of relays) {
@@ -934,7 +936,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistrationWrongMargin
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostNameRelay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -945,7 +946,6 @@ describe("signTx", async () => {
     ]
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostNameRelay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
 
@@ -953,7 +953,6 @@ describe("signTx", async () => {
     const cert = certificates.poolRegistrationDefault
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.singleHostNameRelay
-    const metadata = poolMetadataVariations.poolMetadataDefault
     const withdrawal = [withdrawals.withdrawal0]
     // TODO
   });
