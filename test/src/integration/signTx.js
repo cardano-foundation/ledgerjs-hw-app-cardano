@@ -192,6 +192,9 @@ const stakingHashOwners = {
 const stakingPathOwners = {
   owner0: {
     stakingPath: str_to_path("1852'/1815'/0'/2/0")
+  },
+  owner1: {
+    stakingPath: str_to_path("1852'/1815'/0'/2/1")
   }
 }
 
@@ -202,6 +205,10 @@ const poolOwnerVariations = {
   twoHashOwners: [
     stakingHashOwners.owner0,
     stakingHashOwners.owner1
+  ],
+  twoPathOwners: [
+    stakingPathOwners.owner0,
+    stakingPathOwners.owner1
   ],
   twoCombinedOwners: [
     stakingHashOwners.owner0,
@@ -811,7 +818,7 @@ describe("signTx", async () => {
     // TODO
   });
 
-  it("Should correctly witness valid multiple owners ipv4 relay pool registration", async () => {
+  it("Should correctly witness valid multiple mixed owners ipv4 relay pool registration", async () => {
     const cert = certificates.poolRegistration2Owner
     const owners = poolOwnerVariations.twoCombinedOwners
     const relays = relayVariations.singleHostIPV4Relay
@@ -819,7 +826,7 @@ describe("signTx", async () => {
     // TODO
   });
 
-  it("Should correctly witness valid multiple owners mixed ipv4, single host relays pool registration", async () => {
+  it("Should correctly witness valid multiple mixed owners mixed ipv4, single host relays pool registration", async () => {
     const cert = certificates.poolRegistration2Relay2Owner
     const owners = poolOwnerVariations.twoCombinedOwners
     const relays = relayVariations.combinedIPV4SingleHostNameRelays
@@ -827,7 +834,7 @@ describe("signTx", async () => {
     // TODO
   });
 
-  it("Should correctly witness valid multiple owners mixed ipv4 ipv6 relays pool registration", async () => {
+  it("Should correctly witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration", async () => {
     const cert = certificates.poolRegistration2Relay2Owner
     const owners = poolOwnerVariations.twoCombinedOwners
     const relays = relayVariations.combinedIPV4IPV6Relays
@@ -836,9 +843,26 @@ describe("signTx", async () => {
   });
 
   it("Should correctly witness valid single path owner no relays pool registration ", async () => {
+    // Pool won't be listed in the topology, it will need to connect manually to known nodes
     const cert = certificates.poolRegistration0Relay
     const owners = poolOwnerVariations.singlePathOwner
     const relays = relayVariations.noRelays
+    const metadata = poolMetadataVariations.poolMetadataDefault
+    // TODO
+  });
+
+    it("Should reject pool registration with multiple path owners", async () => {
+    const cert = certificates.poolRegistration2Owner
+    const owners = poolOwnerVariations.twoPathOwners
+    const relays = relayVariations.singleHostIPV4Relay
+    const metadata = poolMetadataVariations.poolMetadataDefault
+    // TODO
+  });
+
+  it("Should reject pool registration with only hash owners", async () => {
+    const cert = certificates.poolRegistration2Owner
+    const owners = poolOwnerVariations.twoHashOwners
+    const relays = relayVariations.singleHostIPV4Relay
     const metadata = poolMetadataVariations.poolMetadataDefault
     // TODO
   });
