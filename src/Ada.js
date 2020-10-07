@@ -95,16 +95,20 @@ export type PoolMetadataParams = {|
   metadataHashHex: string
 |}
 
+export type Margin = {|
+  numerator: number,
+  denominaror: number,
+|}
+
 export type PoolParams = {|
   poolKeyHashHex: string,
   vrfKeyHashHex: string,
   pledgeStr: string,
   costStr: string,
-  marginNumerator: number,
-  marginDenominaror: number,
+  margin: Margin,
   rewardAccountKeyHash: string,
-  poolOwnersCount: number,
-  relaysCount: number,
+  poolOwners: Array<PoolOwnerParams>,
+  relays: Array<RelayParams>,
   metadata: PoolMetadataParams
 |};
 
