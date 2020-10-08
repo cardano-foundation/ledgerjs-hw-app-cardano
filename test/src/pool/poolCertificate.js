@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
 import { AddressTypeNibbles, utils } from "../../../lib/Ada";
-import { PoolParams } from "../../../lib/Ada"
 
 const inputs = {
   utxo: {
@@ -66,7 +65,7 @@ const stakingPathOwners = {
   }
 }
 
-const poolOwnerVariations = {
+const poolOwnerVariationSet = {
   noOwners: [],
   singleHashOwner: [stakingHashOwners.owner0],
   singlePathOwner: [stakingPathOwners.owner0],
@@ -160,7 +159,7 @@ const relays = {
   }
 }
 
-const relayVariations = {
+const relayVariationSet = {
   noRelays: [],
   singleHostIPV4Relay: [relays.singleHostIPV4Relay0],
   singleHostIPV6Relay: [relays.singleHostIPV6Relay],
@@ -171,21 +170,20 @@ const relayVariations = {
   combinedIPV4IPV6Relays: [relays.singleHostIPV4Relay1, relays.singleHostIPV6Relay]
 }
 
-const defaultPoolRegistration: PoolParams = {
+const defaultPoolRegistration = {
   type: 3,
-  path: str_to_path("1852'/1815'/0'/2/0"),
   poolRegistrationParams: {
     poolKeyHashHex: "7d7ef6b9789d2e56f40d64fd68a0978263b78819c85d806517ba8531",
     vrfKeyHashHex: "d318306e883533656c137a4b97101c011add371c6cb3f26de7c0084ebd2d08ac",
     pledgeStr: "50000000000",
     costStr: "340000000",
     margin: {
-      numerator: 3,
-      denominaror: 100,
+      numerator: "3",
+      denominaror: "100",
     },
     rewardAccountKeyHash: "e0fc38b160e62718716922612711c277ae8b363977dcfb020c4189fba7",
-    poolOwners: poolOwnerVariations.singlePathOwner,
-    relays: relayVariations.singleHostIPV4Relay,
+    poolOwners: poolOwnerVariationSet.singlePathOwner,
+    relays: relayVariationSet.singleHostIPV4Relay,
     metadata: poolMetadataVariations.poolMetadataDefault
   }
 }
@@ -211,51 +209,51 @@ const certificates = {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariations.twoCombinedOwners
+      poolOwners: poolOwnerVariationSet.twoCombinedOwners
     }
   },
   poolRegistration2PathOwners: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariations.twoPathOwners
+      poolOwners: poolOwnerVariationSet.twoPathOwners
     }
   },
   poolRegistration2HashOwners: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariations.twoHashOwners
+      poolOwners: poolOwnerVariationSet.twoHashOwners
     }
   },
   poolRegistrationNoOwners: { 
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariations.noOwners
+      poolOwners: poolOwnerVariationSet.noOwners
     }
   },
   poolRegistrationMixedOwnersIpv4SingleHostRelays: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariations.twoCombinedOwners,
-      relays: relayVariations.combinedIPV4SingleHostNameRelays
+      poolOwners: poolOwnerVariationSet.twoCombinedOwners,
+      relays: relayVariationSet.combinedIPV4SingleHostNameRelays
     }
   },
   poolRegistrationMixedOwnersIpv4Ipv6Relays: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariations.twoCombinedOwners,
-      relays: relayVariations.combinedIPV4IPV6Relays
+      poolOwners: poolOwnerVariationSet.twoCombinedOwners,
+      relays: relayVariationSet.combinedIPV4IPV6Relays
     }
   },
   poolRegistrationNoRelays: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
-      relays: relayVariations.noRelays
+      relays: relayVariationSet.noRelays
     }
   },
   poolRegistrationNoMetadata: { 
@@ -495,7 +493,7 @@ describe("witnessCertificate", async () => {
   });
 
   it("Should reject pool registration with invalid relays", async () => {
-    const invalidRelayVariations = [
+    const invalidrelayVariationSet = [
       relays.singleHostIPV4RelayMissingPort,
       relays.singleHostIPV4RelayMissingIpv4,
       relays.singleHostNameRelayMissingPort,
@@ -503,7 +501,7 @@ describe("witnessCertificate", async () => {
       relays.multiHostNameRelayMissingDns
     ]
 
-    for (const relayVariant of invalidRelayVariations) {
+    for (const relayVariant of invalidrelayVariationSet) {
       const cert = { 
         ...certificates.poolRegistrationDefault,
         poolRegistrationParams: {

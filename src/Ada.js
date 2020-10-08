@@ -96,8 +96,8 @@ export type PoolMetadataParams = {|
 |}
 
 export type Margin = {|
-  numerator: number,
-  denominaror: number,
+  numerator: string,
+  denominaror: string,
 |}
 
 export type PoolParams = {|
