@@ -3,6 +3,25 @@ import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
 import { AddressTypeNibbles, utils } from "../../../lib/Ada";
 import { PoolParams } from "../../../lib/Ada"
 
+const inputs = {
+  utxo: {
+    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    outputIndex: 0
+  }
+};
+
+const outputs = {
+  external: {
+    amountStr: "1",
+    addressHex: utils.buf_to_hex(utils.bech32_decodeAddress(
+      "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
+    ))
+  }
+}
+
+const sampleFeeStr = "42";
+const sampleTtlStr = "10";
+
 const poolMetadataVariations = {
   poolMetadataDefault: {
     metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
@@ -278,49 +297,166 @@ describe("witnessCertificate", async () => {
 
   it("Should correctly witness valid single path owner ipv4 relay pool registration", async () => {
     const cert = certificates.poolRegistrationDefault
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should correctly witness valid multiple mixed owners ipv4 relay pool registration", async () => {
     const cert = certificates.poolRegistrationMixedOwners
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should correctly witness valid multiple mixed owners mixed ipv4, single host relays pool registration", async () => {
     const cert = certificates.poolRegistrationMixedOwnersIpv4SingleHostRelays  
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should correctly witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration", async () => {
     const cert = certificates.poolRegistrationMixedOwnersIpv4Ipv6Relays
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should correctly witness valid single path owner no relays pool registration ", async () => {
     // Pool won't be listed in the topology, it will need to connect manually to known nodes
     const cert = certificates.poolRegistrationNoRelays
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
     it("Should reject pool registration with multiple path owners", async () => {
     const cert = certificates.poolRegistration2PathOwners
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should reject pool registration with only hash owners", async () => {
     const cert = certificates.poolRegistration2HashOwners
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should correctly witness default registration with no metadata", async () => {
     // works as a private pool not visible in yoroi, daedalus, etc.
     const cert = certificates.poolRegistrationNoMetadata
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should reject pool registration with no owners", async () => {
     const cert = certificates.poolRegistrationNoOwners
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should reject pool registration with invalid metadata params", async () => {
@@ -340,9 +476,22 @@ describe("witnessCertificate", async () => {
           metadata: metadataVariant
         }
       }
-      // test and reject
+
+      const response = await ada.signTransaction(
+        NetworkIds.MAINNET,
+        ProtocolMagics.MAINNET,
+        [inputs.utxo],
+        [
+          outputs.external,
+        ],
+        sampleFeeStr,
+        sampleTtlStr,
+        [cert],
+        [],
+        null
+      );
+      // expect(response).to.deep.equal();
     }
-    //reject all
   });
 
   it("Should reject pool registration with invalid relays", async () => {
@@ -362,14 +511,39 @@ describe("witnessCertificate", async () => {
           relays: [relayVariant],
         }
       }
-      // test and reject
+      const response = await ada.signTransaction(
+        NetworkIds.MAINNET,
+        ProtocolMagics.MAINNET,
+        [inputs.utxo],
+        [
+          outputs.external,
+        ],
+        sampleFeeStr,
+        sampleTtlStr,
+        [cert],
+        [],
+        null
+      );
+      // expect(response).to.deep.equal();
     }
-    //reject all
   });
 
   it("Should reject pool registration with numerator bigger than denominator", async () => {
     const cert = certificates.poolRegistrationWrongMargin
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should reject pool registration along with other certificates", async () => {
@@ -377,12 +551,38 @@ describe("witnessCertificate", async () => {
       certificates.poolRegistrationDefault,
       certificates.stakeDelegation,
     ]
-    // TODO
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      certs,
+      [],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 
   it("Should reject pool registration along with a withdrawal", async () => {
     const cert = certificates.poolRegistrationDefault
-    const withdrawal = [withdrawals.withdrawal0]
-    // TODO
+    const withdrawal = withdrawals.withdrawal0
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [
+        outputs.external,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [withdrawal],
+      null
+    );
+    // expect(response).to.deep.equal();
   });
 });
