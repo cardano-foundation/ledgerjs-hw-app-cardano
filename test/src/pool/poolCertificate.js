@@ -184,8 +184,8 @@ const defaultPoolRegistration = {
     pledgeStr: "50000000000",
     costStr: "340000000",
     margin: {
-      numerator: "3",
-      denominaror: "100",
+      numeratorStr: "3",
+      denominatorStr: "100",
     },
     rewardAccountKeyHash: "e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
     poolOwners: poolOwnerVariationSet.singlePathOwner,
@@ -240,7 +240,7 @@ const certificates = {
       poolOwners: poolOwnerVariationSet.twoHashOwners
     }
   },
-  poolRegistrationNoOwners: { 
+  poolRegistrationNoOwners: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
@@ -270,7 +270,7 @@ const certificates = {
       relays: relayVariationSet.noRelays
     }
   },
-  poolRegistrationNoMetadata: { 
+  poolRegistrationNoMetadata: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
@@ -282,8 +282,8 @@ const certificates = {
     poolRegistrationParams: {
       ...defaultPoolRegistration.poolRegistrationParams,
       margin: {
-        numerator: 3,
-        denominaror: 1,
+        numeratorStr: "3",
+        denominatorStr: "1",
       }
     }
   },
@@ -358,7 +358,7 @@ describe("witnessCertificate", async () => {
   });
 
   it("Should correctly witness valid multiple mixed owners mixed ipv4, single host relays pool registration", async () => {
-    const cert = certificates.poolRegistrationMixedOwnersIpv4SingleHostRelays  
+    const cert = certificates.poolRegistrationMixedOwnersIpv4SingleHostRelays;
     const response = await ada.signTransaction(
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
@@ -526,7 +526,7 @@ describe("witnessCertificate", async () => {
     ]
 
     for (const metadataVariant of invalidMetadataVariations) {
-      const cert = { 
+      const cert = {
         ...certificates.poolRegistrationDefault,
         poolRegistrationParams: {
           ...certificates.poolRegistrationDefault.poolRegistrationParams,
@@ -561,7 +561,7 @@ describe("witnessCertificate", async () => {
     ]
 
     for (const relayVariant of invalidrelayVariationSet) {
-      const cert = { 
+      const cert = {
         ...certificates.poolRegistrationDefault,
         poolRegistrationParams: {
           ...certificates.poolRegistrationDefault.poolRegistrationParams,

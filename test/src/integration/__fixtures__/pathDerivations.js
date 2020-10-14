@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { ProtocolMagics } from "../../test_utils"; 
+import { ProtocolMagics } from "../../test_utils";
 
 const derivations = [
   // Byron
