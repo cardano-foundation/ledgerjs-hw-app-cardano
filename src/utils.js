@@ -297,6 +297,9 @@ export default {
   uint8_to_buf,
 
   // no pair for now
+  uint16_to_buf,
+
+  // no pair for now
   path_to_buf,
 
   safe_parseInt,
