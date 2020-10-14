@@ -822,11 +822,11 @@ export default class Ada {
     };
 
     // we need exactly one owner given by path to have a witness
-    let witnessOwner = null;
+    const witnessPaths = [];
     if (isSigningPoolRegistrationAsOwner) {
       if (certificates.length > 1)
         throw new Error("A pool registration certificate must be standalone");
-      if (withdrawals.length > 1)
+      if (withdrawals.length)
         throw new Error("No withdrawals allowed for transactions registering stake pools");
 
       if (!certificates) throw new Error("missing certificates");
@@ -834,6 +834,7 @@ export default class Ada {
       if (!certificates[0].poolRegistrationParams) throw new Error("missing stake pool registration params");
       if (!certificates[0].poolRegistrationParams.poolOwners) throw new Error("missing stake pool owners");
 
+      let witnessOwner: ?PoolOwnerParams = null;
       for (const owner of certificates[0].poolRegistrationParams.poolOwners) {
         if (owner.stakingPath) {
           Precondition.checkIsValidPath(owner.stakingPath);
@@ -845,13 +846,11 @@ export default class Ada {
         }
       }
       if (!witnessOwner) throw new Error("no owner given by path");
-    }
 
-    const witnessPaths = [];
-    if (isSigningPoolRegistrationAsOwner) {
       // a single witness for the pool owner given by path
-      witnessPaths.push(witnessOwner);
+      witnessPaths.push(witnessOwner.stakingPath);
     } else {
+      // we collect required witnesses for inputs, certificates and withdrawals
       // each path is included only once
       const witnessPathsSet = new Set();
       for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
@@ -881,7 +880,7 @@ export default class Ada {
     // outputs
     for (const output of outputs) {
       if (output.addressHex) {
-        await signTx_addAddressOutput(output.addressHex, output.amountStr);
+        await signTx_addAddressOutput(output.amountStr, output.addressHex);
       } else if (output.spendingPath) {
         await signTx_addChangeOutput(
           output.amountStr,
