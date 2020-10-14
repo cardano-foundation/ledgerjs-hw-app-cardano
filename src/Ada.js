@@ -390,7 +390,7 @@ export default class Ada {
   async getExtendedPublicKey(
     path: BIP32Path
   ): Promise<GetExtendedPublicKeyResponse> {
-    Precondition.checkIsValidPath(path);
+    Precondition.checkIsValidPath(path, "invalid key path");
 
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data).then(
@@ -575,6 +575,9 @@ export default class Ada {
     const signTx_addInput = async (
       input: InputTypeUTxO
     ): Promise<void> => {
+      Precondition.checkIsHexString(input.txHashHex, "invalid tx hash");
+      Precondition.check(input.txHashHex.length == 32 * 2, "invalid tx hash");
+
       const data = Buffer.concat([
         utils.hex_to_buf(input.txHashHex),
         utils.uint32_to_buf(input.outputIndex),
@@ -587,6 +590,9 @@ export default class Ada {
       addressHex: string,
       amountStr: string
     ): Promise<void> => {
+      Precondition.checkIsHexString(addressHex, "invalid address in output");
+      Precondition.checkIsValidAmount(amountStr, "invalid amount in output");
+
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS),

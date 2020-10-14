@@ -10,14 +10,15 @@ function parseBIP32Index(str: string): number {
     base = HARDENED;
   }
   const i = utils.safe_parseInt(str);
-  Precondition.check(i >= 0);
-  Precondition.check(i < HARDENED);
+  Precondition.check(i >= 0, errMsg);
+  Precondition.check(i < HARDENED, errMsg);
   return base + i;
 }
-  
+
 export function str_to_path(data: string): Array<number> {
-  Precondition.checkIsString(data);
-  Precondition.check(data.length > 0);
+  const errMsg = "invalid bip32 path string";
+  Precondition.checkIsString(data, errMsg);
+  Precondition.check(data.length > 0, errMsg);
 
   return data.split("/").map(parseBIP32Index);
 }
@@ -30,20 +31,20 @@ export function serializeAddressInfo(
     stakingKeyHashHex: ?string = null,
     stakingBlockchainPointer: ?StakingBlockchainPointer = null
 ): Buffer {
-  Precondition.checkIsUint8(addressTypeNibble << 4);
+  Precondition.checkIsUint8(addressTypeNibble << 4, "invalid address type nibble");
   const addressTypeNibbleBuf = utils.uint8_to_buf(addressTypeNibble);
 
   let networkIdOrProtocolMagicBuf;
 
   if (addressTypeNibble == AddressTypeNibbles.BYRON) {
-    Precondition.checkIsUint32(networkIdOrProtocolMagic);
+    Precondition.checkIsUint32(networkIdOrProtocolMagic, "invalid protocol magic");
     networkIdOrProtocolMagicBuf = utils.uint32_to_buf(networkIdOrProtocolMagic);
   } else {
-    Precondition.checkIsUint8(networkIdOrProtocolMagic);
+    Precondition.checkIsUint8(networkIdOrProtocolMagic, "invalid network id");
     networkIdOrProtocolMagicBuf = utils.uint8_to_buf(networkIdOrProtocolMagic);
   }
 
-  Precondition.checkIsValidPath(spendingPath);
+  Precondition.checkIsValidPath(spendingPath, "invalid spending path");
   const spendingPathBuf = utils.path_to_buf(spendingPath);
 
   const stakingChoices = {
@@ -62,7 +63,7 @@ export function serializeAddressInfo(
     stakingInfoBuf = Buffer.alloc(0);
   } else if ( stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
     stakingChoice = stakingChoices.STAKING_KEY_PATH;
-    Precondition.checkIsValidPath(stakingPath);
+    Precondition.checkIsValidPath(stakingPath, "invalid staking key path");
     stakingInfoBuf = utils.path_to_buf(stakingPath);
   } else if (!stakingPath &&  stakingKeyHashHex && !stakingBlockchainPointer) {
     const stakingKeyHash = utils.hex_to_buf(stakingKeyHashHex);
@@ -72,12 +73,12 @@ export function serializeAddressInfo(
   } else if (!stakingPath && !stakingKeyHashHex &&  stakingBlockchainPointer) {
     stakingChoice = stakingChoices.BLOCKCHAIN_POINTER;
     stakingInfoBuf = Buffer.alloc(3 * 4); // 3 x uint32
-    
-    Precondition.checkIsUint32(stakingBlockchainPointer.blockIndex);
+
+    Precondition.checkIsUint32(stakingBlockchainPointer.blockIndex, "invalid blockchain pointer");
     stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.blockIndex, 0);
-    Precondition.checkIsUint32(stakingBlockchainPointer.txIndex);
+    Precondition.checkIsUint32(stakingBlockchainPointer.txIndex, "invalid blockchain pointer");
     stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.txIndex, 4);
-    Precondition.checkIsUint32(stakingBlockchainPointer.certificateIndex);
+    Precondition.checkIsUint32(stakingBlockchainPointer.certificateIndex, "invalid blockchain pointer");
     stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.certificateIndex, 8);
   } else {
     throw new Error("Invalid staking info");
