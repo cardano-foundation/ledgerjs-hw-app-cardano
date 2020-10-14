@@ -174,9 +174,22 @@ const MetadataCodes = {
 	SIGN_TX_METADATA_YES: 2
 }
 
+const PoolRegistrationCodes = {
+	SIGN_TX_POOL_REGISTRATION_NO: 3,
+	SIGN_TX_POOL_REGISTRATION_YES: 4
+}
+
 const TxOutputTypeCodes = {
   SIGN_TX_OUTPUT_TYPE_ADDRESS: 1,
   SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2
+}
+
+
+const CertificateTypes = {
+	STAKE_REGISTRATION: 0,
+	STAKE_DEREGISTRATION: 1,
+	STAKE_DELEGATION: 2,
+	STAKE_POOL_REGISTRATION : 3
 }
 
 export const ErrorCodes = {
@@ -460,8 +473,7 @@ export default class Ada {
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
 
-    
-    const data = cardano.serializeAddressInfo(
+    const data = cardano.serializeAddressParams(
       addressTypeNibble,
       networkIdOrProtocolMagic,
       spendingPath,
@@ -492,7 +504,7 @@ export default class Ada {
 
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
-    const data = cardano.serializeAddressInfo(
+    const data = cardano.serializeAddressParams(
       addressTypeNibble,
       networkIdOrProtocolMagic,
       spendingPath,
@@ -534,6 +546,12 @@ export default class Ada {
         utils.stripRetcodeFromResponse
       );
 
+    // pool registrations are quite restricted
+    // this affects witness set construction and many validations
+    const isSigningPoolRegistrationAsOwner = certificates.some(
+      cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    );
+
     const signTx_init = async (
       networkId: number,
       protocolMagic: number,
@@ -544,6 +562,7 @@ export default class Ada {
       numWitnesses: number,
       includeMetadata: boolean,
     ): Promise<void> => {
+
       const data = Buffer.concat([
         utils.uint8_to_buf(networkId),
         utils.uint32_to_buf(protocolMagic),
@@ -551,6 +570,11 @@ export default class Ada {
           includeMetadata
           ? MetadataCodes.SIGN_TX_METADATA_YES
           : MetadataCodes.SIGN_TX_METADATA_NO
+        ),
+        utils.uint8_to_buf(
+          isSigningPoolRegistrationAsOwner
+          ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
+          : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO
         ),
         utils.uint32_to_buf(numInputs),
         utils.uint32_to_buf(numOutputs),
@@ -581,8 +605,8 @@ export default class Ada {
     };
 
     const signTx_addAddressOutput = async (
-      addressHex: string,
-      amountStr: string
+      amountStr: string,
+      addressHex: string
     ): Promise<void> => {
       Precondition.checkIsHexString(addressHex, "invalid address in output");
       Precondition.checkIsValidAmount(amountStr, "invalid amount in output");
@@ -597,19 +621,19 @@ export default class Ada {
     };
 
     const signTx_addChangeOutput = async (
+      amountStr: string,
       addressTypeNibble: number,
       spendingPath: BIP32Path,
-      amountStr: string,
       stakingPath: ?BIP32Path = null,
       stakingKeyHashHex: ?string = null,
       stakingBlockchainPointer: ?StakingBlockchainPointer = null,
     ): Promise<void> => {
-
+      Precondition.checkIsValidAmount(amountStr, "invalid amount in output");
 
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
-        cardano.serializeAddressInfo(
+        cardano.serializeAddressParams(
           addressTypeNibble,
           addressTypeNibble == AddressTypeNibbles.BYRON ? protocolMagic : networkId,
           spendingPath,
@@ -624,21 +648,103 @@ export default class Ada {
 
     const signTx_addCertificate = async (
       type: number,
-      path: BIP32Path,
-      poolKeyHashHex: ?string
+      path: ?BIP32Path,
+      poolKeyHashHex: ?string,
+      poolParams: ?PoolParams
     ): Promise<void> => {
       const dataFields = [
         utils.uint8_to_buf(type),
-        utils.path_to_buf(path),
       ];
 
+      switch (type) {
+      case CertificateTypes.STAKE_REGISTRATION:
+      case CertificateTypes.STAKE_DEREGISTRATION:
+      case CertificateTypes.STAKE_DELEGATION: {
+        // these certificates are not allowed within a pool registration tx
+        Precondition.check(!isSigningPoolRegistrationAsOwner,
+            "cannot combine pool registration with other certificates");
+
+        if (path != null)
+          dataFields.push(utils.path_to_buf(path));
+        else
+          throw new Error("path is required for a certificate of type " + type);
+        break;
+      }
+      case CertificateTypes.STAKE_POOL_REGISTRATION: {
+        Assert.assert(isSigningPoolRegistrationAsOwner);
+        // OK, data are serialized and sent later in additional APDUs
+        break;
+      }
+      default:
+        throw new Error("invalid certificate type");
+      }
+
       if (poolKeyHashHex != null) {
+        Precondition.check(
+          type == CertificateTypes.STAKE_DELEGATION,
+          "superfluous pool key hash in a certificate of type " + type
+        );
         dataFields.push(utils.hex_to_buf(poolKeyHashHex));
       }
 
       const data = Buffer.concat(dataFields);
       const response = await _send(P1_STAGE_CERTIFICATES, P2_UNUSED, data);
       Assert.assert(response.length == 0);
+
+      // we are done for every certificate except pool registration
+
+      if (type == CertificateTypes.STAKE_POOL_REGISTRATION) {
+        if(!poolParams)
+          throw new Error("missing stake pool params in a pool registration certificate");
+
+        // additional data for pool certificate
+        const APDU_INSTRUCTIONS = {
+          POOL_PARAMS: 0x30,
+          OWNERS: 0x31,
+          RELAYS: 0x32,
+          METADATA: 0x33,
+          CONFIRMATION: 0x34
+        };
+
+        const response = await _send(
+          P1_STAGE_CERTIFICATES,
+          APDU_INSTRUCTIONS.POOL_PARAMS,
+          cardano.serializePoolInitialParams(poolParams)
+        );
+        Assert.assert(response.length == 0);
+
+        for (const owner of poolParams.poolOwners) {
+          const response = await _send(
+            P1_STAGE_CERTIFICATES,
+            APDU_INSTRUCTIONS.OWNERS,
+            cardano.serializePoolOwnerParams(owner)
+          );
+          Assert.assert(response.length == 0);
+        }
+
+        for (const relay of poolParams.relays) {
+          const response = await _send(
+            P1_STAGE_CERTIFICATES,
+            APDU_INSTRUCTIONS.RELAYS,
+            cardano.serializePoolRelayParams(relay)
+          );
+          Assert.assert(response.length == 0);
+        }
+
+        const mdResponse = await _send(
+          P1_STAGE_CERTIFICATES,
+          APDU_INSTRUCTIONS.METADATA,
+          cardano.serializePoolMetadataParams(poolParams.metadata)
+        );
+        Assert.assert(mdResponse.length == 0);
+
+        const confirmResponse = await _send(
+          P1_STAGE_CERTIFICATES,
+          APDU_INSTRUCTIONS.CONFIRMATION,
+          Buffer.alloc(0)
+        );
+        Assert.assert(confirmResponse.length == 0);
+      }
     }
 
     const signTx_addWithdrawal = async (
@@ -709,24 +815,48 @@ export default class Ada {
       };
     };
 
-    // init
-    //console.log("init");
+    // we need exactly one owner given by path to have a witness
+    let witnessOwner = null;
+    if (isSigningPoolRegistrationAsOwner) {
+      if (certificates.length > 1)
+        throw new Error("A pool registration certificate must be standalone");
+      if (withdrawals.length > 1)
+        throw new Error("No withdrawals allowed for transactions registering stake pools");
 
-    // TODO: 
-    if (certificates.length > 1 && certificates.some(cert => cert.type === 3)) {
-      throw new Error("Pool registration certificate must be standalone")
+      if (!certificates) throw new Error("missing certificates");
+      if (!certificates[0]) throw new Error("invalid certificate");
+      if (!certificates[0].poolRegistrationParams) throw new Error("missing stake pool registration params");
+      if (!certificates[0].poolRegistrationParams.poolOwners) throw new Error("missing stake pool owners");
+
+      for (const owner of certificates[0].poolRegistrationParams.poolOwners) {
+        if (owner.stakingPath) {
+          Precondition.checkIsValidPath(owner.stakingPath);
+          if (witnessOwner) {
+            throw new Error("two pool owners given by path");
+          } else {
+            witnessOwner = owner;
+          }
+        }
+      }
+      if (!witnessOwner) throw new Error("no owner given by path");
     }
-    
-    // for unique witness paths
-    const witnessPathsSet = new Set();
+
     const witnessPaths = [];
-    for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
-      const pathKey = JSON.stringify(path);
-      if (!witnessPathsSet.has(pathKey)) {
-        witnessPathsSet.add(pathKey);
-        witnessPaths.push(path);
+    if (isSigningPoolRegistrationAsOwner) {
+      // a single witness for the pool owner given by path
+      witnessPaths.push(witnessOwner);
+    } else {
+      // each path is included only once
+      const witnessPathsSet = new Set();
+      for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
+        const pathKey = JSON.stringify(path);
+        if (!witnessPathsSet.has(pathKey)) {
+          witnessPathsSet.add(pathKey);
+          witnessPaths.push(path);
+        }
       }
     }
+
     await signTx_init(
       networkId,
       protocolMagic,
@@ -748,9 +878,9 @@ export default class Ada {
         await signTx_addAddressOutput(output.addressHex, output.amountStr);
       } else if (output.spendingPath) {
         await signTx_addChangeOutput(
+          output.amountStr,
           output.addressTypeNibble,
           output.spendingPath,
-          output.amountStr,
           output.stakingPath,
           output.stakingKeyHashHex,
           output.stakingBlockchainPointer,
@@ -769,7 +899,8 @@ export default class Ada {
         await signTx_addCertificate(
           certificate.type,
           certificate.path,
-          certificate.poolKeyHashHex
+          certificate.poolKeyHashHex,
+          certificate.poolRegistrationParams
         )
       }
     }
