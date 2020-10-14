@@ -187,10 +187,10 @@ export function serializePoolRelayParams(
   noBuf.writeUInt8(RELAY_NO);
 
   let portBuf: Buffer;
-  if (params.port) {
-    Precondition.checkIsUint32(params.port, "invalid port");
-    Precondition.check(params.port <= 65535, "invalid port");
-    portBuf = Buffer.concat([yesBuf, utils.uint16_to_buf(params.port)]);
+  if (params.portNumber) {
+    Precondition.checkIsUint32(params.portNumber, "invalid port");
+    Precondition.check(params.portNumber <= 65535, "invalid port");
+    portBuf = Buffer.concat([yesBuf, utils.uint16_to_buf(params.portNumber)]);
   } else {
     portBuf = noBuf;
   }
