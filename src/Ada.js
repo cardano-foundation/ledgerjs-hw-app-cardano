@@ -41,7 +41,7 @@ export type BIP32Path = Array<number>;
 export type InputTypeUTxO = {|
   txHashHex: string,
   outputIndex: number,
-  path: BIP32Path
+  path: ?BIP32Path
 |};
 
 export type OutputTypeAddress = {|
@@ -71,13 +71,13 @@ export type PoolOwnerParams = {|
 |}
 
 export type SingleHostIPRelay = {|
-  portNumber: number,
-  ipv4Hex: string,
-  ipv6Hex: string
+  portNumber: ?number,
+  ipv4Hex: ?string,
+  ipv6Hex: ?string
 |}
 
 export type SingleHostNameRelay = {|
-  portNumber: number,
+  portNumber: ?number,
   dnsName: string
 |}
 
@@ -96,8 +96,8 @@ export type PoolMetadataParams = {|
 |}
 
 export type Margin = {|
-  numerator: string,
-  denominaror: string,
+  numeratorStr: string,
+  denominatorStr: string,
 |}
 
 export type PoolParams = {|
@@ -114,7 +114,7 @@ export type PoolParams = {|
 
 export type Certificate = {|
   type: number,
-  path: BIP32Path,
+  path: ?BIP32Path,
   poolKeyHashHex: ?string,
   poolRegistrationParams: ?PoolParams
 |};
@@ -516,7 +516,6 @@ export default class Ada {
     withdrawals: Array<Withdrawal>,
     metadataHashHex: ?string
   ): Promise<SignTransactionResponse> {
-    //console.log("sign");
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
@@ -733,13 +732,11 @@ export default class Ada {
       metadataHashHex != null
     )
     // inputs
-    //console.log("inputs");
     for (const input of inputs) {
       await signTx_addInput(input);
     }
 
     // outputs
-    //console.log("outputs");
     for (const output of outputs) {
       if (output.addressHex) {
         await signTx_addAddressOutput(output.addressHex, output.amountStr);
@@ -785,10 +782,9 @@ export default class Ada {
     }
 
     // confirm
-    //console.log("confirm");
     const { txHashHex } = await signTx_awaitConfirm();
 
-    //console.log("witnesses");
+    // witnesses
     const witnesses = [];
     for (const path of witnessPaths) {
       const witness = await signTx_getWitness(path);
