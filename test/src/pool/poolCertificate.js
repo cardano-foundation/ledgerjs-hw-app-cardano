@@ -392,10 +392,11 @@ describe("witnessCertificate", async () => {
     );
     // expect(response).to.deep.equal();
   });
+*/
 
   it("Should correctly witness valid multiple mixed owners all relays pool registration", async () => {
     /*
-    * txBody: 82a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7
+    * txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7
     * 000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a4209
     * 5e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4
     * fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc47
@@ -405,7 +406,7 @@ describe("witnessCertificate", async () => {
     * 0bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82
     * 026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d
     * 2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f3733
-    * 90520535bbf6
+    * 90520535bb
     */
     const cert = certificates.poolRegistrationMixedOwnersAllRelays
     const response = await ada.signTransaction(
