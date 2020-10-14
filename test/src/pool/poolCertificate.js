@@ -392,7 +392,6 @@ describe("witnessCertificate", async () => {
     );
     // expect(response).to.deep.equal();
   });
-*/
 
   it("Should correctly witness valid multiple mixed owners all relays pool registration", async () => {
     /*

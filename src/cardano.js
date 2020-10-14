@@ -140,7 +140,7 @@ export function serializePoolInitialParams(
 export function serializePoolOwnerParams(
   params: PoolOwnerParams
 ): Buffer {
-	const SIGN_TX_POOL_OWNER_TYPE_PATH = 1;
+  const SIGN_TX_POOL_OWNER_TYPE_PATH = 1;
   const SIGN_TX_POOL_OWNER_TYPE_KEY_HASH = 2;
 
   const path = params.stakingPath;
@@ -170,11 +170,6 @@ export function serializePoolOwnerParams(
 
   throw new Error("Invalid owner parameters");
 }
-
-export type RelayParams = {|
-  type: number, // single host ip = 0, single hostname = 1, multi host name = 2
-  params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay
-|}
 
 export function serializePoolRelayParams(
   relayParams: RelayParams
