@@ -106,7 +106,7 @@ export type PoolParams = {|
   pledgeStr: string,
   costStr: string,
   margin: Margin,
-  rewardAccountKeyHash: string,
+  rewardAccountHashHex: string,
   poolOwners: Array<PoolOwnerParams>,
   relays: Array<RelayParams>,
   metadata: PoolMetadataParams
@@ -823,6 +823,11 @@ export default class Ada {
       if (withdrawals.length)
         throw new Error("No withdrawals allowed for transactions registering stake pools");
 
+      // verify that no input is given with a path (just to avoid potential confusion)
+      for (const input of inputs) {
+        Precondition.check(!input.path, "stake pool registration: inputs should not contain the witness path");
+      }
+
       if (!certificates) throw new Error("missing certificates");
       if (!certificates[0]) throw new Error("invalid certificate");
       if (!certificates[0].poolRegistrationParams) throw new Error("missing stake pool registration params");
@@ -885,7 +890,7 @@ export default class Ada {
           output.stakingBlockchainPointer,
         );
       } else {
-        throw new Error("TODO");
+        throw new Error("unknown output type");
       }
     }
 

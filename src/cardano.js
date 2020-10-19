@@ -5,6 +5,9 @@ const HARDENED = 0x80000000;
 
 const KEY_HASH_LENGTH = 28;
 
+const POOL_REGISTRATION_OWNERS_MAX = 1000;
+const POOL_REGISTRATION_RELAYS_MAX = 1000;
+
 function parseBIP32Index(str: string, errMsg: ?str = null): number {
   let base = 0;
   if (str.endsWith("'")) {
@@ -117,21 +120,20 @@ export function serializePoolInitialParams(
   Precondition.checkIsUint64(marginDenominator, errMsg);
 
   errMsg = "invalid reward account";
-  Precondition.checkIsHexString(params.rewardAccountKeyHash, errMsg);
-  Precondition.check(params.rewardAccountKeyHash.length == 29 * 2, errMsg);
+  Precondition.checkIsHexString(params.rewardAccountHashHex, errMsg);
+  Precondition.check(params.rewardAccountHashHex.length == 29 * 2, errMsg);
 
-  // TODO make consistent with ledger, use symbolic constants?
-  Precondition.check(params.poolOwners.length <= 1000), "too many owners";
-  Precondition.check(params.relays.length <= 1000), "too many relays";
+  Precondition.check(params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX), "too many owners";
+  Precondition.check(params.relays.length <= POOL_REGISTRATION_RELAYS_MAX), "too many relays";
 
   return Buffer.concat([
     utils.hex_to_buf(params.poolKeyHashHex),
     utils.hex_to_buf(params.vrfKeyHashHex),
     utils.amount_to_buf(params.pledgeStr),
     utils.amount_to_buf(params.costStr),
-    utils.amount_to_buf(params.margin.numeratorStr), // TODO why amount? ... we should have uint64_to_buf
+    utils.amount_to_buf(params.margin.numeratorStr), // TODO why amount? ... we should have uint64_to_buf?
     utils.amount_to_buf(params.margin.denominatorStr),
-    utils.hex_to_buf(params.rewardAccountKeyHash),
+    utils.hex_to_buf(params.rewardAccountHashHex),
     utils.uint32_to_buf(params.poolOwners.length),
     utils.uint32_to_buf(params.relays.length)
   ]);
@@ -220,8 +222,6 @@ export function serializePoolRelayParams(
     Precondition.check(/^[\x00-\x7F]*$/.test(params.dnsName), "invalid dns record")
     dnsBuf = Buffer.from(params.dnsName, "ascii");
   }
-
-  // TODO forbid superfluous params?
 
   Precondition.checkIsUint8(type);
 
