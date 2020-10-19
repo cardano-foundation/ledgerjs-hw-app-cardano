@@ -120,8 +120,8 @@ export function serializePoolInitialParams(
   Precondition.checkIsUint64(marginDenominator, errMsg);
 
   errMsg = "invalid reward account";
-  Precondition.checkIsHexString(params.rewardAccountHashHex, errMsg);
-  Precondition.check(params.rewardAccountHashHex.length == 29 * 2, errMsg);
+  Precondition.checkIsHexString(params.rewardAccountHex, errMsg);
+  Precondition.check(params.rewardAccountHex.length == 29 * 2, errMsg);
 
   Precondition.check(params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX), "too many owners";
   Precondition.check(params.relays.length <= POOL_REGISTRATION_RELAYS_MAX), "too many relays";
@@ -133,7 +133,7 @@ export function serializePoolInitialParams(
     utils.amount_to_buf(params.costStr),
     utils.amount_to_buf(params.margin.numeratorStr), // TODO why amount? ... we should have uint64_to_buf?
     utils.amount_to_buf(params.margin.denominatorStr),
-    utils.hex_to_buf(params.rewardAccountHashHex),
+    utils.hex_to_buf(params.rewardAccountHex),
     utils.uint32_to_buf(params.poolOwners.length),
     utils.uint32_to_buf(params.relays.length)
   ]);
