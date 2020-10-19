@@ -78,8 +78,8 @@ export type PoolOwnerParams = {|
 
 export type SingleHostIPRelay = {|
   portNumber: ?number,
-  ipv4Hex: ?string,
-  ipv6Hex: ?string
+  ipv4Hex: ?string, // TODO something more natural?
+  ipv6Hex: ?string // TODO something more natural?
 |}
 
 export type SingleHostNameRelay = {|
@@ -112,7 +112,7 @@ export type PoolParams = {|
   pledgeStr: string,
   costStr: string,
   margin: Margin,
-  rewardAccountHashHex: string,
+  rewardAccountHex: string,
   poolOwners: Array<PoolOwnerParams>,
   relays: Array<RelayParams>,
   metadata: PoolMetadataParams
