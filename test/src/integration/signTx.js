@@ -478,7 +478,7 @@ describe("signTx", async () => {
       [inputs.utxoShelley],
       [
         outputs.externalByronMainnet,
-        outputs.internalPointer, // TODO fix failing change address in ledger app
+        outputs.internalPointer,
       ],
       sampleFeeStr,
       sampleTtlStr,
