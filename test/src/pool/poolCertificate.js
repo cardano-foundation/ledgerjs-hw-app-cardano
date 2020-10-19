@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
 import { AddressTypeNibbles, utils } from "../../../lib/Ada";
+import { ERRORS } from "../direct/constants";
 
 const inputs = {
   utxo: {
@@ -310,11 +311,31 @@ const results = {
           "61fc06451462426b14fa3a31008a5f7d32b2f1793022060c02939bd0004b07f2bd737d542c2db6cef6dad912b9bdca1829a5dc2b45bab3c72afe374cef59cc04"
       }
     ]
+  },
+  noRelaysSinglePathOwner: {
+    // WARNING: only as computed by ledger, not verified with cardano-cli
+    txHashHex: "fc4778c13fadb8b69249b4cd98ef45f42145e1ce081c5466170a670829dc2184",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "adc06e34dc66f01b16496b04fc4ce5058e3be7290398cf2728f8463dda15c87866314449bdb309d0cdc22f3ca9bee310458f2769df6a1486f1b470a3227a030b"
+      }
+    ]
   }
 }
 
 describe("witnessCertificate", async () => {
   let ada = {};
+
+  let checkThrows = async (f, errorMsg) => {
+    try {
+      await f;
+      throw new Error("should have thrown by now");
+    } catch (error) {
+      expect(error.message).to.have.string(errorMsg);
+    }
+  };
 
   beforeEach(async () => {
     ada = await getAda();
@@ -323,7 +344,7 @@ describe("witnessCertificate", async () => {
   afterEach(async () => {
     await ada.t.close();
   });
-
+/*
   it("Should correctly witness valid single path owner ipv4 relay pool registration", async () => {
     const cert = certificates.poolRegistrationDefault;
     const response = await ada.signTransaction(
@@ -395,11 +416,10 @@ describe("witnessCertificate", async () => {
     );
     // expect(response).to.deep.equal();
   });
+*/
 
   it("Should correctly witness valid multiple mixed owners all relays pool registration", async () => {
-    /*
-    * txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb
-    */
+    // txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb
     const cert = certificates.poolRegistrationMixedOwnersAllRelays;
     const response = await ada.signTransaction(
       NetworkIds.MAINNET,
@@ -433,27 +453,29 @@ describe("witnessCertificate", async () => {
       [],
       null
     );
-    // expect(response).to.deep.equal();
+    expect(response).to.deep.equal(results.noRelaysSinglePathOwner);
   });
 
-    it("Should reject pool registration with multiple path owners", async () => {
-    const cert = certificates.poolRegistration2PathOwners;
-    const response = await ada.signTransaction(
-      NetworkIds.MAINNET,
-      ProtocolMagics.MAINNET,
-      [inputs.utxo],
-      [
-        outputs.external,
-      ],
-      sampleFeeStr,
-      sampleTtlStr,
-      [cert],
-      [],
-      null
-    );
-    // expect(response).to.deep.equal();
+  it("Should reject pool registration with multiple path owners", async () => {
+    async function f() {
+      const cert = certificates.poolRegistration2PathOwners;
+      const response = await ada.signTransaction(
+        NetworkIds.MAINNET,
+        ProtocolMagics.MAINNET,
+        [inputs.utxo],
+        [
+          outputs.external,
+        ],
+        sampleFeeStr,
+        sampleTtlStr,
+        [cert],
+        [],
+        null
+      );
+    }
+    checkThrows(f, ERRORS.INVALID_DATA);
   });
-
+/*
   it("Should reject pool registration with only hash owners", async () => {
     const cert = certificates.poolRegistration2HashOwners;
     const response = await ada.signTransaction(
@@ -635,4 +657,5 @@ describe("witnessCertificate", async () => {
     );
     // expect(response).to.deep.equal();
   });
+  */
 });
