@@ -64,7 +64,7 @@ export const Precondition = {
 
   checkIsHexString: (data: any, msg: ?string = null) => {
     Precondition.checkIsString(data, msg);
-    Precondition.check(data.length % 2 == 0, msg);
+    Precondition.check(data.length % 2 === 0, msg);
     Precondition.check(/^[0-9a-fA-F]*$/.test(data), msg);
   },
   checkIsValidPath: (path: Array<number>, msg: ?string = null) => {
@@ -84,7 +84,7 @@ export const Precondition = {
       Precondition.check(amount[0] != "0", msg);
     }
     // less than max supply
-    if (amount.length == MAX_LOVELACE_SUPPLY_STR.length) {
+    if (amount.length === MAX_LOVELACE_SUPPLY_STR.length) {
       // Note: this is string comparison!
       Precondition.check(amount <= MAX_LOVELACE_SUPPLY_STR, msg);
     }
@@ -97,7 +97,7 @@ export const Precondition = {
   },
   checkIsValidBech32Address: (data: string, msg: ?string = null) => {
     Precondition.checkIsString(data, msg);
-    Precondition.check(data.split("1").length == 2, msg);
+    Precondition.check(data.split("1").length === 2, msg);
 
     for (const c of data.split("1")[1]) {
       Precondition.check(BECH32_ALPHABET.includes(c), msg);
@@ -136,7 +136,7 @@ export function uint32_to_buf(value: number): Buffer {
 }
 
 export function buf_to_uint32(data: Buffer): number {
-  Precondition.check(data.length == 4, "invalid uint8 buffer");
+  Precondition.check(data.length === 4, "invalid uint8 buffer");
 
   return data.readUIntBE(0, 4);
 }
@@ -203,7 +203,7 @@ export function stripRetcodeFromResponse(response: Buffer): Buffer {
 
 export function buf_to_amount(data: Buffer): string {
   Precondition.checkIsBuffer(data);
-  Precondition.check(data.length == 8);
+  Precondition.check(data.length === 8);
 
   const encoded = bs10.encode(data);
   // Strip leading zeros
@@ -276,7 +276,7 @@ export function safe_parseInt(str: string): number {
   Precondition.checkIsString(str, errMsg);
   const i = parseInt(str);
   // Check that we parsed everything
-  Precondition.check("" + i == str, errMsg);
+  Precondition.check("" + i === str, errMsg);
   // Could be invalid
   Precondition.check(!isNaN(i), errMsg);
   // Could still be float

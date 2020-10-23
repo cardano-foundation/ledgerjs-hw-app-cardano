@@ -41,7 +41,7 @@ export function serializeAddressParams(
 
   let networkIdOrProtocolMagicBuf;
 
-  if (addressTypeNibble == AddressTypeNibbles.BYRON) {
+  if (addressTypeNibble === AddressTypeNibbles.BYRON) {
     Precondition.checkIsUint32(networkIdOrProtocolMagic, "invalid protocol magic");
     networkIdOrProtocolMagicBuf = utils.uint32_to_buf(networkIdOrProtocolMagic);
   } else {
@@ -73,7 +73,7 @@ export function serializeAddressParams(
   } else if (!stakingPath &&  stakingKeyHashHex && !stakingBlockchainPointer) {
     const stakingKeyHash = utils.hex_to_buf(stakingKeyHashHex);
     stakingChoice = stakingChoices.STAKING_KEY_HASH;
-    Precondition.check(stakingKeyHash.length == KEY_HASH_LENGTH, "invalid staking key hash length");
+    Precondition.check(stakingKeyHash.length === KEY_HASH_LENGTH, "invalid staking key hash length");
     stakingInfoBuf = stakingKeyHash;
   } else if (!stakingPath && !stakingKeyHashHex &&  stakingBlockchainPointer) {
     stakingChoice = stakingChoices.BLOCKCHAIN_POINTER;
@@ -104,11 +104,11 @@ export function serializePoolInitialParams(
 ): Buffer {
   var errMsg = "invalid pool key hash";
   Precondition.checkIsHexString(params.poolKeyHashHex, errMsg);
-  Precondition.check(params.poolKeyHashHex.length == 28 * 2, errMsg);
+  Precondition.check(params.poolKeyHashHex.length === 28 * 2, errMsg);
 
   errMsg = "invalid vrf key hash";
   Precondition.checkIsHexString(params.vrfKeyHashHex, errMsg);
-  Precondition.check(params.vrfKeyHashHex.length == 32 * 2, errMsg);
+  Precondition.check(params.vrfKeyHashHex.length === 32 * 2, errMsg);
 
   Precondition.checkIsValidAmount(params.pledgeStr, "invalid pledge");
   Precondition.checkIsValidAmount(params.costStr, "invalid cost");
@@ -121,7 +121,7 @@ export function serializePoolInitialParams(
 
   errMsg = "invalid reward account";
   Precondition.checkIsHexString(params.rewardAccountHex, errMsg);
-  Precondition.check(params.rewardAccountHex.length == 29 * 2, errMsg);
+  Precondition.check(params.rewardAccountHex.length === 29 * 2, errMsg);
 
   Precondition.check(params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX), "too many owners";
   Precondition.check(params.relays.length <= POOL_REGISTRATION_RELAYS_MAX), "too many relays";
@@ -162,7 +162,7 @@ export function serializePoolOwnerParams(
   if (hashHex) {
     const errMsg = "invalid owner key hash";
     Precondition.checkIsHexString(hashHex, errMsg);
-    Precondition.check(hashHex.length == KEY_HASH_LENGTH * 2, errMsg);
+    Precondition.check(hashHex.length === KEY_HASH_LENGTH * 2, errMsg);
 
     const hashBuf = utils.hex_to_buf(hashHex);
     const typeBuf = Buffer.alloc(1);
@@ -200,7 +200,7 @@ export function serializePoolRelayParams(
   let ipv4Buf: Buffer;
   if (params.ipv4Hex) {
     Precondition.checkIsHexString(params.ipv4Hex, "invalid ipv4");
-    Precondition.check(params.ipv4Hex.length == 4 * 2, "invalid ipv4");
+    Precondition.check(params.ipv4Hex.length === 4 * 2, "invalid ipv4");
     ipv4Buf = Buffer.concat([yesBuf, utils.hex_to_buf(params.ipv4Hex)]);
   } else {
     ipv4Buf = noBuf;
@@ -209,7 +209,7 @@ export function serializePoolRelayParams(
   let ipv6Buf: Buffer;
   if (params.ipv6Hex) {
     Precondition.checkIsHexString(params.ipv6Hex, "invalid ipv6");
-    Precondition.check(params.ipv6Hex.length == 16 * 2, "invalid ipv6");
+    Precondition.check(params.ipv6Hex.length === 16 * 2, "invalid ipv6");
     ipv6Buf = Buffer.concat([yesBuf, utils.hex_to_buf(params.ipv6Hex)]);
   } else {
     ipv6Buf = noBuf;
@@ -266,7 +266,7 @@ export function serializePoolMetadataParams(
   const hashHex = params.metadataHashHex;
   const errMsg = "invalid pool metadata hash";
   Precondition.checkIsHexString(hashHex, errMsg);
-  Precondition.check(hashHex.length == 32 * 2, errMsg);
+  Precondition.check(hashHex.length === 32 * 2, errMsg);
 
   return Buffer.concat([
     includeMetadataBuffer,
