@@ -300,14 +300,14 @@ export default class Ada {
       P2_UNUSED,
       utils.hex_to_buf("")
     );
-    Assert.assert(response.length == 4);
+    Assert.assert(response.length === 4);
     const [major, minor, patch, flags_value] = response;
 
     const FLAG_IS_DEBUG = 1;
     //const FLAG_IS_HEADLESS = 2;
 
     const flags = {
-      isDebug: (flags_value & FLAG_IS_DEBUG) == FLAG_IS_DEBUG
+      isDebug: (flags_value & FLAG_IS_DEBUG) === FLAG_IS_DEBUG
     };
     return { major, minor, patch, flags };
   }
@@ -335,7 +335,7 @@ export default class Ada {
 
     if (major > 1) {
       return true;
-    } else if (major == 1) {
+    } else if (major === 1) {
       return minor >= 2;
     } else {
       return false;
@@ -368,7 +368,7 @@ export default class Ada {
       P2_UNUSED,
       utils.hex_to_buf("")
     );
-    Assert.assert(response.length == 7);
+    Assert.assert(response.length === 7);
 
     const serial = utils.buf_to_hex(response);
     return { serial };
@@ -416,7 +416,7 @@ export default class Ada {
     );
 
     const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
-    Assert.assert(rest.length == 0);
+    Assert.assert(rest.length === 0);
 
     return {
       publicKeyHex: publicKey.toString("hex"),
@@ -514,7 +514,7 @@ export default class Ada {
     );
 
     const response = await _send(P1_DISPLAY, P2_UNUSED, data);
-    Assert.assert(response.length == 0);
+    Assert.assert(response.length === 0);
   }
 
   async signTransaction(
@@ -587,21 +587,21 @@ export default class Ada {
         P2_UNUSED,
         data
       );
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_addInput = async (
       input: InputTypeUTxO
     ): Promise<void> => {
       Precondition.checkIsHexString(input.txHashHex, "invalid tx hash");
-      Precondition.check(input.txHashHex.length == 32 * 2, "invalid tx hash");
+      Precondition.check(input.txHashHex.length === 32 * 2, "invalid tx hash");
 
       const data = Buffer.concat([
         utils.hex_to_buf(input.txHashHex),
         utils.uint32_to_buf(input.outputIndex),
       ]);
       const response = await _send(P1_STAGE_INPUTS, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_addAddressOutput = async (
@@ -617,7 +617,7 @@ export default class Ada {
         utils.hex_to_buf(addressHex)
       ]);
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_addChangeOutput = async (
@@ -635,7 +635,7 @@ export default class Ada {
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
         cardano.serializeAddressParams(
           addressTypeNibble,
-          addressTypeNibble == AddressTypeNibbles.BYRON ? protocolMagic : networkId,
+          addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,
           spendingPath,
           stakingPath,
           stakingKeyHashHex,
@@ -643,7 +643,7 @@ export default class Ada {
         )
       ]);
       const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_addCertificate = async (
@@ -681,7 +681,7 @@ export default class Ada {
 
       if (poolKeyHashHex != null) {
         Precondition.check(
-          type == CertificateTypes.STAKE_DELEGATION,
+          type === CertificateTypes.STAKE_DELEGATION,
           "superfluous pool key hash in a certificate of type " + type
         );
         dataFields.push(utils.hex_to_buf(poolKeyHashHex));
@@ -689,7 +689,7 @@ export default class Ada {
 
       const data = Buffer.concat(dataFields);
       const response = await _send(P1_STAGE_CERTIFICATES, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
 
       // we are done for every certificate except pool registration
 
@@ -711,7 +711,7 @@ export default class Ada {
           APDU_INSTRUCTIONS.POOL_PARAMS,
           cardano.serializePoolInitialParams(poolParams)
         );
-        Assert.assert(response.length == 0);
+        Assert.assert(response.length === 0);
 
         for (const owner of poolParams.poolOwners) {
           const response = await _send(
@@ -719,7 +719,7 @@ export default class Ada {
             APDU_INSTRUCTIONS.OWNERS,
             cardano.serializePoolOwnerParams(owner)
           );
-          Assert.assert(response.length == 0);
+          Assert.assert(response.length === 0);
         }
 
         for (const relay of poolParams.relays) {
@@ -728,7 +728,7 @@ export default class Ada {
             APDU_INSTRUCTIONS.RELAYS,
             cardano.serializePoolRelayParams(relay)
           );
-          Assert.assert(response.length == 0);
+          Assert.assert(response.length === 0);
         }
 
         const mdResponse = await _send(
@@ -736,14 +736,14 @@ export default class Ada {
           APDU_INSTRUCTIONS.METADATA,
           cardano.serializePoolMetadataParams(poolParams.metadata)
         );
-        Assert.assert(mdResponse.length == 0);
+        Assert.assert(mdResponse.length === 0);
 
         const confirmResponse = await _send(
           P1_STAGE_CERTIFICATES,
           APDU_INSTRUCTIONS.CONFIRMATION,
           Buffer.alloc(0)
         );
-        Assert.assert(confirmResponse.length == 0);
+        Assert.assert(confirmResponse.length === 0);
       }
     }
 
@@ -756,7 +756,7 @@ export default class Ada {
         utils.path_to_buf(path)
       ]);
       const response = await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     }
 
     const signTx_setFee = async (
@@ -766,7 +766,7 @@ export default class Ada {
         utils.amount_to_buf(feeStr),
       ]);
       const response = await _send(P1_STAGE_FEE, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_setTtl = async (
@@ -776,7 +776,7 @@ export default class Ada {
         utils.amount_to_buf(ttlStr),
       ]);
       const response = await _send(P1_STAGE_TTL, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_setMetadata = async (
@@ -785,7 +785,7 @@ export default class Ada {
       const data = utils.hex_to_buf(metadataHashHex);
 
       const response = await _send(P1_STAGE_METADATA, P2_UNUSED, data);
-      Assert.assert(response.length == 0);
+      Assert.assert(response.length === 0);
     };
 
     const signTx_awaitConfirm = async (): Promise<{
@@ -871,6 +871,7 @@ export default class Ada {
       witnessPaths.length,
       metadataHashHex != null
     )
+
     // inputs
     for (const input of inputs) {
       await signTx_addInput(input);

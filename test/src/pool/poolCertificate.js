@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
-import { AddressTypeNibbles, utils } from "../../../lib/Ada";
+import { AddressTypeNibbles, utils, getErrorDescription } from "../../../lib/Ada";
 import { ERRORS } from "../direct/constants";
 
 const inputs = {
