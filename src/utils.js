@@ -1,7 +1,9 @@
 //@flow
 import basex from "base-x";
 import bech32 from "bech32";
-import {AddressTypeNibbles} from "./Ada"
+import { AddressTypeNibbles } from "./Ada"
+import cardano from "./cardano";
+
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -164,6 +166,28 @@ export function path_to_buf(path: Array<number>): Buffer {
   return data;
 }
 
+function parseBIP32Index(str: string, errMsg: ?string = null): number {
+  let base = 0;
+  if (str.endsWith("'")) {
+    str = str.slice(0, -1);
+    base = cardano.HARDENED;
+  }
+  const i = safe_parseInt(str);
+  Precondition.check(i >= 0, errMsg);
+  Precondition.check(i < cardano.HARDENED, errMsg);
+  return base + i;
+}
+
+export function str_to_path(data: string): Array<number> {
+  const errMsg = "invalid bip32 path string ";
+  Precondition.checkIsString(data, errMsg);
+  Precondition.check(data.length > 0, errMsg);
+
+  return data.split("/").map(function (x: string): number {
+    return parseBIP32Index(x, errMsg + data + " because of " + x);
+  });
+}
+
 const sum = (arr: Array<number>) => arr.reduce((x, y) => x + y, 0);
 
 export function chunkBy(data: Buffer, chunkLengths: Array<number>) {
@@ -287,6 +311,8 @@ export function safe_parseInt(str: string): number {
 
 
 export default {
+  Assert,
+
   hex_to_buf,
   buf_to_hex,
 
@@ -301,6 +327,8 @@ export default {
 
   // no pair for now
   path_to_buf,
+
+  str_to_path,
 
   safe_parseInt,
 
