@@ -8,26 +8,6 @@ const KEY_HASH_LENGTH = 28;
 const POOL_REGISTRATION_OWNERS_MAX = 1000;
 const POOL_REGISTRATION_RELAYS_MAX = 1000;
 
-function parseBIP32Index(str: string, errMsg: ?str = null): number {
-  let base = 0;
-  if (str.endsWith("'")) {
-    str = str.slice(0, -1);
-    base = HARDENED;
-  }
-  const i = utils.safe_parseInt(str);
-  Precondition.check(i >= 0, errMsg);
-  Precondition.check(i < HARDENED, errMsg);
-  return base + i;
-}
-
-export function str_to_path(data: string): Array<number> {
-  const errMsg = "invalid bip32 path string";
-  Precondition.checkIsString(data, errMsg);
-  Precondition.check(data.length > 0, errMsg);
-
-  return data.split("/").map(parseBIP32Index);
-}
-
 export function serializeAddressParams(
     addressTypeNibble: $Values<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
@@ -118,6 +98,9 @@ export function serializePoolInitialParams(
   Precondition.checkIsUint64(marginNumerator, errMsg);
   const marginDenominator = utils.safe_parseInt(params.margin.denominatorStr);
   Precondition.checkIsUint64(marginDenominator, errMsg);
+  Precondition.check(marginNumerator >= 0, errMsg);
+  Precondition.check(marginDenominator > 0, errMsg);
+  Precondition.check(marginNumerator <= marginDenominator, errMsg);
 
   errMsg = "invalid reward account";
   Precondition.checkIsHexString(params.rewardAccountHex, errMsg);
@@ -254,17 +237,17 @@ export function serializePoolMetadataParams(
   if (!params) {
     // deal with null metadata
     includeMetadataBuffer.writeUInt8(POOL_CERTIFICATE_METADATA_NO);
-    return buffer;
+    return includeMetadataBuffer;
   } else {
     includeMetadataBuffer.writeUInt8(POOL_CERTIFICATE_METADATA_YES);
   }
 
   const url = params.metadataUrl;
-  Precondition.checkIsString(url, "invalid pool metadata url");
-  Precondition.check(url.length <= 64, "pool metadata url too long");
+  Precondition.checkIsString(url, "invalid pool metadata: invalid url");
+  Precondition.check(url.length <= 64, "invalid pool metadata: url too long");
 
   const hashHex = params.metadataHashHex;
-  const errMsg = "invalid pool metadata hash";
+  const errMsg = "invalid pool metadata: invalid hash";
   Precondition.checkIsHexString(hashHex, errMsg);
   Precondition.check(hashHex.length === 32 * 2, errMsg);
 
@@ -280,8 +263,6 @@ export function serializePoolMetadataParams(
 
 export default {
   HARDENED,
-
-  str_to_path,
 
   serializeAddressParams,
 

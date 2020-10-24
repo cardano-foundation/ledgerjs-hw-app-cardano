@@ -699,7 +699,7 @@ export default class Ada {
 
       // we are done for every certificate except pool registration
 
-      if (type == CertificateTypes.STAKE_POOL_REGISTRATION) {
+      if (type === CertificateTypes.STAKE_POOL_REGISTRATION) {
         if(!poolParams)
           throw new Error("missing stake pool params in a pool registration certificate");
 
@@ -850,10 +850,14 @@ export default class Ada {
           }
         }
       }
-      if (!witnessOwner) throw new Error("no owner given by path");
 
-      // a single witness for the pool owner given by path
-      witnessPaths.push(witnessOwner.stakingPath);
+      if (witnessOwner) {
+        // a single witness for the pool owner given by path
+        witnessPaths.push(witnessOwner.stakingPath);
+      } else {
+        throw new Error("no owner given by path");
+      }
+
     } else {
       // we collect required witnesses for inputs, certificates and withdrawals
       // each path is included only once
