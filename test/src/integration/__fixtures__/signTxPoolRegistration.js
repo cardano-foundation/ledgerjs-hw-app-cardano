@@ -87,40 +87,40 @@ export const relays = {
     type: 0,
     params: {
       portNumber: 3000,
-      ipv4Hex: "36e44b9a",
-      ipv6Hex: null
+      ipv4: "54.228.75.154", // "36e44b9a"
+      ipv6: null
     }
   },
   singleHostIPV4Relay1: {
     type: 0,
     params: {
       portNumber: 4000,
-      ipv4Hex: "36e44b9a",
-      ipv6Hex: null
+      ipv4: "54.228.75.154", // "36e44b9a"
+      ipv6: null
     }
   },
   singleHostIPV4RelayMissingPort: {
     type: 0,
     params: {
       portNumber: null,
-      ipv4Hex: "36e44b9a",
-      ipv6Hex: null
+      ipv4: "54.228.75.154", // "36e44b9a"
+      ipv6: null
     }
   },
   singleHostIPV4RelayMissingIpv4: {
     type: 0,
     params: {
       portNumber: 3000,
-      ipv4Hex: null,
-      ipv6Hex: null
+      ipv4: null,
+      ipv6: null
     }
   },
   singleHostIPV6Relay: {
     type: 0,
     params: {
       portNumber: 3000,
-      ipv4Hex: "36e44b9b",
-      ipv6Hex: "0178ff2483e3a2330a34c4a5e576c207"
+      ipv4: "54.228.75.155", // "36e44b9b"
+      ipv6: "24ff:7801:33a2:e383:a5c4:340a:07c2:76e5"
     }
   },
   singleHostNameRelay: {
