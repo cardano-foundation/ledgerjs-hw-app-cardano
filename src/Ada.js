@@ -72,8 +72,8 @@ export type PoolOwnerParams = {|
 
 export type SingleHostIPRelay = {|
   portNumber: ?number,
-  ipv4Hex: ?string, // TODO something more natural?
-  ipv6Hex: ?string // TODO something more natural?
+  ipv4: ?string, // e.g. "192.168.0.1"
+  ipv6: ?string  // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
 |}
 
 export type SingleHostNameRelay = {|

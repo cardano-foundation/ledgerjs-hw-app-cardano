@@ -1,5 +1,6 @@
 import utils, { Precondition } from "./utils";
 import {AddressTypeNibbles, PoolParams, PoolOwnerParams, SingleHostIPRelay, SingleHostNameRelay, MultiHostNameRelay, PoolMetadataParams} from './Ada';
+import { hex_to_buf } from "../lib/utils";
 
 const HARDENED = 0x80000000;
 
@@ -181,19 +182,35 @@ export function serializePoolRelayParams(
   }
 
   let ipv4Buf: Buffer;
-  if (params.ipv4Hex) {
-    Precondition.checkIsHexString(params.ipv4Hex, "invalid ipv4");
-    Precondition.check(params.ipv4Hex.length === 4 * 2, "invalid ipv4");
-    ipv4Buf = Buffer.concat([yesBuf, utils.hex_to_buf(params.ipv4Hex)]);
+  if (params.ipv4) {
+    const errorMsg = "invalid ipv4";
+    Precondition.checkIsString(params.ipv4, errorMsg);
+    let ipParts = params.ipv4.split('.');
+    Precondition.check(ipParts.length === 4, errorMsg);
+    let ipBytes = Buffer.alloc(4);
+    for (let i = 0; i < 4; i++) {
+      let ipPart = parseInt(ipParts[i], 10);
+      Precondition.checkIsUint8(ipPart, errorMsg);
+      ipBytes.writeUInt8(ipPart, i);
+    }
+    ipv4Buf = Buffer.concat([yesBuf, ipBytes]);
   } else {
     ipv4Buf = noBuf;
   }
 
   let ipv6Buf: Buffer;
-  if (params.ipv6Hex) {
-    Precondition.checkIsHexString(params.ipv6Hex, "invalid ipv6");
-    Precondition.check(params.ipv6Hex.length === 16 * 2, "invalid ipv6");
-    ipv6Buf = Buffer.concat([yesBuf, utils.hex_to_buf(params.ipv6Hex)]);
+  if (params.ipv6) {
+    const errorMsg = "invalid ipv6";
+    Precondition.checkIsString(params.ipv6, errorMsg);
+    let ipParts = params.ipv6.split(':');
+    Precondition.check(ipParts.length === 8, errorMsg);
+    let ipBytes = Buffer.alloc(0);
+    for (let i = 0; i < 8; i++) {
+      Precondition.checkIsHexString(ipParts[i], errorMsg);
+      Precondition.check(ipParts[i].length === 4, errorMsg);
+      ipBytes = Buffer.concat([ipBytes, hex_to_buf(ipParts[i])]);
+    }
+    ipv6Buf = Buffer.concat([yesBuf, ipBytes]);
   } else {
     ipv6Buf = noBuf;
   }
