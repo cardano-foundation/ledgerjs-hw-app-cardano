@@ -146,9 +146,9 @@ describe("signTxPoolRegistrationOK", async () => {
   });
 });
 
-// TODO does not work because ledger state is not reset properly in between the tests
-// so some details are wrong here (e.g. what Ledger does if js validation is removed)
-/*
+
+// ======================================== negative tests (tx should be rejected) ===============================
+
 describe("signTxPoolRegistrationReject", async () => {
   let ada = {};
 
@@ -188,8 +188,8 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "two pool owners given by path";
-    // after removing js validation, this should pass:
+    const errMsg = "there should be exactly one owner given by path";
+    // after removing js validation, this should pass instead:
     // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
     await checkThrows(f, errMsg);
   });
@@ -212,9 +212,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "no owner given by path";
-    // after removing js validation, this should pass:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_STATE));
+    const errMsg = "there should be exactly one owner given by path";
     await checkThrows(f, errMsg);
   });
 
@@ -236,21 +234,17 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "no owner given by path";
-    // after removing js validation, this should pass:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_STATE));
+    const errMsg = "there should be exactly one owner given by path";
     await checkThrows(f, errMsg);
   });
 
   it("Should reject pool registration with invalid metadata params", async () => {
-    // TODO does not work with this for loop because ledger's state is not reset properly in between
-    // TODO calling afterEach in between does not help
     const invalidMetadataVariations = [
-      poolMetadataVariations.poolMetadataUrlTooLong
-      // poolMetadataVariations.poolMetadataInvalidHexLength,
-      // poolMetadataVariations.poolMetadataInvalidUrl,
-      // poolMetadataVariations.poolMetadataMissingHash,
-      // poolMetadataVariations.poolMetadataMissingUrl
+      poolMetadataVariations.poolMetadataUrlTooLong,
+      poolMetadataVariations.poolMetadataInvalidHexLength,
+      poolMetadataVariations.poolMetadataInvalidUrl,
+      poolMetadataVariations.poolMetadataMissingHash,
+      poolMetadataVariations.poolMetadataMissingUrl
     ]
 
     for (const metadataVariant of invalidMetadataVariations) {
@@ -279,42 +273,45 @@ describe("signTxPoolRegistrationReject", async () => {
       }
 
       const errMsg = "invalid pool metadata";
-      // after removing js validation, this should pass:
+      // for poolMetadataUrlTooLong, after removing js validation, this should pass instead:
       // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
       await checkThrows(f, errMsg);
     }
   });
 
   it("Should reject pool registration with invalid relay", async () => {
-    async function f() {
-      const cert = {
-        ...certificates.poolRegistrationDefault,
-        poolRegistrationParams: {
-          ...certificates.poolRegistrationDefault.poolRegistrationParams,
-          relays: [relays.singleHostNameRelayMissingDns]
-          // should work the same for the line below
-          // relays: [relays.multiHostNameRelayMissingDns]
-        }
-      }
-      const response = await ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [
-          outputs.external,
-        ],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert],
-        [],
-        null
-      );
-    }
+    const relayVariants = [
+      relays.singleHostNameRelayMissingDns,
+      relays.multiHostNameRelayMissingDns
+    ]
 
-    const errMsg = "missing dns record";
-    // after removing js validation, this should pass:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
-    await checkThrows(f, errMsg);
+    for (const relayVariant of relayVariants) {
+      async function f() {
+        const cert = {
+          ...certificates.poolRegistrationDefault,
+          poolRegistrationParams: {
+            ...certificates.poolRegistrationDefault.poolRegistrationParams,
+            relays: [relayVariant]
+          }
+        }
+        const response = await ada.signTransaction(
+          NetworkIds.MAINNET,
+          ProtocolMagics.MAINNET,
+          [inputs.utxo],
+          [
+            outputs.external,
+          ],
+          sampleFeeStr,
+          sampleTtlStr,
+          [cert],
+          [],
+          null
+        );
+      }
+
+      const errMsg = "missing dns record";
+      await checkThrows(f, errMsg);
+    }
   });
 
   it("Should reject pool registration with numerator bigger than denominator", async () => {
@@ -336,8 +333,6 @@ describe("signTxPoolRegistrationReject", async () => {
     }
 
     const errMsg = "invalid margin";
-    // after removing js validation, this should pass:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
     await checkThrows(f, errMsg);
   });
 
@@ -362,9 +357,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "A pool registration certificate must be standalone";
-    // after removing js validation, this should pass:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
+    const errMsg = "cannot combine pool registration with other certificates";
     await checkThrows(f, errMsg);
   });
 
@@ -387,10 +380,9 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "No withdrawals allowed for transactions registering stake pools";
-    // after removing js validation, this should pass:
+    const errMsg = "no withdrawals allowed for transactions registering stake pools";
+    // after removing js validation, this should pass instead:
     // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
     await checkThrows(f, errMsg);
   });
 });
-*/
