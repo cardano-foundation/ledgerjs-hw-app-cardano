@@ -76,7 +76,7 @@ function validateCertificates(
             serializePoolOwnerParams(owner);
           }
         }
-        if (numPathOwners !== 1) throw new Error("there should be exactly one path owner");
+        if (numPathOwners !== 1) throw new Error("there should be exactly one owner given by path");
 
         // relays
         Precondition.checkIsArray(poolParams.relays, "relays not an array");
