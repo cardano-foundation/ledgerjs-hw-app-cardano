@@ -1,13 +1,175 @@
-import utils, { Precondition } from "./utils";
-import {AddressTypeNibbles, PoolParams, PoolOwnerParams, SingleHostIPRelay, SingleHostNameRelay, MultiHostNameRelay, PoolMetadataParams} from './Ada';
+import utils, { Precondition, Assert } from "./utils";
+import { PoolParams, PoolOwnerParams, SingleHostIPRelay, SingleHostNameRelay, MultiHostNameRelay, PoolMetadataParams } from './Ada';
 import { hex_to_buf } from "../lib/utils";
 
 const HARDENED = 0x80000000;
+
+export const AddressTypeNibbles = {
+  BASE: 0b0000,
+  POINTER: 0b0100,
+  ENTERPRISE: 0b0110,
+  BYRON: 0b1000,
+  REWARD: 0b1110
+}
+
+export const CertificateTypes = {
+	STAKE_REGISTRATION: 0,
+	STAKE_DEREGISTRATION: 1,
+	STAKE_DELEGATION: 2,
+	STAKE_POOL_REGISTRATION : 3
+}
 
 const KEY_HASH_LENGTH = 28;
 
 const POOL_REGISTRATION_OWNERS_MAX = 1000;
 const POOL_REGISTRATION_RELAYS_MAX = 1000;
+
+function validateCertificates(
+  certificates: Array<Certificate>
+)
+{
+  Precondition.checkIsArray(certificates, "certificates not an array");
+  const isSigningPoolRegistrationAsOwner = certificates.some(
+    cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+  );
+
+  for (const cert of certificates) {
+    if (!cert) throw new Error("invalid certificate");
+
+    const CANNOT_COMBINE_CERTIFICATES = "cannot combine pool registration with other certificates";
+    const PATH_IS_REQUIRED =  "path is required for a certificate of type " + cert.type;
+    switch (cert.type) {
+      case CertificateTypes.STAKE_REGISTRATION: {
+        Precondition.check(!isSigningPoolRegistrationAsOwner, CANNOT_COMBINE_CERTIFICATES);
+        Precondition.checkIsValidPath(cert.path, PATH_IS_REQUIRED);
+        Precondition.check(!cert.poolKeyHashHex, "superfluous pool key hash in a certificate of type " + cert.type);
+        break;
+      }
+      case CertificateTypes.STAKE_DEREGISTRATION: {
+        Precondition.check(!isSigningPoolRegistrationAsOwner, CANNOT_COMBINE_CERTIFICATES);
+        Precondition.checkIsValidPath(cert.path, PATH_IS_REQUIRED);
+        Precondition.check(!cert.poolKeyHashHex, "superfluous pool key hash in a certificate of type " + cert.type);
+        break;
+      }
+      case CertificateTypes.STAKE_DELEGATION: {
+        Precondition.check(!isSigningPoolRegistrationAsOwner, CANNOT_COMBINE_CERTIFICATES);
+        Precondition.checkIsValidPath(cert.path, PATH_IS_REQUIRED);
+        Precondition.checkIsHexString(cert.poolKeyHashHex, "missing pool key hash in a certificate of type " + cert.type);
+        Precondition.check(cert.poolKeyHashHex.length == KEY_HASH_LENGTH * 2, "invalid pool key hash in a certificate of type " + cert.type);
+        break;
+      }
+      case CertificateTypes.STAKE_POOL_REGISTRATION: {
+        Assert.assert(isSigningPoolRegistrationAsOwner);
+        Precondition.check(!cert.path, "superfluous path for pool registration certificate");
+        const poolParams = cert.poolRegistrationParams;
+        Precondition.check(!!poolParams, "missing stake pool params in a pool registration certificate");
+
+        // serialization succeeds if and only if params are valid
+        serializePoolInitialParams(poolParams);
+
+        // owners
+        Precondition.checkIsArray(poolParams.poolOwners, "owners not an array");
+        let numPathOwners = 0;
+        for (const owner of poolParams.poolOwners) {
+          if (owner.stakingPath) {
+            numPathOwners++;
+            serializePoolOwnerParams(owner);
+          }
+        }
+        if (numPathOwners !== 1) throw new Error("there should be exactly one path owner");
+
+        // relays
+        Precondition.checkIsArray(poolParams.relays, "relays not an array");
+        for (const relay of poolParams.relays) {
+          serializePoolRelayParams(relay);
+        }
+
+        // metadata
+        serializePoolMetadataParams(poolParams.metadata);
+
+        break;
+      }
+      default:
+        throw new Error("invalid certificate type");
+    }
+  }
+}
+
+export function validateTransaction(
+  networkId: number,
+  protocolMagic: number,
+  inputs: Array<InputTypeUTxO>,
+  outputs: Array<OutputTypeAddress | OutputTypeAddressParams>,
+  feeStr: string,
+  ttlStr: string,
+  certificates: Array<Certificate>,
+  withdrawals: Array<Withdrawal>,
+  metadataHashHex: ?string
+) {
+  Precondition.checkIsArray(certificates, "certificates not an array");
+  const isSigningPoolRegistrationAsOwner = certificates.some(
+    cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+  );
+
+  Precondition.checkIsArray(inputs, "inputs not an array");
+  for (const input of inputs) {
+    Precondition.checkIsHexString(input.txHashHex, "invalid tx hash");
+    Precondition.check(input.txHashHex.length === 32 * 2, "invalid tx hash length");
+
+    if (isSigningPoolRegistrationAsOwner) {
+      // input should not be given with a path
+      // the path is not used, but we check just to avoid potential confusion of developers using this
+      Precondition.check(!input.path, "stake pool registration: inputs should not contain the witness path");
+    }
+  }
+
+  Precondition.checkIsArray(inputs, "outputs not an array");
+  for (const output of outputs) {
+    Precondition.checkIsValidAmount(output.amountStr, "invalid amount in output");
+    if (output.addressHex) {
+      Precondition.checkIsHexString(output.addressHex, "invalid address in output");
+      Precondition.check(output.addressHex.length <= 128 * 2, "invalid address in output: too long");
+    } else if (output.spendingPath) {
+      // we try to serialize the data, an error is thrown if output params are invalid
+      serializeAddressParams(
+        output.addressTypeNibble,
+        output.addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,
+        output.spendingPath,
+        output.stakingPath,
+        output.stakingKeyHashHex,
+        output.stakingBlockchainPointer
+      );
+    } else {
+      throw new Error("unknown output type");
+    }
+  }
+
+  // fee
+  Precondition.checkIsValidAmount(feeStr, "invalid fee");
+
+  //  ttl
+  const ttl = utils.safe_parseInt(ttlStr);
+  Precondition.checkIsUint64(ttl, "invalid ttl");
+  Precondition.check(ttl > 0, "invalid ttl: should be positive");
+
+  // certificates
+  validateCertificates(certificates);
+
+  Precondition.checkIsArray(withdrawals, "withdrawals not an array");
+  if (isSigningPoolRegistrationAsOwner && withdrawals.length > 0) {
+    throw new Error("no withdrawals allowed for transactions registering stake pools");
+  }
+  for (const withdrawal of withdrawals) {
+    Precondition.checkIsValidAmount(withdrawal.amountStr);
+    Precondition.checkIsValidPath(withdrawal.path);
+  }
+
+  // metadata could be null
+  if (metadataHashHex !== null) {
+    Precondition.checkIsHexString(metadataHashHex, "invalid metadata");
+    Precondition.check(metadataHashHex.length == 32 * 2, "invalid metadata");
+  }
+}
 
 export function serializeAddressParams(
     addressTypeNibble: number,
@@ -189,7 +351,7 @@ export function serializePoolRelayParams(
     Precondition.check(ipParts.length === 4, errorMsg);
     let ipBytes = Buffer.alloc(4);
     for (let i = 0; i < 4; i++) {
-      let ipPart = parseInt(ipParts[i], 10);
+      let ipPart = utils.safe_parseInt(ipParts[i]);
       Precondition.checkIsUint8(ipPart, errorMsg);
       ipBytes.writeUInt8(ipPart, i);
     }
@@ -280,6 +442,10 @@ export function serializePoolMetadataParams(
 
 export default {
   HARDENED,
+  AddressTypeNibbles,
+  CertificateTypes,
+
+  validateTransaction,
 
   serializeAddressParams,
 

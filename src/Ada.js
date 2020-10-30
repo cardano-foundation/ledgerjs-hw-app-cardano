@@ -20,7 +20,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 import utils, { Precondition, Assert } from "./utils";
-import cardano from "./cardano";
+import cardano, { CertificateTypes, AddressTypeNibbles } from "./cardano";
 
 const CLA = 0xd7;
 
@@ -50,9 +50,9 @@ export type OutputTypeAddress = {|
 |};
 
 export type OutputTypeAddressParams = {|
+  amountStr: string,
   addressTypeNibble: number,
   spendingPath: BIP32Path,
-  amountStr: string,
   stakingPath: ?BIP32Path,
   stakingKeyHashHex: ?string,
   stakingBlockchainPointer: ?StakingBlockchainPointer,
@@ -161,14 +161,6 @@ export type SignTransactionResponse = {|
   witnesses: Array<Witness>
 |};
 
-export const AddressTypeNibbles = {
-  BASE: 0b0000,
-  POINTER: 0b0100,
-  ENTERPRISE: 0b0110,
-  BYRON: 0b1000,
-  REWARD: 0b1110
-}
-
 const MetadataCodes = {
 	SIGN_TX_METADATA_NO: 1,
 	SIGN_TX_METADATA_YES: 2
@@ -182,14 +174,6 @@ const PoolRegistrationCodes = {
 const TxOutputTypeCodes = {
   SIGN_TX_OUTPUT_TYPE_ADDRESS: 1,
   SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2
-}
-
-
-const CertificateTypes = {
-	STAKE_REGISTRATION: 0,
-	STAKE_DEREGISTRATION: 1,
-	STAKE_DELEGATION: 2,
-	STAKE_POOL_REGISTRATION : 3
 }
 
 export const ErrorCodes = {
@@ -529,6 +513,12 @@ export default class Ada {
     metadataHashHex: ?string
   ): Promise<SignTransactionResponse> {
 
+    cardano.validateTransaction(
+      networkId, protocolMagic,
+      inputs, outputs, feeStr, ttlStr,
+      certificates, withdrawals, metadataHashHex
+    );
+
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
     const P1_STAGE_OUTPUTS = 0x03;
@@ -593,9 +583,6 @@ export default class Ada {
     const signTx_addInput = async (
       input: InputTypeUTxO
     ): Promise<void> => {
-      Precondition.checkIsHexString(input.txHashHex, "invalid tx hash");
-      Precondition.check(input.txHashHex.length === 32 * 2, "invalid tx hash");
-
       const data = Buffer.concat([
         utils.hex_to_buf(input.txHashHex),
         utils.uint32_to_buf(input.outputIndex),
@@ -608,9 +595,6 @@ export default class Ada {
       amountStr: string,
       addressHex: string
     ): Promise<void> => {
-      Precondition.checkIsHexString(addressHex, "invalid address in output");
-      Precondition.checkIsValidAmount(amountStr, "invalid amount in output");
-
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS),
@@ -628,7 +612,6 @@ export default class Ada {
       stakingKeyHashHex: ?string = null,
       stakingBlockchainPointer: ?StakingBlockchainPointer = null,
     ): Promise<void> => {
-      Precondition.checkIsValidAmount(amountStr, "invalid amount in output");
 
       const data = Buffer.concat([
         utils.amount_to_buf(amountStr),
@@ -660,14 +643,8 @@ export default class Ada {
       case CertificateTypes.STAKE_REGISTRATION:
       case CertificateTypes.STAKE_DEREGISTRATION:
       case CertificateTypes.STAKE_DELEGATION: {
-        // these certificates are not allowed within a pool registration tx
-        Precondition.check(!isSigningPoolRegistrationAsOwner,
-            "cannot combine pool registration with other certificates");
-
-        if (path != null)
+        if (path)
           dataFields.push(utils.path_to_buf(path));
-        else
-          throw new Error("path is required for a certificate of type " + type);
         break;
       }
       case CertificateTypes.STAKE_POOL_REGISTRATION: {
@@ -680,10 +657,6 @@ export default class Ada {
       }
 
       if (poolKeyHashHex != null) {
-        Precondition.check(
-          type === CertificateTypes.STAKE_DELEGATION,
-          "superfluous pool key hash in a certificate of type " + type
-        );
         dataFields.push(utils.hex_to_buf(poolKeyHashHex));
       }
 
@@ -694,7 +667,7 @@ export default class Ada {
       // we are done for every certificate except pool registration
 
       if (type === CertificateTypes.STAKE_POOL_REGISTRATION) {
-        if(!poolParams)
+        if (!poolParams)
           throw new Error("missing stake pool params in a pool registration certificate");
 
         // additional data for pool certificate
@@ -818,39 +791,13 @@ export default class Ada {
     // we need exactly one owner given by path to have a witness
     const witnessPaths = [];
     if (isSigningPoolRegistrationAsOwner) {
-      if (certificates.length > 1)
-        throw new Error("A pool registration certificate must be standalone");
-      if (withdrawals.length)
-        throw new Error("No withdrawals allowed for transactions registering stake pools");
+      Assert.assert(certificates.length == 1);
 
-      // verify that no input is given with a path (just to avoid potential confusion)
-      for (const input of inputs) {
-        Precondition.check(!input.path, "stake pool registration: inputs should not contain the witness path");
-      }
-
-      if (!certificates) throw new Error("missing certificates");
-      if (!certificates[0]) throw new Error("invalid certificate");
-      if (!certificates[0].poolRegistrationParams) throw new Error("missing stake pool registration params");
-      if (!certificates[0].poolRegistrationParams.poolOwners) throw new Error("missing stake pool owners");
-
-      let witnessOwner: ?PoolOwnerParams = null;
-      for (const owner of certificates[0].poolRegistrationParams.poolOwners) {
-        if (owner.stakingPath) {
-          Precondition.checkIsValidPath(owner.stakingPath);
-          if (witnessOwner) {
-            throw new Error("two pool owners given by path");
-          } else {
-            witnessOwner = owner;
-          }
-        }
-      }
-
-      if (witnessOwner) {
-        // a single witness for the pool owner given by path
-        witnessPaths.push(witnessOwner.stakingPath);
-      } else {
-        throw new Error("no owner given by path");
-      }
+      // there should be exactly one owner given by path which will be used for the witness
+      const owners = certificates[0].poolRegistrationParams.poolOwners;
+      const witnessOwner = owners.find(owner => !!owner.stakingPath);
+      Assert.assert(!!witnessOwner);
+      witnessPaths.push(witnessOwner.stakingPath);
 
     } else {
       // we collect required witnesses for inputs, certificates and withdrawals
@@ -946,6 +893,9 @@ export default class Ada {
 
 // reexport
 export {
+  AddressTypeNibbles,
+  CertificateTypes,
+
   cardano,
   utils
 };
