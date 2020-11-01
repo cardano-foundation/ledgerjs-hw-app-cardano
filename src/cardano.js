@@ -20,6 +20,7 @@ export const CertificateTypes = {
 }
 
 const KEY_HASH_LENGTH = 28;
+const TX_HASH_LENGTH = 32;
 
 const POOL_REGISTRATION_OWNERS_MAX = 1000;
 const POOL_REGISTRATION_RELAYS_MAX = 1000;
@@ -180,7 +181,7 @@ export function validateTransaction(
   Precondition.checkIsArray(inputs, TxErrors.INPUTS_NOT_ARRAY);
   for (const input of inputs) {
     Precondition.checkIsHexString(input.txHashHex, TxErrors.INPUT_INVALID_TX_HASH);
-    Precondition.check(input.txHashHex.length === 32 * 2, TxErrors.INPUT_INVALID_TX_HASH);
+    Precondition.check(input.txHashHex.length === TX_HASH_LENGTH * 2, TxErrors.INPUT_INVALID_TX_HASH);
 
     if (isSigningPoolRegistrationAsOwner) {
       // input should not be given with a path
@@ -317,7 +318,7 @@ export function serializePoolInitialParams(
   params: PoolParams
 ): Buffer {
   Precondition.checkIsHexString(params.poolKeyHashHex, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH);
-  Precondition.check(params.poolKeyHashHex.length === 28 * 2, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH);
+  Precondition.check(params.poolKeyHashHex.length === KEY_HASH_LENGTH * 2, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH);
 
   Precondition.checkIsHexString(params.vrfKeyHashHex, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH);
   Precondition.check(params.vrfKeyHashHex.length === 32 * 2, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH);
@@ -485,6 +486,10 @@ export function serializePoolMetadataParams(
   const url = params.metadataUrl;
   Precondition.checkIsString(url, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
   Precondition.check(url.length <= 64, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
+  Precondition.check(
+    url.split('').every(c => (c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126)),
+    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+  );
 
   const hashHex = params.metadataHashHex;
   Precondition.checkIsHexString(hashHex, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH);
@@ -511,6 +516,8 @@ export default {
   HARDENED,
   AddressTypeNibbles,
   CertificateTypes,
+  KEY_HASH_LENGTH,
+  TX_HASH_LENGTH,
 
   serializeGetExtendedPublicKeyParams,
 

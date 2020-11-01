@@ -34,7 +34,7 @@ export const poolMetadataVariations = {
     metadataHashHex: "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
   },
   poolMetadataInvalidUrl: {
-    metadataUrl: "$.v#5fb2@euf)#i^9a|$;i8$l7v<aj)2<;bdmn9",
+    metadataUrl: "\n",
     metadataHashHex: "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
   },
   poolMetadataMissingHash: {

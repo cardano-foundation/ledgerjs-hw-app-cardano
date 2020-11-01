@@ -108,8 +108,8 @@ export const Precondition = {
 };
 
 export const Assert = {
-  assert: (cond: boolean) => {
-    if (!cond) throw new Error("Assertion failed");
+  assert: (cond: boolean, errMsg: string = "Assertion failed") => {
+    if (!cond) throw new Error(errMsg);
   }
 };
 
@@ -239,7 +239,7 @@ export function amount_to_buf(amount: string): Buffer {
 
   const data = bs10.decode(amount);
   // Amount should fit uin64_t
-  Assert.assert(data.length <= 8);
+  Assert.assert(data.length <= 8, "excessive data");
 
   const padding = Buffer.alloc(8 - data.length);
   return Buffer.concat([padding, data]);
