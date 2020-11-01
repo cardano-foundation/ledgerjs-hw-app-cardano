@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Assert, getAda, NetworkIds, ProtocolMagics} from "../test_utils";
-import { getErrorDescription } from "../../../lib/Ada";
+import { getErrorDescription, TxErrors } from "../../../lib/Ada";
 import { ERRORS } from "../direct/constants";
 import { inputs, outputs, relays, poolMetadataVariations, sampleFeeStr, sampleTtlStr, certificates, withdrawals, results } from './__fixtures__/signTxPoolRegistration';
 
@@ -188,7 +188,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "there should be exactly one owner given by path";
+    const errMsg = TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH;
     // after removing js validation, this should pass instead:
     // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
     await checkThrows(f, errMsg);
@@ -212,8 +212,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "there should be exactly one owner given by path";
-    await checkThrows(f, errMsg);
+    await checkThrows(f, TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
   });
 
   it("Should reject pool registration with no owners", async () => {
@@ -234,8 +233,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "there should be exactly one owner given by path";
-    await checkThrows(f, errMsg);
+    await checkThrows(f, TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
   });
 
   it("Should reject pool registration with invalid metadata params", async () => {
@@ -273,6 +271,8 @@ describe("signTxPoolRegistrationReject", async () => {
       }
 
       const errMsg = "invalid pool metadata";
+      Assert.assert(TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL.includes(errMsg));
+      Assert.assert(TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH.includes(errMsg));
       // for poolMetadataUrlTooLong, after removing js validation, this should pass instead:
       // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
       await checkThrows(f, errMsg);
@@ -309,8 +309,7 @@ describe("signTxPoolRegistrationReject", async () => {
         );
       }
 
-      const errMsg = "missing dns record";
-      await checkThrows(f, errMsg);
+      await checkThrows(f, TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS);
     }
   });
 
@@ -332,8 +331,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "invalid margin";
-    await checkThrows(f, errMsg);
+    await checkThrows(f, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
   });
 
   it("Should reject pool registration along with other certificates", async () => {
@@ -357,8 +355,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "cannot combine pool registration with other certificates";
-    await checkThrows(f, errMsg);
+    await checkThrows(f, TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
   });
 
   it("Should reject pool registration along with a withdrawal", async () => {
@@ -380,7 +377,7 @@ describe("signTxPoolRegistrationReject", async () => {
       );
     }
 
-    const errMsg = "no withdrawals allowed for transactions registering stake pools";
+    const errMsg = TxErrors.WITHDRAWALS_FORBIDDEN;
     // after removing js validation, this should pass instead:
     // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
     await checkThrows(f, errMsg);

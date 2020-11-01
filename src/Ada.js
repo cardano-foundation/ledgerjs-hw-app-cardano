@@ -20,7 +20,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 import utils, { Precondition, Assert } from "./utils";
-import cardano, { CertificateTypes, AddressTypeNibbles } from "./cardano";
+import cardano, { CertificateTypes, AddressTypeNibbles, TxErrors } from "./cardano";
 
 const CLA = 0xd7;
 
@@ -176,7 +176,7 @@ const TxOutputTypeCodes = {
   SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2
 }
 
-export const ErrorCodes = {
+export const DeviceErrorCodes = {
   ERR_STILL_IN_CALL: 0x6e04, // internal
   ERR_INVALID_DATA: 0x6e07,
   ERR_INVALID_BIP_PATH: 0x6e08,
@@ -192,24 +192,27 @@ export const ErrorCodes = {
 const GH_ERRORS_LINK =
   "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h";
 
-const ErrorMsgs = {
-  [ErrorCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
-  [ErrorCodes.ERR_INVALID_BIP_PATH]:
-    "Invalid derivation path supplied to Ledger",
-  [ErrorCodes.ERR_REJECTED_BY_USER]: "Action rejected by user",
-  [ErrorCodes.ERR_REJECTED_BY_POLICY]:
-    "Action rejected by Ledger's security policy",
-  [ErrorCodes.ERR_DEVICE_LOCKED]: "Device is locked",
-  [ErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app",
-  [ErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type"
+const DeviceErrorMessages = {
+  [DeviceErrorCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
+  [DeviceErrorCodes.ERR_INVALID_BIP_PATH]: "Invalid derivation path supplied to Ledger",
+  [DeviceErrorCodes.ERR_REJECTED_BY_USER]: "Action rejected by user",
+  [DeviceErrorCodes.ERR_REJECTED_BY_POLICY]: "Action rejected by Ledger's security policy",
+  [DeviceErrorCodes.ERR_DEVICE_LOCKED]: "Device is locked",
+  [DeviceErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app",
+  [DeviceErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type"
 };
 
 export const getErrorDescription = (statusCode: number) => {
   const statusCodeHex = `0x${statusCode.toString(16)}`;
   const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_ERRORS_LINK}`;
 
-  return ErrorMsgs[statusCode] || defaultMsg;
+  return DeviceErrorMessages[statusCode] || defaultMsg;
 };
+
+export const VersionErrors = {
+  UNSUPPORTED_GET_SERIAL: "getSerial not supported by device firmware",
+  UNSUPPORTED_POOL_REGISTRATION: "pool registration not supported by device firmware",
+}
 
 // It can happen that we try to send a message to the device
 // when the device thinks it is still in a middle of previous ADPU stream.
@@ -222,7 +225,7 @@ const wrapRetryStillInCall = fn => async (...args: any) => {
   try {
     return await fn(...args);
   } catch (e) {
-    if (e && e.statusCode && e.statusCode === ErrorCodes.ERR_STILL_IN_CALL) {
+    if (e && e.statusCode && e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL) {
       // Do the retry
       return await fn(...args);
     }
@@ -339,7 +342,7 @@ export default class Ada {
   async getSerial(): Promise<GetSerialResponse> {
     const version = await this._getVersion();
     if (!this._isGetSerialSupported(version))
-      throw new Error("getSerial not supported by device firmware");
+      throw new Error(VersionErrors.UNSUPPORTED_GET_SERIAL);
 
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_SERIAL, p1, p2, data).then(
@@ -381,8 +384,6 @@ export default class Ada {
   async getExtendedPublicKey(
     path: BIP32Path
   ): Promise<GetExtendedPublicKeyResponse> {
-    Precondition.checkIsValidPath(path, "invalid key path");
-
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data).then(
         utils.stripRetcodeFromResponse
@@ -391,7 +392,7 @@ export default class Ada {
     const P1_UNUSED = 0x00;
     const P2_UNUSED = 0x00;
 
-    const data = utils.path_to_buf(path);
+    const data = cardano.serializeGetExtendedPublicKeyParams(path);
 
     const response = await wrapRetryStillInCall(_send)(
       P1_UNUSED,
@@ -653,7 +654,8 @@ export default class Ada {
         break;
       }
       default:
-        throw new Error("invalid certificate type");
+        // validation should catch invalid certificate type
+        Assert.assert(false);
       }
 
       if (poolKeyHashHex != null) {
@@ -667,9 +669,6 @@ export default class Ada {
       // we are done for every certificate except pool registration
 
       if (type === CertificateTypes.STAKE_POOL_REGISTRATION) {
-        if (!poolParams)
-          throw new Error("missing stake pool params in a pool registration certificate");
-
         // additional data for pool certificate
         const APDU_INSTRUCTIONS = {
           POOL_PARAMS: 0x30,
@@ -704,12 +703,12 @@ export default class Ada {
           Assert.assert(response.length === 0);
         }
 
-        const mdResponse = await _send(
+        const metadataResponse = await _send(
           P1_STAGE_CERTIFICATES,
           APDU_INSTRUCTIONS.METADATA,
           cardano.serializePoolMetadataParams(poolParams.metadata)
         );
-        Assert.assert(mdResponse.length === 0);
+        Assert.assert(metadataResponse.length === 0);
 
         const confirmResponse = await _send(
           P1_STAGE_CERTIFICATES,
@@ -842,7 +841,8 @@ export default class Ada {
           output.stakingBlockchainPointer,
         );
       } else {
-        throw new Error("unknown output type");
+        // validation should catch invalid outputs
+        Assert.assert(false);
       }
     }
 
@@ -895,6 +895,7 @@ export default class Ada {
 export {
   AddressTypeNibbles,
   CertificateTypes,
+  TxErrors,
 
   cardano,
   utils
