@@ -502,6 +502,22 @@ export default class Ada {
     Assert.assert(response.length === 0);
   }
 
+  _isPoolRegistrationSupported(version: GetVersionResponse): boolean {
+    const major = parseInt(version.major);
+    const minor = parseInt(version.minor);
+    const patch = parseInt(version.patch);
+    if (isNaN(major) || isNaN(minor) || isNaN(patch))
+      return false;
+
+    if (major >= 3) {
+      return true;
+    } else if (major === 2) {
+      return minor >= 1;
+    } else {
+      return false;
+    }
+  }
+
   async signTransaction(
     networkId: number,
     protocolMagic: number,
@@ -520,6 +536,16 @@ export default class Ada {
       certificates, withdrawals, metadataHashHex
     );
 
+    // pool registrations are quite restricted
+    // this affects witness set construction and many validations
+    const isSigningPoolRegistrationAsOwner = certificates.some(
+      cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    );
+
+    const version = await this._getVersion();
+    if (isSigningPoolRegistrationAsOwner && !this._isPoolRegistrationSupported(version))
+      throw new Error(VersionErrors.UNSUPPORTED_POOL_REGISTRATION);
+
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
     const P1_STAGE_OUTPUTS = 0x03;
@@ -536,12 +562,6 @@ export default class Ada {
       this.send(CLA, INS.SIGN_TX, p1, p2, data).then(
         utils.stripRetcodeFromResponse
       );
-
-    // pool registrations are quite restricted
-    // this affects witness set construction and many validations
-    const isSigningPoolRegistrationAsOwner = certificates.some(
-      cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
-    );
 
     const signTx_init = async (
       networkId: number,
