@@ -153,7 +153,7 @@ describe("signTxPoolRegistrationReject", async () => {
   let ada = {};
 
   let checkThrows = async (f, errorMsg) => {
-    Assert.assert(typeof f === "function");
+    Assert.assert(typeof f === "function", "the test is messed up");
     try {
       await f();
       throw new Error("should have thrown by now");
@@ -236,12 +236,10 @@ describe("signTxPoolRegistrationReject", async () => {
     await checkThrows(f, TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
   });
 
-  it("Should reject pool registration with invalid metadata params", async () => {
+  it("Should reject pool registration with invalid metadata url", async () => {
     const invalidMetadataVariations = [
       poolMetadataVariations.poolMetadataUrlTooLong,
-      poolMetadataVariations.poolMetadataInvalidHexLength,
       poolMetadataVariations.poolMetadataInvalidUrl,
-      poolMetadataVariations.poolMetadataMissingHash,
       poolMetadataVariations.poolMetadataMissingUrl
     ]
 
@@ -270,9 +268,45 @@ describe("signTxPoolRegistrationReject", async () => {
         );
       }
 
-      const errMsg = "invalid pool metadata";
-      Assert.assert(TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL.includes(errMsg));
-      Assert.assert(TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH.includes(errMsg));
+      const errMsg = TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL;
+      // for poolMetadataUrlTooLong, after removing js validation, this should pass instead:
+      // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
+      await checkThrows(f, errMsg);
+    }
+  });
+
+  it("Should reject pool registration with invalid metadata hash", async () => {
+    const invalidMetadataVariations = [
+      poolMetadataVariations.poolMetadataInvalidHexLength,
+      poolMetadataVariations.poolMetadataMissingHash,
+    ]
+
+    for (const metadataVariant of invalidMetadataVariations) {
+      async function f() {
+        const cert = {
+          ...certificates.poolRegistrationDefault,
+          poolRegistrationParams: {
+            ...certificates.poolRegistrationDefault.poolRegistrationParams,
+            metadata: metadataVariant
+          }
+        }
+
+        const response = await ada.signTransaction(
+          NetworkIds.MAINNET,
+          ProtocolMagics.MAINNET,
+          [inputs.utxo],
+          [
+            outputs.external,
+          ],
+          sampleFeeStr,
+          sampleTtlStr,
+          [cert],
+          [],
+          null
+        );
+      }
+
+      const errMsg = TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH;
       // for poolMetadataUrlTooLong, after removing js validation, this should pass instead:
       // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
       await checkThrows(f, errMsg);

@@ -499,7 +499,7 @@ export default class Ada {
     );
 
     const response = await _send(P1_DISPLAY, P2_UNUSED, data);
-    Assert.assert(response.length === 0);
+    Assert.assert(response.length === 0, "response not empty");
   }
 
   _isPoolRegistrationSupported(version: GetVersionResponse): boolean {
@@ -558,10 +558,16 @@ export default class Ada {
     const P1_STAGE_WITNESSES = 0x0a;
     const P2_UNUSED = 0x00;
 
-    const _send = (p1, p2, data) =>
-      this.send(CLA, INS.SIGN_TX, p1, p2, data).then(
-        utils.stripRetcodeFromResponse
+    const self = this;
+    const _send = async function(p1, p2, data, expectedResponseLength = 0) {
+      let response = await self.send(CLA, INS.SIGN_TX, p1, p2, data);
+      response = utils.stripRetcodeFromResponse(response);
+      Assert.assert(
+        response.length === expectedResponseLength,
+        `unexpected response lenth: ${response.length} instead of ${expectedResponseLength}`
       );
+      return response;
+    }
 
     const signTx_init = async (
       networkId: number,
@@ -598,7 +604,6 @@ export default class Ada {
         P2_UNUSED,
         data
       );
-      Assert.assert(response.length === 0);
     };
 
     const signTx_addInput = async (
@@ -608,8 +613,7 @@ export default class Ada {
         utils.hex_to_buf(input.txHashHex),
         utils.uint32_to_buf(input.outputIndex),
       ]);
-      const response = await _send(P1_STAGE_INPUTS, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_INPUTS, P2_UNUSED, data);
     };
 
     const signTx_addAddressOutput = async (
@@ -621,8 +625,7 @@ export default class Ada {
         utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS),
         utils.hex_to_buf(addressHex)
       ]);
-      const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
     };
 
     const signTx_addChangeOutput = async (
@@ -646,8 +649,7 @@ export default class Ada {
           stakingBlockchainPointer
         )
       ]);
-      const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
     };
 
     const signTx_addCertificate = async (
@@ -669,13 +671,13 @@ export default class Ada {
         break;
       }
       case CertificateTypes.STAKE_POOL_REGISTRATION: {
-        Assert.assert(isSigningPoolRegistrationAsOwner);
+        Assert.assert(isSigningPoolRegistrationAsOwner, "tx certificates validation messed up");
         // OK, data are serialized and sent later in additional APDUs
         break;
       }
       default:
         // validation should catch invalid certificate type
-        Assert.assert(false);
+        Assert.assert(false, "invalid certificate type");
       }
 
       if (poolKeyHashHex != null) {
@@ -683,8 +685,7 @@ export default class Ada {
       }
 
       const data = Buffer.concat(dataFields);
-      const response = await _send(P1_STAGE_CERTIFICATES, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_CERTIFICATES, P2_UNUSED, data);
 
       // we are done for every certificate except pool registration
 
@@ -698,44 +699,38 @@ export default class Ada {
           CONFIRMATION: 0x34
         };
 
-        const response = await _send(
+        await _send(
           P1_STAGE_CERTIFICATES,
           APDU_INSTRUCTIONS.POOL_PARAMS,
           cardano.serializePoolInitialParams(poolParams)
         );
-        Assert.assert(response.length === 0);
 
         for (const owner of poolParams.poolOwners) {
-          const response = await _send(
+          await _send(
             P1_STAGE_CERTIFICATES,
             APDU_INSTRUCTIONS.OWNERS,
             cardano.serializePoolOwnerParams(owner)
           );
-          Assert.assert(response.length === 0);
         }
-
         for (const relay of poolParams.relays) {
-          const response = await _send(
+          await _send(
             P1_STAGE_CERTIFICATES,
             APDU_INSTRUCTIONS.RELAYS,
             cardano.serializePoolRelayParams(relay)
           );
-          Assert.assert(response.length === 0);
         }
 
-        const metadataResponse = await _send(
+        await _send(
           P1_STAGE_CERTIFICATES,
           APDU_INSTRUCTIONS.METADATA,
           cardano.serializePoolMetadataParams(poolParams.metadata)
         );
-        Assert.assert(metadataResponse.length === 0);
 
-        const confirmResponse = await _send(
+        await _send(
           P1_STAGE_CERTIFICATES,
           APDU_INSTRUCTIONS.CONFIRMATION,
           Buffer.alloc(0)
         );
-        Assert.assert(confirmResponse.length === 0);
       }
     }
 
@@ -747,8 +742,7 @@ export default class Ada {
         utils.amount_to_buf(amountStr),
         utils.path_to_buf(path)
       ]);
-      const response = await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data);
     }
 
     const signTx_setFee = async (
@@ -757,8 +751,7 @@ export default class Ada {
       const data = Buffer.concat([
         utils.amount_to_buf(feeStr),
       ]);
-      const response = await _send(P1_STAGE_FEE, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_FEE, P2_UNUSED, data);
     };
 
     const signTx_setTtl = async (
@@ -767,8 +760,7 @@ export default class Ada {
       const data = Buffer.concat([
         utils.amount_to_buf(ttlStr),
       ]);
-      const response = await _send(P1_STAGE_TTL, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_TTL, P2_UNUSED, data);
     };
 
     const signTx_setMetadata = async (
@@ -776,8 +768,7 @@ export default class Ada {
     ): Promise<void> => {
       const data = utils.hex_to_buf(metadataHashHex);
 
-      const response = await _send(P1_STAGE_METADATA, P2_UNUSED, data);
-      Assert.assert(response.length === 0);
+      await _send(P1_STAGE_METADATA, P2_UNUSED, data);
     };
 
     const signTx_awaitConfirm = async (): Promise<{
@@ -786,7 +777,8 @@ export default class Ada {
       const response = await _send(
         P1_STAGE_CONFIRM,
         P2_UNUSED,
-        utils.hex_to_buf("")
+        utils.hex_to_buf(""),
+        cardano.TX_HASH_LENGTH
       );
       return {
         txHashHex: response.toString("hex")
@@ -800,7 +792,7 @@ export default class Ada {
       witnessSignatureHex: string
     |}> => {
       const data = Buffer.concat([utils.path_to_buf(path)]);
-      const response = await _send(P1_STAGE_WITNESSES, P2_UNUSED, data);
+      const response = await _send(P1_STAGE_WITNESSES, P2_UNUSED, data, 64);
       return {
         path: path,
         witnessSignatureHex: utils.buf_to_hex(response)
@@ -815,7 +807,7 @@ export default class Ada {
       // there should be exactly one owner given by path which will be used for the witness
       const owners = certificates[0].poolRegistrationParams.poolOwners;
       const witnessOwner = owners.find(owner => !!owner.stakingPath);
-      Assert.assert(!!witnessOwner);
+      Assert.assert(!!witnessOwner, "witness owner missing");
       witnessPaths.push(witnessOwner.stakingPath);
 
     } else {
@@ -862,7 +854,7 @@ export default class Ada {
         );
       } else {
         // validation should catch invalid outputs
-        Assert.assert(false);
+        Assert.assert(false, "invalid output type");
       }
     }
 
