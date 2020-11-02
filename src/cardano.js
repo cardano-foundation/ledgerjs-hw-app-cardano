@@ -237,7 +237,7 @@ export function validateTransaction(
   }
 
   // metadata could be null
-  if (metadataHashHex !== null) {
+  if ((metadataHashHex !== null) && (metadataHashHex !== undefined)) {
     Precondition.checkIsHexString(metadataHashHex, TxErrors.METADATA_INVALID);
     Precondition.check(metadataHashHex.length == 32 * 2, TxErrors.METADATA_INVALID);
   }
@@ -475,7 +475,7 @@ export function serializePoolMetadataParams(
   const POOL_CERTIFICATE_METADATA_YES = 2;
 
   const includeMetadataBuffer = Buffer.alloc(1);
-  if (!params) {
+  if ((params === null) || (params === undefined)) {
     // deal with null metadata
     includeMetadataBuffer.writeUInt8(POOL_CERTIFICATE_METADATA_NO);
     return includeMetadataBuffer;
