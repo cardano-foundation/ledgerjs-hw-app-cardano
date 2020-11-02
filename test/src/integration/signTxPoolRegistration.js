@@ -30,7 +30,7 @@ describe("signTxPoolRegistrationOK", async () => {
       sampleTtlStr,
       [cert],
       [],
-      null
+      undefined
     );
     expect(response).to.deep.equal(results.allRelaysHashAndPathOwners);
   });

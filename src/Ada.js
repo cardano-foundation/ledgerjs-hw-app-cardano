@@ -882,7 +882,7 @@ export default class Ada {
       }
     }
 
-    if (metadataHashHex != null) {
+    if ((metadataHashHex !== null) && (metadataHashHex !== undefined)) {
       await signTx_setMetadata(metadataHashHex);
     }
 
