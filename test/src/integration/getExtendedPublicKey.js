@@ -14,7 +14,7 @@ describe("getExtendedPublicKey", async () => {
     await ada.t.close();
   });
 
-  it("Should successfully get extended public key", async () => {
+  it("Should successfully get a single extended public key", async () => {
     const test = async path => {
       const derivation = getPathDerivationFixture({
         path,
@@ -34,6 +34,37 @@ describe("getExtendedPublicKey", async () => {
 
     await test("1852'/1815'/0'/0/1");
     await test("1852'/1815'/0'/2/0");
+  });
+
+  it("Should successfully get several extended public keys", async () => {
+    const paths = [
+      "44'/1815'/1'",
+      "44'/1815'/1'/0/12'",
+      "44'/1815'/1'/0/10'/1/2/3",
+      "1852'/1815'/0'/0/1",
+      "1852'/1815'/0'/2/0"
+    ];
+
+    const inputs = [];
+    const expectedResults = [];
+    for (const path of paths) {
+      const derivation = getPathDerivationFixture({
+        path,
+      });
+
+      inputs.push(str_to_path(derivation.path));
+
+      expectedResults.push({
+        publicKeyHex: derivation.publicKey,
+        chainCodeHex: derivation.chainCode
+      });
+    };
+
+    const results = await ada.getExtendedPublicKeys(inputs);
+    for (let i = 0; i < expectedResults.length; i++) {
+      expect(results[i].publicKeyHex).to.equal(expectedResults[i].publicKeyHex);
+      expect(results[i].chainCodeHex).to.equal(expectedResults[i].chainCodeHex);
+    }
   });
 
   it("Should return the same public key with the same path consistently", async () => {

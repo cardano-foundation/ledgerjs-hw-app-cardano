@@ -34,15 +34,20 @@ describe("getExtendedPublicKey", async () => {
     // This is a sanity check test, to make sure the API did not change
     // If it is failing, you have to refactor all other tests
     await send(0x00, 0x00, validDataBuffer);
+
+    const data = Buffer.concat([validDataBuffer, Buffer.from("00000000", "hex")]);
+    await send(0x00, 0x00, data);
   });
 
-  it("Should not permit mismatch between path length and according buffer length", async () => {
-    const data = Buffer.concat([validDataBuffer, Buffer.from("00", "hex")]);
+  it("Should not permit buffer with inappropriate length", async () => {
+    const data1 = Buffer.concat([validDataBuffer, Buffer.from("00", "hex")]);
+    await checkThrows(0x00, 0x00, data1, ERRORS.INVALID_DATA);
 
-    await checkThrows(0x00, 0x00, data, ERRORS.INVALID_DATA);
+    const data2 = Buffer.concat([validDataBuffer, Buffer.from("1122334455", "hex")]);
+    await checkThrows(0x00, 0x00, data2, ERRORS.INVALID_DATA);
   });
 
-  it("Should not permit mismatch between path length and according buffer length", async () => {
+  it("Should not permit buffer that is too short", async () => {
     const data = validDataBuffer.slice(0, -3);
 
     await checkThrows(0x00, 0x00, data, ERRORS.INVALID_DATA);
@@ -53,13 +58,13 @@ describe("getExtendedPublicKey", async () => {
       await checkThrows(p1, p2, validDataBuffer, ERRORS.INVALID_REQUEST_PARAMETERS);
 
     // Invalid P1
-    await testcase(0x01, 0x00);
+    await testcase(0x03, 0x00);
 
     // // Invalid P2
     await testcase(0x00, 0x01);
   });
 
-  it("Should not permit path not starting with 44'/1815'", async () => {
+  it("Should not permit path with wrong/missing first three elements", async () => {
     const paths = [
       "44'",
       "44'/132'/1'",
