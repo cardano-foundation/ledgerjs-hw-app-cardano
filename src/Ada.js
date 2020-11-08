@@ -371,6 +371,69 @@ export default class Ada {
   }
 
   /**
+   * @description Get several public keys; one for each of the specified BIP 32 paths.
+   *
+   * @param {Array<BIP32Path>} paths The paths. A path must begin with `44'/1815'/account'` or `1852'/1815'/account'`, and may be up to 10 indexes long.
+   * @return {Promise<Array<GetExtendedPublicKeyResponse>>} The extended public keys (i.e. with chaincode) for the given paths.
+   *
+   * @example
+   * const [{ publicKey, chainCode }] = await ada.getExtendedPublicKeys([[ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]]);
+   * console.log(publicKey);
+   *
+   */
+  async getExtendedPublicKeys(
+    paths: Array<BIP32Path>
+  ): Promise<Array<GetExtendedPublicKeyResponse>> {
+    // validate the input
+    Precondition.checkIsArray(paths);
+    for (const path of paths) {
+      Precondition.checkIsValidPath(path);
+    }
+
+    const _send = (p1, p2, data) =>
+      this.send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data).then(
+        utils.stripRetcodeFromResponse
+      );
+
+    const P1_INIT = 0x00;
+    const P1_NEXT_KEY = 0x01;
+    const P2_UNUSED = 0x00;
+
+    const result = [];
+
+    for (let i = 0; i < paths.length; i++) {
+      const pathData = cardano.serializeGetExtendedPublicKeyParams(paths[i]);
+
+      let response: Buffer;
+      if (i == 0) {
+        // initial APDU
+        const remainingKeysData = utils.uint32_to_buf(paths.length - 1);
+
+        response = await wrapRetryStillInCall(_send)(
+          P1_INIT, P2_UNUSED,
+          Buffer.concat([pathData, remainingKeysData])
+        );
+      } else {
+        // next key APDU
+        response = await _send(
+          P1_NEXT_KEY, P2_UNUSED,
+          pathData
+        );
+      }
+
+      const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
+      Assert.assert(rest.length === 0);
+
+      result.push({
+        publicKeyHex: publicKey.toString("hex"),
+        chainCodeHex: chainCode.toString("hex")
+      });
+    }
+
+    return result;
+  }
+
+  /**
    * @description Get a public key from the specified BIP 32 path.
    *
    * @param {BIP32Path} indexes The path indexes. Path must begin with `44'/1815'/n'`, and may be up to 10 indexes long.
@@ -384,29 +447,7 @@ export default class Ada {
   async getExtendedPublicKey(
     path: BIP32Path
   ): Promise<GetExtendedPublicKeyResponse> {
-    const _send = (p1, p2, data) =>
-      this.send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data).then(
-        utils.stripRetcodeFromResponse
-      );
-
-    const P1_UNUSED = 0x00;
-    const P2_UNUSED = 0x00;
-
-    const data = cardano.serializeGetExtendedPublicKeyParams(path);
-
-    const response = await wrapRetryStillInCall(_send)(
-      P1_UNUSED,
-      P2_UNUSED,
-      data
-    );
-
-    const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
-    Assert.assert(rest.length === 0);
-
-    return {
-      publicKeyHex: publicKey.toString("hex"),
-      chainCodeHex: chainCode.toString("hex")
-    };
+    return (await this.getExtendedPublicKeys([path]))[0];
   }
 
   /**
