@@ -209,11 +209,6 @@ export const getErrorDescription = (statusCode: number) => {
   return DeviceErrorMessages[statusCode] || defaultMsg;
 };
 
-export const VersionErrors = {
-  UNSUPPORTED_GET_SERIAL: "getSerial not supported by device firmware",
-  UNSUPPORTED_POOL_REGISTRATION: "pool registration not supported by device firmware",
-}
-
 // It can happen that we try to send a message to the device
 // when the device thinks it is still in a middle of previous ADPU stream.
 // This happens mostly if host does abort communication for some reason
@@ -313,21 +308,23 @@ export default class Ada {
     return this._getVersion();
   }
 
-  _isGetSerialSupported(version: GetVersionResponse): boolean {
+  async _checkLedgerAppVersion(minMajor: number, minMinor: number) {
+    const version = await this._getVersion();
     const major = parseInt(version.major);
     const minor = parseInt(version.minor);
     const patch = parseInt(version.patch);
-    if (isNaN(major) || isNaN(minor) || isNaN(patch))
-      return false;
 
-    if (major > 1) {
-      return true;
-    } else if (major === 1) {
-      return minor >= 2;
-    } else {
-      return false;
-    }
-  }
+    const msg = "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed";
+
+    if (isNaN(major) || isNaN(minor) || isNaN(patch))
+      throw new Error(msg);
+
+    if (major < minMajor)
+      throw new Error(msg);
+
+    if ((major === minMajor) && (minor < minMinor))
+      throw new Error(msg);
+ }
 
   /**
    * Returns an object containing the device serial number.
@@ -340,9 +337,7 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    const version = await this._getVersion();
-    if (!this._isGetSerialSupported(version))
-      throw new Error(VersionErrors.UNSUPPORTED_GET_SERIAL);
+    await this._checkLedgerAppVersion(1, 2);
 
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_SERIAL, p1, p2, data).then(
@@ -384,6 +379,9 @@ export default class Ada {
   async getExtendedPublicKeys(
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
+
+    await this._checkLedgerAppVersion(2, 1);
+
     // validate the input
     Precondition.checkIsArray(paths);
     for (const path of paths) {
@@ -405,7 +403,7 @@ export default class Ada {
       const pathData = cardano.serializeGetExtendedPublicKeyParams(paths[i]);
 
       let response: Buffer;
-      if (i == 0) {
+      if (i === 0) {
         // initial APDU
         const remainingKeysData = utils.uint32_to_buf(paths.length - 1);
 
@@ -543,22 +541,6 @@ export default class Ada {
     Assert.assert(response.length === 0, "response not empty");
   }
 
-  _isPoolRegistrationSupported(version: GetVersionResponse): boolean {
-    const major = parseInt(version.major);
-    const minor = parseInt(version.minor);
-    const patch = parseInt(version.patch);
-    if (isNaN(major) || isNaN(minor) || isNaN(patch))
-      return false;
-
-    if (major >= 3) {
-      return true;
-    } else if (major === 2) {
-      return minor >= 1;
-    } else {
-      return false;
-    }
-  }
-
   async signTransaction(
     networkId: number,
     protocolMagic: number,
@@ -583,9 +565,8 @@ export default class Ada {
       cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
     );
 
-    const version = await this._getVersion();
-    if (isSigningPoolRegistrationAsOwner && !this._isPoolRegistrationSupported(version))
-      throw new Error(VersionErrors.UNSUPPORTED_POOL_REGISTRATION);
+    if (isSigningPoolRegistrationAsOwner)
+      await this._checkLedgerAppVersion(2, 1);
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
