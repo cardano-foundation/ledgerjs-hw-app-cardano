@@ -308,7 +308,7 @@ export default class Ada {
     return this._getVersion();
   }
 
-  async _checkLedgerAppVersion(minMajor: number, minMinor: number) {
+  async _checkLedgerCardanoAppVersion(minMajor: number, minMinor: number) {
     const version = await this._getVersion();
     const major = parseInt(version.major);
     const minor = parseInt(version.minor);
@@ -337,7 +337,7 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    await this._checkLedgerAppVersion(1, 2);
+    await this._checkLedgerCardanoAppVersion(1, 2);
 
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_SERIAL, p1, p2, data).then(
@@ -380,7 +380,7 @@ export default class Ada {
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
 
-    await this._checkLedgerAppVersion(2, 1);
+    await this._checkLedgerCardanoAppVersion(2, 1);
 
     // validate the input
     Precondition.checkIsArray(paths);
@@ -566,7 +566,7 @@ export default class Ada {
     );
 
     if (isSigningPoolRegistrationAsOwner)
-      await this._checkLedgerAppVersion(2, 1);
+      await this._checkLedgerCardanoAppVersion(2, 1);
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
