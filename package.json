@@ -55,13 +55,13 @@
     "build-example": "bash ./script/build_example.sh",
     "clean-test": "rm -rf test/lib",
     "build-test": "yarn run clean && yarn run build && yarn run clean-test && babel --source-maps -d test/lib test/src && flow-copy-source -v test/src test/lib",
-    "test": "yarn build-test && yarn test-device-run && yarn test-integration-run && yarn test-direct-run",
+    "test": "yarn build-test && yarn test-device-run && yarn test-direct-run && yarn test-integration-run",
     "test-device": "yarn run build-test && mocha --timeout 3600000 test/lib/device",
     "test-device-run": "mocha --timeout 3600000 test/lib/device",
-    "test-integration": "yarn run build-test && yarn run test-integration-run",
-    "test-integration-run": "mocha --timeout 600000 test/lib/integration",
     "test-direct": "yarn build-test && yarn test-direct-run",
     "test-direct-run": "mocha --timeout 3600000 test/lib/direct",
+    "test-integration": "yarn run build-test && yarn run test-integration-run",
+    "test-integration-run": "mocha --timeout 600000 test/lib/integration",
     "//": "run single test by specifying --grep <name> parameter in test-integration"
   }
 }
