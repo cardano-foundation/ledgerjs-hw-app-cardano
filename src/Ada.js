@@ -379,13 +379,14 @@ export default class Ada {
   async getExtendedPublicKeys(
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
-
-    await this._checkLedgerCardanoAppVersion(2, 1);
-
     // validate the input
     Precondition.checkIsArray(paths);
     for (const path of paths) {
       Precondition.checkIsValidPath(path);
+    }
+
+    if (paths.length > 1) {
+      await this._checkLedgerCardanoAppVersion(2, 1);
     }
 
     const _send = (p1, p2, data) =>
@@ -409,7 +410,11 @@ export default class Ada {
 
         response = await wrapRetryStillInCall(_send)(
           P1_INIT, P2_UNUSED,
-          Buffer.concat([pathData, remainingKeysData])
+          // remainingKeysData cannot be passed for single key export
+          // to maintain backwards compatibility with Ledger app version 2.0.4
+          paths.length > 1
+          ? Buffer.concat([pathData, remainingKeysData])
+          : pathData
         );
       } else {
         // next key APDU
