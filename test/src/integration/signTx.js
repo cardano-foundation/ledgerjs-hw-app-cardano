@@ -12,6 +12,11 @@ const inputs = {
     txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     outputIndex: 0,
     path: str_to_path("1852'/1815'/0'/0/0"),
+  },
+  utxoNonReasonable: {
+    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    outputIndex: 0,
+    path: str_to_path("1852'/1815'/456'/0/0"),
   }
 };
 
@@ -56,6 +61,12 @@ const outputs = {
     addressTypeNibble: AddressTypeNibbles.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+    amountStr: "7120787"
+  },
+  internalBaseWithStakingPathNonReasonable: {
+    addressTypeNibble: AddressTypeNibbles.BASE,
+    spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
+    stakingPath: str_to_path("1852'/1815'/456'/2/0"),
     amountStr: "7120787"
   },
   internalEnterprise: {
@@ -314,6 +325,16 @@ const results = {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
           "953c5243ba09570dd4e52642236834c138ad4abbbb21796a90540a11e8dc96e47043401d370cdaed70ebc332dd4db80c9b167fd7f20971c4f142875cea57200c"
+      }
+    ]
+  },
+  nonReasonable: {
+    txHashHex: "40b3a79c645be040139078befee154d5f935c8ba2af6144cebcf447f8ef2e580",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/456'/0/0"),
+        witnessSignatureHex:
+          "bb1a035acf4a7b5dd68914f0007dfc4d1cc7b4d88748c0ad24326fd06597542ce0352075ed861b3ae012ab976cacd3dbbc58802cdf82409917ebf9a8bb182e04"
       }
     ]
   }
@@ -589,5 +610,22 @@ describe("signTx", async () => {
       sampleMetadataHashHex
     );
     expect(response).to.deep.equal(results.withMetadata);
+  });
+
+  it("Should correctly sign tx with non-reasonable account and address", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoNonReasonable],
+      [
+        outputs.internalBaseWithStakingPathNonReasonable,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      sampleMetadataHashHex
+    );
+    expect(response).to.deep.equal(results.nonReasonable);
   });
 });
