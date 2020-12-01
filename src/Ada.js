@@ -202,6 +202,10 @@ const DeviceErrorMessages = {
   [DeviceErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type"
 };
 
+const Errors = {
+  INCORRECT_APP_VERSION: "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed"
+}
+
 export const getErrorDescription = (statusCode: number) => {
   const statusCodeHex = `0x${statusCode.toString(16)}`;
   const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_ERRORS_LINK}`;
@@ -271,6 +275,9 @@ export default class Ada {
   }
 
   async _getVersion(): Promise<GetVersionResponse> {
+    // moving getVersion() logic to private function in order
+    // to disable concurrent execution protection done by this.transport.decorateAppAPIMethods()
+    // when invoked from within other calls to check app version
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_VERSION, p1, p2, data).then(
         utils.stripRetcodeFromResponse
@@ -308,22 +315,23 @@ export default class Ada {
     return this._getVersion();
   }
 
-  async _checkLedgerCardanoAppVersion(minMajor: number, minMinor: number) {
+  async _isLedgerAppVersionAtLeast(minMajor: number, minMinor: number): Promise<boolean> {
     const version = await this._getVersion();
     const major = parseInt(version.major);
     const minor = parseInt(version.minor);
-    const patch = parseInt(version.patch);
 
-    const msg = "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed";
+    if (isNaN(major) || isNaN(minor))
+      return false;
 
-    if (isNaN(major) || isNaN(minor) || isNaN(patch))
-      throw new Error(msg);
+    return (major >= minMajor) && (major>minMajor || minor>=minMinor);
+  }
 
-    if (major < minMajor)
-      throw new Error(msg);
+  async _ensureLedgerAppVersionAtLeast(minMajor: number, minMinor: number) {
+    const versionCheckSuccess = await this._isLedgerAppVersionAtLeast(minMajor, minMinor)
 
-    if ((major === minMajor) && (minor < minMinor))
-      throw new Error(msg);
+    if (!versionCheckSuccess) {
+      throw new Error(Errors.INCORRECT_APP_VERSION);
+    }
  }
 
   /**
@@ -337,7 +345,7 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    await this._checkLedgerCardanoAppVersion(1, 2);
+    await this._ensureLedgerAppVersionAtLeast(1, 2);
 
     const _send = (p1, p2, data) =>
       this.send(CLA, INS.GET_SERIAL, p1, p2, data).then(
@@ -386,7 +394,7 @@ export default class Ada {
     }
 
     if (paths.length > 1) {
-      await this._checkLedgerCardanoAppVersion(2, 1);
+      await this._ensureLedgerAppVersionAtLeast(2, 1);
     }
 
     const _send = (p1, p2, data) =>
@@ -406,15 +414,15 @@ export default class Ada {
       let response: Buffer;
       if (i === 0) {
         // initial APDU
-        const remainingKeysData = utils.uint32_to_buf(paths.length - 1);
+
+        // passing empty Buffer for backwards compatibility
+        // of single key export on Ledger app version 2.0.4
+        const remainingKeysData = paths.length > 1
+          ? utils.uint32_to_buf(paths.length - 1)
+          : Buffer.from([]);
 
         response = await wrapRetryStillInCall(_send)(
-          P1_INIT, P2_UNUSED,
-          // remainingKeysData cannot be passed for single key export
-          // to maintain backwards compatibility with Ledger app version 2.0.4
-          paths.length > 1
-          ? Buffer.concat([pathData, remainingKeysData])
-          : pathData
+          P1_INIT, P2_UNUSED, Buffer.concat([pathData, remainingKeysData])
         );
       } else {
         // next key APDU
@@ -570,8 +578,10 @@ export default class Ada {
       cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
     );
 
-    if (isSigningPoolRegistrationAsOwner)
-      await this._checkLedgerCardanoAppVersion(2, 1);
+    const appHasStakePoolOwnerSupport = await this._isLedgerAppVersionAtLeast(2, 1);
+    if (isSigningPoolRegistrationAsOwner && !appHasStakePoolOwnerSupport) {
+      throw Error(Errors.INCORRECT_APP_VERSION)
+    }
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
@@ -607,6 +617,20 @@ export default class Ada {
       includeMetadata: boolean,
     ): Promise<void> => {
 
+      const _serializePoolRegistrationCode = (isSigningPoolRegistrationAsOwner: boolean): Buffer => {
+        // backwards compatible way of serializing the flag to signalize pool registration
+        // transactions. To be removed/refactored once Ledger app 2.1.0 or later is rolled out
+        if (!appHasStakePoolOwnerSupport) {
+          return Buffer.from([])
+        }
+
+        return utils.uint8_to_buf(
+          isSigningPoolRegistrationAsOwner
+          ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
+          : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO
+        )
+      }
+
       const data = Buffer.concat([
         utils.uint8_to_buf(networkId),
         utils.uint32_to_buf(protocolMagic),
@@ -615,11 +639,7 @@ export default class Ada {
           ? MetadataCodes.SIGN_TX_METADATA_YES
           : MetadataCodes.SIGN_TX_METADATA_NO
         ),
-        utils.uint8_to_buf(
-          isSigningPoolRegistrationAsOwner
-          ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
-          : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO
-        ),
+        _serializePoolRegistrationCode(isSigningPoolRegistrationAsOwner),
         utils.uint32_to_buf(numInputs),
         utils.uint32_to_buf(numOutputs),
         utils.uint32_to_buf(numCertificates),
