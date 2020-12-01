@@ -375,5 +375,16 @@ export const results = {
           "06e66f6a2d510a8a5446597c59c79cbf4f9e7af9073da0651ea59bbdc2340dc933ed292aa282e6ea7068bed9f6bcb44228573e661c211e6dc61f4dd73ff41f04"
       }
     ]
-  }
+  },
+  noOutputs: {
+    // WARNING: only as computed by ledger, not verified with cardano-cli
+    txHashHex: "600114fd1c50a7e857fdcaaea73d94f7435c9fce63cfde597f7c48b8dda3b0ba",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/0'/2/0"),
+        witnessSignatureHex:
+          "91c09ad95d5d0f87f61a62e2f5e2dda4245eb4011887a04a53bdf085282002ccc712718e855e36a30cfcf7ecd43bcdc795aa87647be9c716b65e7fcf376e0503"
+      }
+    ]
+  },
 }

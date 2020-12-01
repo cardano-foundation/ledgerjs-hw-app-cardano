@@ -161,6 +161,16 @@ const results = {
       }
     ]
   },
+  noOutputs: {
+    txHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "190dcee0cc7125fd0ec104cf685674f1ad77f3e439a4a249e596a3306f9eb110ced8fb8ec59da15b721203c8973bd341d88e6a60b85c1e9f2623152fee8dc00a"
+      }
+    ]
+  },
   noChangeShelleyScripthash: {
     txHashHex: "23d82edc8fbd2d55237cba955a2280161ebd5643b23844e9b5abdc843b966e62",
     witnesses: [
@@ -419,6 +429,21 @@ describe("signTx", async () => {
       null
     );
     expect(response).to.deep.equal(results.noChangeShelley);
+  });
+
+  it("Should correctly sign tx without outputs", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null
+    );
+    expect(response).to.deep.equal(results.noOutputs);
   });
 
   it("Should correctly sign tx without change address with Shelley scripthash output", async () => {

@@ -126,7 +126,7 @@ describe("signTxPoolRegistrationOK", async () => {
     expect(response).to.deep.equal(results.noRelaysSinglePathOwner);
   });
 
-  it("Should correctly witness default registration with no metadata", async () => {
+  it("Should correctly witness pool registration with no metadata", async () => {
     // works as a private pool not visible in yoroi, daedalus, etc.
     const cert = certificates.poolRegistrationNoMetadata;
     const response = await ada.signTransaction(
@@ -144,8 +144,23 @@ describe("signTxPoolRegistrationOK", async () => {
     );
     expect(response).to.deep.equal(results.noMetadata);
   });
-});
 
+  it("Should correctly witness pool registration without outputs", async () => {
+    const cert = certificates.poolRegistrationMixedOwnersAllRelays;
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert],
+      [],
+      undefined
+    );
+    expect(response).to.deep.equal(results.noOutputs);
+  });
+});
 
 // ======================================== negative tests (tx should be rejected) ===============================
 
