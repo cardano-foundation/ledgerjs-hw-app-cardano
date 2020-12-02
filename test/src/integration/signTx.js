@@ -98,7 +98,7 @@ const withdrawals = {
   }
 }
 
-const sampleMetadata = "deadbeef".repeat(8);
+const sampleMetadataHashHex = "deadbeef".repeat(8);
 const sampleFeeStr = "42";
 const sampleTtlStr = "10";
 
@@ -586,7 +586,7 @@ describe("signTx", async () => {
       sampleTtlStr,
       [],
       [],
-      sampleMetadata
+      sampleMetadataHashHex
     );
     expect(response).to.deep.equal(results.withMetadata);
   });
