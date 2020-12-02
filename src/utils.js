@@ -113,6 +113,12 @@ export const Assert = {
   }
 };
 
+// A function usable to enforce invariants in the code that are
+// recognized by Flow, relies on https://github.com/facebook/flow/issues/2617
+export function invariant(cond: boolean, errMsg: string = "Invariant failed") {
+  if (!cond) throw new Error(errMsg);
+}
+
 export function uint8_to_buf(value: number): Buffer {
   Precondition.checkIsUint8(value, "invalid uint8 value");
 

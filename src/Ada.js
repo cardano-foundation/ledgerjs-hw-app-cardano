@@ -19,7 +19,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
-import utils, { Precondition, Assert } from "./utils";
+import utils, { Precondition, Assert, invariant } from "./utils";
 import cardano, { CertificateTypes, AddressTypeNibbles, TxErrors } from "./cardano";
 
 const CLA = 0xd7;
@@ -737,6 +737,8 @@ export default class Ada {
       // we are done for every certificate except pool registration
 
       if (type === CertificateTypes.STAKE_POOL_REGISTRATION) {
+        invariant(poolParams != null);
+
         // additional data for pool certificate
         const APDU_INSTRUCTIONS = {
           POOL_PARAMS: 0x30,
@@ -846,15 +848,16 @@ export default class Ada {
       };
     };
 
-    // we need exactly one owner given by path to have a witness
     const witnessPaths = [];
     if (isSigningPoolRegistrationAsOwner) {
-      Assert.assert(certificates.length == 1);
-
       // there should be exactly one owner given by path which will be used for the witness
+      Assert.assert(certificates.length == 1);
+      invariant(certificates[0].poolRegistrationParams != null);
+
       const owners = certificates[0].poolRegistrationParams.poolOwners;
       const witnessOwner = owners.find(owner => !!owner.stakingPath);
-      Assert.assert(!!witnessOwner, "witness owner missing");
+      invariant(witnessOwner != null);
+
       witnessPaths.push(witnessOwner.stakingPath);
 
     } else {
@@ -939,6 +942,9 @@ export default class Ada {
     // witnesses
     const witnesses = [];
     for (const path of witnessPaths) {
+      invariant(path != null);
+      Precondition.checkIsValidPath(path, "Invalid path to witness has been supplied");
+      
       const witness = await signTx_getWitness(path);
       witnesses.push(witness);
     }
