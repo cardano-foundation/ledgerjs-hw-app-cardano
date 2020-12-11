@@ -1,7 +1,9 @@
 //@flow
 import basex from "base-x";
 import bech32 from "bech32";
-import {AddressTypeNibbles} from "./Ada"
+import { AddressTypeNibbles } from "./Ada"
+import cardano from "./cardano";
+
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -20,86 +22,121 @@ const TESTNET_NETWORK_ID = 0x00
 
 export const Precondition = {
   // Generic check
-  check: (cond: boolean) => {
-    if (!cond) throw new Error("Precondition failed");
+  check: (cond: boolean, msg: ?string = null) => {
+    if (!msg)
+      msg = "Precondition failed";
+
+    if (!cond) throw new Error(msg);
   },
   // Basic types
-  checkIsString: (data: any) => {
-    Precondition.check(typeof data === "string");
+  checkIsString: (data: any, msg: ?string = null) => {
+    Precondition.check(typeof data === "string", msg);
   },
-  checkIsInteger: (data: any) => {
-    Precondition.check(Number.isInteger(data));
+  checkIsInteger: (data: any, msg: ?string = null) => {
+    Precondition.check(Number.isInteger(data), msg);
   },
-  checkIsArray: (data: any) => {
-    Precondition.check(Array.isArray(data));
+  checkIsArray: (data: any, msg: ?string = null) => {
+    Precondition.check(Array.isArray(data), msg);
   },
-  checkIsBuffer: (data: any) => {
-    Precondition.check(Buffer.isBuffer(data));
+  checkIsBuffer: (data: any, msg: ?string = null) => {
+    Precondition.check(Buffer.isBuffer(data), msg);
   },
 
   // Extended checks
-  checkIsUint32: (data: any) => {
-    Precondition.checkIsInteger(data);
-    Precondition.check(data >= 0);
-    Precondition.check(data <= 4294967295);
+  checkIsUint64: (data: any, msg: ?string = null) => {
+    Precondition.checkIsInteger(data, msg);
+    Precondition.check(data >= 0, msg);
+    Precondition.check(data <= 18446744073709551615, msg);
   },
-  checkIsUint8: (data: any) => {
-    Precondition.checkIsInteger(data);
-    Precondition.check(data >= 0);
-    Precondition.check(data <= 255);
+  checkIsUint32: (data: any, msg: ?string = null) => {
+    Precondition.checkIsInteger(data, msg);
+    Precondition.check(data >= 0, msg);
+    Precondition.check(data <= 4294967295, msg);
+  },
+  checkIsUint16: (data: any, msg: ?string = null) => {
+    Precondition.checkIsInteger(data, msg);
+    Precondition.check(data >= 0, msg);
+    Precondition.check(data <= 65535, msg);
+  },
+  checkIsUint8: (data: any, msg: ?string = null) => {
+    Precondition.checkIsInteger(data, msg);
+    Precondition.check(data >= 0, msg);
+    Precondition.check(data <= 255, msg);
   },
 
-  checkIsHexString: (data: any) => {
-    Precondition.checkIsString(data);
-    Precondition.check(data.length % 2 == 0);
-    Precondition.check(/^[0-9a-fA-F]*$/.test(data));
+  checkIsHexString: (data: any, msg: ?string = null) => {
+    Precondition.checkIsString(data, msg);
+    Precondition.check(data.length % 2 === 0, msg);
+    Precondition.check(/^[0-9a-fA-F]*$/.test(data), msg);
   },
-  checkIsValidPath: (path: Array<number>) => {
-    Precondition.checkIsArray(path);
+  checkIsValidPath: (path: Array<number>, msg: ?string = null) => {
+    Precondition.checkIsArray(path), msg;
     for (const x of path) {
-      Precondition.checkIsUint32(x);
+      Precondition.checkIsUint32(x, msg);
     }
   },
-  checkIsValidAmount: (amount: string) => {
-    Precondition.checkIsString(amount);
-    Precondition.check(/^[0-9]*$/.test(amount));
+  checkIsValidAmount: (amount: string, msg: ?string = null) => {
+    Precondition.checkIsString(amount, msg);
+    Precondition.check(/^[0-9]*$/.test(amount), msg);
     // Length checks
-    Precondition.check(amount.length > 0);
-    Precondition.check(amount.length <= MAX_LOVELACE_SUPPLY_STR.length);
+    Precondition.check(amount.length > 0, msg);
+    Precondition.check(amount.length <= MAX_LOVELACE_SUPPLY_STR.length, msg);
     // Leading zeros
     if (amount.length > 1) {
-      Precondition.check(amount[0] != "0");
+      Precondition.check(amount[0] != "0", msg);
     }
     // less than max supply
-    if (amount.length == MAX_LOVELACE_SUPPLY_STR.length) {
+    if (amount.length === MAX_LOVELACE_SUPPLY_STR.length) {
       // Note: this is string comparison!
-      Precondition.check(amount <= MAX_LOVELACE_SUPPLY_STR);
+      Precondition.check(amount <= MAX_LOVELACE_SUPPLY_STR, msg);
     }
   },
-  checkIsValidBase58: (data: string) => {
-    Precondition.checkIsString(data);
+  checkIsValidBase58: (data: string, msg: ?string = null) => {
+    Precondition.checkIsString(data, msg);
     for (const c of data) {
-      Precondition.check(BASE58_ALPHABET.includes(c));
+      Precondition.check(BASE58_ALPHABET.includes(c), msg);
     }
   },
-  checkIsValidBech32Address: (data: string) => {
-    Precondition.checkIsString(data);
-    Precondition.check(data.split("1").length == 2);
+  checkIsValidBech32Address: (data: string, msg: ?string = null) => {
+    Precondition.checkIsString(data, msg);
+    Precondition.check(data.split("1").length === 2, msg);
 
     for (const c of data.split("1")[1]) {
-      Precondition.check(BECH32_ALPHABET.includes(c));
+      Precondition.check(BECH32_ALPHABET.includes(c), msg);
     }
   }
 };
 
 export const Assert = {
-  assert: (cond: boolean) => {
-    if (!cond) throw new Error("Assertion failed");
+  assert: (cond: boolean, errMsg: string = "Assertion failed") => {
+    if (!cond) throw new Error(errMsg);
   }
 };
 
+// A function usable to enforce invariants in the code that are
+// recognized by Flow, relies on https://github.com/facebook/flow/issues/2617
+export function invariant(cond: boolean, errMsg: string = "Invariant failed") {
+  if (!cond) throw new Error(errMsg);
+}
+
+export function uint8_to_buf(value: number): Buffer {
+  Precondition.checkIsUint8(value, "invalid uint8 value");
+
+  const data = Buffer.alloc(1);
+  data.writeUInt8(value, 0);
+  return data;
+}
+
+export function uint16_to_buf(value: number): Buffer {
+  Precondition.checkIsUint16(value, "invalid uint16 value");
+
+  const data = Buffer.alloc(2);
+  data.writeUInt16BE(value, 0);
+  return data;
+}
+
 export function uint32_to_buf(value: number): Buffer {
-  Precondition.checkIsUint32(value);
+  Precondition.checkIsUint32(value, "invalid uint32 value");
 
   const data = Buffer.alloc(4);
   data.writeUInt32BE(value, 0);
@@ -107,21 +144,13 @@ export function uint32_to_buf(value: number): Buffer {
 }
 
 export function buf_to_uint32(data: Buffer): number {
-  Precondition.check(data.length == 4);
+  Precondition.check(data.length === 4, "invalid uint8 buffer");
 
   return data.readUIntBE(0, 4);
 }
 
-export function uint8_to_buf(value: number): Buffer {
-  Precondition.checkIsUint8(value);
-
-  const data = Buffer.alloc(1);
-  data.writeUInt8(value, 0);
-  return data;
-}
-
 export function hex_to_buf(data: string): Buffer {
-  Precondition.checkIsHexString(data);
+  Precondition.checkIsHexString(data, "invalid hex string");
   return Buffer.from(data, "hex");
 }
 
@@ -132,7 +161,7 @@ export function buf_to_hex(data: Buffer): string {
 // no buf_to_uint8
 
 export function path_to_buf(path: Array<number>): Buffer {
-  Precondition.checkIsValidPath(path);
+  Precondition.checkIsValidPath(path, "invalid bip32 path");
 
   const data = Buffer.alloc(1 + 4 * path.length);
   data.writeUInt8(path.length, 0);
@@ -141,6 +170,28 @@ export function path_to_buf(path: Array<number>): Buffer {
     data.writeUInt32BE(path[i], 1 + i * 4);
   }
   return data;
+}
+
+function parseBIP32Index(str: string, errMsg: ?string = null): number {
+  let base = 0;
+  if (str.endsWith("'")) {
+    str = str.slice(0, -1);
+    base = cardano.HARDENED;
+  }
+  const i = safe_parseInt(str);
+  Precondition.check(i >= 0, errMsg);
+  Precondition.check(i < cardano.HARDENED, errMsg);
+  return base + i;
+}
+
+export function str_to_path(data: string): Array<number> {
+  const errMsg = "invalid bip32 path string ";
+  Precondition.checkIsString(data, errMsg);
+  Precondition.check(data.length > 0, errMsg);
+
+  return data.split("/").map(function (x: string): number {
+    return parseBIP32Index(x, errMsg + data + " because of " + x);
+  });
 }
 
 const sum = (arr: Array<number>) => arr.reduce((x, y) => x + y, 0);
@@ -182,7 +233,7 @@ export function stripRetcodeFromResponse(response: Buffer): Buffer {
 
 export function buf_to_amount(data: Buffer): string {
   Precondition.checkIsBuffer(data);
-  Precondition.check(data.length == 8);
+  Precondition.check(data.length === 8);
 
   const encoded = bs10.encode(data);
   // Strip leading zeros
@@ -190,11 +241,11 @@ export function buf_to_amount(data: Buffer): string {
 }
 
 export function amount_to_buf(amount: string): Buffer {
-  Precondition.checkIsValidAmount(amount);
+  Precondition.checkIsValidAmount(amount, "invalid amount");
 
   const data = bs10.decode(amount);
   // Amount should fit uin64_t
-  Assert.assert(data.length <= 8);
+  Assert.assert(data.length <= 8, "excessive data");
 
   const padding = Buffer.alloc(8 - data.length);
   return Buffer.concat([padding, data]);
@@ -207,7 +258,7 @@ export function base58_encode(data: Buffer): string {
 }
 
 export function base58_decode(data: string): Buffer {
-  Precondition.checkIsValidBase58(data);
+  Precondition.checkIsValidBase58(data, "invalid base58 string");
 
   return bs58.decode(data);
 }
@@ -244,27 +295,30 @@ function getShelleyAddressPrefix(data: Buffer): string {
 }
 
 export function bech32_decodeAddress(data: string): Buffer {
-  Precondition.checkIsValidBech32Address(data);
+  Precondition.checkIsValidBech32Address(data, "invalid bech32 string");
 
   const { words } = bech32.decode(data, 1000)
   return Buffer.from(bech32.fromWords(words));
 }
 
 export function safe_parseInt(str: string): number {
-  Precondition.checkIsString(str);
+  const errMsg = "invalid int string";
+  Precondition.checkIsString(str, errMsg);
   const i = parseInt(str);
   // Check that we parsed everything
-  Precondition.check("" + i == str);
+  Precondition.check("" + i === str, errMsg);
   // Could be invalid
-  Precondition.check(!isNaN(i));
+  Precondition.check(!isNaN(i), errMsg);
   // Could still be float
-  Precondition.checkIsInteger(i);
+  Precondition.checkIsInteger(i, errMsg);
   return i;
 }
 
 
 
 export default {
+  Assert,
+
   hex_to_buf,
   buf_to_hex,
 
@@ -275,7 +329,12 @@ export default {
   uint8_to_buf,
 
   // no pair for now
+  uint16_to_buf,
+
+  // no pair for now
   path_to_buf,
+
+  str_to_path,
 
   safe_parseInt,
 

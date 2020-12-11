@@ -88,7 +88,7 @@ describe("deriveAddress", async () => {
         "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vuph3wczvf288aeyu");
     await test(AddressTypeNibbles.POINTER, 0x03, "1852'/1815'/0'/0/1", null, null, [0, 0, 0],
         "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcqqqqqnnd32q");
-      
+
     // reward
     await test(AddressTypeNibbles.REWARD, 0x00, "1852'/1815'/0'/2/0", null, null, null,
         "stake_test1uqwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8q8mmqwc");
