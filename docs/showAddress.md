@@ -14,5 +14,13 @@ see [deriveAddress()](getAddress.md)
 ### Responses
 
 #### Success
-    returns `undefined`
 
+returns `undefined`
+
+#### Error case
+
+see [deriveAddress()](getAddress.md)
+
+### Examples
+
+same as [deriveAddress()](getAddress.md) but the response is `undefined`
