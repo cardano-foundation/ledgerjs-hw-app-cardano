@@ -66,7 +66,7 @@ Certificates are included in the signTransaction call's parameters in an array, 
 
 * `portNumber` - *optional* `number` network port number, e.g. `3000`
 * `ipv4` - *optional* `string` IPv4 address of the host, e.g. `"54.48.78.2"`
-* `ipv6` - *optional* `string` IPv6 address of the host, e.g. `"24ff:7801:33a2:e383:a5c4:340a:07c2:76e5"`
+* `ipv6` - *optional* `string` IPv6 address of the host, e.g. `"24ff:7801:33a2:e383:a5c4:340a:07c2:76e5"` (needs to be full form)
 
 Either IPv4 or IPv6 address has to be provided (or both)
 
