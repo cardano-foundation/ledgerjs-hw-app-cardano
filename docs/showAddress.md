@@ -1,4 +1,4 @@
-## Cardano: show address
+# Cardano: show address
 
 Show requested address derived by given BIP32-Ed25519 path on the device so the user can verify it. The API is the same as the [deriveAddress()](getAddress.md)
 
@@ -7,20 +7,20 @@ ES6
 const result = await ledger.showAddress(addressType, networkIdOrProtocolMagic, spendingPath, stakingPath?, stakingKeyHashHex?, stakingBlockchainPointer?);
 ```
 
-### Params
+## Params
 
 see [deriveAddress()](getAddress.md)
 
-### Responses
+## Responses
 
-#### Success
+### Success
 
 returns `undefined`
 
-#### Error case
+### Error case
 
 see [deriveAddress()](getAddress.md)
 
-### Examples
+## Examples
 
 same as [deriveAddress()](getAddress.md) but the response is `undefined`

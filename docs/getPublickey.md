@@ -1,4 +1,4 @@
-## Cardano: get public keys
+# Cardano: get public keys
 Retrieve a BIP32-Ed25519 extended public derived by given BIP32-Ed25519 path.
 
 ES6
@@ -14,20 +14,20 @@ const result = await ledger.getExtendedPublicKeys(paths)
 ```
 
 
-### Params
+## Params
 
-#### Exporting single path
+### Exporting single path
 
 * `path` — *required* `Array<number>` BIP44 derivation path for the public key, minimum length `3`, maximum length `10`, accepts only Array (ex. `[(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0]`) format
 
-#### Exporting multiple paths
+### Exporting multiple paths
 
 * `paths` - *required* `Array<Array<number>>`, each `Array<number>` having the same structure as `path` defined above
 
 
-### Responses
+## Responses
 
-#### Success
+### Success
 
 One public key
 
@@ -49,19 +49,23 @@ Multiple public keys:
 
 ```
 
-#### Error case
+### Error case
 ```javascript
 //Throws HwTransport.TransportStatusError with errorcode and message set by https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h
 ```
 
-### Examples
+## Examples
+
+Note: for more convenient path representation using [str_to_path()](helperFunctions.md#str_to_path) helper function
+
 Get root public key of first cardano byron account:
 
-#### Request
+### Request
+
 ```javascript
-ledger.getExtendedPublicKey([(44 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0]);
+ledger.getExtendedPublicKey(str_to_path("1852'/1815'/0'"));
 ```
-#### Response
+### Response
 ```javascript
 {
     chainCodeHex: "68418151f0f892b99d6c4fdda3b6d16a3725afde8357e6709220eaa27b48c014".

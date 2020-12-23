@@ -1,5 +1,5 @@
 
-## Cardano: Sign transaction
+# Cardano: Sign transaction
 Asks device to sign given transaction. User is asked to confirm all transaction
 details on device.
 
@@ -10,9 +10,9 @@ ES6
 const result = await ledger.signTransaction(networkId, protocolMagic, inputs, outputs, feeStr, ttlStr, certificates, withdrawals, metadataHashHex);
 ```
 
-### Params
+## Params
 
-#### Sign a transaction
+### Sign a transaction
 * `networkId` - *required* `number` must be 1 for Mainnet, 0 for Testnet
 * `protocolMagic` - *required* `number` must be 764824073 for Mainnet, 42 for Testnet
 * `inputs` - *required* `Array<InputTypeUTxO>` Array of transaction inputs, for type read below
@@ -23,16 +23,17 @@ const result = await ledger.signTransaction(networkId, protocolMagic, inputs, ou
 * `withdrawals` - *optional* `Array<Withdrawal>` Array of withdrawals included in this transaction, for type read below
 * `metadataHashHex` - *optional* `string` Metadata for the transaction, must be a CBOR encoded `map` type.
 
-#### InputTypeUTxO
-* `path` - *required* `Array<number>` BIP44 derivation path for the address, minimum length `5`, maximum length `10`, accepts only Array (ex. `[(44 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 0]`) format
+### InputTypeUTxO
+* `path` - *optional* `Array<number>` BIP44 derivation path for the address, minimum length `5`, maximum length `10`, accepts only Array (ex. `[(44 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 0]`) format
 * `txHashHex` - *required* `string`  Hash in hexadecimal notation of the transaction where this input is an output
 * `outputIndex` - *required* `number` Index of this input in the transaction outputs this input uses.
 
-#### OutputTypeAddress
+Note: path is actually required in almost all cases, except when a stake pool registration certificates is being signed, as explained in this [article](certificates.md#stake-pool-registration-as-an-owner-limitations)
+### OutputTypeAddress
 * `amountStr` - *required* `string` The amount of ADA assigned to this output in this transaction in decimal Lovelace
 * `addressHex` - *optional* `string` The address where this output is going in hexadecimal notation, used for Byron outputs
 
-#### OutputTypeAddressParams
+### OutputTypeAddressParams
 * `amountStr` - *required* `number` The amount of ADA assigned to this output in this transaction in decimal Lovelace
 * `addressTypeNibble` - *required* `number` Type of the address you want to derive, accepts `AddressTypeNibbles` enum below
 * `spendingPath` — *required* `Array<number>` BIP44 derivation path for the address, minimum length `5`, maximum length `10`, accepts only Array (ex. `[(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 0]`) format
@@ -40,7 +41,7 @@ const result = await ledger.signTransaction(networkId, protocolMagic, inputs, ou
 * `stakingKeyHashHex` - *optional* `string | null` Staking part of the address as hex string, either this or `stakingPath` are required for base address derivation, device cannot verify ownership of the staking key.
 * `stakingBlockchainPointer` - *optional* `StakingBlockchainPointer | null` object below, required for pointer address derivation
 
-#### AddressTypeNibbles
+### AddressTypeNibbles
 ```javascript
     BASE: 0b0000,
     POINTER: 0b0100,
@@ -49,7 +50,7 @@ const result = await ledger.signTransaction(networkId, protocolMagic, inputs, ou
     REWARD: 0b1110
 ```
 
-#### StakingBlockchainPointer
+### StakingBlockchainPointer
 ```javascript
 {
     blockIndex: number, //index of the block this pointer is pointing to
@@ -58,27 +59,18 @@ const result = await ledger.signTransaction(networkId, protocolMagic, inputs, ou
 }
 ```
 
-#### Certificate
-* `type` - *required* `number` Certificate type.
-* `path` - *required* `Array<number>` BIP44 derivation path for the staking address included in this certificate, minimum length `5`, accepts only Array (ex. `[(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0]`) format
-* `poolKeyHashHex` - *optional* `string` Hash of pool ID in hexadecimal notation, required for certificates that represent a pool operation
+### Certificate
 
-##### Supported Certificate Types:
-```javascript
-    STAKE_REGISTRATION: 0, // requires path
-	STAKE_DEREGISTRATION: 1, // requires path
-	STAKE_DELEGATION: 2, // requires path and poolKeyHashHex
-	STAKE_POOL_REGISTRATION : 3 // TODO document, available since Ledger app 2.1.0
-```
+Certificates are documented in a separate [article](certificates.md)
 
-#### Withdrawal
+### Withdrawal
 * `path` - *required* `Array<number>` BIP44 derivation path for the reward address this withdrawal is for, minimum length `5`, accepts only Array (ex. `[(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0]`) format
 * `amountStr` - *required* `number` The amount of ADA withdrawn to this address in decimal Lovelace
 
 
-### Responses
+## Responses
 
-#### Success case
+### Success case
 ```javascript
 {
     success: true,
@@ -89,7 +81,7 @@ const result = await ledger.signTransaction(networkId, protocolMagic, inputs, ou
 }
 ```
 
-#### Error case
+### Error case
 ```javascript
 {
     success: false,
@@ -99,23 +91,25 @@ const result = await ledger.signTransaction(networkId, protocolMagic, inputs, ou
 }
 ```
 
-### Internal validation details
+## Internal validation details
 
-A single transaction can include one or more entries, it can have one or more outputs, zero or more certificates attached and zero or more staking reward withdrawals.
+A single transaction can include one or more entries, it can have zero or more outputs, zero or more certificates attached and zero or more staking reward withdrawals.
 
-Every transaction must include at least one input and one output.
+Every transaction must include at least one input.
 
 The caller is responsible for ensuring inputs contain enough ADA to cover all payments and operational fees, the device does not check is as the blockchain itself is supposed to reject transactions that are not valid in that regard.
 
 
-### Example
+## Example
+Note: for more convenient path representation using [str_to_path()](helperFunctions.md#str_to_path) helper function
+
 ```javascript
 ledger.signTransaction(
     1, //networkId
     764824073, //protocolMagic
     [
         {
-            path: [(44 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 1],
+            path: str_to_path("1852'/1815'/0'/0/1"),
             txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
             outputIndex: 0,
         }
@@ -127,8 +121,8 @@ ledger.signTransaction(
         },
         {
             addressTypeNibble: 0b0000,
-            spendingPath: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 0],
-            stakingPath: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0],
+            spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+            stakingPath: str_to_path("1852'/1815'/0'/2/0"),
             amountStr: "7120787",
         }
     ], //outputs
@@ -137,21 +131,21 @@ ledger.signTransaction(
     [
         {
             type: 0,
-            path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0]
+            path: str_to_path("1852'/1815'/0'/2/0"),
         },
         {
             type: 1,
-            path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0]
+            path: str_to_path("1852'/1815'/0'/2/0"),
         },
         {
             type: 2,
-            path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0],
+            path: str_to_path("1852'/1815'/0'/2/0"),
             poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973"
         },
     ], //certificates
     [
         {
-            path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0],
+            path: str_to_path("1852'/1815'/0'/2/0"),
             amountStr: "1000",
         }
     ], //withdrawals
@@ -159,7 +153,7 @@ ledger.signTransaction(
 );
 ```
 
-### Result
+## Result
 ```javascript
 {
     txHashHex: '7c6f577545a532527000fb112456f368262ab57648fe135567fa1c97971c87b4',
