@@ -15,8 +15,10 @@ const BECH32_ALPHABET =
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
 
+const MAX_UINT_64_STR = "18446744073709551615"
 // Max supply in lovelace
 const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
+const POOL_MARGIN_DENOMINATOR_MAX_STR = ["1", "000", "000", "000", "000", "000000"].join("")
 
 const TESTNET_NETWORK_ID = 0x00
 
@@ -43,11 +45,6 @@ export const Precondition = {
   },
 
   // Extended checks
-  checkIsUint64: (data: any, msg: ?string = null) => {
-    Precondition.checkIsInteger(data, msg);
-    Precondition.check(data >= 0, msg);
-    Precondition.check(data <= 18446744073709551615, msg);
-  },
   checkIsUint32: (data: any, msg: ?string = null) => {
     Precondition.checkIsInteger(data, msg);
     Precondition.check(data >= 0, msg);
@@ -75,20 +72,34 @@ export const Precondition = {
       Precondition.checkIsUint32(x, msg);
     }
   },
-  checkIsValidAmount: (amount: string, msg: ?string = null) => {
-    Precondition.checkIsString(amount, msg);
-    Precondition.check(/^[0-9]*$/.test(amount), msg);
+  checkIsUint64Str: (data: any, msg: ?string = null) => {
+    Precondition.checkIsValidUintStr(data, MAX_UINT_64_STR, msg);
+  },
+  checkIsPositiveUint64Str: (data: string, msg: ?string = null) => {
+    Precondition.checkIsUint64Str(data, msg);
+    Precondition.check(data !== "0", msg);
+  },
+  checkIsValidAdaAmount: (amount: string, msg: ?string = null) => {
+    Precondition.checkIsValidUintStr(amount, MAX_LOVELACE_SUPPLY_STR, msg);
+  },
+  checkIsValidPoolMarginDenominator: (data: string, msg: ?string = null) => {
+    Precondition.checkIsValidUintStr(data, POOL_MARGIN_DENOMINATOR_MAX_STR, msg);
+    Precondition.check(data !== "0", msg);
+  },
+  checkIsValidUintStr (data: any, maxValue: string, msg: ?string = null) {
+    Precondition.checkIsString(data, msg);
+    Precondition.check(/^[0-9]*$/.test(data), msg);
     // Length checks
-    Precondition.check(amount.length > 0, msg);
-    Precondition.check(amount.length <= MAX_LOVELACE_SUPPLY_STR.length, msg);
+    Precondition.check(data.length > 0, msg);
+    Precondition.check(data.length <= maxValue.length, msg);
     // Leading zeros
-    if (amount.length > 1) {
-      Precondition.check(amount[0] != "0", msg);
+    if (data.length > 1) {
+      Precondition.check(data[0] != "0", msg);
     }
-    // less than max supply
-    if (amount.length === MAX_LOVELACE_SUPPLY_STR.length) {
+    // less or equal than max value
+    if (data.length === maxValue.length) {
       // Note: this is string comparison!
-      Precondition.check(amount <= MAX_LOVELACE_SUPPLY_STR, msg);
+      Precondition.check(data <= maxValue, msg);
     }
   },
   checkIsValidBase58: (data: string, msg: ?string = null) => {
@@ -147,6 +158,16 @@ export function buf_to_uint32(data: Buffer): number {
   Precondition.check(data.length === 4, "invalid uint8 buffer");
 
   return data.readUIntBE(0, 4);
+}
+
+export function uint64_to_buf(value: string): Buffer {
+  Precondition.checkIsUint64Str(value, "invalid uint64 value");
+
+  const data = bs10.decode(value);
+  Assert.assert(data.length <= 8, "excessive data");
+
+  const padding = Buffer.alloc(8 - data.length);
+  return Buffer.concat([padding, data]);
 }
 
 export function hex_to_buf(data: string): Buffer {
@@ -240,15 +261,10 @@ export function buf_to_amount(data: Buffer): string {
   return encoded.replace(/^0*(.)/, "$1");
 }
 
-export function amount_to_buf(amount: string): Buffer {
-  Precondition.checkIsValidAmount(amount, "invalid amount");
+export function ada_amount_to_buf(amount: string): Buffer {
+  Precondition.checkIsValidAdaAmount(amount, "invalid amount");
 
-  const data = bs10.decode(amount);
-  // Amount should fit uin64_t
-  Assert.assert(data.length <= 8, "excessive data");
-
-  const padding = Buffer.alloc(8 - data.length);
-  return Buffer.concat([padding, data]);
+  return uint64_to_buf(amount);
 }
 
 export function base58_encode(data: Buffer): string {
@@ -322,6 +338,9 @@ export default {
   hex_to_buf,
   buf_to_hex,
 
+  // no pair for now
+  uint64_to_buf,
+
   uint32_to_buf,
   buf_to_uint32,
 
@@ -336,9 +355,7 @@ export default {
 
   str_to_path,
 
-  safe_parseInt,
-
-  amount_to_buf,
+  ada_amount_to_buf,
   buf_to_amount,
 
   base58_encode,

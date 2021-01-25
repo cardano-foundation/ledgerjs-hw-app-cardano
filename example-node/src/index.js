@@ -103,63 +103,92 @@ const makeExamples = appAda => ({
     console.log("signTransaction");
     
     console.log(await appAda.signTransaction(
-        1, //networkId
-        764824073, //protocolMagic
-        [
+      1, //networkId
+      764824073, //protocolMagic
+      [
+        {
+          path: [(44 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 1],
+          txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
+          outputIndex: 0,
+        }
+      ], //inputs
+      [
+        {
+          addressHex: "82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561",
+          amountStr: "3003112",
+        },
+        {
+          addressHex: "82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561",
+          amountStr: "4700",
+          tokenBundle: [
             {
-                path: utils.str_to_path("44'/1815'/0'/0/1"),
-                txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
-                outputIndex: 0,
+              policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+              tokens: [
+                {
+                  assetNameHex: "7564247542686911",
+                  amountStr: "47"
+                }
+              ]
+            },
+            {
+              policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+              tokens: [
+                {
+                  assetNameHex: "456c204e69c3b16f",
+                  amountStr: "7878754"
+                },
+                {
+                  assetNameHex: "74652474436f696e", // "te$tCoin"
+                  amountStr: "1234"
+                }
+              ]
             }
-        ], //inputs
-        [
-            {
-                addressHex: "82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561",
-                amountStr: "3003112",
-            },
-            {
-                addressTypeNibble: 0b0000,
-                spendingPath: utils.str_to_path("1852'/1815'/0'/0/0"),
-                stakingPath: utils.str_to_path("1852'/1815'/0'/2/0"),
-                amountStr: "7120787",
-            }
-        ], //outputs
-        "42", //feeStr
-        "10", //ttlStr
-        [
-            {
-                type: 0,
-                path: utils.str_to_path("1852'/1815'/0'/2/0"),
-            },
-            {
-                type: 1,
-                path: utils.str_to_path("1852'/1815'/0'/2/0"),
-            },
-            {
-                type: 2,
-                path: utils.str_to_path("1852'/1815'/0'/2/0"),
-                poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973"
-            },
-        ], //certificates
-        [
-            {
-                path: utils.str_to_path("1852'/1815'/0'/2/0"),
-                amountStr: "1000",
-            }
-        ], //withdrawals
-        "a200a11864a118c843aa00ff01a119012c590100a200a11864a1a200a11864a1" //metadataHashHex
+          ]
+        },
+        {
+          addressTypeNibble: 0b0000,
+          spendingPath: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 0, 0],
+          stakingPath: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0],
+          amountStr: "7120787",
+        }
+      ], //outputs
+      "42", //feeStr
+      "10", //ttlStr
+      [
+        {
+          type: 0,
+          path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0]
+        },
+        {
+          type: 1,
+          path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0]
+        },
+        {
+          type: 2,
+          path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0],
+          poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973"
+        },
+      ], //certificates
+      [
+        {
+          path: [(1852 | 0x80000000) >>> 0, (1815 | 0x80000000) >>> 0, (0 | 0x80000000) >>> 0, 2, 0],
+          amountStr: "1000",
+        }
+      ], //withdrawals
+      "a200a11864a118c843aa00ff01a119012c590100a200a11864a1a200a11864a1", //metadataHashHex,
+      "7", //validityIntervalStartStr
     ));
     /*
       {
-        txHashHex: '7c6f577545a532527000fb112456f368262ab57648fe135567fa1c97971c87b4',
+        txHashHex: '30f6d278f7b5191364f7ae59ecf1db15db10d3efedcb367c5c34761793a653ee',
         witnesses: [
           {
             path: [Array],
-            witnessSignatureHex: 'c4ec6a31047dd987c626a75c8c1087189f5f6ff2ba845c73a8866a73b66e9ded4e722c1e7a4c96ed11cee6e749bb485352256a1c654b2cecb1a68dca592dfc0c'
+            witnessSignatureHex: '078c05676f2183f7da9f69a23cadf0a34ba04fc5dacf000f40eaf13a1edcbf7591b8fcf56b75b9e157363c4be9cb1ba5d3f01a7713567ee223cffb6e2afda30c'
           },
           {
             path: [Array],
-            witnessSignatureHex: 'cafe10383d955fcf9f6fea032628916ea5030776f34762cadfbd92352918250e173b149479c50d101d79af435de78f05fb9ebb63f7f3e977b9e5a82422b34c0f'
+            witnessSignatureHex: '5b1439560ce51cd67cdb5922cbc7b42f8fa24f8009d7d9bd49af9206c46d8e32cba96639498e3064ab31b93b7cfa5506fdf167e1eedd298adaa580ae616f800d'
           }
         ]
       }

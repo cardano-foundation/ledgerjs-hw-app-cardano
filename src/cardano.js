@@ -1,5 +1,5 @@
 import utils, { Precondition, Assert } from "./utils";
-import { PoolParams, PoolOwnerParams, SingleHostIPRelay, SingleHostNameRelay, MultiHostNameRelay, PoolMetadataParams } from './Ada';
+import { TxOutput, TxOutputTypeCodes, PoolParams, PoolOwnerParams, SingleHostIPRelay, SingleHostNameRelay, MultiHostNameRelay, PoolMetadataParams } from './Ada';
 import { hex_to_buf } from "../lib/utils";
 
 const HARDENED = 0x80000000;
@@ -17,13 +17,26 @@ export const CertificateTypes = Object.freeze({
 	STAKE_DEREGISTRATION: 1,
 	STAKE_DELEGATION: 2,
 	STAKE_POOL_REGISTRATION : 3
-})
+});
+
+export const SignTxIncluded = Object.freeze({
+	SIGN_TX_INCLUDED_NO: 1,
+	SIGN_TX_INCLUDED_YES: 2
+});
+
 
 const KEY_HASH_LENGTH = 28;
 const TX_HASH_LENGTH = 32;
 
+const TOKEN_POLICY_LENGTH = 28;
+const TOKEN_NAME_LENGTH = 32;
+
+const ASSET_GROUPS_MAX = 1000;
+const TOKENS_IN_GROUP_MAX = 1000;
+
 const POOL_REGISTRATION_OWNERS_MAX = 1000;
 const POOL_REGISTRATION_RELAYS_MAX = 1000;
+
 
 export const GetKeyErrors = {
   INVALID_PATH: "invalid key path",
@@ -39,6 +52,9 @@ export const TxErrors = {
 
   OUTPUTS_NOT_ARRAY: "outputs not an array",
   OUTPUT_INVALID_AMOUNT: "invalid amount in an output",
+  OUTPUT_INVALID_TOKEN_BUNDLE: "invalid multiasset token bundle in an output",  
+  OUTPUT_INVALID_TOKEN_POLICY: "invalid multiasset token policy",
+  OUTPUT_INVALID_ASSET_NAME: "invalid asset name in the token bundle in an output",
   OUTPUT_INVALID_ADDRESS: "invalid address in an output",
   OUTPUT_WITH_PATH: "outputs given by path are not allowed for stake pool registration transactions",
   OUTPUT_UNKNOWN_TYPE: "unknown output type",
@@ -67,6 +83,7 @@ export const TxErrors = {
   CERTIFICATE_POOL_INVALID_PLEDGE: "invalid pledge in a pool registration certificate",
   CERTIFICATE_POOL_INVALID_COST: "invalid cost in a pool registration certificate",
   CERTIFICATE_POOL_INVALID_MARGIN: "invalid margin in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR: "pool margin denominator must be a value between 1 and 10^15",
   CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT: "invalid reward account in a pool registration certificate",
   CERTIFICATE_POOL_OWNERS_NOT_ARRAY: "owners not an array in a pool registration certificate",
   CERTIFICATE_POOL_OWNERS_TOO_MANY: "too many owners in a pool registration certificate",
@@ -89,6 +106,8 @@ export const TxErrors = {
   WITHDRAWALS_FORBIDDEN: "no withdrawals allowed for transactions registering stake pools",
 
   METADATA_INVALID: "invalid metadata",
+
+  VALIDITY_INTERVAL_START_INVALID: "invalid validity interval start",
 }
 
 
@@ -170,7 +189,8 @@ export function validateTransaction(
   ttlStr: string,
   certificates: Array<Certificate>,
   withdrawals: Array<Withdrawal>,
-  metadataHashHex: ?string
+  metadataHashHex: ?string,
+  validityIntervalStartStr: ?string
 ) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(
@@ -193,35 +213,40 @@ export function validateTransaction(
   // outputs
   Precondition.checkIsArray(outputs, TxErrors.OUTPUTS_NOT_ARRAY);
   for (const output of outputs) {
-    Precondition.checkIsValidAmount(output.amountStr, TxErrors.OUTPUT_INVALID_AMOUNT);
+    // we try to serialize the data, an error is thrown if ada amount or address params are invalid
+    serializeOutputBasicParams(output, protocolMagic, networkId);
 
-    if (output.addressHex) {
-      Precondition.checkIsHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS);
-      Precondition.check(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
-    } else if (output.spendingPath) {
+    if (output.spendingPath) {
       Precondition.check(!isSigningPoolRegistrationAsOwner, TxErrors.OUTPUT_WITH_PATH);
+    }
 
-      // we try to serialize the data, an error is thrown if output params are invalid
-      serializeAddressParams(
-        output.addressTypeNibble,
-        output.addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,
-        output.spendingPath,
-        output.stakingPath,
-        output.stakingKeyHashHex,
-        output.stakingBlockchainPointer
-      );
-    } else {
-      throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
+    if (output.tokenBundle) {
+      Precondition.checkIsArray(output.tokenBundle, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
+      Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
+
+      for (const assetGroup of output.tokenBundle) {
+        Precondition.checkIsHexString(assetGroup.policyIdHex, TxErrors.OUTPUT_INVALID_TOKEN_POLICY);
+        Precondition.check(assetGroup.policyIdHex.length === TOKEN_POLICY_LENGTH * 2, TxErrors.OUTPUT_INVALID_TOKEN_POLICY);
+
+        Precondition.checkIsArray(assetGroup.tokens);
+        Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX);
+
+        for (const token of assetGroup.tokens) {
+          Precondition.checkIsHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
+          Precondition.check(token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2, TxErrors.OUTPUT_INVALID_ASSET_NAME);
+          Precondition.checkIsUint64Str(token.amountStr);
+        }
+      }
     }
   }
 
   // fee
-  Precondition.checkIsValidAmount(feeStr, TxErrors.FEE_INVALID);
+  Precondition.checkIsValidAdaAmount(feeStr, TxErrors.FEE_INVALID);
 
   //  ttl
-  const ttl = utils.safe_parseInt(ttlStr);
-  Precondition.checkIsUint64(ttl, TxErrors.TTL_INVALID);
-  Precondition.check(ttl > 0, TxErrors.TTL_INVALID);
+  if (ttlStr != null) {
+    Precondition.checkIsPositiveUint64Str(ttlStr, TxErrors.TTL_INVALID);
+  }
 
   // certificates
   validateCertificates(certificates);
@@ -232,14 +257,19 @@ export function validateTransaction(
     throw new Error(TxErrors.WITHDRAWALS_FORBIDDEN);
   }
   for (const withdrawal of withdrawals) {
-    Precondition.checkIsValidAmount(withdrawal.amountStr);
+    Precondition.checkIsValidAdaAmount(withdrawal.amountStr);
     Precondition.checkIsValidPath(withdrawal.path);
   }
 
   // metadata could be null
-  if ((metadataHashHex !== null) && (metadataHashHex !== undefined)) {
+  if (metadataHashHex != null) {
     Precondition.checkIsHexString(metadataHashHex, TxErrors.METADATA_INVALID);
     Precondition.check(metadataHashHex.length == 32 * 2, TxErrors.METADATA_INVALID);
+  }
+
+  //  validity interval start
+  if (validityIntervalStartStr != null) {
+    Precondition.checkIsPositiveUint64Str(validityIntervalStartStr, TxErrors.VALIDITY_INTERVAL_START_INVALID);
   }
 }
 
@@ -314,6 +344,91 @@ export function serializeAddressParams(
   ]);
 }
 
+export function serializeOutputBasicParams(
+  output: TxOutput,
+  protocolMagic: number,
+  networkId: number
+): Buffer {
+  Precondition.checkIsValidAdaAmount(output.amountStr);
+
+  let outputType;
+  let addressBuf;
+
+  if (output.addressHex) {
+    outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
+
+    Precondition.checkIsHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS);
+    Precondition.check(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
+    addressBuf = Buffer.concat([
+      utils.uint32_to_buf(output.addressHex.length / 2),
+      utils.hex_to_buf(output.addressHex)
+    ]);
+
+  } else if (output.spendingPath) {
+    outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
+
+    addressBuf = serializeAddressParams(
+      output.addressTypeNibble,
+      output.addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,
+      output.spendingPath,
+      output.stakingPath,
+      output.stakingKeyHashHex,
+      output.stakingBlockchainPointer
+    );
+
+  } else {
+    throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
+  }
+
+  const numassetGroups =
+      (output.tokenBundle) ?
+      output.tokenBundle.length :
+      0;
+
+  return Buffer.concat([
+    utils.uint8_to_buf(outputType),
+    addressBuf,
+    utils.ada_amount_to_buf(output.amountStr),
+    utils.uint32_to_buf(numassetGroups)
+  ]);
+}
+
+// TODO remove after ledger app 2.2 is widespread
+export function serializeOutputBasicParamsBefore_2_2(
+  output: TxOutput,
+  protocolMagic: number,
+  networkId: number
+): Buffer {
+  Precondition.checkIsValidAdaAmount(output.amountStr);
+
+  if (output.addressHex) {
+    Precondition.checkIsHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS);
+    Precondition.check(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
+
+    return Buffer.concat([	
+      utils.ada_amount_to_buf(output.amountStr),	
+      utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
+      utils.hex_to_buf(output.addressHex)	
+    ]);	
+
+  } else if (output.spendingPath) {
+    return Buffer.concat([
+      utils.ada_amount_to_buf(output.amountStr),
+      utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),	
+      serializeAddressParams(	
+        output.addressTypeNibble,	
+        output.addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,	
+        output.spendingPath,	
+        output.stakingPath,	
+        output.stakingKeyHashHex,	
+        output.stakingBlockchainPointer	
+      )
+    ]);
+  } else {
+    throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
+  }
+}
+
 export function serializePoolInitialParams(
   params: PoolParams
 ): Buffer {
@@ -323,16 +438,15 @@ export function serializePoolInitialParams(
   Precondition.checkIsHexString(params.vrfKeyHashHex, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH);
   Precondition.check(params.vrfKeyHashHex.length === 32 * 2, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH);
 
-  Precondition.checkIsValidAmount(params.pledgeStr, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE);
-  Precondition.checkIsValidAmount(params.costStr, TxErrors.CERTIFICATE_POOL_INVALID_COST);
+  Precondition.checkIsValidAdaAmount(params.pledgeStr, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE);
+  Precondition.checkIsValidAdaAmount(params.costStr, TxErrors.CERTIFICATE_POOL_INVALID_COST);
 
-  const marginNumerator = utils.safe_parseInt(params.margin.numeratorStr);
-  Precondition.checkIsUint64(marginNumerator, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
-  const marginDenominator = utils.safe_parseInt(params.margin.denominatorStr);
-  Precondition.checkIsUint64(marginDenominator, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
-  Precondition.check(marginNumerator >= 0, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
-  Precondition.check(marginDenominator > 0, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
-  Precondition.check(marginNumerator <= marginDenominator, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
+  const marginNumeratorStr = params.margin.numeratorStr;
+  const marginDenominatorStr = params.margin.denominatorStr;
+  Precondition.checkIsUint64Str(marginNumeratorStr, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
+  Precondition.checkIsValidPoolMarginDenominator(marginDenominatorStr, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR);
+  // given both are valid uint strings, the check below is equivalent to "marginNumerator <= marginDenominator"
+  Precondition.checkIsValidUintStr(marginNumeratorStr, marginDenominatorStr, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
 
   Precondition.checkIsHexString(params.rewardAccountHex, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT);
   Precondition.check(params.rewardAccountHex.length === 29 * 2, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT);
@@ -343,10 +457,10 @@ export function serializePoolInitialParams(
   return Buffer.concat([
     utils.hex_to_buf(params.poolKeyHashHex),
     utils.hex_to_buf(params.vrfKeyHashHex),
-    utils.amount_to_buf(params.pledgeStr),
-    utils.amount_to_buf(params.costStr),
-    utils.amount_to_buf(params.margin.numeratorStr), // TODO why amount? ... we should have uint64_to_buf?
-    utils.amount_to_buf(params.margin.denominatorStr),
+    utils.ada_amount_to_buf(params.pledgeStr),
+    utils.ada_amount_to_buf(params.costStr),
+    utils.uint64_to_buf(params.margin.numeratorStr),
+    utils.uint64_to_buf(params.margin.denominatorStr),
     utils.hex_to_buf(params.rewardAccountHex),
     utils.uint32_to_buf(params.poolOwners.length),
     utils.uint32_to_buf(params.relays.length)
@@ -471,16 +585,12 @@ export function serializePoolMetadataParams(
   params: PoolMetadataParams
 ): Buffer {
 
-  const POOL_CERTIFICATE_METADATA_NO = 1;
-  const POOL_CERTIFICATE_METADATA_YES = 2;
-
   const includeMetadataBuffer = Buffer.alloc(1);
-  if ((params === null) || (params === undefined)) {
-    // deal with null metadata
-    includeMetadataBuffer.writeUInt8(POOL_CERTIFICATE_METADATA_NO);
-    return includeMetadataBuffer;
+  if (params != null) {
+    includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_YES);
   } else {
-    includeMetadataBuffer.writeUInt8(POOL_CERTIFICATE_METADATA_YES);
+    includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_NO);
+    return includeMetadataBuffer;
   }
 
   const url = params.metadataUrl;
@@ -524,6 +634,8 @@ export default {
   validateTransaction,
 
   serializeAddressParams,
+  serializeOutputBasicParams,
+  serializeOutputBasicParamsBefore_2_2,
 
   serializePoolInitialParams,
   serializePoolOwnerParams,

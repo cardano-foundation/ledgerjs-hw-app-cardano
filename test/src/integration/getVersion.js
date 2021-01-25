@@ -16,6 +16,6 @@ describe("getVersion", async () => {
     const response = await ada.getVersion();
 
     expect(response.major).to.equal(2);
-    expect(response.minor).to.equal(1);
+    expect(response.minor).to.equal(2);
   });
 });
