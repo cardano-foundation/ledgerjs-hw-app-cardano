@@ -16,4 +16,11 @@ Run example by `node example-node/lib/index.js`.
 Automated tests are provided. There are two types of tests
 
 1. `yarn test-integration`. Tests JS api.
-2. `yarn test-direct`. Mostly tests vartious corner cases. There are some extensive tests which are disabled by default, see tests source code. Also note that for these tests it is advised to install developer version of Cardano app with _headless_ mode enabled, otherwise you spend your entire life confirming various prompts on device.
+2. `yarn test-direct`. Mostly tests for different corner cases. There are some extensive tests which are disabled by default, see tests source code.
+
+Note that for these tests it is advisable to install the developer build of the Cardano app with _headless_ mode enabled unless you want to verify the UI flows, otherwise you will need a significant amount of time to manually confirm all prompts on the device.
+
+### Documentation
+
+* available calls documented in [docs folder](/docs)
+* [CHANGELOG](CHANGELOG.md)
