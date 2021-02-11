@@ -235,34 +235,40 @@ export const getErrorDescription = (statusCode: number) => {
 // In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
 // default. We can therefore transparently retry the request.
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
-const wrapRetryStillInCall = (fn) => async (...args: any) => {
-  try {
-    return await fn(...args);
-  } catch (e) {
-    if (
-      e &&
-      e.statusCode &&
-      e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
-    ) {
-      // Do the retry
+function wrapRetryStillInCall<T: Function>(fn: T): T {
+  // $FlowFixMe
+  return async (...args: any) => {
+    try {
       return await fn(...args);
+    } catch (e) {
+      if (
+        e &&
+        e.statusCode &&
+        e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
+      ) {
+        // Do the retry
+        return await fn(...args);
+      }
+      throw e;
     }
-    throw e;
-  }
-};
+  };
+}
 
-const wrapConvertError = (fn) => async (...args) => {
-  try {
-    return await fn(...args);
-  } catch (e) {
-    if (e && e.statusCode) {
-      // keep HwTransport.TransportStatusError
-      // just override the message
-      e.message = `Ledger device: ${getErrorDescription(e.statusCode)}`;
+function wrapConvertError<T: Function>(fn: T): T {
+  // $FlowFixMe
+  return async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      if (e && e.statusCode) {
+        // keep HwTransport.TransportStatusError
+        // just override the message
+        e.message = `Ledger device: ${getErrorDescription(e.statusCode)}`;
+      }
+      throw e;
     }
-    throw e;
-  }
-};
+  };
+}
 
 /**
  * Cardano ADA API
@@ -272,7 +278,13 @@ const wrapConvertError = (fn) => async (...args) => {
  * const ada = new Ada(transport);
  */
 
-type SendFn = (number, number, number, number, Buffer) => Promise<Buffer>;
+type SendFn = (
+  cla: number,
+  ins: number,
+  p1: number,
+  p2: number,
+  data: Buffer
+) => Promise<Buffer>;
 
 const buildSendFn = (cls: Object, instructionCode: $Values<typeof INS>) => {
   return async (
@@ -411,7 +423,13 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    await wrapRetryStillInCall(this.send)(CLA, INS.RUN_TESTS, 0x00, 0x00);
+    await wrapRetryStillInCall(this.send)(
+      CLA,
+      INS.RUN_TESTS,
+      0x00,
+      0x00,
+      Buffer.alloc(0)
+    );
   }
 
   /**
