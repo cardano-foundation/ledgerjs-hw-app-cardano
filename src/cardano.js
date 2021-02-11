@@ -1,6 +1,21 @@
+//@flow
 import utils, { Precondition, Assert } from "./utils";
-import { TxOutput, TxOutputTypeCodes, PoolParams, PoolOwnerParams, SingleHostIPRelay, SingleHostNameRelay, MultiHostNameRelay, PoolMetadataParams } from './Ada';
-import { hex_to_buf } from "../lib/utils";
+import type {
+  TxOutput,
+  Certificate,
+  PoolParams,
+  PoolOwnerParams,
+  PoolMetadataParams,
+  BIP32Path,
+  InputTypeUTxO,
+  TxOutputTypeAddress,
+  TxOutputTypeAddressParams,
+  Withdrawal,
+  StakingBlockchainPointer,
+  RelayParams,
+} from "./Ada";
+import { TxOutputTypeCodes } from "./Ada";
+import { hex_to_buf } from "./utils";
 
 const HARDENED = 0x80000000;
 
@@ -9,21 +24,20 @@ export const AddressTypeNibbles = Object.freeze({
   POINTER: 0b0100,
   ENTERPRISE: 0b0110,
   BYRON: 0b1000,
-  REWARD: 0b1110
+  REWARD: 0b1110,
 });
 
 export const CertificateTypes = Object.freeze({
-	STAKE_REGISTRATION: 0,
-	STAKE_DEREGISTRATION: 1,
-	STAKE_DELEGATION: 2,
-	STAKE_POOL_REGISTRATION : 3
+  STAKE_REGISTRATION: 0,
+  STAKE_DEREGISTRATION: 1,
+  STAKE_DELEGATION: 2,
+  STAKE_POOL_REGISTRATION: 3,
 });
 
 export const SignTxIncluded = Object.freeze({
-	SIGN_TX_INCLUDED_NO: 1,
-	SIGN_TX_INCLUDED_YES: 2
+  SIGN_TX_INCLUDED_NO: 1,
+  SIGN_TX_INCLUDED_YES: 2,
 });
-
 
 const KEY_HASH_LENGTH = 28;
 const TX_HASH_LENGTH = 32;
@@ -37,26 +51,29 @@ const TOKENS_IN_GROUP_MAX = 1000;
 const POOL_REGISTRATION_OWNERS_MAX = 1000;
 const POOL_REGISTRATION_RELAYS_MAX = 1000;
 
-
 export const GetKeyErrors = {
   INVALID_PATH: "invalid key path",
-}
+};
 
 export const TxErrors = {
+  OUTPUT_INVALID_ADDRESS_TYPE_NIBBLE: "invalid address nibble",
   INVALID_PROTOCOL_MAGIC: "invalid protocol magic",
   INVALID_NETWORK_ID: "invalid network id",
 
   INPUTS_NOT_ARRAY: "inputs not an array",
-  INPUT_WITH_PATH: "stake pool registration: inputs should not contain the witness path",
+  INPUT_WITH_PATH:
+    "stake pool registration: inputs should not contain the witness path",
   INPUT_INVALID_TX_HASH: "invalid tx hash in an input",
 
   OUTPUTS_NOT_ARRAY: "outputs not an array",
   OUTPUT_INVALID_AMOUNT: "invalid amount in an output",
-  OUTPUT_INVALID_TOKEN_BUNDLE: "invalid multiasset token bundle in an output",  
+  OUTPUT_INVALID_TOKEN_BUNDLE: "invalid multiasset token bundle in an output",
   OUTPUT_INVALID_TOKEN_POLICY: "invalid multiasset token policy",
-  OUTPUT_INVALID_ASSET_NAME: "invalid asset name in the token bundle in an output",
+  OUTPUT_INVALID_ASSET_NAME:
+    "invalid asset name in the token bundle in an output",
   OUTPUT_INVALID_ADDRESS: "invalid address in an output",
-  OUTPUT_WITH_PATH: "outputs given by path are not allowed for stake pool registration transactions",
+  OUTPUT_WITH_PATH:
+    "outputs given by path are not allowed for stake pool registration transactions",
   OUTPUT_UNKNOWN_TYPE: "unknown output type",
   OUTPUT_INVALID_SPENDING_PATH: "invalid spending path in an output",
   OUTPUT_INVALID_BLOCKCHAIN_POINTER: "invalid blockchain pointer in an output",
@@ -69,55 +86,78 @@ export const TxErrors = {
   TTL_INVALID: "invalid ttl",
 
   CERTIFICATES_NOT_ARRAY: "certificates not an array",
-  CERTIFICATES_COMBINATION_FORBIDDEN: "pool registration must not be combined with other certificates",
+  CERTIFICATES_COMBINATION_FORBIDDEN:
+    "pool registration must not be combined with other certificates",
   CERTIFICATE_MISSING_PATH: "path is required for one of the certificates",
   CERTIFICATE_SUPERFLUOUS_PATH: "superfluous path in a certificate",
   CERTIFICATE_MISSING_POOL_KEY_HASH: "pool key hash missing in a certificate",
-  CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH: "superfluous pool key hash in a certificate",
+  CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH:
+    "superfluous pool key hash in a certificate",
   CERTIFICATE_INVALID_POOL_KEY_HASH: "invalid pool key hash in a certificate",
   CERTIFICATE_INVALID: "invalid certificate",
 
-  CERTIFICATE_POOL_MISSING_POOL_PARAMS: "missing stake pool params in a pool registration certificate",
-  CERTIFICATE_POOL_INVALID_POOL_KEY_HASH: "invalid pool key hash in a pool registration certificate",
-  CERTIFICATE_POOL_INVALID_VRF_KEY_HASH: "invalid vrf key hash in a pool registration certificate",
-  CERTIFICATE_POOL_INVALID_PLEDGE: "invalid pledge in a pool registration certificate",
-  CERTIFICATE_POOL_INVALID_COST: "invalid cost in a pool registration certificate",
-  CERTIFICATE_POOL_INVALID_MARGIN: "invalid margin in a pool registration certificate",
-  CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR: "pool margin denominator must be a value between 1 and 10^15",
-  CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT: "invalid reward account in a pool registration certificate",
-  CERTIFICATE_POOL_OWNERS_NOT_ARRAY: "owners not an array in a pool registration certificate",
-  CERTIFICATE_POOL_OWNERS_TOO_MANY: "too many owners in a pool registration certificate",
-  CERTIFICATE_POOL_OWNERS_SINGLE_PATH: "there should be exactly one owner given by path in a pool registration certificate",
-  CERTIFICATE_POOL_OWNER_INCOMPLETE: "incomplete owner params in a pool registration certificate",
-  CERTIFICATE_POOL_OWNER_INVALID_PATH: "invalid owner path in a pool registration certificate",
-  CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH: "invalid owner key hash in a pool registration certificate",
-  CERTIFICATE_POOL_RELAYS_NOT_ARRAY: "relays not an array in a pool registration certificate",
-  CERTIFICATE_POOL_RELAYS_TOO_MANY: "too many pool relays in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_INVALID_TYPE: "invalid type of a relay in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_INVALID_PORT: "invalid port in a relay in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_INVALID_IPV4: "invalid ipv4 in a relay in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_INVALID_IPV6: "invalid ipv6 in a relay in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_INVALID_DNS: "invalid dns record in a relay in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_MISSING_DNS: "missing dns record in a relay in a pool registration certificate",
-  CERTIFICATE_POOL_METADATA_INVALID_URL: "invalid metadata in a pool registration certificate: invalid url",
-  CERTIFICATE_POOL_METADATA_INVALID_HASH: "invalid metadata in a pool registration certificate: invalid hash",
+  CERTIFICATE_POOL_MISSING_POOL_PARAMS:
+    "missing stake pool params in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_POOL_KEY_HASH:
+    "invalid pool key hash in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_VRF_KEY_HASH:
+    "invalid vrf key hash in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_PLEDGE:
+    "invalid pledge in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_COST:
+    "invalid cost in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_MARGIN:
+    "invalid margin in a pool registration certificate",
+  CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR:
+    "pool margin denominator must be a value between 1 and 10^15",
+  CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT:
+    "invalid reward account in a pool registration certificate",
+  CERTIFICATE_POOL_OWNERS_NOT_ARRAY:
+    "owners not an array in a pool registration certificate",
+  CERTIFICATE_POOL_OWNERS_TOO_MANY:
+    "too many owners in a pool registration certificate",
+  CERTIFICATE_POOL_OWNERS_SINGLE_PATH:
+    "there should be exactly one owner given by path in a pool registration certificate",
+  CERTIFICATE_POOL_OWNER_INCOMPLETE:
+    "incomplete owner params in a pool registration certificate",
+  CERTIFICATE_POOL_OWNER_INVALID_PATH:
+    "invalid owner path in a pool registration certificate",
+  CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH:
+    "invalid owner key hash in a pool registration certificate",
+  CERTIFICATE_POOL_RELAYS_NOT_ARRAY:
+    "relays not an array in a pool registration certificate",
+  CERTIFICATE_POOL_RELAYS_TOO_MANY:
+    "too many pool relays in a pool registration certificate",
+  CERTIFICATE_POOL_RELAY_INVALID_TYPE:
+    "invalid type of a relay in a pool registration certificate",
+  CERTIFICATE_POOL_RELAY_INVALID_PORT:
+    "invalid port in a relay in a pool registration certificate",
+  CERTIFICATE_POOL_RELAY_INVALID_IPV4:
+    "invalid ipv4 in a relay in a pool registration certificate",
+  CERTIFICATE_POOL_RELAY_INVALID_IPV6:
+    "invalid ipv6 in a relay in a pool registration certificate",
+  CERTIFICATE_POOL_RELAY_INVALID_DNS:
+    "invalid dns record in a relay in a pool registration certificate",
+  CERTIFICATE_POOL_RELAY_MISSING_DNS:
+    "missing dns record in a relay in a pool registration certificate",
+  CERTIFICATE_POOL_METADATA_INVALID_URL:
+    "invalid metadata in a pool registration certificate: invalid url",
+  CERTIFICATE_POOL_METADATA_INVALID_HASH:
+    "invalid metadata in a pool registration certificate: invalid hash",
 
   WITHDRAWALS_NOT_ARRAY: "withdrawals not an array",
-  WITHDRAWALS_FORBIDDEN: "no withdrawals allowed for transactions registering stake pools",
+  WITHDRAWALS_FORBIDDEN:
+    "no withdrawals allowed for transactions registering stake pools",
 
   METADATA_INVALID: "invalid metadata",
 
   VALIDITY_INTERVAL_START_INVALID: "invalid validity interval start",
-}
+};
 
-
-function validateCertificates(
-  certificates: Array<Certificate>
-)
-{
+function validateCertificates(certificates: Array<Certificate>) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(
-    cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
   );
 
   for (const cert of certificates) {
@@ -125,51 +165,98 @@ function validateCertificates(
 
     switch (cert.type) {
       case CertificateTypes.STAKE_REGISTRATION: {
-        Precondition.check(!isSigningPoolRegistrationAsOwner, TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
-        Precondition.checkIsValidPath(cert.path, TxErrors.CERTIFICATE_MISSING_PATH);
-        Precondition.check(!cert.poolKeyHashHex, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
+        Precondition.check(
+          !isSigningPoolRegistrationAsOwner,
+          TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
+        );
+        Precondition.checkIsValidPath(
+          cert.path,
+          TxErrors.CERTIFICATE_MISSING_PATH
+        );
+        Precondition.check(
+          !cert.poolKeyHashHex,
+          TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH
+        );
         break;
       }
       case CertificateTypes.STAKE_DEREGISTRATION: {
-        Precondition.check(!isSigningPoolRegistrationAsOwner, TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
-        Precondition.checkIsValidPath(cert.path, TxErrors.CERTIFICATE_MISSING_PATH);
-        Precondition.check(!cert.poolKeyHashHex, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
+        Precondition.check(
+          !isSigningPoolRegistrationAsOwner,
+          TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
+        );
+        Precondition.checkIsValidPath(
+          cert.path,
+          TxErrors.CERTIFICATE_MISSING_PATH
+        );
+        Precondition.check(
+          !cert.poolKeyHashHex,
+          TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH
+        );
         break;
       }
       case CertificateTypes.STAKE_DELEGATION: {
-        Precondition.check(!isSigningPoolRegistrationAsOwner, TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
-        Precondition.checkIsValidPath(cert.path, TxErrors.CERTIFICATE_MISSING_PATH);
-        Precondition.checkIsHexString(cert.poolKeyHashHex, TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH);
-        Precondition.check(cert.poolKeyHashHex.length == KEY_HASH_LENGTH * 2, TxErrors.CERTIFICATE_INVALID_POOL_KEY_HASH);
+        Precondition.check(
+          !isSigningPoolRegistrationAsOwner,
+          TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
+        );
+        Precondition.checkIsValidPath(
+          cert.path,
+          TxErrors.CERTIFICATE_MISSING_PATH
+        );
+        Precondition.checkIsHexString(
+          cert.poolKeyHashHex,
+          TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH
+        );
+        Precondition.check(
+          // $FlowFixMe
+          cert.poolKeyHashHex.length == KEY_HASH_LENGTH * 2,
+          TxErrors.CERTIFICATE_INVALID_POOL_KEY_HASH
+        );
         break;
       }
       case CertificateTypes.STAKE_POOL_REGISTRATION: {
         Assert.assert(isSigningPoolRegistrationAsOwner);
         Precondition.check(!cert.path, TxErrors.CERTIFICATE_SUPERFLUOUS_PATH);
         const poolParams = cert.poolRegistrationParams;
-        Precondition.check(!!poolParams, TxErrors.CERTIFICATE_POOL_MISSING_POOL_PARAMS);
+        Precondition.check(
+          !!poolParams,
+          TxErrors.CERTIFICATE_POOL_MISSING_POOL_PARAMS
+        );
 
         // serialization succeeds if and only if params are valid
+        // $FlowFixMe
         serializePoolInitialParams(poolParams);
 
         // owners
-        Precondition.checkIsArray(poolParams.poolOwners, TxErrors.CERTIFICATE_POOL_OWNERS_NOT_ARRAY);
+        Precondition.checkIsArray(
+          // $FlowFixMe
+          poolParams.poolOwners,
+          TxErrors.CERTIFICATE_POOL_OWNERS_NOT_ARRAY
+        );
         let numPathOwners = 0;
+        // $FlowFixMe
         for (const owner of poolParams.poolOwners) {
           if (owner.stakingPath) {
             numPathOwners++;
             serializePoolOwnerParams(owner);
           }
         }
-        if (numPathOwners !== 1) throw new Error(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
+        if (numPathOwners !== 1)
+          throw new Error(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
 
         // relays
-        Precondition.checkIsArray(poolParams.relays, TxErrors.CERTIFICATE_POOL_RELAYS_NOT_ARRAY);
+        Precondition.checkIsArray(
+          // $FlowFixMe
+          poolParams.relays,
+          TxErrors.CERTIFICATE_POOL_RELAYS_NOT_ARRAY
+        );
+        // $FlowFixMe
         for (const relay of poolParams.relays) {
           serializePoolRelayParams(relay);
         }
 
         // metadata
+        // $FlowFixMe
         serializePoolMetadataParams(poolParams.metadata);
 
         break;
@@ -184,9 +271,9 @@ export function validateTransaction(
   networkId: number,
   protocolMagic: number,
   inputs: Array<InputTypeUTxO>,
-  outputs: Array<OutputTypeAddress | OutputTypeAddressParams>,
+  outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
   feeStr: string,
-  ttlStr: string,
+  ttlStr: ?string,
   certificates: Array<Certificate>,
   withdrawals: Array<Withdrawal>,
   metadataHashHex: ?string,
@@ -194,14 +281,20 @@ export function validateTransaction(
 ) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(
-    cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
   );
 
   // inputs
   Precondition.checkIsArray(inputs, TxErrors.INPUTS_NOT_ARRAY);
   for (const input of inputs) {
-    Precondition.checkIsHexString(input.txHashHex, TxErrors.INPUT_INVALID_TX_HASH);
-    Precondition.check(input.txHashHex.length === TX_HASH_LENGTH * 2, TxErrors.INPUT_INVALID_TX_HASH);
+    Precondition.checkIsHexString(
+      input.txHashHex,
+      TxErrors.INPUT_INVALID_TX_HASH
+    );
+    Precondition.check(
+      input.txHashHex.length === TX_HASH_LENGTH * 2,
+      TxErrors.INPUT_INVALID_TX_HASH
+    );
 
     if (isSigningPoolRegistrationAsOwner) {
       // input should not be given with a path
@@ -217,23 +310,41 @@ export function validateTransaction(
     serializeOutputBasicParams(output, protocolMagic, networkId);
 
     if (output.spendingPath) {
-      Precondition.check(!isSigningPoolRegistrationAsOwner, TxErrors.OUTPUT_WITH_PATH);
+      Precondition.check(
+        !isSigningPoolRegistrationAsOwner,
+        TxErrors.OUTPUT_WITH_PATH
+      );
     }
 
     if (output.tokenBundle) {
-      Precondition.checkIsArray(output.tokenBundle, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
+      Precondition.checkIsArray(
+        output.tokenBundle,
+        TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE
+      );
       Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
 
       for (const assetGroup of output.tokenBundle) {
-        Precondition.checkIsHexString(assetGroup.policyIdHex, TxErrors.OUTPUT_INVALID_TOKEN_POLICY);
-        Precondition.check(assetGroup.policyIdHex.length === TOKEN_POLICY_LENGTH * 2, TxErrors.OUTPUT_INVALID_TOKEN_POLICY);
+        Precondition.checkIsHexString(
+          assetGroup.policyIdHex,
+          TxErrors.OUTPUT_INVALID_TOKEN_POLICY
+        );
+        Precondition.check(
+          assetGroup.policyIdHex.length === TOKEN_POLICY_LENGTH * 2,
+          TxErrors.OUTPUT_INVALID_TOKEN_POLICY
+        );
 
         Precondition.checkIsArray(assetGroup.tokens);
         Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX);
 
         for (const token of assetGroup.tokens) {
-          Precondition.checkIsHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
-          Precondition.check(token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2, TxErrors.OUTPUT_INVALID_ASSET_NAME);
+          Precondition.checkIsHexString(
+            token.assetNameHex,
+            TxErrors.OUTPUT_INVALID_ASSET_NAME
+          );
+          Precondition.check(
+            token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2,
+            TxErrors.OUTPUT_INVALID_ASSET_NAME
+          );
           Precondition.checkIsUint64Str(token.amountStr);
         }
       }
@@ -264,44 +375,62 @@ export function validateTransaction(
   // metadata could be null
   if (metadataHashHex != null) {
     Precondition.checkIsHexString(metadataHashHex, TxErrors.METADATA_INVALID);
-    Precondition.check(metadataHashHex.length == 32 * 2, TxErrors.METADATA_INVALID);
+    Precondition.check(
+      metadataHashHex.length == 32 * 2,
+      TxErrors.METADATA_INVALID
+    );
   }
 
   //  validity interval start
   if (validityIntervalStartStr != null) {
-    Precondition.checkIsPositiveUint64Str(validityIntervalStartStr, TxErrors.VALIDITY_INTERVAL_START_INVALID);
+    Precondition.checkIsPositiveUint64Str(
+      validityIntervalStartStr,
+      TxErrors.VALIDITY_INTERVAL_START_INVALID
+    );
   }
 }
 
 export function serializeAddressParams(
-    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
-    networkIdOrProtocolMagic: number,
-    spendingPath: BIP32Path,
-    stakingPath: ?BIP32Path = null,
-    stakingKeyHashHex: ?string = null,
-    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+  addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+  networkIdOrProtocolMagic: number,
+  spendingPath: BIP32Path,
+  stakingPath: ?BIP32Path = null,
+  stakingKeyHashHex: ?string = null,
+  stakingBlockchainPointer: ?StakingBlockchainPointer = null
 ): Buffer {
-  Precondition.checkIsUint8(addressTypeNibble << 4, TxErrors.OUTPUT_INVALID_ADDRESS_TYPE_NIBBLE);
+  Precondition.checkIsUint8(
+    addressTypeNibble << 4,
+    TxErrors.OUTPUT_INVALID_ADDRESS_TYPE_NIBBLE
+  );
   const addressTypeNibbleBuf = utils.uint8_to_buf(addressTypeNibble);
 
   let networkIdOrProtocolMagicBuf;
 
   if (addressTypeNibble === AddressTypeNibbles.BYRON) {
-    Precondition.checkIsUint32(networkIdOrProtocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC);
+    Precondition.checkIsUint32(
+      networkIdOrProtocolMagic,
+      TxErrors.INVALID_PROTOCOL_MAGIC
+    );
     networkIdOrProtocolMagicBuf = utils.uint32_to_buf(networkIdOrProtocolMagic);
   } else {
-    Precondition.checkIsUint8(networkIdOrProtocolMagic, TxErrors.INVALID_NETWORK_ID);
+    Precondition.checkIsUint8(
+      networkIdOrProtocolMagic,
+      TxErrors.INVALID_NETWORK_ID
+    );
     networkIdOrProtocolMagicBuf = utils.uint8_to_buf(networkIdOrProtocolMagic);
   }
 
-  Precondition.checkIsValidPath(spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH);
+  Precondition.checkIsValidPath(
+    spendingPath,
+    TxErrors.OUTPUT_INVALID_SPENDING_PATH
+  );
   const spendingPathBuf = utils.path_to_buf(spendingPath);
 
   const stakingChoices = {
     NO_STAKING: 0x11,
     STAKING_KEY_PATH: 0x22,
     STAKING_KEY_HASH: 0x33,
-    BLOCKCHAIN_POINTER: 0x44
+    BLOCKCHAIN_POINTER: 0x44,
   };
   type StakingChoice = $Values<typeof stakingChoices>;
 
@@ -311,24 +440,39 @@ export function serializeAddressParams(
   if (!stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
     stakingChoice = stakingChoices.NO_STAKING;
     stakingInfoBuf = Buffer.alloc(0);
-  } else if ( stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
+  } else if (stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
     stakingChoice = stakingChoices.STAKING_KEY_PATH;
-    Precondition.checkIsValidPath(stakingPath, TxErrors.OUTPUT_INVALID_STAKING_KEY_PATH);
+    Precondition.checkIsValidPath(
+      stakingPath,
+      TxErrors.OUTPUT_INVALID_STAKING_KEY_PATH
+    );
     stakingInfoBuf = utils.path_to_buf(stakingPath);
-  } else if (!stakingPath &&  stakingKeyHashHex && !stakingBlockchainPointer) {
+  } else if (!stakingPath && stakingKeyHashHex && !stakingBlockchainPointer) {
     const stakingKeyHash = utils.hex_to_buf(stakingKeyHashHex);
     stakingChoice = stakingChoices.STAKING_KEY_HASH;
-    Precondition.check(stakingKeyHash.length === KEY_HASH_LENGTH, TxErrors.OUTPUT_INVALID_STAKING_KEY_HASH);
+    Precondition.check(
+      stakingKeyHash.length === KEY_HASH_LENGTH,
+      TxErrors.OUTPUT_INVALID_STAKING_KEY_HASH
+    );
     stakingInfoBuf = stakingKeyHash;
-  } else if (!stakingPath && !stakingKeyHashHex &&  stakingBlockchainPointer) {
+  } else if (!stakingPath && !stakingKeyHashHex && stakingBlockchainPointer) {
     stakingChoice = stakingChoices.BLOCKCHAIN_POINTER;
     stakingInfoBuf = Buffer.alloc(3 * 4); // 3 x uint32
 
-    Precondition.checkIsUint32(stakingBlockchainPointer.blockIndex, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER);
+    Precondition.checkIsUint32(
+      stakingBlockchainPointer.blockIndex,
+      TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER
+    );
     stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.blockIndex, 0);
-    Precondition.checkIsUint32(stakingBlockchainPointer.txIndex, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER);
+    Precondition.checkIsUint32(
+      stakingBlockchainPointer.txIndex,
+      TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER
+    );
     stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.txIndex, 4);
-    Precondition.checkIsUint32(stakingBlockchainPointer.certificateIndex, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER);
+    Precondition.checkIsUint32(
+      stakingBlockchainPointer.certificateIndex,
+      TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER
+    );
     stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.certificateIndex, 8);
   } else {
     throw new Error(TxErrors.OUTPUT_INVALID_STAKING_INFO);
@@ -340,7 +484,7 @@ export function serializeAddressParams(
     networkIdOrProtocolMagicBuf,
     spendingPathBuf,
     stakingChoiceBuf,
-    stakingInfoBuf
+    stakingInfoBuf,
   ]);
 }
 
@@ -357,39 +501,42 @@ export function serializeOutputBasicParams(
   if (output.addressHex) {
     outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
 
-    Precondition.checkIsHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS);
-    Precondition.check(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
+    Precondition.checkIsHexString(
+      output.addressHex,
+      TxErrors.OUTPUT_INVALID_ADDRESS
+    );
+    Precondition.check(
+      output.addressHex.length <= 128 * 2,
+      TxErrors.OUTPUT_INVALID_ADDRESS
+    );
     addressBuf = Buffer.concat([
       utils.uint32_to_buf(output.addressHex.length / 2),
-      utils.hex_to_buf(output.addressHex)
+      utils.hex_to_buf(output.addressHex),
     ]);
-
   } else if (output.spendingPath) {
     outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
 
     addressBuf = serializeAddressParams(
       output.addressTypeNibble,
-      output.addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,
+      output.addressTypeNibble === AddressTypeNibbles.BYRON
+        ? protocolMagic
+        : networkId,
       output.spendingPath,
       output.stakingPath,
       output.stakingKeyHashHex,
       output.stakingBlockchainPointer
     );
-
   } else {
     throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
   }
 
-  const numassetGroups =
-      (output.tokenBundle) ?
-      output.tokenBundle.length :
-      0;
+  const numassetGroups = output.tokenBundle ? output.tokenBundle.length : 0;
 
   return Buffer.concat([
     utils.uint8_to_buf(outputType),
     addressBuf,
     utils.ada_amount_to_buf(output.amountStr),
-    utils.uint32_to_buf(numassetGroups)
+    utils.uint32_to_buf(numassetGroups),
   ]);
 }
 
@@ -402,57 +549,102 @@ export function serializeOutputBasicParamsBefore_2_2(
   Precondition.checkIsValidAdaAmount(output.amountStr);
 
   if (output.addressHex) {
-    Precondition.checkIsHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS);
-    Precondition.check(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
+    Precondition.checkIsHexString(
+      output.addressHex,
+      TxErrors.OUTPUT_INVALID_ADDRESS
+    );
+    Precondition.check(
+      output.addressHex.length <= 128 * 2,
+      TxErrors.OUTPUT_INVALID_ADDRESS
+    );
 
-    return Buffer.concat([	
-      utils.ada_amount_to_buf(output.amountStr),	
+    return Buffer.concat([
+      utils.ada_amount_to_buf(output.amountStr),
       utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
-      utils.hex_to_buf(output.addressHex)	
-    ]);	
-
+      utils.hex_to_buf(output.addressHex),
+    ]);
   } else if (output.spendingPath) {
     return Buffer.concat([
       utils.ada_amount_to_buf(output.amountStr),
-      utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),	
-      serializeAddressParams(	
-        output.addressTypeNibble,	
-        output.addressTypeNibble === AddressTypeNibbles.BYRON ? protocolMagic : networkId,	
-        output.spendingPath,	
-        output.stakingPath,	
-        output.stakingKeyHashHex,	
-        output.stakingBlockchainPointer	
-      )
+      utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
+      serializeAddressParams(
+        output.addressTypeNibble,
+        output.addressTypeNibble === AddressTypeNibbles.BYRON
+          ? protocolMagic
+          : networkId,
+        output.spendingPath,
+        output.stakingPath,
+        output.stakingKeyHashHex,
+        output.stakingBlockchainPointer
+      ),
     ]);
   } else {
     throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
   }
 }
 
-export function serializePoolInitialParams(
-  params: PoolParams
-): Buffer {
-  Precondition.checkIsHexString(params.poolKeyHashHex, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH);
-  Precondition.check(params.poolKeyHashHex.length === KEY_HASH_LENGTH * 2, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH);
+export function serializePoolInitialParams(params: PoolParams): Buffer {
+  Precondition.checkIsHexString(
+    params.poolKeyHashHex,
+    TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH
+  );
+  Precondition.check(
+    params.poolKeyHashHex.length === KEY_HASH_LENGTH * 2,
+    TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH
+  );
 
-  Precondition.checkIsHexString(params.vrfKeyHashHex, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH);
-  Precondition.check(params.vrfKeyHashHex.length === 32 * 2, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH);
+  Precondition.checkIsHexString(
+    params.vrfKeyHashHex,
+    TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH
+  );
+  Precondition.check(
+    params.vrfKeyHashHex.length === 32 * 2,
+    TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH
+  );
 
-  Precondition.checkIsValidAdaAmount(params.pledgeStr, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE);
-  Precondition.checkIsValidAdaAmount(params.costStr, TxErrors.CERTIFICATE_POOL_INVALID_COST);
+  Precondition.checkIsValidAdaAmount(
+    params.pledgeStr,
+    TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE
+  );
+  Precondition.checkIsValidAdaAmount(
+    params.costStr,
+    TxErrors.CERTIFICATE_POOL_INVALID_COST
+  );
 
   const marginNumeratorStr = params.margin.numeratorStr;
   const marginDenominatorStr = params.margin.denominatorStr;
-  Precondition.checkIsUint64Str(marginNumeratorStr, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
-  Precondition.checkIsValidPoolMarginDenominator(marginDenominatorStr, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR);
+  Precondition.checkIsUint64Str(
+    marginNumeratorStr,
+    TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
+  );
+  Precondition.checkIsValidPoolMarginDenominator(
+    marginDenominatorStr,
+    TxErrors.CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR
+  );
   // given both are valid uint strings, the check below is equivalent to "marginNumerator <= marginDenominator"
-  Precondition.checkIsValidUintStr(marginNumeratorStr, marginDenominatorStr, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
+  Precondition.checkIsValidUintStr(
+    marginNumeratorStr,
+    marginDenominatorStr,
+    TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
+  );
 
-  Precondition.checkIsHexString(params.rewardAccountHex, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT);
-  Precondition.check(params.rewardAccountHex.length === 29 * 2, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT);
+  Precondition.checkIsHexString(
+    params.rewardAccountHex,
+    TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT
+  );
+  Precondition.check(
+    params.rewardAccountHex.length === 29 * 2,
+    TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT
+  );
 
-  Precondition.check(params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX, TxErrors.CERTIFICATE_POOL_OWNERS_TOO_MANY);
-  Precondition.check(params.relays.length <= POOL_REGISTRATION_RELAYS_MAX, TxErrors.CERTIFICATE_POOL_RELAYS_TOO_MANY);
+  Precondition.check(
+    params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX,
+    TxErrors.CERTIFICATE_POOL_OWNERS_TOO_MANY
+  );
+  Precondition.check(
+    params.relays.length <= POOL_REGISTRATION_RELAYS_MAX,
+    TxErrors.CERTIFICATE_POOL_RELAYS_TOO_MANY
+  );
 
   return Buffer.concat([
     utils.hex_to_buf(params.poolKeyHashHex),
@@ -463,13 +655,11 @@ export function serializePoolInitialParams(
     utils.uint64_to_buf(params.margin.denominatorStr),
     utils.hex_to_buf(params.rewardAccountHex),
     utils.uint32_to_buf(params.poolOwners.length),
-    utils.uint32_to_buf(params.relays.length)
+    utils.uint32_to_buf(params.relays.length),
   ]);
 }
 
-export function serializePoolOwnerParams(
-  params: PoolOwnerParams
-): Buffer {
+export function serializePoolOwnerParams(params: PoolOwnerParams): Buffer {
   const SIGN_TX_POOL_OWNER_TYPE_PATH = 1;
   const SIGN_TX_POOL_OWNER_TYPE_KEY_HASH = 2;
 
@@ -477,7 +667,10 @@ export function serializePoolOwnerParams(
   const hashHex = params.stakingKeyHashHex;
 
   if (path) {
-    Precondition.checkIsValidPath(path, TxErrors.CERTIFICATE_POOL_OWNER_INVALID_PATH);
+    Precondition.checkIsValidPath(
+      path,
+      TxErrors.CERTIFICATE_POOL_OWNER_INVALID_PATH
+    );
 
     const pathBuf = utils.path_to_buf(path);
     const typeBuf = Buffer.alloc(1);
@@ -486,8 +679,14 @@ export function serializePoolOwnerParams(
   }
 
   if (hashHex) {
-    Precondition.checkIsHexString(hashHex, TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH);
-    Precondition.check(hashHex.length === KEY_HASH_LENGTH * 2, TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH);
+    Precondition.checkIsHexString(
+      hashHex,
+      TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH
+    );
+    Precondition.check(
+      hashHex.length === KEY_HASH_LENGTH * 2,
+      TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH
+    );
 
     const hashBuf = utils.hex_to_buf(hashHex);
     const typeBuf = Buffer.alloc(1);
@@ -498,9 +697,7 @@ export function serializePoolOwnerParams(
   throw new Error(TxErrors.CERTIFICATE_POOL_OWNER_INCOMPLETE);
 }
 
-export function serializePoolRelayParams(
-  relayParams: RelayParams
-): Buffer {
+export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   const type = relayParams.type;
   const params = relayParams.params;
 
@@ -515,8 +712,16 @@ export function serializePoolRelayParams(
 
   let portBuf: Buffer;
   if (params.portNumber) {
-    Precondition.checkIsUint32(params.portNumber, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT);
-    Precondition.check(params.portNumber <= 65535, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT);
+    Precondition.checkIsUint32(
+      params.portNumber,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
+    );
+    Precondition.check(
+      // $FlowFixMe
+      params.portNumber <= 65535,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
+    );
+    // $FlowFixMe
     portBuf = Buffer.concat([yesBuf, utils.uint16_to_buf(params.portNumber)]);
   } else {
     portBuf = noBuf;
@@ -524,13 +729,23 @@ export function serializePoolRelayParams(
 
   let ipv4Buf: Buffer;
   if (params.ipv4) {
-    Precondition.checkIsString(params.ipv4, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4);
-    let ipParts = params.ipv4.split('.');
-    Precondition.check(ipParts.length === 4, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4);
+    Precondition.checkIsString(
+      params.ipv4,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
+    );
+    // $FlowFixMe
+    let ipParts = params.ipv4.split(".");
+    Precondition.check(
+      ipParts.length === 4,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
+    );
     let ipBytes = Buffer.alloc(4);
     for (let i = 0; i < 4; i++) {
       let ipPart = utils.safe_parseInt(ipParts[i]);
-      Precondition.checkIsUint8(ipPart, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4);
+      Precondition.checkIsUint8(
+        ipPart,
+        TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
+      );
       ipBytes.writeUInt8(ipPart, i);
     }
     ipv4Buf = Buffer.concat([yesBuf, ipBytes]);
@@ -540,22 +755,41 @@ export function serializePoolRelayParams(
 
   let ipv6Buf: Buffer;
   if (params.ipv6) {
-    Precondition.checkIsString(params.ipv6, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6);
-    let ipHex = params.ipv6.split(':').join('');
-    Precondition.checkIsHexString(ipHex, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6);
-    Precondition.check(ipHex.length === 16 * 2, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6);
+    Precondition.checkIsString(
+      params.ipv6,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
+    );
+    // $FlowFixMe
+    let ipHex = params.ipv6.split(":").join("");
+    Precondition.checkIsHexString(
+      ipHex,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
+    );
+    Precondition.check(
+      ipHex.length === 16 * 2,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
+    );
     ipv6Buf = Buffer.concat([yesBuf, hex_to_buf(ipHex)]);
   } else {
     ipv6Buf = noBuf;
   }
 
-  let dnsBuf: Buffer;
+  let dnsBuf: ?Buffer;
   if (params.dnsName) {
     Precondition.checkIsString(params.dnsName);
-    Precondition.check(params.dnsName.length <= 64, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS);
-    Precondition.check(/^[\x00-\x7F]*$/.test(params.dnsName), TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS);
     Precondition.check(
-      params.dnsName.split('').every(c => (c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126)),
+      params.dnsName.length <= 64,
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
+    );
+    Precondition.check(
+      // eslint-disable-next-line no-control-regex
+      /^[\x00-\x7F]*$/.test(params.dnsName),
+      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
+    );
+    Precondition.check(
+      params.dnsName
+        .split("")
+        .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
     );
     dnsBuf = Buffer.from(params.dnsName, "ascii");
@@ -566,16 +800,24 @@ export function serializePoolRelayParams(
   let typeBuf = Buffer.alloc(1);
   typeBuf.writeUInt8(type);
 
-  switch(type) {
+  switch (type) {
     case 0:
       return Buffer.concat([typeBuf, portBuf, ipv4Buf, ipv6Buf]);
 
     case 1:
-      Precondition.check(dnsBuf, TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS);
+      Precondition.check(
+        dnsBuf !== undefined,
+        TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
+      );
+      // $FlowFixMe
       return Buffer.concat([typeBuf, portBuf, dnsBuf]);
 
     case 2:
-      Precondition.check(dnsBuf, TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS);
+      Precondition.check(
+        dnsBuf !== undefined,
+        TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
+      );
+      // $FlowFixMe
       return Buffer.concat([typeBuf, dnsBuf]);
   }
   throw new Error(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_TYPE);
@@ -584,7 +826,6 @@ export function serializePoolRelayParams(
 export function serializePoolMetadataParams(
   params: PoolMetadataParams
 ): Buffer {
-
   const includeMetadataBuffer = Buffer.alloc(1);
   if (params != null) {
     includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_YES);
@@ -594,33 +835,41 @@ export function serializePoolMetadataParams(
   }
 
   const url = params.metadataUrl;
-  Precondition.checkIsString(url, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
-  Precondition.check(url.length <= 64, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
+  Precondition.checkIsString(
+    url,
+    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+  );
   Precondition.check(
-    url.split('').every(c => (c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126)),
+    url.length <= 64,
+    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+  );
+  Precondition.check(
+    url.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
     TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
   );
 
   const hashHex = params.metadataHashHex;
-  Precondition.checkIsHexString(hashHex, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH);
-  Precondition.check(hashHex.length === 32 * 2, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH);
+  Precondition.checkIsHexString(
+    hashHex,
+    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
+  );
+  Precondition.check(
+    hashHex.length === 32 * 2,
+    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
+  );
 
   return Buffer.concat([
     includeMetadataBuffer,
     utils.hex_to_buf(hashHex),
-    Buffer.from(url)
+    Buffer.from(url),
   ]);
 }
 
-export function serializeGetExtendedPublicKeyParams(
-  path: BIP32Path
-): Buffer {
-  Precondition.check(path, GetKeyErrors.INVALID_PATH);
+export function serializeGetExtendedPublicKeyParams(path: BIP32Path): Buffer {
+  Precondition.check(!!path, GetKeyErrors.INVALID_PATH);
 
   return utils.path_to_buf(path);
 }
-
-
 
 export default {
   HARDENED,
@@ -640,5 +889,5 @@ export default {
   serializePoolInitialParams,
   serializePoolOwnerParams,
   serializePoolRelayParams,
-  serializePoolMetadataParams
+  serializePoolMetadataParams,
 };
