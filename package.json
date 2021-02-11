@@ -34,19 +34,27 @@
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-flow": "^7.9.0",
     "@ledgerhq/hw-transport-node-hid": "^5.12.0",
+    "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
     "chalk": "^4.0.0",
+    "eslint": "^7.19.0",
+    "eslint-plugin-flowtype": "^5.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "flow-bin": "^0.131.0",
     "flow-copy-source": "^2.0.9",
     "flow-typed": "^3.1.0",
     "mocha": "^7.1.1",
-    "prettier": "^2.0.3"
+    "prettier": "^2.2.1",
+    "prettier-eslint": "^12.0.0"
   },
   "bugs": {
     "url": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/issues"
   },
   "homepage": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano",
   "scripts": {
+    "lint": "yarn eslint .",
     "flow": "flow",
     "clean": "bash ./script/clean.sh",
     "build": "bash ./script/build.sh",

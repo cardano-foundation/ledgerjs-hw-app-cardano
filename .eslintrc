@@ -1,0 +1,47 @@
+{
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended", "plugin:import/errors"],
+  "plugins": ["flowtype", "import", "prettier", "mocha"],
+  "rules": {
+    "no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "flowtype/boolean-style": ["error", "boolean"],
+    "flowtype/define-flow-type": "warn",
+    "flowtype/generic-spacing": ["error", "never"],
+    "flowtype/no-mixed": "error",
+    "flowtype/no-primitive-constructor-types": "error",
+    "flowtype/no-types-missing-file-annotation": "error",
+    "flowtype/no-weak-types": "warn",
+    "flowtype/object-type-delimiter": ["error", "comma"],
+    "flowtype/semi": ["warn", "always"],
+    "flowtype/space-after-type-colon": ["error", "always"],
+    "flowtype/space-before-generic-bracket": ["error", "never"],
+    "flowtype/space-before-type-colon": ["error", "never"],
+    "flowtype/union-intersection-spacing": ["error", "always"],
+    "flowtype/use-flow-type": "warn",
+    "flowtype/valid-syntax": "error"
+  },
+  "settings": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": false
+    }
+  },
+  "overrides": [
+    {
+      "files": "test/**/*.js",
+      "rules": {
+        "no-unused-vars": ["off"]
+      }
+    }
+  ]
+}
