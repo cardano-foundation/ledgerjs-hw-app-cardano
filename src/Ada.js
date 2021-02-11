@@ -23,8 +23,8 @@ import cardano, {
   CertificateTypes,
   AddressTypeNibbles,
   SignTxIncluded,
-  TxErrors,
 } from "./cardano";
+import { TxErrors } from "./txErrors";
 
 const CLA = 0xd7;
 
