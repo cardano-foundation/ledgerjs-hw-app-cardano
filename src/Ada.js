@@ -23,8 +23,8 @@ import cardano, {
   CertificateTypes,
   AddressTypeNibbles,
   SignTxIncluded,
-  TxErrors,
 } from "./cardano";
+import { TxErrors } from "./txErrors";
 
 const CLA = 0xd7;
 
@@ -235,34 +235,40 @@ export const getErrorDescription = (statusCode: number) => {
 // In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
 // default. We can therefore transparently retry the request.
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
-const wrapRetryStillInCall = (fn) => async (...args: any) => {
-  try {
-    return await fn(...args);
-  } catch (e) {
-    if (
-      e &&
-      e.statusCode &&
-      e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
-    ) {
-      // Do the retry
+function wrapRetryStillInCall<T: Function>(fn: T): T {
+  // $FlowFixMe
+  return async (...args: any) => {
+    try {
       return await fn(...args);
+    } catch (e) {
+      if (
+        e &&
+        e.statusCode &&
+        e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
+      ) {
+        // Do the retry
+        return await fn(...args);
+      }
+      throw e;
     }
-    throw e;
-  }
-};
+  };
+}
 
-const wrapConvertError = (fn) => async (...args) => {
-  try {
-    return await fn(...args);
-  } catch (e) {
-    if (e && e.statusCode) {
-      // keep HwTransport.TransportStatusError
-      // just override the message
-      e.message = `Ledger device: ${getErrorDescription(e.statusCode)}`;
+function wrapConvertError<T: Function>(fn: T): T {
+  // $FlowFixMe
+  return async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      if (e && e.statusCode) {
+        // keep HwTransport.TransportStatusError
+        // just override the message
+        e.message = `Ledger device: ${getErrorDescription(e.statusCode)}`;
+      }
+      throw e;
     }
-    throw e;
-  }
-};
+  };
+}
 
 /**
  * Cardano ADA API
@@ -272,33 +278,19 @@ const wrapConvertError = (fn) => async (...args) => {
  * const ada = new Ada(transport);
  */
 
-type SendFn = (number, number, number, number, Buffer) => Promise<Buffer>;
-
-const buildSendFn = (cls: Object, instructionCode: $Values<typeof INS>) => {
-  return async (
-    p1: number,
-    p2: number,
-    data: Buffer,
-    expectedResponseLength: ?number
-  ): Promise<Buffer> => {
-    let response = await cls.send(CLA, instructionCode, p1, p2, data);
-    response = utils.stripRetcodeFromResponse(response);
-
-    if (expectedResponseLength != null) {
-      Assert.assert(
-        response.length === expectedResponseLength,
-        `unexpected response length: ${response.length} instead of ${expectedResponseLength}`
-      );
-    }
-
-    return response;
-  };
+type SendParams = {
+  ins: $Values<typeof INS>,
+  p1: number,
+  p2: number,
+  data: Buffer,
+  expectedResponseLength?: number,
 };
+type SendFn = (params: SendParams) => Promise<Buffer>;
 
 export default class Ada {
   transport: Transport<*>;
   methods: Array<string>;
-  send: SendFn;
+  _send: SendFn;
 
   constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
     this.transport = transport;
@@ -311,23 +303,41 @@ export default class Ada {
       "showAddress",
     ];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
-    this.send = wrapConvertError(this.transport.send);
+    this._send = async (params: SendParams): Promise<Buffer> => {
+      let response = await wrapConvertError(this.transport.send)(
+        CLA,
+        params.ins,
+        params.p1,
+        params.p2,
+        params.data
+      );
+      response = utils.stripRetcodeFromResponse(response);
+
+      if (params.expectedResponseLength != null) {
+        Assert.assert(
+          response.length === params.expectedResponseLength,
+          `unexpected response length: ${response.length} instead of ${params.expectedResponseLength}`
+        );
+      }
+
+      return response;
+    };
   }
 
-  async _getVersion(): Promise<GetVersionResponse> {
+  async _getVersion(_send: SendFn): Promise<GetVersionResponse> {
     // moving getVersion() logic to private function in order
     // to disable concurrent execution protection done by this.transport.decorateAppAPIMethods()
     // when invoked from within other calls to check app version
 
-    const _send = buildSendFn(this, INS.GET_VERSION);
     const P1_UNUSED = 0x00;
     const P2_UNUSED = 0x00;
-    const response = await wrapRetryStillInCall(_send)(
-      P1_UNUSED,
-      P2_UNUSED,
-      utils.hex_to_buf(""),
-      4
-    );
+    const response = await wrapRetryStillInCall(_send)({
+      ins: INS.GET_VERSION,
+      p1: P1_UNUSED,
+      p2: P2_UNUSED,
+      data: Buffer.alloc(0),
+      expectedResponseLength: 4,
+    });
     const [major, minor, patch, flags_value] = response;
 
     const FLAG_IS_DEBUG = 1;
@@ -350,14 +360,15 @@ export default class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    return this._getVersion();
+    return this._getVersion(this._send);
   }
 
   async _isLedgerAppVersionAtLeast(
+    _send: SendFn,
     minMajor: number,
     minMinor: number
   ): Promise<boolean> {
-    const version = await this._getVersion();
+    const version = await this._getVersion(_send);
     const major = parseInt(version.major);
     const minor = parseInt(version.minor);
 
@@ -366,8 +377,13 @@ export default class Ada {
     return major >= minMajor && (major > minMajor || minor >= minMinor);
   }
 
-  async _ensureLedgerAppVersionAtLeast(minMajor: number, minMinor: number) {
+  async _ensureLedgerAppVersionAtLeast(
+    _send: SendFn,
+    minMajor: number,
+    minMinor: number
+  ) {
     const versionCheckSuccess = await this._isLedgerAppVersionAtLeast(
+      _send,
       minMajor,
       minMinor
     );
@@ -388,17 +404,21 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    await this._ensureLedgerAppVersionAtLeast(1, 2);
+    return this._getSerial(this._send);
+  }
 
-    const _send = buildSendFn(this, INS.GET_SERIAL);
+  async _getSerial(_send: SendFn): Promise<GetSerialResponse> {
+    await this._ensureLedgerAppVersionAtLeast(_send, 1, 2);
+
     const P1_UNUSED = 0x00;
     const P2_UNUSED = 0x00;
-    const response = await wrapRetryStillInCall(_send)(
-      P1_UNUSED,
-      P2_UNUSED,
-      utils.hex_to_buf(""),
-      7
-    );
+    const response = await wrapRetryStillInCall(_send)({
+      ins: INS.GET_SERIAL,
+      p1: P1_UNUSED,
+      p2: P2_UNUSED,
+      data: Buffer.alloc(0),
+      expectedResponseLength: 7,
+    });
     Assert.assert(response.length === 7);
 
     const serial = utils.buf_to_hex(response);
@@ -411,7 +431,17 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    await wrapRetryStillInCall(this.send)(CLA, INS.RUN_TESTS, 0x00, 0x00);
+    return this._runTests(this._send);
+  }
+
+  async _runTests(_send: SendFn): Promise<void> {
+    await wrapRetryStillInCall(_send)({
+      ins: INS.RUN_TESTS,
+      p1: 0x00,
+      p2: 0x00,
+      data: Buffer.alloc(0),
+      expectedResponseLength: 0,
+    });
   }
 
   /**
@@ -425,7 +455,15 @@ export default class Ada {
    * console.log(publicKey);
    *
    */
+
   async getExtendedPublicKeys(
+    paths: Array<BIP32Path>
+  ): Promise<Array<GetExtendedPublicKeyResponse>> {
+    return this._getExtendedPublicKeys(this._send, paths);
+  }
+
+  async _getExtendedPublicKeys(
+    _send: SendFn,
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
     // validate the input
@@ -435,10 +473,8 @@ export default class Ada {
     }
 
     if (paths.length > 1) {
-      await this._ensureLedgerAppVersionAtLeast(2, 1);
+      await this._ensureLedgerAppVersionAtLeast(_send, 2, 1);
     }
-
-    const _send = buildSendFn(this, INS.GET_EXT_PUBLIC_KEY);
 
     const P1_INIT = 0x00;
     const P1_NEXT_KEY = 0x01;
@@ -460,14 +496,22 @@ export default class Ada {
             ? utils.uint32_to_buf(paths.length - 1)
             : Buffer.from([]);
 
-        response = await wrapRetryStillInCall(_send)(
-          P1_INIT,
-          P2_UNUSED,
-          Buffer.concat([pathData, remainingKeysData])
-        );
+        response = await wrapRetryStillInCall(_send)({
+          ins: INS.GET_EXT_PUBLIC_KEY,
+          p1: P1_INIT,
+          p2: P2_UNUSED,
+          data: Buffer.concat([pathData, remainingKeysData]),
+          expectedResponseLength: 64,
+        });
       } else {
         // next key APDU
-        response = await _send(P1_NEXT_KEY, P2_UNUSED, pathData, 64);
+        response = await _send({
+          ins: INS.GET_EXT_PUBLIC_KEY,
+          p1: P1_NEXT_KEY,
+          p2: P2_UNUSED,
+          data: pathData,
+          expectedResponseLength: 64,
+        });
       }
 
       const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
@@ -540,8 +584,26 @@ export default class Ada {
     stakingKeyHashHex: ?string = null,
     stakingBlockchainPointer: ?StakingBlockchainPointer = null
   ): Promise<DeriveAddressResponse> {
-    const _send = buildSendFn(this, INS.DERIVE_ADDRESS);
+    return this._deriveAddress(
+      this._send,
+      addressTypeNibble,
+      networkIdOrProtocolMagic,
+      spendingPath,
+      stakingPath,
+      stakingKeyHashHex,
+      stakingBlockchainPointer
+    );
+  }
 
+  async _deriveAddress(
+    _send: SendFn,
+    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    networkIdOrProtocolMagic: number,
+    spendingPath: BIP32Path,
+    stakingPath: ?BIP32Path = null,
+    stakingKeyHashHex: ?string = null,
+    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+  ): Promise<DeriveAddressResponse> {
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
 
@@ -554,7 +616,12 @@ export default class Ada {
       stakingBlockchainPointer
     );
 
-    const response = await _send(P1_RETURN, P2_UNUSED, data);
+    const response = await _send({
+      ins: INS.DERIVE_ADDRESS,
+      p1: P1_RETURN,
+      p2: P2_UNUSED,
+      data: data,
+    });
 
     return {
       addressHex: response.toString("hex"),
@@ -569,8 +636,26 @@ export default class Ada {
     stakingKeyHashHex: ?string = null,
     stakingBlockchainPointer: ?StakingBlockchainPointer = null
   ): Promise<void> {
-    const _send = buildSendFn(this, INS.DERIVE_ADDRESS);
+    return this._showAddress(
+      this._send,
+      addressTypeNibble,
+      networkIdOrProtocolMagic,
+      spendingPath,
+      stakingPath,
+      stakingKeyHashHex,
+      stakingBlockchainPointer
+    );
+  }
 
+  async _showAddress(
+    _send: SendFn,
+    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    networkIdOrProtocolMagic: number,
+    spendingPath: BIP32Path,
+    stakingPath: ?BIP32Path = null,
+    stakingKeyHashHex: ?string = null,
+    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+  ): Promise<void> {
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
     const data = cardano.serializeAddressParams(
@@ -582,10 +667,44 @@ export default class Ada {
       stakingBlockchainPointer
     );
 
-    await _send(P1_DISPLAY, P2_UNUSED, data, 0);
+    await _send({
+      ins: INS.DERIVE_ADDRESS,
+      p1: P1_DISPLAY,
+      p2: P2_UNUSED,
+      data,
+      expectedResponseLength: 0,
+    });
   }
 
   async signTransaction(
+    networkId: number,
+    protocolMagic: number,
+    inputs: Array<InputTypeUTxO>,
+    outputs: Array<TxOutput>,
+    feeStr: string,
+    ttlStr: ?string,
+    certificates: Array<Certificate>,
+    withdrawals: Array<Withdrawal>,
+    metadataHashHex: ?string,
+    validityIntervalStartStr: ?string
+  ): Promise<SignTransactionResponse> {
+    return this._signTransaction(
+      this._send,
+      networkId,
+      protocolMagic,
+      inputs,
+      outputs,
+      feeStr,
+      ttlStr,
+      certificates,
+      withdrawals,
+      metadataHashHex,
+      validityIntervalStartStr
+    );
+  }
+
+  async _signTransaction(
+    _send: SendFn,
     networkId: number,
     protocolMagic: number,
     inputs: Array<InputTypeUTxO>,
@@ -604,6 +723,7 @@ export default class Ada {
     );
 
     const appHasStakePoolOwnerSupport = await this._isLedgerAppVersionAtLeast(
+      _send,
       2,
       1
     );
@@ -612,7 +732,11 @@ export default class Ada {
     }
 
     // TODO replace this with a better mechanism for detecting ledger app capabilities
-    const appHasMultiassetSupport = await this._isLedgerAppVersionAtLeast(2, 2);
+    const appHasMultiassetSupport = await this._isLedgerAppVersionAtLeast(
+      _send,
+      2,
+      2
+    );
     if (!appHasMultiassetSupport) {
       const containsMultiassets = outputs.some(
         (output) => output.tokenBundle != null
@@ -656,8 +780,6 @@ export default class Ada {
     const P1_STAGE_CONFIRM = 0x0a;
     const P1_STAGE_WITNESSES = 0x0f;
     const P2_UNUSED = 0x00;
-
-    const _send = buildSendFn(this, INS.SIGN_TX);
 
     const signTx_init = async (
       networkId: number,
@@ -732,12 +854,13 @@ export default class Ada {
         utils.uint32_to_buf(numWithdrawals),
         utils.uint32_to_buf(numWitnesses),
       ]);
-      const _response = await wrapRetryStillInCall(_send)(
-        P1_STAGE_INIT,
-        P2_UNUSED,
+      const _response = await wrapRetryStillInCall(_send)({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_INIT,
+        p2: P2_UNUSED,
         data,
-        0
-      );
+        expectedResponseLength: 0,
+      });
     };
 
     const signTx_addInput = async (input: InputTypeUTxO): Promise<void> => {
@@ -745,7 +868,13 @@ export default class Ada {
         utils.hex_to_buf(input.txHashHex),
         utils.uint32_to_buf(input.outputIndex),
       ]);
-      await _send(P1_STAGE_INPUTS, P2_UNUSED, data, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_INPUTS,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
     };
 
     const signTx_addOutput = async (output: TxOutput): Promise<void> => {
@@ -773,7 +902,13 @@ export default class Ada {
         outputP2 = P2_UNUSED;
       }
 
-      await _send(P1_STAGE_OUTPUTS, outputP2, outputData, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_OUTPUTS,
+        p2: outputP2,
+        data: outputData,
+        expectedResponseLength: 0,
+      });
 
       if (output.tokenBundle != null) {
         for (const assetGroup of output.tokenBundle) {
@@ -781,7 +916,13 @@ export default class Ada {
             utils.hex_to_buf(assetGroup.policyIdHex),
             utils.uint32_to_buf(assetGroup.tokens.length),
           ]);
-          await _send(P1_STAGE_OUTPUTS, P2_ASSET_GROUP, data, 0);
+          await _send({
+            ins: INS.SIGN_TX,
+            p1: P1_STAGE_OUTPUTS,
+            p2: P2_ASSET_GROUP,
+            data,
+            expectedResponseLength: 0,
+          });
 
           for (const token of assetGroup.tokens) {
             const data = Buffer.concat([
@@ -789,14 +930,26 @@ export default class Ada {
               utils.hex_to_buf(token.assetNameHex),
               utils.uint64_to_buf(token.amountStr),
             ]);
-            await _send(P1_STAGE_OUTPUTS, P2_TOKEN, data, 0);
+            await _send({
+              ins: INS.SIGN_TX,
+              p1: P1_STAGE_OUTPUTS,
+              p2: P2_TOKEN,
+              data,
+              expectedResponseLength: 0,
+            });
           }
         }
       }
 
       // TODO remove the if condition after ledger app 2.2 is rolled out
       if (appHasMultiassetSupport) {
-        await _send(P1_STAGE_OUTPUTS, P2_CONFIRM, Buffer.alloc(0), 0);
+        await _send({
+          ins: INS.SIGN_TX,
+          p1: P1_STAGE_OUTPUTS,
+          p2: P2_CONFIRM,
+          data: Buffer.alloc(0),
+          expectedResponseLength: 0,
+        });
       }
     };
 
@@ -833,7 +986,13 @@ export default class Ada {
       }
 
       const data = Buffer.concat(dataFields);
-      await _send(P1_STAGE_CERTIFICATES, P2_UNUSED, data, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_CERTIFICATES,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
 
       // we are done for every certificate except pool registration
 
@@ -849,43 +1008,48 @@ export default class Ada {
           CONFIRMATION: 0x34,
         };
 
-        await _send(
-          P1_STAGE_CERTIFICATES,
-          APDU_INSTRUCTIONS.POOL_PARAMS,
-          cardano.serializePoolInitialParams(poolParams),
-          0
-        );
+        await _send({
+          ins: INS.SIGN_TX,
+          p1: P1_STAGE_CERTIFICATES,
+          p2: APDU_INSTRUCTIONS.POOL_PARAMS,
+          data: cardano.serializePoolInitialParams(poolParams),
+          expectedResponseLength: 0,
+        });
 
         for (const owner of poolParams.poolOwners) {
-          await _send(
-            P1_STAGE_CERTIFICATES,
-            APDU_INSTRUCTIONS.OWNERS,
-            cardano.serializePoolOwnerParams(owner),
-            0
-          );
+          await _send({
+            ins: INS.SIGN_TX,
+            p1: P1_STAGE_CERTIFICATES,
+            p2: APDU_INSTRUCTIONS.OWNERS,
+            data: cardano.serializePoolOwnerParams(owner),
+            expectedResponseLength: 0,
+          });
         }
         for (const relay of poolParams.relays) {
-          await _send(
-            P1_STAGE_CERTIFICATES,
-            APDU_INSTRUCTIONS.RELAYS,
-            cardano.serializePoolRelayParams(relay),
-            0
-          );
+          await _send({
+            ins: INS.SIGN_TX,
+            p1: P1_STAGE_CERTIFICATES,
+            p2: APDU_INSTRUCTIONS.RELAYS,
+            data: cardano.serializePoolRelayParams(relay),
+            expectedResponseLength: 0,
+          });
         }
 
-        await _send(
-          P1_STAGE_CERTIFICATES,
-          APDU_INSTRUCTIONS.METADATA,
-          cardano.serializePoolMetadataParams(poolParams.metadata),
-          0
-        );
+        await _send({
+          ins: INS.SIGN_TX,
+          p1: P1_STAGE_CERTIFICATES,
+          p2: APDU_INSTRUCTIONS.METADATA,
+          data: cardano.serializePoolMetadataParams(poolParams.metadata),
+          expectedResponseLength: 0,
+        });
 
-        await _send(
-          P1_STAGE_CERTIFICATES,
-          APDU_INSTRUCTIONS.CONFIRMATION,
-          Buffer.alloc(0),
-          0
-        );
+        await _send({
+          ins: INS.SIGN_TX,
+          p1: P1_STAGE_CERTIFICATES,
+          p2: APDU_INSTRUCTIONS.CONFIRMATION,
+          data: Buffer.alloc(0),
+          expectedResponseLength: 0,
+        });
       }
     };
 
@@ -897,17 +1061,35 @@ export default class Ada {
         utils.ada_amount_to_buf(amountStr),
         utils.path_to_buf(path),
       ]);
-      await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_WITHDRAWALS,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
     };
 
     const signTx_setFee = async (feeStr: string): Promise<void> => {
       const data = Buffer.concat([utils.ada_amount_to_buf(feeStr)]);
-      await _send(P1_STAGE_FEE, P2_UNUSED, data, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_FEE,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
     };
 
     const signTx_setTtl = async (ttlStr: string): Promise<void> => {
       const data = Buffer.concat([utils.uint64_to_buf(ttlStr)]);
-      await _send(P1_STAGE_TTL, P2_UNUSED, data, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_TTL,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
     };
 
     const signTx_setMetadata = async (
@@ -915,7 +1097,13 @@ export default class Ada {
     ): Promise<void> => {
       const data = utils.hex_to_buf(metadataHashHex);
 
-      await _send(P1_STAGE_METADATA, P2_UNUSED, data, 0);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_METADATA,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
     };
 
     const signTx_setValidityIntervalStart = async (
@@ -924,7 +1112,12 @@ export default class Ada {
       const data = Buffer.concat([
         utils.uint64_to_buf(validityIntervalStartStr),
       ]);
-      await _send(P1_STAGE_VALIDITY_INTERVAL_START, P2_UNUSED, data);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1_STAGE_VALIDITY_INTERVAL_START,
+        p2: P2_UNUSED,
+        data,
+      });
     };
 
     const signTx_awaitConfirm = async (): Promise<{
@@ -938,12 +1131,13 @@ export default class Ada {
         confirmP1 = 0x09; // needed for backward compatibility
       }
 
-      const response = await _send(
-        confirmP1,
-        P2_UNUSED,
-        utils.hex_to_buf(""),
-        cardano.TX_HASH_LENGTH
-      );
+      const response = await _send({
+        ins: INS.SIGN_TX,
+        p1: confirmP1,
+        p2: P2_UNUSED,
+        data: Buffer.alloc(0),
+        expectedResponseLength: cardano.TX_HASH_LENGTH,
+      });
       return {
         txHashHex: response.toString("hex"),
       };
@@ -964,7 +1158,13 @@ export default class Ada {
       }
 
       const data = Buffer.concat([utils.path_to_buf(path)]);
-      const response = await _send(witnessP1, P2_UNUSED, data, 64);
+      const response = await _send({
+        ins: INS.SIGN_TX,
+        p1: witnessP1,
+        p2: P2_UNUSED,
+        data,
+        expectedResponseLength: 64,
+      });
       return {
         path: path,
         witnessSignatureHex: utils.buf_to_hex(response),
