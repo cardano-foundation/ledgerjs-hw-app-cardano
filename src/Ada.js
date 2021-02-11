@@ -17,10 +17,14 @@
 // @flow
 
 import type Transport from "@ledgerhq/hw-transport";
-import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 import utils, { Precondition, Assert, invariant } from "./utils";
-import cardano, { CertificateTypes, AddressTypeNibbles, SignTxIncluded, TxErrors } from "./cardano";
+import cardano, {
+  CertificateTypes,
+  AddressTypeNibbles,
+  SignTxIncluded,
+  TxErrors,
+} from "./cardano";
 
 const CLA = 0xd7;
 
@@ -33,7 +37,7 @@ const INS = Object.freeze({
 
   SIGN_TX: 0x21,
 
-  RUN_TESTS: 0xf0
+  RUN_TESTS: 0xf0,
 });
 
 export type BIP32Path = Array<number>;
@@ -41,26 +45,23 @@ export type BIP32Path = Array<number>;
 export type InputTypeUTxO = {|
   txHashHex: string,
   outputIndex: number,
-  path: ?BIP32Path
+  path: ?BIP32Path,
 |};
 
-
-export type Token =
-{|
+export type Token = {|
   assetNameHex: string,
-  amountStr: string
+  amountStr: string,
 |};
 
-export type AssetGroup =
-{|
+export type AssetGroup = {|
   policyIdHex: string,
-  tokens: Array<Token>
+  tokens: Array<Token>,
 |};
 
 export type TxOutputTypeAddress = {|
   amountStr: string,
   tokenBundle: Array<AssetGroup>,
-  addressHex: string
+  addressHex: string,
 |};
 
 export type TxOutputTypeAddressParams = {|
@@ -78,43 +79,43 @@ export type TxOutput = TxOutputTypeAddress | TxOutputTypeAddressParams;
 export type StakingBlockchainPointer = {|
   blockIndex: number,
   txIndex: number,
-  certificateIndex: number
-|}
+  certificateIndex: number,
+|};
 
 export type PoolOwnerParams = {|
   stakingPath: ?BIP32Path,
-  stakingKeyHashHex: ?string
-|}
+  stakingKeyHashHex: ?string,
+|};
 
 export type SingleHostIPRelay = {|
   portNumber: ?number,
   ipv4: ?string, // e.g. "192.168.0.1"
-  ipv6: ?string  // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
-|}
+  ipv6: ?string, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+|};
 
 export type SingleHostNameRelay = {|
   portNumber: ?number,
-  dnsName: string
-|}
+  dnsName: string,
+|};
 
 export type MultiHostNameRelay = {|
-  dnsName: string
-|}
+  dnsName: string,
+|};
 
 export type RelayParams = {|
   type: number, // single host ip = 0, single hostname = 1, multi host name = 2
-  params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay
-|}
+  params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay,
+|};
 
 export type PoolMetadataParams = {|
   metadataUrl: string,
-  metadataHashHex: string
-|}
+  metadataHashHex: string,
+|};
 
 export type Margin = {|
   numeratorStr: string,
   denominatorStr: string,
-|}
+|};
 
 export type PoolParams = {|
   poolKeyHashHex: string,
@@ -125,43 +126,43 @@ export type PoolParams = {|
   rewardAccountHex: string,
   poolOwners: Array<PoolOwnerParams>,
   relays: Array<RelayParams>,
-  metadata: PoolMetadataParams
+  metadata: PoolMetadataParams,
 |};
 
 export type Certificate = {|
   type: $Values<typeof CertificateTypes>,
   path: BIP32Path,
   poolKeyHashHex: ?string,
-  poolRegistrationParams: ?PoolParams
+  poolRegistrationParams: ?PoolParams,
 |};
 
 export type Withdrawal = {|
   path: BIP32Path,
-  amountStr: string
+  amountStr: string,
 |};
 
 export type Flags = {|
-  isDebug: boolean
+  isDebug: boolean,
 |};
 
 export type GetVersionResponse = {|
   major: number,
   minor: number,
   patch: number,
-  flags: Flags
+  flags: Flags,
 |};
 
 export type GetSerialResponse = {|
-  serial: string
+  serial: string,
 |};
 
 export type DeriveAddressResponse = {|
-  addressHex: string
+  addressHex: string,
 |};
 
 export type GetExtendedPublicKeyResponse = {|
   publicKeyHex: string,
-  chainCodeHex: string
+  chainCodeHex: string,
 |};
 
 export type Witness = {|
@@ -169,23 +170,23 @@ export type Witness = {|
   // Note: this is *only* a signature
   // you need to add proper extended public key
   // to form a full witness
-  witnessSignatureHex: string
+  witnessSignatureHex: string,
 |};
 
 export type SignTransactionResponse = {|
   txHashHex: string,
-  witnesses: Array<Witness>
+  witnesses: Array<Witness>,
 |};
 
 const PoolRegistrationCodes = {
-	SIGN_TX_POOL_REGISTRATION_NO: 3,
-	SIGN_TX_POOL_REGISTRATION_YES: 4
-}
+  SIGN_TX_POOL_REGISTRATION_NO: 3,
+  SIGN_TX_POOL_REGISTRATION_YES: 4,
+};
 
 export const TxOutputTypeCodes = {
   SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES: 1,
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2
-}
+  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2,
+};
 
 export const DeviceErrorCodes = {
   ERR_STILL_IN_CALL: 0x6e04, // internal
@@ -197,7 +198,7 @@ export const DeviceErrorCodes = {
   ERR_UNSUPPORTED_ADDRESS_TYPE: 0x6e12,
 
   // Not thrown by ledger-app-cardano itself but other apps
-  ERR_CLA_NOT_SUPPORTED: 0x6e00
+  ERR_CLA_NOT_SUPPORTED: 0x6e00,
 };
 
 const GH_ERRORS_LINK =
@@ -205,17 +206,20 @@ const GH_ERRORS_LINK =
 
 const DeviceErrorMessages = {
   [DeviceErrorCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
-  [DeviceErrorCodes.ERR_INVALID_BIP_PATH]: "Invalid derivation path supplied to Ledger",
+  [DeviceErrorCodes.ERR_INVALID_BIP_PATH]:
+    "Invalid derivation path supplied to Ledger",
   [DeviceErrorCodes.ERR_REJECTED_BY_USER]: "Action rejected by user",
-  [DeviceErrorCodes.ERR_REJECTED_BY_POLICY]: "Action rejected by Ledger's security policy",
+  [DeviceErrorCodes.ERR_REJECTED_BY_POLICY]:
+    "Action rejected by Ledger's security policy",
   [DeviceErrorCodes.ERR_DEVICE_LOCKED]: "Device is locked",
   [DeviceErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app",
-  [DeviceErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type"
+  [DeviceErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type",
 };
 
 const Errors = {
-  INCORRECT_APP_VERSION: "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed"
-}
+  INCORRECT_APP_VERSION:
+    "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed",
+};
 
 export const getErrorDescription = (statusCode: number) => {
   const statusCodeHex = `0x${statusCode.toString(16)}`;
@@ -231,11 +235,15 @@ export const getErrorDescription = (statusCode: number) => {
 // In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
 // default. We can therefore transparently retry the request.
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
-const wrapRetryStillInCall = fn => async (...args: any) => {
+const wrapRetryStillInCall = (fn) => async (...args: any) => {
   try {
     return await fn(...args);
   } catch (e) {
-    if (e && e.statusCode && e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL) {
+    if (
+      e &&
+      e.statusCode &&
+      e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
+    ) {
       // Do the retry
       return await fn(...args);
     }
@@ -243,7 +251,7 @@ const wrapRetryStillInCall = fn => async (...args: any) => {
   }
 };
 
-const wrapConvertError = fn => async (...args) => {
+const wrapConvertError = (fn) => async (...args) => {
   try {
     return await fn(...args);
   } catch (e) {
@@ -267,22 +275,25 @@ const wrapConvertError = fn => async (...args) => {
 type SendFn = (number, number, number, number, Buffer) => Promise<Buffer>;
 
 const buildSendFn = (cls: Object, instructionCode: $Values<typeof INS>) => {
-  return (
-    async (p1: number, p2: number, data: Buffer, expectedResponseLength: ?number): Promise<Buffer> => {
-      let response = await cls.send(CLA, instructionCode, p1, p2, data);
-      response = utils.stripRetcodeFromResponse(response);
+  return async (
+    p1: number,
+    p2: number,
+    data: Buffer,
+    expectedResponseLength: ?number
+  ): Promise<Buffer> => {
+    let response = await cls.send(CLA, instructionCode, p1, p2, data);
+    response = utils.stripRetcodeFromResponse(response);
 
-      if (expectedResponseLength != null) {
-        Assert.assert(
-          response.length === expectedResponseLength,
-          `unexpected response length: ${response.length} instead of ${expectedResponseLength}`
-        );
-      }
-
-      return response;
+    if (expectedResponseLength != null) {
+      Assert.assert(
+        response.length === expectedResponseLength,
+        `unexpected response length: ${response.length} instead of ${expectedResponseLength}`
+      );
     }
-  )
-}
+
+    return response;
+  };
+};
 
 export default class Ada {
   transport: Transport<*>;
@@ -297,7 +308,7 @@ export default class Ada {
       "getExtendedPublicKey",
       "signTransaction",
       "deriveAddress",
-      "showAddress"
+      "showAddress",
     ];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
     this.send = wrapConvertError(this.transport.send);
@@ -323,7 +334,7 @@ export default class Ada {
     //const FLAG_IS_HEADLESS = 2;
 
     const flags = {
-      isDebug: (flags_value & FLAG_IS_DEBUG) === FLAG_IS_DEBUG
+      isDebug: (flags_value & FLAG_IS_DEBUG) === FLAG_IS_DEBUG,
     };
     return { major, minor, patch, flags };
   }
@@ -342,24 +353,29 @@ export default class Ada {
     return this._getVersion();
   }
 
-  async _isLedgerAppVersionAtLeast(minMajor: number, minMinor: number): Promise<boolean> {
+  async _isLedgerAppVersionAtLeast(
+    minMajor: number,
+    minMinor: number
+  ): Promise<boolean> {
     const version = await this._getVersion();
     const major = parseInt(version.major);
     const minor = parseInt(version.minor);
 
-    if (isNaN(major) || isNaN(minor))
-      return false;
+    if (isNaN(major) || isNaN(minor)) return false;
 
-    return (major >= minMajor) && (major>minMajor || minor>=minMinor);
+    return major >= minMajor && (major > minMajor || minor >= minMinor);
   }
 
   async _ensureLedgerAppVersionAtLeast(minMajor: number, minMinor: number) {
-    const versionCheckSuccess = await this._isLedgerAppVersionAtLeast(minMajor, minMinor)
+    const versionCheckSuccess = await this._isLedgerAppVersionAtLeast(
+      minMajor,
+      minMinor
+    );
 
     if (!versionCheckSuccess) {
       throw new Error(Errors.INCORRECT_APP_VERSION);
     }
- }
+  }
 
   /**
    * Returns an object containing the device serial number.
@@ -421,7 +437,7 @@ export default class Ada {
     if (paths.length > 1) {
       await this._ensureLedgerAppVersionAtLeast(2, 1);
     }
-    
+
     const _send = buildSendFn(this, INS.GET_EXT_PUBLIC_KEY);
 
     const P1_INIT = 0x00;
@@ -439,20 +455,19 @@ export default class Ada {
 
         // passing empty Buffer for backwards compatibility
         // of single key export on Ledger app version 2.0.4
-        const remainingKeysData = paths.length > 1
-          ? utils.uint32_to_buf(paths.length - 1)
-          : Buffer.from([]);
+        const remainingKeysData =
+          paths.length > 1
+            ? utils.uint32_to_buf(paths.length - 1)
+            : Buffer.from([]);
 
         response = await wrapRetryStillInCall(_send)(
-          P1_INIT, P2_UNUSED, Buffer.concat([pathData, remainingKeysData])
+          P1_INIT,
+          P2_UNUSED,
+          Buffer.concat([pathData, remainingKeysData])
         );
       } else {
         // next key APDU
-        response = await _send(
-          P1_NEXT_KEY, P2_UNUSED,
-          pathData,
-          64
-        );
+        response = await _send(P1_NEXT_KEY, P2_UNUSED, pathData, 64);
       }
 
       const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
@@ -460,7 +475,7 @@ export default class Ada {
 
       result.push({
         publicKeyHex: publicKey.toString("hex"),
-        chainCodeHex: chainCode.toString("hex")
+        chainCodeHex: chainCode.toString("hex"),
       });
     }
 
@@ -518,13 +533,13 @@ export default class Ada {
    *
    */
   async deriveAddress(
-      addressTypeNibble: $Values<typeof AddressTypeNibbles>,
-      networkIdOrProtocolMagic: number,
-      spendingPath: BIP32Path,
-      stakingPath: ?BIP32Path = null,
-      stakingKeyHashHex: ?string = null,
-      stakingBlockchainPointer: ?StakingBlockchainPointer = null
-      ): Promise<DeriveAddressResponse> {
+    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    networkIdOrProtocolMagic: number,
+    spendingPath: BIP32Path,
+    stakingPath: ?BIP32Path = null,
+    stakingKeyHashHex: ?string = null,
+    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+  ): Promise<DeriveAddressResponse> {
     const _send = buildSendFn(this, INS.DERIVE_ADDRESS);
 
     const P1_RETURN = 0x01;
@@ -542,17 +557,17 @@ export default class Ada {
     const response = await _send(P1_RETURN, P2_UNUSED, data);
 
     return {
-      addressHex: response.toString('hex')
+      addressHex: response.toString("hex"),
     };
   }
 
   async showAddress(
-      addressTypeNibble: $Values<typeof AddressTypeNibbles>,
-      networkIdOrProtocolMagic: number,
-      spendingPath: BIP32Path,
-      stakingPath: ?BIP32Path = null,
-      stakingKeyHashHex: ?string = null,
-      stakingBlockchainPointer: ?StakingBlockchainPointer = null
+    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    networkIdOrProtocolMagic: number,
+    spendingPath: BIP32Path,
+    stakingPath: ?BIP32Path = null,
+    stakingKeyHashHex: ?string = null,
+    stakingBlockchainPointer: ?StakingBlockchainPointer = null
   ): Promise<void> {
     const _send = buildSendFn(this, INS.DERIVE_ADDRESS);
 
@@ -582,14 +597,16 @@ export default class Ada {
     metadataHashHex: ?string,
     validityIntervalStartStr: ?string
   ): Promise<SignTransactionResponse> {
-
     // pool registrations are quite restricted
     // this affects witness set construction and many validations
     const isSigningPoolRegistrationAsOwner = certificates.some(
-      cert => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+      (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
     );
 
-    const appHasStakePoolOwnerSupport = await this._isLedgerAppVersionAtLeast(2, 1);
+    const appHasStakePoolOwnerSupport = await this._isLedgerAppVersionAtLeast(
+      2,
+      1
+    );
     if (isSigningPoolRegistrationAsOwner && !appHasStakePoolOwnerSupport) {
       throw Error(Errors.INCORRECT_APP_VERSION);
     }
@@ -597,27 +614,35 @@ export default class Ada {
     // TODO replace this with a better mechanism for detecting ledger app capabilities
     const appHasMultiassetSupport = await this._isLedgerAppVersionAtLeast(2, 2);
     if (!appHasMultiassetSupport) {
-
       const containsMultiassets = outputs.some(
-        output => (output.tokenBundle != null)
+        (output) => output.tokenBundle != null
       );
 
       // for older app versions:
       // multiasset outputs must not be given
       // validity interval start must not be given
       // ttl must be given
-      if (containsMultiassets || (validityIntervalStartStr != null) || (ttlStr == null)) {
+      if (
+        containsMultiassets ||
+        validityIntervalStartStr != null ||
+        ttlStr == null
+      ) {
         throw Error(Errors.INCORRECT_APP_VERSION);
       }
     }
 
     cardano.validateTransaction(
-      networkId, protocolMagic,
-      inputs, outputs, feeStr, ttlStr,
-      certificates, withdrawals, metadataHashHex,
+      networkId,
+      protocolMagic,
+      inputs,
+      outputs,
+      feeStr,
+      ttlStr,
+      certificates,
+      withdrawals,
+      metadataHashHex,
       validityIntervalStartStr
     );
-
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
@@ -646,30 +671,33 @@ export default class Ada {
       includeValidityIntervalStart: boolean,
       numWitnesses: number
     ): Promise<void> => {
-
-      const _serializePoolRegistrationCode = (isSigningPoolRegistrationAsOwner: boolean): Buffer => {
+      const _serializePoolRegistrationCode = (
+        isSigningPoolRegistrationAsOwner: boolean
+      ): Buffer => {
         // backwards compatible way of serializing the flag to signalize pool registration
         // transactions.
         // TODO To be removed/refactored once Ledger app 2.1 or later is rolled out
         if (!appHasStakePoolOwnerSupport) {
-          return Buffer.from([])
+          return Buffer.from([]);
         }
 
         return utils.uint8_to_buf(
           isSigningPoolRegistrationAsOwner
-          ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
-          : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO
-        )
+            ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
+            : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO
+        );
       };
 
-      const _serializeIncludeInTxData = (hasMultiassetSupport: boolean): Buffer => {
+      const _serializeIncludeInTxData = (
+        hasMultiassetSupport: boolean
+      ): Buffer => {
         // TODO remove after Ledger app 2.1 support is not needed anymore
         if (!hasMultiassetSupport) {
           return Buffer.concat([
             utils.uint8_to_buf(
               includeMetadata
-              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-              : SignTxIncluded.SIGN_TX_INCLUDED_NO
+                ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+                : SignTxIncluded.SIGN_TX_INCLUDED_NO
             ),
           ]);
         }
@@ -677,18 +705,18 @@ export default class Ada {
         return Buffer.concat([
           utils.uint8_to_buf(
             includeTtl
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO
+              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+              : SignTxIncluded.SIGN_TX_INCLUDED_NO
           ),
           utils.uint8_to_buf(
             includeMetadata
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO
+              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+              : SignTxIncluded.SIGN_TX_INCLUDED_NO
           ),
           utils.uint8_to_buf(
             includeValidityIntervalStart
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO
+              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+              : SignTxIncluded.SIGN_TX_INCLUDED_NO
           ),
         ]);
       };
@@ -704,7 +732,7 @@ export default class Ada {
         utils.uint32_to_buf(numWithdrawals),
         utils.uint32_to_buf(numWitnesses),
       ]);
-      const response = await wrapRetryStillInCall(_send)(
+      const _response = await wrapRetryStillInCall(_send)(
         P1_STAGE_INIT,
         P2_UNUSED,
         data,
@@ -712,9 +740,7 @@ export default class Ada {
       );
     };
 
-    const signTx_addInput = async (
-      input: InputTypeUTxO
-    ): Promise<void> => {
+    const signTx_addInput = async (input: InputTypeUTxO): Promise<void> => {
       const data = Buffer.concat([
         utils.hex_to_buf(input.txHashHex),
         utils.uint32_to_buf(input.outputIndex),
@@ -722,9 +748,7 @@ export default class Ada {
       await _send(P1_STAGE_INPUTS, P2_UNUSED, data, 0);
     };
 
-    const signTx_addOutput = async (
-      output: TxOutput
-    ): Promise<void> => {
+    const signTx_addOutput = async (output: TxOutput): Promise<void> => {
       const P2_BASIC_DATA = 0x30;
       const P2_ASSET_GROUP = 0x31;
       const P2_TOKEN = 0x32;
@@ -734,33 +758,36 @@ export default class Ada {
       let outputData;
       let outputP2;
       if (appHasMultiassetSupport) {
-        outputData = cardano.serializeOutputBasicParams(output, protocolMagic, networkId);
+        outputData = cardano.serializeOutputBasicParams(
+          output,
+          protocolMagic,
+          networkId
+        );
         outputP2 = P2_BASIC_DATA;
       } else {
-        outputData = cardano.serializeOutputBasicParamsBefore_2_2(output, protocolMagic, networkId);
+        outputData = cardano.serializeOutputBasicParamsBefore_2_2(
+          output,
+          protocolMagic,
+          networkId
+        );
         outputP2 = P2_UNUSED;
       }
 
-      await _send(
-        P1_STAGE_OUTPUTS,
-        outputP2,
-        outputData,
-        0
-      );
+      await _send(P1_STAGE_OUTPUTS, outputP2, outputData, 0);
 
       if (output.tokenBundle != null) {
         for (const assetGroup of output.tokenBundle) {
           const data = Buffer.concat([
             utils.hex_to_buf(assetGroup.policyIdHex),
-            utils.uint32_to_buf(assetGroup.tokens.length)
+            utils.uint32_to_buf(assetGroup.tokens.length),
           ]);
           await _send(P1_STAGE_OUTPUTS, P2_ASSET_GROUP, data, 0);
 
-          for(const token of assetGroup.tokens) {
+          for (const token of assetGroup.tokens) {
             const data = Buffer.concat([
               utils.uint32_to_buf(token.assetNameHex.length / 2),
               utils.hex_to_buf(token.assetNameHex),
-              utils.uint64_to_buf(token.amountStr)
+              utils.uint64_to_buf(token.amountStr),
             ]);
             await _send(P1_STAGE_OUTPUTS, P2_TOKEN, data, 0);
           }
@@ -771,7 +798,7 @@ export default class Ada {
       if (appHasMultiassetSupport) {
         await _send(P1_STAGE_OUTPUTS, P2_CONFIRM, Buffer.alloc(0), 0);
       }
-    }
+    };
 
     const signTx_addCertificate = async (
       type: $Values<typeof CertificateTypes>,
@@ -779,26 +806,26 @@ export default class Ada {
       poolKeyHashHex: ?string,
       poolParams: ?PoolParams
     ): Promise<void> => {
-      const dataFields = [
-        utils.uint8_to_buf(type),
-      ];
+      const dataFields = [utils.uint8_to_buf(type)];
 
       switch (type) {
-      case CertificateTypes.STAKE_REGISTRATION:
-      case CertificateTypes.STAKE_DEREGISTRATION:
-      case CertificateTypes.STAKE_DELEGATION: {
-        if (path != null)
-          dataFields.push(utils.path_to_buf(path));
-        break;
-      }
-      case CertificateTypes.STAKE_POOL_REGISTRATION: {
-        Assert.assert(isSigningPoolRegistrationAsOwner, "tx certificates validation messed up");
-        // OK, data are serialized and sent later in additional APDUs
-        break;
-      }
-      default:
-        // validation should catch invalid certificate type
-        Assert.assert(false, "invalid certificate type");
+        case CertificateTypes.STAKE_REGISTRATION:
+        case CertificateTypes.STAKE_DEREGISTRATION:
+        case CertificateTypes.STAKE_DELEGATION: {
+          if (path != null) dataFields.push(utils.path_to_buf(path));
+          break;
+        }
+        case CertificateTypes.STAKE_POOL_REGISTRATION: {
+          Assert.assert(
+            isSigningPoolRegistrationAsOwner,
+            "tx certificates validation messed up"
+          );
+          // OK, data are serialized and sent later in additional APDUs
+          break;
+        }
+        default:
+          // validation should catch invalid certificate type
+          Assert.assert(false, "invalid certificate type");
       }
 
       if (poolKeyHashHex != null) {
@@ -819,7 +846,7 @@ export default class Ada {
           OWNERS: 0x31,
           RELAYS: 0x32,
           METADATA: 0x33,
-          CONFIRMATION: 0x34
+          CONFIRMATION: 0x34,
         };
 
         await _send(
@@ -860,34 +887,26 @@ export default class Ada {
           0
         );
       }
-    }
+    };
 
     const signTx_addWithdrawal = async (
       path: BIP32Path,
-      amountStr: string,
+      amountStr: string
     ): Promise<void> => {
       const data = Buffer.concat([
         utils.ada_amount_to_buf(amountStr),
-        utils.path_to_buf(path)
+        utils.path_to_buf(path),
       ]);
       await _send(P1_STAGE_WITHDRAWALS, P2_UNUSED, data, 0);
-    }
+    };
 
-    const signTx_setFee = async (
-      feeStr: string
-    ): Promise<void> => {
-      const data = Buffer.concat([
-        utils.ada_amount_to_buf(feeStr),
-      ]);
+    const signTx_setFee = async (feeStr: string): Promise<void> => {
+      const data = Buffer.concat([utils.ada_amount_to_buf(feeStr)]);
       await _send(P1_STAGE_FEE, P2_UNUSED, data, 0);
     };
 
-    const signTx_setTtl = async (
-      ttlStr: string
-    ): Promise<void> => {
-      const data = Buffer.concat([
-        utils.uint64_to_buf(ttlStr),
-      ]);
+    const signTx_setTtl = async (ttlStr: string): Promise<void> => {
+      const data = Buffer.concat([utils.uint64_to_buf(ttlStr)]);
       await _send(P1_STAGE_TTL, P2_UNUSED, data, 0);
     };
 
@@ -909,9 +928,8 @@ export default class Ada {
     };
 
     const signTx_awaitConfirm = async (): Promise<{
-      txHashHex: string
+      txHashHex: string,
     }> => {
-
       // TODO remove after ledger app 2.2 is rolled out
       let confirmP1;
       if (appHasMultiassetSupport) {
@@ -927,7 +945,7 @@ export default class Ada {
         cardano.TX_HASH_LENGTH
       );
       return {
-        txHashHex: response.toString("hex")
+        txHashHex: response.toString("hex"),
       };
     };
 
@@ -935,9 +953,8 @@ export default class Ada {
       path: BIP32Path
     ): Promise<{|
       path: BIP32Path,
-      witnessSignatureHex: string
+      witnessSignatureHex: string,
     |}> => {
-
       // TODO remove after ledger app 2.2 is rolled out
       let witnessP1;
       if (appHasMultiassetSupport) {
@@ -947,15 +964,10 @@ export default class Ada {
       }
 
       const data = Buffer.concat([utils.path_to_buf(path)]);
-      const response = await _send(
-        witnessP1,
-        P2_UNUSED,
-        data,
-        64
-      );
+      const response = await _send(witnessP1, P2_UNUSED, data, 64);
       return {
         path: path,
-        witnessSignatureHex: utils.buf_to_hex(response)
+        witnessSignatureHex: utils.buf_to_hex(response),
       };
     };
 
@@ -966,16 +978,15 @@ export default class Ada {
       invariant(certificates[0].poolRegistrationParams != null);
 
       const owners = certificates[0].poolRegistrationParams.poolOwners;
-      const witnessOwner = owners.find(owner => !!owner.stakingPath);
+      const witnessOwner = owners.find((owner) => !!owner.stakingPath);
       invariant(witnessOwner != null);
 
       witnessPaths.push(witnessOwner.stakingPath);
-
     } else {
       // we collect required witnesses for inputs, certificates and withdrawals
       // each path is included only once
       const witnessPathsSet = new Set();
-      for (const {path} of [...inputs, ...certificates, ...withdrawals]) {
+      for (const { path } of [...inputs, ...certificates, ...withdrawals]) {
         const pathKey = JSON.stringify(path);
         if (!witnessPathsSet.has(pathKey)) {
           witnessPathsSet.add(pathKey);
@@ -1020,16 +1031,13 @@ export default class Ada {
           certificate.path,
           certificate.poolKeyHashHex,
           certificate.poolRegistrationParams
-        )
+        );
       }
     }
 
     if (withdrawals.length > 0) {
       for (const withdrawal of withdrawals) {
-        await signTx_addWithdrawal(
-          withdrawal.path,
-          withdrawal.amountStr
-        )
+        await signTx_addWithdrawal(withdrawal.path, withdrawal.amountStr);
       }
     }
 
@@ -1048,25 +1056,21 @@ export default class Ada {
     const witnesses = [];
     for (const path of witnessPaths) {
       invariant(path != null);
-      Precondition.checkIsValidPath(path, "Invalid path to witness has been supplied");
-      
+      Precondition.checkIsValidPath(
+        path,
+        "Invalid path to witness has been supplied"
+      );
+
       const witness = await signTx_getWitness(path);
       witnesses.push(witness);
     }
 
     return {
       txHashHex,
-      witnesses
+      witnesses,
     };
   }
 }
 
 // reexport
-export {
-  AddressTypeNibbles,
-  CertificateTypes,
-  TxErrors,
-
-  cardano,
-  utils
-};
+export { AddressTypeNibbles, CertificateTypes, TxErrors, cardano, utils };

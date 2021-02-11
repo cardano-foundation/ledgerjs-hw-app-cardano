@@ -1,32 +1,36 @@
 //@flow
 import basex from "base-x";
 import bech32 from "bech32";
-import { AddressTypeNibbles } from "./Ada"
+import { AddressTypeNibbles } from "./Ada";
 import cardano from "./cardano";
-
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
 
-const BECH32_ALPHABET =
-  "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
+const BECH32_ALPHABET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
 
-const MAX_UINT_64_STR = "18446744073709551615"
+const MAX_UINT_64_STR = "18446744073709551615";
 // Max supply in lovelace
 const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
-const POOL_MARGIN_DENOMINATOR_MAX_STR = ["1", "000", "000", "000", "000", "000000"].join("")
+const POOL_MARGIN_DENOMINATOR_MAX_STR = [
+  "1",
+  "000",
+  "000",
+  "000",
+  "000",
+  "000000",
+].join("");
 
-const TESTNET_NETWORK_ID = 0x00
+const TESTNET_NETWORK_ID = 0x00;
 
 export const Precondition = {
   // Generic check
   check: (cond: boolean, msg: ?string = null) => {
-    if (!msg)
-      msg = "Precondition failed";
+    if (!msg) msg = "Precondition failed";
 
     if (!cond) throw new Error(msg);
   },
@@ -83,10 +87,14 @@ export const Precondition = {
     Precondition.checkIsValidUintStr(amount, MAX_LOVELACE_SUPPLY_STR, msg);
   },
   checkIsValidPoolMarginDenominator: (data: string, msg: ?string = null) => {
-    Precondition.checkIsValidUintStr(data, POOL_MARGIN_DENOMINATOR_MAX_STR, msg);
+    Precondition.checkIsValidUintStr(
+      data,
+      POOL_MARGIN_DENOMINATOR_MAX_STR,
+      msg
+    );
     Precondition.check(data !== "0", msg);
   },
-  checkIsValidUintStr (data: any, maxValue: string, msg: ?string = null) {
+  checkIsValidUintStr(data: any, maxValue: string, msg: ?string = null) {
     Precondition.checkIsString(data, msg);
     Precondition.check(/^[0-9]*$/.test(data), msg);
     // Length checks
@@ -115,13 +123,13 @@ export const Precondition = {
     for (const c of data.split("1")[1]) {
       Precondition.check(BECH32_ALPHABET.includes(c), msg);
     }
-  }
+  },
 };
 
 export const Assert = {
   assert: (cond: boolean, errMsg: string = "Assertion failed") => {
     if (!cond) throw new Error(errMsg);
-  }
+  },
 };
 
 // A function usable to enforce invariants in the code that are
@@ -286,7 +294,11 @@ export function bech32_encodeAddress(data: Buffer): string {
 
   const data5bit = bech32.toWords(data);
   const MAX_HUMAN_ADDRESS_LENGTH = 150; // see cardano.h in https://github.com/vacuumlabs/ledger-app-cardano-shelley
-  return bech32.encode(getShelleyAddressPrefix(data), data5bit, MAX_HUMAN_ADDRESS_LENGTH);
+  return bech32.encode(
+    getShelleyAddressPrefix(data),
+    data5bit,
+    MAX_HUMAN_ADDRESS_LENGTH
+  );
 }
 
 // based on https://github.com/cardano-foundation/CIPs/pull/6/files
@@ -304,7 +316,7 @@ function getShelleyAddressPrefix(data: Buffer): string {
 
   const networkId = data[0] & 0b00001111;
   if (networkId === TESTNET_NETWORK_ID) {
-      result += "_test";
+    result += "_test";
   }
 
   return result;
@@ -313,7 +325,7 @@ function getShelleyAddressPrefix(data: Buffer): string {
 export function bech32_decodeAddress(data: string): Buffer {
   Precondition.checkIsValidBech32Address(data, "invalid bech32 string");
 
-  const { words } = bech32.decode(data, 1000)
+  const { words } = bech32.decode(data, 1000);
   return Buffer.from(bech32.fromWords(words));
 }
 
@@ -329,8 +341,6 @@ export function safe_parseInt(str: string): number {
   Precondition.checkIsInteger(i, errMsg);
   return i;
 }
-
-
 
 export default {
   Assert,
@@ -366,5 +376,5 @@ export default {
 
   safe_parseInt,
   chunkBy,
-  stripRetcodeFromResponse
+  stripRetcodeFromResponse,
 };
