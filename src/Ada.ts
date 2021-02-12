@@ -16,27 +16,22 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import utils, { Precondition, Assert, invariant } from "./utils";
 import cardano, {
-  CertificateTypes,
   AddressTypeNibbles,
-  SignTxIncluded,
+  CertificateTypes,
 } from "./cardano";
+import { INS } from "./interactions/common/ins";
+import { deriveAddress } from "./interactions/deriveAddress";
+import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
+import { getSerial } from "./interactions/getSerial";
+import { getVersion } from "./interactions/getVersion";
+import { runTests } from "./interactions/runTests";
+import { showAddress } from "./interactions/showAddress";
+import { signTransaction } from "./interactions/signTx";
 import { TxErrors } from "./txErrors";
+import utils, { Assert } from "./utils";
 
 const CLA = 0xd7;
-
-const INS = {
-  GET_VERSION: 0x00,
-  GET_SERIAL: 0x01,
-
-  GET_EXT_PUBLIC_KEY: 0x10,
-  DERIVE_ADDRESS: 0x11,
-
-  SIGN_TX: 0x21,
-
-  RUN_TESTS: 0xf0,
-} as const;
 
 export type KeyOf<T> = keyof T;
 export type ValueOf<T> = T[keyof T];
@@ -179,11 +174,6 @@ export type SignTransactionResponse = {
   witnesses: Array<Witness>,
 };
 
-const PoolRegistrationCodes = {
-  SIGN_TX_POOL_REGISTRATION_NO: 3,
-  SIGN_TX_POOL_REGISTRATION_YES: 4,
-};
-
 export const TxOutputTypeCodes = {
   SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES: 1,
   SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2,
@@ -217,7 +207,7 @@ const DeviceErrorMessages = {
   [DeviceErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type",
 };
 
-const Errors = {
+export const Errors = {
   INCORRECT_APP_VERSION:
     "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed",
 };
@@ -228,32 +218,6 @@ export const getErrorDescription = (statusCode: number) => {
 
   return DeviceErrorMessages[statusCode] || defaultMsg;
 };
-
-// It can happen that we try to send a message to the device
-// when the device thinks it is still in a middle of previous ADPU stream.
-// This happens mostly if host does abort communication for some reason
-// leaving ledger mid-call.
-// In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
-// default. We can therefore transparently retry the request.
-// Note though that only the *first* request in an multi-APDU exchange should be retried.
-function wrapRetryStillInCall<T extends Function>(fn: T): T {
-  // @ts-ignore
-  return async (...args: any) => {
-    try {
-      return await fn(...args);
-    } catch (e) {
-      if (
-        e &&
-        e.statusCode &&
-        e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
-      ) {
-        // Do the retry
-        return await fn(...args);
-      }
-      throw e;
-    }
-  };
-}
 
 function wrapConvertError<T extends Function>(fn: T): T {
   // @ts-ignore
@@ -279,25 +243,24 @@ function wrapConvertError<T extends Function>(fn: T): T {
  * const ada = new Ada(transport);
  */
 
-type SendParams = {
-  ins: ValueOf<typeof INS>,
+export type SendParams = {
+  ins: INS,
   p1: number,
   p2: number,
   data: Buffer,
   expectedResponseLength?: number,
 };
-type SendFn = (params: SendParams) => Promise<Buffer>;
+export type SendFn = (params: SendParams) => Promise<Buffer>;
 
-type Transport = any
+export type Transport = any
 
 export default class Ada {
   transport: Transport;
-  methods: Array<string>;
   _send: SendFn;
 
   constructor(transport: Transport, scrambleKey: string = "ADA") {
     this.transport = transport;
-    this.methods = [
+    const methods = [
       "getVersion",
       "getSerial",
       "getExtendedPublicKey",
@@ -305,7 +268,7 @@ export default class Ada {
       "deriveAddress",
       "showAddress",
     ];
-    this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
+    this.transport.decorateAppAPIMethods(this, methods, scrambleKey);
     this._send = async (params: SendParams): Promise<Buffer> => {
       let response = await wrapConvertError(this.transport.send)(
         CLA,
@@ -327,31 +290,6 @@ export default class Ada {
     };
   }
 
-  async _getVersion(_send: SendFn): Promise<GetVersionResponse> {
-    // moving getVersion() logic to private function in order
-    // to disable concurrent execution protection done by this.transport.decorateAppAPIMethods()
-    // when invoked from within other calls to check app version
-
-    const P1_UNUSED = 0x00;
-    const P2_UNUSED = 0x00;
-    const response = await wrapRetryStillInCall(_send)({
-      ins: INS.GET_VERSION,
-      p1: P1_UNUSED,
-      p2: P2_UNUSED,
-      data: Buffer.alloc(0),
-      expectedResponseLength: 4,
-    });
-    const [major, minor, patch, flags_value] = response;
-
-    const FLAG_IS_DEBUG = 1;
-    //const FLAG_IS_HEADLESS = 2;
-
-    const flags = {
-      isDebug: (flags_value & FLAG_IS_DEBUG) === FLAG_IS_DEBUG,
-    };
-    return { major, minor, patch, flags };
-  }
-
   /**
    * Returns an object containing the app version.
    *
@@ -363,33 +301,7 @@ export default class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    return this._getVersion(this._send);
-  }
-
-  async _isLedgerAppVersionAtLeast(
-    _send: SendFn,
-    minMajor: number,
-    minMinor: number
-  ): Promise<boolean> {
-    const {major, minor} = await this._getVersion(_send);
-
-    return major >= minMajor && (major > minMajor || minor >= minMinor);
-  }
-
-  async _ensureLedgerAppVersionAtLeast(
-    _send: SendFn,
-    minMajor: number,
-    minMinor: number
-  ) {
-    const versionCheckSuccess = await this._isLedgerAppVersionAtLeast(
-      _send,
-      minMajor,
-      minMinor
-    );
-
-    if (!versionCheckSuccess) {
-      throw new Error(Errors.INCORRECT_APP_VERSION);
-    }
+    return getVersion(this._send);
   }
 
   /**
@@ -403,26 +315,9 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    return this._getSerial(this._send);
+    return getSerial(this._send);
   }
 
-  async _getSerial(_send: SendFn): Promise<GetSerialResponse> {
-    await this._ensureLedgerAppVersionAtLeast(_send, 1, 2);
-
-    const P1_UNUSED = 0x00;
-    const P2_UNUSED = 0x00;
-    const response = await wrapRetryStillInCall(_send)({
-      ins: INS.GET_SERIAL,
-      p1: P1_UNUSED,
-      p2: P2_UNUSED,
-      data: Buffer.alloc(0),
-      expectedResponseLength: 7,
-    });
-    Assert.assert(response.length === 7);
-
-    const serial = utils.buf_to_hex(response);
-    return { serial };
-  }
 
   /**
    * Runs unit tests on the device (DEVEL app build only)
@@ -430,18 +325,9 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    return this._runTests(this._send);
+    return runTests(this._send);
   }
 
-  async _runTests(_send: SendFn): Promise<void> {
-    await wrapRetryStillInCall(_send)({
-      ins: INS.RUN_TESTS,
-      p1: 0x00,
-      p2: 0x00,
-      data: Buffer.alloc(0),
-      expectedResponseLength: 0,
-    });
-  }
 
   /**
    * @description Get several public keys; one for each of the specified BIP 32 paths.
@@ -458,71 +344,7 @@ export default class Ada {
   async getExtendedPublicKeys(
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
-    return this._getExtendedPublicKeys(this._send, paths);
-  }
-
-  async _getExtendedPublicKeys(
-    _send: SendFn,
-    paths: Array<BIP32Path>
-  ): Promise<Array<GetExtendedPublicKeyResponse>> {
-    // validate the input
-    Precondition.checkIsArray(paths);
-    for (const path of paths) {
-      Precondition.checkIsValidPath(path);
-    }
-
-    if (paths.length > 1) {
-      await this._ensureLedgerAppVersionAtLeast(_send, 2, 1);
-    }
-
-    const P1_INIT = 0x00;
-    const P1_NEXT_KEY = 0x01;
-    const P2_UNUSED = 0x00;
-
-    const result = [];
-
-    for (let i = 0; i < paths.length; i++) {
-      const pathData = cardano.serializeGetExtendedPublicKeyParams(paths[i]);
-
-      let response: Buffer;
-      if (i === 0) {
-        // initial APDU
-
-        // passing empty Buffer for backwards compatibility
-        // of single key export on Ledger app version 2.0.4
-        const remainingKeysData =
-          paths.length > 1
-            ? utils.uint32_to_buf(paths.length - 1)
-            : Buffer.from([]);
-
-        response = await wrapRetryStillInCall(_send)({
-          ins: INS.GET_EXT_PUBLIC_KEY,
-          p1: P1_INIT,
-          p2: P2_UNUSED,
-          data: Buffer.concat([pathData, remainingKeysData]),
-          expectedResponseLength: 64,
-        });
-      } else {
-        // next key APDU
-        response = await _send({
-          ins: INS.GET_EXT_PUBLIC_KEY,
-          p1: P1_NEXT_KEY,
-          p2: P2_UNUSED,
-          data: pathData,
-          expectedResponseLength: 64,
-        });
-      }
-
-      const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
-      Assert.assert(rest.length === 0);
-
-      result.push({
-        publicKeyHex: publicKey.toString("hex"),
-        chainCodeHex: chainCode.toString("hex"),
-      });
-    }
-
-    return result;
+    return getExtendedPublicKeys(this._send, paths);
   }
 
   /**
@@ -579,11 +401,11 @@ export default class Ada {
     addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
-    stakingPath: BIP32Path | null= null,
+    stakingPath: BIP32Path | null = null,
     stakingKeyHashHex: string | null = null,
     stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<DeriveAddressResponse> {
-    return this._deriveAddress(
+    return deriveAddress(
       this._send,
       addressTypeNibble,
       networkIdOrProtocolMagic,
@@ -594,38 +416,6 @@ export default class Ada {
     );
   }
 
-  async _deriveAddress(
-    _send: SendFn,
-    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
-    networkIdOrProtocolMagic: number,
-    spendingPath: BIP32Path,
-    stakingPath: BIP32Path | null = null,
-    stakingKeyHashHex: string | null = null,
-    stakingBlockchainPointer: StakingBlockchainPointer | null = null
-  ): Promise<DeriveAddressResponse> {
-    const P1_RETURN = 0x01;
-    const P2_UNUSED = 0x00;
-
-    const data = cardano.serializeAddressParams(
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
-    );
-
-    const response = await _send({
-      ins: INS.DERIVE_ADDRESS,
-      p1: P1_RETURN,
-      p2: P2_UNUSED,
-      data: data,
-    });
-
-    return {
-      addressHex: response.toString("hex"),
-    };
-  }
 
   async showAddress(
     addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
@@ -635,7 +425,7 @@ export default class Ada {
     stakingKeyHashHex: string | null = null,
     stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<void> {
-    return this._showAddress(
+    return showAddress(
       this._send,
       addressTypeNibble,
       networkIdOrProtocolMagic,
@@ -646,34 +436,6 @@ export default class Ada {
     );
   }
 
-  async _showAddress(
-    _send: SendFn,
-    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
-    networkIdOrProtocolMagic: number,
-    spendingPath: BIP32Path,
-    stakingPath: BIP32Path | null = null,
-    stakingKeyHashHex: string | null = null,
-    stakingBlockchainPointer: StakingBlockchainPointer | null = null
-  ): Promise<void> {
-    const P1_DISPLAY = 0x02;
-    const P2_UNUSED = 0x00;
-    const data = cardano.serializeAddressParams(
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
-    );
-
-    await _send({
-      ins: INS.DERIVE_ADDRESS,
-      p1: P1_DISPLAY,
-      p2: P2_UNUSED,
-      data,
-      expectedResponseLength: 0,
-    });
-  }
 
   async signTransaction(
     networkId: number,
@@ -687,7 +449,7 @@ export default class Ada {
     metadataHashHex?: string,
     validityIntervalStartStr?: string
   ): Promise<SignTransactionResponse> {
-    return this._signTransaction(
+    return signTransaction(
       this._send,
       networkId,
       protocolMagic,
@@ -700,575 +462,6 @@ export default class Ada {
       metadataHashHex,
       validityIntervalStartStr
     );
-  }
-
-  async _signTransaction(
-    _send: SendFn,
-    networkId: number,
-    protocolMagic: number,
-    inputs: Array<InputTypeUTxO>,
-    outputs: Array<TxOutput>,
-    feeStr: string,
-    ttlStr: string | undefined,
-    certificates: Array<Certificate>,
-    withdrawals: Array<Withdrawal>,
-    metadataHashHex?: string,
-    validityIntervalStartStr?: string
-  ): Promise<SignTransactionResponse> {
-    // pool registrations are quite restricted
-    // this affects witness set construction and many validations
-    const isSigningPoolRegistrationAsOwner = certificates.some(
-      (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
-    );
-
-    const appHasStakePoolOwnerSupport = await this._isLedgerAppVersionAtLeast(
-      _send,
-      2,
-      1
-    );
-    if (isSigningPoolRegistrationAsOwner && !appHasStakePoolOwnerSupport) {
-      throw Error(Errors.INCORRECT_APP_VERSION);
-    }
-
-    // TODO replace this with a better mechanism for detecting ledger app capabilities
-    const appHasMultiassetSupport = await this._isLedgerAppVersionAtLeast(
-      _send,
-      2,
-      2
-    );
-    if (!appHasMultiassetSupport) {
-      const containsMultiassets = outputs.some(
-        (output) => output.tokenBundle != null
-      );
-
-      // for older app versions:
-      // multiasset outputs must not be given
-      // validity interval start must not be given
-      // ttl must be given
-      if (
-        containsMultiassets ||
-        validityIntervalStartStr != null ||
-        ttlStr == null
-      ) {
-        throw Error(Errors.INCORRECT_APP_VERSION);
-      }
-    }
-
-    cardano.validateTransaction(
-      networkId,
-      protocolMagic,
-      inputs,
-      outputs,
-      feeStr,
-      ttlStr,
-      certificates,
-      withdrawals,
-      metadataHashHex,
-      validityIntervalStartStr
-    );
-
-    const P1_STAGE_INIT = 0x01;
-    const P1_STAGE_INPUTS = 0x02;
-    const P1_STAGE_OUTPUTS = 0x03;
-    const P1_STAGE_FEE = 0x04;
-    const P1_STAGE_TTL = 0x05;
-    const P1_STAGE_CERTIFICATES = 0x06;
-    const P1_STAGE_WITHDRAWALS = 0x07;
-    const P1_STAGE_METADATA = 0x08;
-    const P1_STAGE_VALIDITY_INTERVAL_START = 0x09;
-    const P1_STAGE_CONFIRM = 0x0a;
-    const P1_STAGE_WITNESSES = 0x0f;
-    const P2_UNUSED = 0x00;
-
-    const signTx_init = async (
-      networkId: number,
-      protocolMagic: number,
-      numInputs: number,
-      numOutputs: number,
-      includeTtl: boolean,
-      numCertificates: number,
-      numWithdrawals: number,
-      includeMetadata: boolean,
-      includeValidityIntervalStart: boolean,
-      numWitnesses: number
-    ): Promise<void> => {
-      const _serializePoolRegistrationCode = (
-        isSigningPoolRegistrationAsOwner: boolean
-      ): Buffer => {
-        // backwards compatible way of serializing the flag to signalize pool registration
-        // transactions.
-        // TODO To be removed/refactored once Ledger app 2.1 or later is rolled out
-        if (!appHasStakePoolOwnerSupport) {
-          return Buffer.from([]);
-        }
-
-        return utils.uint8_to_buf(
-          isSigningPoolRegistrationAsOwner
-            ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
-            : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO
-        );
-      };
-
-      const _serializeIncludeInTxData = (
-        hasMultiassetSupport: boolean
-      ): Buffer => {
-        // TODO remove after Ledger app 2.1 support is not needed anymore
-        if (!hasMultiassetSupport) {
-          return Buffer.concat([
-            utils.uint8_to_buf(
-              includeMetadata
-                ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-                : SignTxIncluded.SIGN_TX_INCLUDED_NO
-            ),
-          ]);
-        }
-
-        return Buffer.concat([
-          utils.uint8_to_buf(
-            includeTtl
-              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-              : SignTxIncluded.SIGN_TX_INCLUDED_NO
-          ),
-          utils.uint8_to_buf(
-            includeMetadata
-              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-              : SignTxIncluded.SIGN_TX_INCLUDED_NO
-          ),
-          utils.uint8_to_buf(
-            includeValidityIntervalStart
-              ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-              : SignTxIncluded.SIGN_TX_INCLUDED_NO
-          ),
-        ]);
-      };
-
-      const data = Buffer.concat([
-        utils.uint8_to_buf(networkId),
-        utils.uint32_to_buf(protocolMagic),
-        _serializeIncludeInTxData(appHasMultiassetSupport),
-        _serializePoolRegistrationCode(isSigningPoolRegistrationAsOwner),
-        utils.uint32_to_buf(numInputs),
-        utils.uint32_to_buf(numOutputs),
-        utils.uint32_to_buf(numCertificates),
-        utils.uint32_to_buf(numWithdrawals),
-        utils.uint32_to_buf(numWitnesses),
-      ]);
-      const _response = await wrapRetryStillInCall(_send)({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_INIT,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-    };
-
-    const signTx_addInput = async (input: InputTypeUTxO): Promise<void> => {
-      const data = Buffer.concat([
-        utils.hex_to_buf(input.txHashHex),
-        utils.uint32_to_buf(input.outputIndex),
-      ]);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_INPUTS,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-    };
-
-    const signTx_addOutput = async (output: TxOutput): Promise<void> => {
-      const P2_BASIC_DATA = 0x30;
-      const P2_ASSET_GROUP = 0x31;
-      const P2_TOKEN = 0x32;
-      const P2_CONFIRM = 0x33;
-
-      // TODO remove the Before_2_2 version after ledger app 2.2 is rolled out
-      let outputData;
-      let outputP2;
-      if (appHasMultiassetSupport) {
-        outputData = cardano.serializeOutputBasicParams(
-          output,
-          protocolMagic,
-          networkId
-        );
-        outputP2 = P2_BASIC_DATA;
-      } else {
-        outputData = cardano.serializeOutputBasicParamsBefore_2_2(
-          output,
-          protocolMagic,
-          networkId
-        );
-        outputP2 = P2_UNUSED;
-      }
-
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_OUTPUTS,
-        p2: outputP2,
-        data: outputData,
-        expectedResponseLength: 0,
-      });
-
-      if (output.tokenBundle != null) {
-        for (const assetGroup of output.tokenBundle) {
-          const data = Buffer.concat([
-            utils.hex_to_buf(assetGroup.policyIdHex),
-            utils.uint32_to_buf(assetGroup.tokens.length),
-          ]);
-          await _send({
-            ins: INS.SIGN_TX,
-            p1: P1_STAGE_OUTPUTS,
-            p2: P2_ASSET_GROUP,
-            data,
-            expectedResponseLength: 0,
-          });
-
-          for (const token of assetGroup.tokens) {
-            const data = Buffer.concat([
-              utils.uint32_to_buf(token.assetNameHex.length / 2),
-              utils.hex_to_buf(token.assetNameHex),
-              utils.uint64_to_buf(token.amountStr),
-            ]);
-            await _send({
-              ins: INS.SIGN_TX,
-              p1: P1_STAGE_OUTPUTS,
-              p2: P2_TOKEN,
-              data,
-              expectedResponseLength: 0,
-            });
-          }
-        }
-      }
-
-      // TODO remove the if condition after ledger app 2.2 is rolled out
-      if (appHasMultiassetSupport) {
-        await _send({
-          ins: INS.SIGN_TX,
-          p1: P1_STAGE_OUTPUTS,
-          p2: P2_CONFIRM,
-          data: Buffer.alloc(0),
-          expectedResponseLength: 0,
-        });
-      }
-    };
-
-    const signTx_addCertificate = async (
-      type: ValueOf<typeof CertificateTypes>,
-      path?: BIP32Path,
-      poolKeyHashHex?: string,
-      poolParams?: PoolParams
-    ): Promise<void> => {
-      const dataFields = [utils.uint8_to_buf(type)];
-
-      switch (type) {
-        case CertificateTypes.STAKE_REGISTRATION:
-        case CertificateTypes.STAKE_DEREGISTRATION:
-        case CertificateTypes.STAKE_DELEGATION: {
-          if (path != null) dataFields.push(utils.path_to_buf(path));
-          break;
-        }
-        case CertificateTypes.STAKE_POOL_REGISTRATION: {
-          Assert.assert(
-            isSigningPoolRegistrationAsOwner,
-            "tx certificates validation messed up"
-          );
-          // OK, data are serialized and sent later in additional APDUs
-          break;
-        }
-        default:
-          // validation should catch invalid certificate type
-          Assert.assert(false, "invalid certificate type");
-      }
-
-      if (poolKeyHashHex != null) {
-        dataFields.push(utils.hex_to_buf(poolKeyHashHex));
-      }
-
-      const data = Buffer.concat(dataFields);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_CERTIFICATES,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-
-      // we are done for every certificate except pool registration
-
-      if (type === CertificateTypes.STAKE_POOL_REGISTRATION) {
-        invariant(poolParams != null);
-
-        // additional data for pool certificate
-        const APDU_INSTRUCTIONS = {
-          POOL_PARAMS: 0x30,
-          OWNERS: 0x31,
-          RELAYS: 0x32,
-          METADATA: 0x33,
-          CONFIRMATION: 0x34,
-        };
-
-        await _send({
-          ins: INS.SIGN_TX,
-          p1: P1_STAGE_CERTIFICATES,
-          p2: APDU_INSTRUCTIONS.POOL_PARAMS,
-          data: cardano.serializePoolInitialParams(poolParams),
-          expectedResponseLength: 0,
-        });
-
-        for (const owner of poolParams.poolOwners) {
-          await _send({
-            ins: INS.SIGN_TX,
-            p1: P1_STAGE_CERTIFICATES,
-            p2: APDU_INSTRUCTIONS.OWNERS,
-            data: cardano.serializePoolOwnerParams(owner),
-            expectedResponseLength: 0,
-          });
-        }
-        for (const relay of poolParams.relays) {
-          await _send({
-            ins: INS.SIGN_TX,
-            p1: P1_STAGE_CERTIFICATES,
-            p2: APDU_INSTRUCTIONS.RELAYS,
-            data: cardano.serializePoolRelayParams(relay),
-            expectedResponseLength: 0,
-          });
-        }
-
-        await _send({
-          ins: INS.SIGN_TX,
-          p1: P1_STAGE_CERTIFICATES,
-          p2: APDU_INSTRUCTIONS.METADATA,
-          data: cardano.serializePoolMetadataParams(poolParams.metadata),
-          expectedResponseLength: 0,
-        });
-
-        await _send({
-          ins: INS.SIGN_TX,
-          p1: P1_STAGE_CERTIFICATES,
-          p2: APDU_INSTRUCTIONS.CONFIRMATION,
-          data: Buffer.alloc(0),
-          expectedResponseLength: 0,
-        });
-      }
-    };
-
-    const signTx_addWithdrawal = async (
-      path: BIP32Path,
-      amountStr: string
-    ): Promise<void> => {
-      const data = Buffer.concat([
-        utils.ada_amount_to_buf(amountStr),
-        utils.path_to_buf(path),
-      ]);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_WITHDRAWALS,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-    };
-
-    const signTx_setFee = async (feeStr: string): Promise<void> => {
-      const data = Buffer.concat([utils.ada_amount_to_buf(feeStr)]);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_FEE,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-    };
-
-    const signTx_setTtl = async (ttlStr: string): Promise<void> => {
-      const data = Buffer.concat([utils.uint64_to_buf(ttlStr)]);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_TTL,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-    };
-
-    const signTx_setMetadata = async (
-      metadataHashHex: string
-    ): Promise<void> => {
-      const data = utils.hex_to_buf(metadataHashHex);
-
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_METADATA,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-    };
-
-    const signTx_setValidityIntervalStart = async (
-      validityIntervalStartStr: string
-    ): Promise<void> => {
-      const data = Buffer.concat([
-        utils.uint64_to_buf(validityIntervalStartStr),
-      ]);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_VALIDITY_INTERVAL_START,
-        p2: P2_UNUSED,
-        data,
-      });
-    };
-
-    const signTx_awaitConfirm = async (): Promise<{
-      txHashHex: string,
-    }> => {
-      // TODO remove after ledger app 2.2 is rolled out
-      let confirmP1;
-      if (appHasMultiassetSupport) {
-        confirmP1 = P1_STAGE_CONFIRM;
-      } else {
-        confirmP1 = 0x09; // needed for backward compatibility
-      }
-
-      const response = await _send({
-        ins: INS.SIGN_TX,
-        p1: confirmP1,
-        p2: P2_UNUSED,
-        data: Buffer.alloc(0),
-        expectedResponseLength: cardano.TX_HASH_LENGTH,
-      });
-      return {
-        txHashHex: response.toString("hex"),
-      };
-    };
-
-    const signTx_getWitness = async (
-      path: BIP32Path
-    ): Promise<{
-      path: BIP32Path,
-      witnessSignatureHex: string,
-    }> => {
-      // TODO remove after ledger app 2.2 is rolled out
-      let witnessP1;
-      if (appHasMultiassetSupport) {
-        witnessP1 = P1_STAGE_WITNESSES;
-      } else {
-        witnessP1 = 0x0a; // needed for backward compatibility
-      }
-
-      const data = Buffer.concat([utils.path_to_buf(path)]);
-      const response = await _send({
-        ins: INS.SIGN_TX,
-        p1: witnessP1,
-        p2: P2_UNUSED,
-        data,
-        expectedResponseLength: 64,
-      });
-      return {
-        path: path,
-        witnessSignatureHex: utils.buf_to_hex(response),
-      };
-    };
-
-    const witnessPaths = [];
-    if (isSigningPoolRegistrationAsOwner) {
-      // there should be exactly one owner given by path which will be used for the witness
-      Assert.assert(certificates.length == 1);
-      invariant(certificates[0].poolRegistrationParams != null);
-
-      const owners = certificates[0].poolRegistrationParams.poolOwners;
-      const witnessOwner = owners.find((owner) => !!owner.stakingPath);
-      invariant(witnessOwner != null);
-
-      witnessPaths.push(witnessOwner.stakingPath);
-    } else {
-      // we collect required witnesses for inputs, certificates and withdrawals
-      // each path is included only once
-      const witnessPathsSet = new Set();
-      for (const { path } of [...inputs, ...certificates, ...withdrawals]) {
-        const pathKey = JSON.stringify(path);
-        if (!witnessPathsSet.has(pathKey)) {
-          witnessPathsSet.add(pathKey);
-          witnessPaths.push(path);
-        }
-      }
-    }
-
-    await signTx_init(
-      networkId,
-      protocolMagic,
-      inputs.length,
-      outputs.length,
-      ttlStr != null,
-      certificates.length,
-      withdrawals.length,
-      metadataHashHex != null,
-      validityIntervalStartStr != null,
-      witnessPaths.length
-    );
-
-    // inputs
-    for (const input of inputs) {
-      await signTx_addInput(input);
-    }
-
-    // outputs
-    for (const output of outputs) {
-      await signTx_addOutput(output);
-    }
-
-    await signTx_setFee(feeStr);
-
-    if (ttlStr != null) {
-      await signTx_setTtl(ttlStr);
-    }
-
-    if (certificates.length > 0) {
-      for (const certificate of certificates) {
-        await signTx_addCertificate(
-          certificate.type,
-          certificate.path,
-          // @ts-ignore
-          certificate.poolKeyHashHex,
-          certificate.poolRegistrationParams
-        );
-      }
-    }
-
-    if (withdrawals.length > 0) {
-      for (const withdrawal of withdrawals) {
-        await signTx_addWithdrawal(withdrawal.path, withdrawal.amountStr);
-      }
-    }
-
-    if (metadataHashHex != null) {
-      await signTx_setMetadata(metadataHashHex);
-    }
-
-    if (validityIntervalStartStr != null) {
-      await signTx_setValidityIntervalStart(validityIntervalStartStr);
-    }
-
-    // confirm
-    const { txHashHex } = await signTx_awaitConfirm();
-
-    // witnesses
-    const witnesses = [];
-    for (const path of witnessPaths) {
-      invariant(path != null);
-      Precondition.checkIsValidPath(
-        path,
-        "Invalid path to witness has been supplied"
-      );
-
-      const witness = await signTx_getWitness(path);
-      witnesses.push(witness);
-    }
-
-    return {
-      txHashHex,
-      witnesses,
-    };
   }
 }
 
