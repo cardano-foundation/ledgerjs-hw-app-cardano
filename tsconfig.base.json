@@ -3,7 +3,6 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
-    "baseUrl": ".",
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "inlineSourceMap": true,
@@ -23,8 +22,6 @@
     "target": "ES2016",
     "typeRoots": ["./node_modules/@types", "./types"],
     "noErrorTruncation": true,
-    "paths": {
-      "src": ["src/*"]
-    }
+    "baseUrl": "src"
   }
 }
