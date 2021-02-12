@@ -4,9 +4,7 @@
     "node": true,
     "mocha": true
   },
-  "parser": "babel-eslint",
   "extends": ["eslint:recommended", "plugin:import/errors"],
-  "plugins": ["flowtype", "import", "prettier", "mocha"],
   "rules": {
     "no-unused-vars": [
       "warn",
@@ -15,32 +13,64 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "flowtype/boolean-style": ["error", "boolean"],
-    "flowtype/define-flow-type": "warn",
-    "flowtype/generic-spacing": ["error", "never"],
-    "flowtype/no-mixed": "error",
-    "flowtype/no-primitive-constructor-types": "error",
-    "flowtype/no-types-missing-file-annotation": "error",
-    "flowtype/no-weak-types": "warn",
-    "flowtype/object-type-delimiter": ["error", "comma"],
-    "flowtype/semi": ["warn", "always"],
-    "flowtype/space-after-type-colon": ["error", "always"],
-    "flowtype/space-before-generic-bracket": ["error", "never"],
-    "flowtype/space-before-type-colon": ["error", "never"],
-    "flowtype/union-intersection-spacing": ["error", "always"],
-    "flowtype/use-flow-type": "warn",
-    "flowtype/valid-syntax": "error"
   },
+  "plugins": ["@typescript-eslint", "import", "prettier"],
   "settings": {
-    "flowtype": {
-      "onlyFilesWithFlowAnnotation": false
+    "import/parser": {
+      "@typescript-eslint/parser": [".ts"],
     }
   },
   "overrides": [
     {
+      "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint", "import", "prettier"],
+      "parserOptions": {
+        "project": "tsconfig.json",
+        "sourceType": "module",
+        "tsconfigRootDir": "./"
+      },
+      "settings": {
+        "flowtype": {
+          "onlyFilesWithFlowAnnotation": false
+        },
+        "import/parser": {
+          '@typescript-eslint/parser': ['.ts'],
+        },
+        "import/resolver": {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ["tsconfig.json"]
+          }
+        }
+      },
+      "files": "src/**/*.ts",
+    },
+    {
+      "parser": "babel-eslint",
+      "plugins": ["flowtype", "import", "prettier", "mocha"],
       "files": "test/**/*.js",
+      "settings": {
+        "flowtype": {
+          "onlyFilesWithFlowAnnotation": false
+        },
+      },
       "rules": {
-        "no-unused-vars": ["off"]
+        "no-unused-vars": ["off"],
+        "flowtype/boolean-style": ["error", "boolean"],
+        "flowtype/define-flow-type": "warn",
+        "flowtype/generic-spacing": ["error", "never"],
+        "flowtype/no-mixed": "error",
+        "flowtype/no-primitive-constructor-types": "error",
+        "flowtype/no-types-missing-file-annotation": "error",
+        "flowtype/no-weak-types": "warn",
+        "flowtype/object-type-delimiter": ["error", "comma"],
+        "flowtype/semi": ["warn", "always"],
+        "flowtype/space-after-type-colon": ["error", "always"],
+        "flowtype/space-before-generic-bracket": ["error", "never"],
+        "flowtype/space-before-type-colon": ["error", "never"],
+        "flowtype/union-intersection-spacing": ["error", "always"],
+        "flowtype/use-flow-type": "warn",
+        "flowtype/valid-syntax": "error"
       }
     }
   ]

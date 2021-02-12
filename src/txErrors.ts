@@ -1,4 +1,3 @@
-//@flow
 export const TxErrors = {
   OUTPUT_INVALID_ADDRESS_TYPE_NIBBLE: "invalid address type nibble",
   INVALID_PROTOCOL_MAGIC: "invalid protocol magic",

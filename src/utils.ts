@@ -1,4 +1,3 @@
-//@flow
 import basex from "base-x";
 import bech32 from "bech32";
 import { AddressTypeNibbles } from "./Ada";
@@ -29,64 +28,64 @@ const TESTNET_NETWORK_ID = 0x00;
 
 export const Precondition = {
   // Generic check
-  check: (cond: boolean, msg: ?string = null) => {
+  check: (cond: boolean, msg?: string) => {
     if (!msg) msg = "Precondition failed";
 
     if (!cond) throw new Error(msg);
   },
   // Basic types
-  checkIsString: (data: any, msg: ?string = null) => {
+  checkIsString: (data: any, msg?: string ) => {
     Precondition.check(typeof data === "string", msg);
   },
-  checkIsInteger: (data: any, msg: ?string = null) => {
+  checkIsInteger: (data: any, msg?: string) => {
     Precondition.check(Number.isInteger(data), msg);
   },
-  checkIsArray: (data: any, msg: ?string = null) => {
+  checkIsArray: (data: any, msg?: string ) => {
     Precondition.check(Array.isArray(data), msg);
   },
-  checkIsBuffer: (data: any, msg: ?string = null) => {
+  checkIsBuffer: (data: any, msg?: string ) => {
     Precondition.check(Buffer.isBuffer(data), msg);
   },
 
   // Extended checks
-  checkIsUint32: (data: any, msg: ?string = null) => {
+  checkIsUint32: (data: any, msg?: string) => {
     Precondition.checkIsInteger(data, msg);
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 4294967295, msg);
   },
-  checkIsUint16: (data: any, msg: ?string = null) => {
+  checkIsUint16: (data: any, msg?: string ) => {
     Precondition.checkIsInteger(data, msg);
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 65535, msg);
   },
-  checkIsUint8: (data: any, msg: ?string = null) => {
+  checkIsUint8: (data: any, msg?: string ) => {
     Precondition.checkIsInteger(data, msg);
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 255, msg);
   },
 
-  checkIsHexString: (data: any, msg: ?string = null) => {
+  checkIsHexString: (data: any, msg?: string ) => {
     Precondition.checkIsString(data, msg);
     Precondition.check(data.length % 2 === 0, msg);
     Precondition.check(/^[0-9a-fA-F]*$/.test(data), msg);
   },
-  checkIsValidPath: (path: Array<number>, msg: ?string = null) => {
+  checkIsValidPath: (path: Array<number>, msg?: string) => {
     Precondition.checkIsArray(path), msg;
     for (const x of path) {
       Precondition.checkIsUint32(x, msg);
     }
   },
-  checkIsUint64Str: (data: any, msg: ?string = null) => {
+  checkIsUint64Str: (data: any, msg?: string) => {
     Precondition.checkIsValidUintStr(data, MAX_UINT_64_STR, msg);
   },
-  checkIsPositiveUint64Str: (data: string, msg: ?string = null) => {
+  checkIsPositiveUint64Str: (data: string, msg?: string) => {
     Precondition.checkIsUint64Str(data, msg);
     Precondition.check(data !== "0", msg);
   },
-  checkIsValidAdaAmount: (amount: string, msg: ?string = null) => {
+  checkIsValidAdaAmount: (amount: string, msg?: string ) => {
     Precondition.checkIsValidUintStr(amount, MAX_LOVELACE_SUPPLY_STR, msg);
   },
-  checkIsValidPoolMarginDenominator: (data: string, msg: ?string = null) => {
+  checkIsValidPoolMarginDenominator: (data: string, msg?: string) => {
     Precondition.checkIsValidUintStr(
       data,
       POOL_MARGIN_DENOMINATOR_MAX_STR,
@@ -94,7 +93,7 @@ export const Precondition = {
     );
     Precondition.check(data !== "0", msg);
   },
-  checkIsValidUintStr(data: any, maxValue: string, msg: ?string = null) {
+  checkIsValidUintStr(data: any, maxValue: string, msg?: string) {
     Precondition.checkIsString(data, msg);
     Precondition.check(/^[0-9]*$/.test(data), msg);
     // Length checks
@@ -110,13 +109,13 @@ export const Precondition = {
       Precondition.check(data <= maxValue, msg);
     }
   },
-  checkIsValidBase58: (data: string, msg: ?string = null) => {
+  checkIsValidBase58: (data: string, msg?: string) => {
     Precondition.checkIsString(data, msg);
     for (const c of data) {
       Precondition.check(BASE58_ALPHABET.includes(c), msg);
     }
   },
-  checkIsValidBech32Address: (data: string, msg: ?string = null) => {
+  checkIsValidBech32Address: (data: string, msg?: string) => {
     Precondition.checkIsString(data, msg);
     Precondition.check(data.split("1").length === 2, msg);
 
@@ -134,7 +133,7 @@ export const Assert = {
 
 // A function usable to enforce invariants in the code that are
 // recognized by Flow, relies on https://github.com/facebook/flow/issues/2617
-export function invariant(cond: boolean, errMsg: string = "Invariant failed") {
+export function invariant(cond: boolean, errMsg: string = "Invariant failed"): asserts cond {
   if (!cond) throw new Error(errMsg);
 }
 
@@ -201,7 +200,7 @@ export function path_to_buf(path: Array<number>): Buffer {
   return data;
 }
 
-function parseBIP32Index(str: string, errMsg: ?string = null): number {
+function parseBIP32Index(str: string, errMsg?: string): number {
   let base = 0;
   if (str.endsWith("'")) {
     str = str.slice(0, -1);

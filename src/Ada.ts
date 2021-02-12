@@ -14,9 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-// @flow
-
-import type Transport from "@ledgerhq/hw-transport";
+//import type Transport from "@ledgerhq/hw-transport";
 
 import utils, { Precondition, Assert, invariant } from "./utils";
 import cardano, {
@@ -28,7 +26,7 @@ import { TxErrors } from "./txErrors";
 
 const CLA = 0xd7;
 
-const INS = Object.freeze({
+const INS = {
   GET_VERSION: 0x00,
   GET_SERIAL: 0x01,
 
@@ -38,86 +36,89 @@ const INS = Object.freeze({
   SIGN_TX: 0x21,
 
   RUN_TESTS: 0xf0,
-});
+} as const;
+
+export type KeyOf<T> = keyof T;
+export type ValueOf<T> = T[keyof T];
 
 export type BIP32Path = Array<number>;
 
-export type InputTypeUTxO = {|
+export type InputTypeUTxO = {
   txHashHex: string,
   outputIndex: number,
-  path: ?BIP32Path,
-|};
+  path?: BIP32Path,
+};
 
-export type Token = {|
+export type Token = {
   assetNameHex: string,
   amountStr: string,
-|};
+};
 
-export type AssetGroup = {|
+export type AssetGroup = {
   policyIdHex: string,
   tokens: Array<Token>,
-|};
+};
 
-export type TxOutputTypeAddress = {|
+export type TxOutputTypeAddress = {
   amountStr: string,
   tokenBundle: Array<AssetGroup>,
   addressHex: string,
-|};
+};
 
-export type TxOutputTypeAddressParams = {|
+export type TxOutputTypeAddressParams = {
   amountStr: string,
   tokenBundle: Array<AssetGroup>,
-  addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+  addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
   spendingPath: BIP32Path,
-  stakingPath: ?BIP32Path,
-  stakingKeyHashHex: ?string,
-  stakingBlockchainPointer: ?StakingBlockchainPointer,
-|};
+  stakingPath?: BIP32Path,
+  stakingKeyHashHex?: string,
+  stakingBlockchainPointer?: StakingBlockchainPointer,
+};
 
 export type TxOutput = TxOutputTypeAddress | TxOutputTypeAddressParams;
 
-export type StakingBlockchainPointer = {|
+export type StakingBlockchainPointer = {
   blockIndex: number,
   txIndex: number,
   certificateIndex: number,
-|};
+};
 
-export type PoolOwnerParams = {|
-  stakingPath: ?BIP32Path,
-  stakingKeyHashHex: ?string,
-|};
+export type PoolOwnerParams = {
+  stakingPath?: BIP32Path,
+  stakingKeyHashHex?: string,
+};
 
-export type SingleHostIPRelay = {|
-  portNumber: ?number,
-  ipv4: ?string, // e.g. "192.168.0.1"
-  ipv6: ?string, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
-|};
+export type SingleHostIPRelay = {
+  portNumber?: number,
+  ipv4?: string, // e.g. "192.168.0.1"
+  ipv6?: string, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+};
 
-export type SingleHostNameRelay = {|
-  portNumber: ?number,
+export type SingleHostNameRelay = {
+  portNumber?: number,
   dnsName: string,
-|};
+};
 
-export type MultiHostNameRelay = {|
+export type MultiHostNameRelay = {
   dnsName: string,
-|};
+};
 
-export type RelayParams = {|
+export type RelayParams = {
   type: number, // single host ip = 0, single hostname = 1, multi host name = 2
   params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay,
-|};
+};
 
-export type PoolMetadataParams = {|
+export type PoolMetadataParams = {
   metadataUrl: string,
   metadataHashHex: string,
-|};
+};
 
-export type Margin = {|
+export type Margin = {
   numeratorStr: string,
   denominatorStr: string,
-|};
+};
 
-export type PoolParams = {|
+export type PoolParams = {
   poolKeyHashHex: string,
   vrfKeyHashHex: string,
   pledgeStr: string,
@@ -127,56 +128,56 @@ export type PoolParams = {|
   poolOwners: Array<PoolOwnerParams>,
   relays: Array<RelayParams>,
   metadata: PoolMetadataParams,
-|};
+};
 
-export type Certificate = {|
-  type: $Values<typeof CertificateTypes>,
+export type Certificate = {
+  type: ValueOf<typeof CertificateTypes>,
   path: BIP32Path,
-  poolKeyHashHex: ?string,
-  poolRegistrationParams: ?PoolParams,
-|};
+  poolKeyHashHex?: string,
+  poolRegistrationParams?: PoolParams,
+};
 
-export type Withdrawal = {|
+export type Withdrawal = {
   path: BIP32Path,
   amountStr: string,
-|};
+};
 
-export type Flags = {|
+export type Flags = {
   isDebug: boolean,
-|};
+};
 
-export type GetVersionResponse = {|
+export type GetVersionResponse = {
   major: number,
   minor: number,
   patch: number,
   flags: Flags,
-|};
+};
 
-export type GetSerialResponse = {|
+export type GetSerialResponse = {
   serial: string,
-|};
+};
 
-export type DeriveAddressResponse = {|
+export type DeriveAddressResponse = {
   addressHex: string,
-|};
+};
 
-export type GetExtendedPublicKeyResponse = {|
+export type GetExtendedPublicKeyResponse = {
   publicKeyHex: string,
   chainCodeHex: string,
-|};
+};
 
-export type Witness = {|
+export type Witness = {
   path: BIP32Path,
   // Note: this is *only* a signature
   // you need to add proper extended public key
   // to form a full witness
   witnessSignatureHex: string,
-|};
+};
 
-export type SignTransactionResponse = {|
+export type SignTransactionResponse = {
   txHashHex: string,
   witnesses: Array<Witness>,
-|};
+};
 
 const PoolRegistrationCodes = {
   SIGN_TX_POOL_REGISTRATION_NO: 3,
@@ -235,8 +236,8 @@ export const getErrorDescription = (statusCode: number) => {
 // In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
 // default. We can therefore transparently retry the request.
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
-function wrapRetryStillInCall<T: Function>(fn: T): T {
-  // $FlowFixMe
+function wrapRetryStillInCall<T extends Function>(fn: T): T {
+  // @ts-ignore
   return async (...args: any) => {
     try {
       return await fn(...args);
@@ -254,8 +255,8 @@ function wrapRetryStillInCall<T: Function>(fn: T): T {
   };
 }
 
-function wrapConvertError<T: Function>(fn: T): T {
-  // $FlowFixMe
+function wrapConvertError<T extends Function>(fn: T): T {
+  // @ts-ignore
   return async (...args) => {
     try {
       return await fn(...args);
@@ -279,7 +280,7 @@ function wrapConvertError<T: Function>(fn: T): T {
  */
 
 type SendParams = {
-  ins: $Values<typeof INS>,
+  ins: ValueOf<typeof INS>,
   p1: number,
   p2: number,
   data: Buffer,
@@ -287,12 +288,14 @@ type SendParams = {
 };
 type SendFn = (params: SendParams) => Promise<Buffer>;
 
+type Transport = any
+
 export default class Ada {
-  transport: Transport<*>;
+  transport: Transport;
   methods: Array<string>;
   _send: SendFn;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
+  constructor(transport: Transport, scrambleKey: string = "ADA") {
     this.transport = transport;
     this.methods = [
       "getVersion",
@@ -368,11 +371,7 @@ export default class Ada {
     minMajor: number,
     minMinor: number
   ): Promise<boolean> {
-    const version = await this._getVersion(_send);
-    const major = parseInt(version.major);
-    const minor = parseInt(version.minor);
-
-    if (isNaN(major) || isNaN(minor)) return false;
+    const {major, minor} = await this._getVersion(_send);
 
     return major >= minMajor && (major > minMajor || minor >= minMinor);
   }
@@ -577,12 +576,12 @@ export default class Ada {
    *
    */
   async deriveAddress(
-    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
-    stakingPath: ?BIP32Path = null,
-    stakingKeyHashHex: ?string = null,
-    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+    stakingPath: BIP32Path | null= null,
+    stakingKeyHashHex: string | null = null,
+    stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<DeriveAddressResponse> {
     return this._deriveAddress(
       this._send,
@@ -597,12 +596,12 @@ export default class Ada {
 
   async _deriveAddress(
     _send: SendFn,
-    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
-    stakingPath: ?BIP32Path = null,
-    stakingKeyHashHex: ?string = null,
-    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+    stakingPath: BIP32Path | null = null,
+    stakingKeyHashHex: string | null = null,
+    stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<DeriveAddressResponse> {
     const P1_RETURN = 0x01;
     const P2_UNUSED = 0x00;
@@ -629,12 +628,12 @@ export default class Ada {
   }
 
   async showAddress(
-    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
-    stakingPath: ?BIP32Path = null,
-    stakingKeyHashHex: ?string = null,
-    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+    stakingPath: BIP32Path | null = null,
+    stakingKeyHashHex: string | null = null,
+    stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<void> {
     return this._showAddress(
       this._send,
@@ -649,12 +648,12 @@ export default class Ada {
 
   async _showAddress(
     _send: SendFn,
-    addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
-    stakingPath: ?BIP32Path = null,
-    stakingKeyHashHex: ?string = null,
-    stakingBlockchainPointer: ?StakingBlockchainPointer = null
+    stakingPath: BIP32Path | null = null,
+    stakingKeyHashHex: string | null = null,
+    stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<void> {
     const P1_DISPLAY = 0x02;
     const P2_UNUSED = 0x00;
@@ -682,11 +681,11 @@ export default class Ada {
     inputs: Array<InputTypeUTxO>,
     outputs: Array<TxOutput>,
     feeStr: string,
-    ttlStr: ?string,
+    ttlStr: string | undefined,
     certificates: Array<Certificate>,
     withdrawals: Array<Withdrawal>,
-    metadataHashHex: ?string,
-    validityIntervalStartStr: ?string
+    metadataHashHex?: string,
+    validityIntervalStartStr?: string
   ): Promise<SignTransactionResponse> {
     return this._signTransaction(
       this._send,
@@ -710,11 +709,11 @@ export default class Ada {
     inputs: Array<InputTypeUTxO>,
     outputs: Array<TxOutput>,
     feeStr: string,
-    ttlStr: ?string,
+    ttlStr: string | undefined,
     certificates: Array<Certificate>,
     withdrawals: Array<Withdrawal>,
-    metadataHashHex: ?string,
-    validityIntervalStartStr: ?string
+    metadataHashHex?: string,
+    validityIntervalStartStr?: string
   ): Promise<SignTransactionResponse> {
     // pool registrations are quite restricted
     // this affects witness set construction and many validations
@@ -954,10 +953,10 @@ export default class Ada {
     };
 
     const signTx_addCertificate = async (
-      type: $Values<typeof CertificateTypes>,
-      path: ?BIP32Path,
-      poolKeyHashHex: ?string,
-      poolParams: ?PoolParams
+      type: ValueOf<typeof CertificateTypes>,
+      path?: BIP32Path,
+      poolKeyHashHex?: string,
+      poolParams?: PoolParams
     ): Promise<void> => {
       const dataFields = [utils.uint8_to_buf(type)];
 
@@ -1145,10 +1144,10 @@ export default class Ada {
 
     const signTx_getWitness = async (
       path: BIP32Path
-    ): Promise<{|
+    ): Promise<{
       path: BIP32Path,
       witnessSignatureHex: string,
-    |}> => {
+    }> => {
       // TODO remove after ledger app 2.2 is rolled out
       let witnessP1;
       if (appHasMultiassetSupport) {
@@ -1229,6 +1228,7 @@ export default class Ada {
         await signTx_addCertificate(
           certificate.type,
           certificate.path,
+          // @ts-ignore
           certificate.poolKeyHashHex,
           certificate.poolRegistrationParams
         );
