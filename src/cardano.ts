@@ -1,5 +1,4 @@
-//@flow
-import utils, { Precondition, Assert } from "./utils";
+import utils, { Precondition, Assert, invariant } from "./utils";
 import type {
   TxOutput,
   Certificate,
@@ -13,6 +12,7 @@ import type {
   Withdrawal,
   StakingBlockchainPointer,
   RelayParams,
+  ValueOf,
 } from "./Ada";
 import { TxOutputTypeCodes } from "./Ada";
 import { hex_to_buf } from "./utils";
@@ -110,7 +110,7 @@ function validateCertificates(certificates: Array<Certificate>) {
           TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH
         );
         Precondition.check(
-          // $FlowFixMe
+          // @ts-ignore
           cert.poolKeyHashHex.length == KEY_HASH_LENGTH * 2,
           TxErrors.CERTIFICATE_INVALID_POOL_KEY_HASH
         );
@@ -124,19 +124,16 @@ function validateCertificates(certificates: Array<Certificate>) {
           !!poolParams,
           TxErrors.CERTIFICATE_POOL_MISSING_POOL_PARAMS
         );
-
+        invariant(!!poolParams)
         // serialization succeeds if and only if params are valid
-        // $FlowFixMe
         serializePoolInitialParams(poolParams);
 
         // owners
         Precondition.checkIsArray(
-          // $FlowFixMe
           poolParams.poolOwners,
           TxErrors.CERTIFICATE_POOL_OWNERS_NOT_ARRAY
         );
         let numPathOwners = 0;
-        // $FlowFixMe
         for (const owner of poolParams.poolOwners) {
           if (owner.stakingPath) {
             numPathOwners++;
@@ -148,17 +145,14 @@ function validateCertificates(certificates: Array<Certificate>) {
 
         // relays
         Precondition.checkIsArray(
-          // $FlowFixMe
           poolParams.relays,
           TxErrors.CERTIFICATE_POOL_RELAYS_NOT_ARRAY
         );
-        // $FlowFixMe
         for (const relay of poolParams.relays) {
           serializePoolRelayParams(relay);
         }
 
         // metadata
-        // $FlowFixMe
         serializePoolMetadataParams(poolParams.metadata);
 
         break;
@@ -175,11 +169,11 @@ export function validateTransaction(
   inputs: Array<InputTypeUTxO>,
   outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
   feeStr: string,
-  ttlStr: ?string,
+  ttlStr: string | undefined,
   certificates: Array<Certificate>,
   withdrawals: Array<Withdrawal>,
-  metadataHashHex: ?string,
-  validityIntervalStartStr: ?string
+  metadataHashHex?: string,
+  validityIntervalStartStr?: string
 ) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(
@@ -211,7 +205,7 @@ export function validateTransaction(
     // we try to serialize the data, an error is thrown if ada amount or address params are invalid
     serializeOutputBasicParams(output, protocolMagic, networkId);
 
-    if (output.spendingPath) {
+    if ('spendingPath' in output) {
       Precondition.check(
         !isSigningPoolRegistrationAsOwner,
         TxErrors.OUTPUT_WITH_PATH
@@ -293,12 +287,12 @@ export function validateTransaction(
 }
 
 export function serializeAddressParams(
-  addressTypeNibble: $Values<typeof AddressTypeNibbles>,
+  addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
   networkIdOrProtocolMagic: number,
   spendingPath: BIP32Path,
-  stakingPath: ?BIP32Path = null,
-  stakingKeyHashHex: ?string = null,
-  stakingBlockchainPointer: ?StakingBlockchainPointer = null
+  stakingPath: BIP32Path | null = null,
+  stakingKeyHashHex: string | null = null,
+  stakingBlockchainPointer: StakingBlockchainPointer | null = null
 ): Buffer {
   Precondition.checkIsUint8(
     addressTypeNibble << 4,
@@ -334,7 +328,7 @@ export function serializeAddressParams(
     STAKING_KEY_HASH: 0x33,
     BLOCKCHAIN_POINTER: 0x44,
   };
-  type StakingChoice = $Values<typeof stakingChoices>;
+  type StakingChoice = ValueOf<typeof stakingChoices>;
 
   // serialize staking info
   let stakingChoice: StakingChoice;
@@ -396,11 +390,10 @@ export function serializeOutputBasicParams(
   networkId: number
 ): Buffer {
   Precondition.checkIsValidAdaAmount(output.amountStr);
-
   let outputType;
   let addressBuf;
 
-  if (output.addressHex) {
+  if ('addressHex' in output) {
     outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
 
     Precondition.checkIsHexString(
@@ -415,7 +408,7 @@ export function serializeOutputBasicParams(
       utils.uint32_to_buf(output.addressHex.length / 2),
       utils.hex_to_buf(output.addressHex),
     ]);
-  } else if (output.spendingPath) {
+  } else if ('spendingPath' in output) {
     outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
 
     addressBuf = serializeAddressParams(
@@ -450,7 +443,7 @@ export function serializeOutputBasicParamsBefore_2_2(
 ): Buffer {
   Precondition.checkIsValidAdaAmount(output.amountStr);
 
-  if (output.addressHex) {
+  if ('addressHex' in output) {
     Precondition.checkIsHexString(
       output.addressHex,
       TxErrors.OUTPUT_INVALID_ADDRESS
@@ -613,29 +606,29 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   noBuf.writeUInt8(RELAY_NO);
 
   let portBuf: Buffer;
-  if (params.portNumber) {
+  if ('portNumber' in params) {
     Precondition.checkIsUint32(
       params.portNumber,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
     );
     Precondition.check(
-      // $FlowFixMe
+      // @ts-ignore
       params.portNumber <= 65535,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
     );
-    // $FlowFixMe
+    // @ts-ignore
     portBuf = Buffer.concat([yesBuf, utils.uint16_to_buf(params.portNumber)]);
   } else {
     portBuf = noBuf;
   }
 
   let ipv4Buf: Buffer;
-  if (params.ipv4) {
+  if ('ipv4' in params) {
     Precondition.checkIsString(
       params.ipv4,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
     );
-    // $FlowFixMe
+    // @ts-ignore
     let ipParts = params.ipv4.split(".");
     Precondition.check(
       ipParts.length === 4,
@@ -656,12 +649,12 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   }
 
   let ipv6Buf: Buffer;
-  if (params.ipv6) {
+  if ('ipv6' in params) {
     Precondition.checkIsString(
       params.ipv6,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
     );
-    // $FlowFixMe
+    // @ts-ignore
     let ipHex = params.ipv6.split(":").join("");
     Precondition.checkIsHexString(
       ipHex,
@@ -676,8 +669,8 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
     ipv6Buf = noBuf;
   }
 
-  let dnsBuf: ?Buffer;
-  if (params.dnsName) {
+  let dnsBuf: Buffer | undefined;
+  if ('dnsName' in params) {
     Precondition.checkIsString(params.dnsName);
     Precondition.check(
       params.dnsName.length <= 64,
@@ -711,7 +704,7 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
         dnsBuf !== undefined,
         TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
       );
-      // $FlowFixMe
+      // @ts-ignore
       return Buffer.concat([typeBuf, portBuf, dnsBuf]);
 
     case 2:
@@ -719,7 +712,7 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
         dnsBuf !== undefined,
         TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
       );
-      // $FlowFixMe
+      // @ts-ignore
       return Buffer.concat([typeBuf, dnsBuf]);
   }
   throw new Error(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_TYPE);
