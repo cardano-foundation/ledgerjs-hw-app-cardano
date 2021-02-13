@@ -1,17 +1,16 @@
 import type {
-  AddressTypeNibbles,
+  AddressTypeNibble,
   BIP32Path,
   DeriveAddressResponse,
   SendFn,
   StakingBlockchainPointer,
-  ValueOf,
 } from "../Ada";
 import cardano from "../cardano";
 import { INS } from "./common/ins";
 
 export async function deriveAddress(
   _send: SendFn,
-  addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
+  addressTypeNibble: AddressTypeNibble,
   networkIdOrProtocolMagic: number,
   spendingPath: BIP32Path,
   stakingPath: BIP32Path | null = null,

@@ -20,20 +20,20 @@ import { hex_to_buf } from "./utils";
 
 const HARDENED = 0x80000000;
 
-export const AddressTypeNibbles = Object.freeze({
-  BASE: 0b0000,
-  POINTER: 0b0100,
-  ENTERPRISE: 0b0110,
-  BYRON: 0b1000,
-  REWARD: 0b1110,
-});
+export enum AddressTypeNibble {
+  BASE = 0b0000,
+  POINTER = 0b0100,
+  ENTERPRISE = 0b0110,
+  BYRON = 0b1000,
+  REWARD = 0b1110,
+}
 
-export const CertificateTypes = Object.freeze({
-  STAKE_REGISTRATION: 0,
-  STAKE_DEREGISTRATION: 1,
-  STAKE_DELEGATION: 2,
-  STAKE_POOL_REGISTRATION: 3,
-});
+export enum CertificateType {
+  STAKE_REGISTRATION = 0,
+  STAKE_DEREGISTRATION = 1,
+  STAKE_DELEGATION = 2,
+  STAKE_POOL_REGISTRATION = 3,
+}
 
 export const SignTxIncluded = Object.freeze({
   SIGN_TX_INCLUDED_NO: 1,
@@ -59,14 +59,14 @@ export const GetKeyErrors = {
 function validateCertificates(certificates: Array<Certificate>) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(
-    (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
   );
 
   for (const cert of certificates) {
     if (!cert) throw new Error(TxErrors.CERTIFICATE_INVALID);
 
     switch (cert.type) {
-      case CertificateTypes.STAKE_REGISTRATION: {
+      case CertificateType.STAKE_REGISTRATION: {
         Precondition.check(
           !isSigningPoolRegistrationAsOwner,
           TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
@@ -81,7 +81,7 @@ function validateCertificates(certificates: Array<Certificate>) {
         );
         break;
       }
-      case CertificateTypes.STAKE_DEREGISTRATION: {
+      case CertificateType.STAKE_DEREGISTRATION: {
         Precondition.check(
           !isSigningPoolRegistrationAsOwner,
           TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
@@ -96,7 +96,7 @@ function validateCertificates(certificates: Array<Certificate>) {
         );
         break;
       }
-      case CertificateTypes.STAKE_DELEGATION: {
+      case CertificateType.STAKE_DELEGATION: {
         Precondition.check(
           !isSigningPoolRegistrationAsOwner,
           TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
@@ -116,7 +116,7 @@ function validateCertificates(certificates: Array<Certificate>) {
         );
         break;
       }
-      case CertificateTypes.STAKE_POOL_REGISTRATION: {
+      case CertificateType.STAKE_POOL_REGISTRATION: {
         Assert.assert(isSigningPoolRegistrationAsOwner);
         Precondition.check(!cert.path, TxErrors.CERTIFICATE_SUPERFLUOUS_PATH);
         const poolParams = cert.poolRegistrationParams;
@@ -177,7 +177,7 @@ export function validateTransaction(
 ) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(
-    (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
   );
 
   // inputs
@@ -286,8 +286,9 @@ export function validateTransaction(
   }
 }
 
+
 export function serializeAddressParams(
-  addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
+  addressTypeNibble: AddressTypeNibble,
   networkIdOrProtocolMagic: number,
   spendingPath: BIP32Path,
   stakingPath: BIP32Path | null = null,
@@ -302,7 +303,7 @@ export function serializeAddressParams(
 
   let networkIdOrProtocolMagicBuf;
 
-  if (addressTypeNibble === AddressTypeNibbles.BYRON) {
+  if (addressTypeNibble === AddressTypeNibble.BYRON) {
     Precondition.checkIsUint32(
       networkIdOrProtocolMagic,
       TxErrors.INVALID_PROTOCOL_MAGIC
@@ -413,7 +414,7 @@ export function serializeOutputBasicParams(
 
     addressBuf = serializeAddressParams(
       output.addressTypeNibble,
-      output.addressTypeNibble === AddressTypeNibbles.BYRON
+      output.addressTypeNibble === AddressTypeNibble.BYRON
         ? protocolMagic
         : networkId,
       output.spendingPath,
@@ -464,7 +465,7 @@ export function serializeOutputBasicParamsBefore_2_2(
       utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
       serializeAddressParams(
         output.addressTypeNibble,
-        output.addressTypeNibble === AddressTypeNibbles.BYRON
+        output.addressTypeNibble === AddressTypeNibble.BYRON
           ? protocolMagic
           : networkId,
         output.spendingPath,
@@ -768,8 +769,8 @@ export function serializeGetExtendedPublicKeyParams(path: BIP32Path): Buffer {
 
 export default {
   HARDENED,
-  AddressTypeNibbles,
-  CertificateTypes,
+  AddressTypeNibble,
+  CertificateType,
   KEY_HASH_LENGTH,
   TX_HASH_LENGTH,
 

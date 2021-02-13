@@ -10,7 +10,7 @@ import type {
   Withdrawal,
 } from "../Ada";
 import {
-  CertificateTypes,
+  CertificateType,
   Errors,
 } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
@@ -40,7 +40,7 @@ export async function signTransaction(
   // pool registrations are quite restricted
   // this affects witness set construction and many validations
   const isSigningPoolRegistrationAsOwner = certificates.some(
-    (cert) => cert.type === CertificateTypes.STAKE_POOL_REGISTRATION
+    (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
   );
 
   const appHasStakePoolOwnerSupport = await isLedgerAppVersionAtLeast(
@@ -271,7 +271,7 @@ export async function signTransaction(
   };
 
   const signTx_addCertificate = async (
-    type: ValueOf<typeof CertificateTypes>,
+    type: CertificateType,
     path?: BIP32Path,
     poolKeyHashHex?: string,
     poolParams?: PoolParams
@@ -279,13 +279,13 @@ export async function signTransaction(
     const dataFields = [utils.uint8_to_buf(type)];
 
     switch (type) {
-      case CertificateTypes.STAKE_REGISTRATION:
-      case CertificateTypes.STAKE_DEREGISTRATION:
-      case CertificateTypes.STAKE_DELEGATION: {
+      case CertificateType.STAKE_REGISTRATION:
+      case CertificateType.STAKE_DEREGISTRATION:
+      case CertificateType.STAKE_DELEGATION: {
         if (path != null) dataFields.push(utils.path_to_buf(path));
         break;
       }
-      case CertificateTypes.STAKE_POOL_REGISTRATION: {
+      case CertificateType.STAKE_POOL_REGISTRATION: {
         Assert.assert(
           isSigningPoolRegistrationAsOwner,
           "tx certificates validation messed up"
@@ -313,7 +313,7 @@ export async function signTransaction(
 
     // we are done for every certificate except pool registration
 
-    if (type === CertificateTypes.STAKE_POOL_REGISTRATION) {
+    if (type === CertificateType.STAKE_POOL_REGISTRATION) {
       invariant(poolParams != null);
 
       // additional data for pool certificate

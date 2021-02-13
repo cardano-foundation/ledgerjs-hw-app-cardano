@@ -1,20 +1,20 @@
 import { expect } from "chai";
-import { getAda, str_to_path, NetworkIds, ProtocolMagics} from "../test_utils";
-import { AddressTypeNibbles, utils } from "../../../lib/Ada";
+
+import { getAda, NetworkIds, ProtocolMagics} from "../test_utils";
 import {
+  certificates,
   inputs,
   outputs,
-  sampleFeeStr,
-  sampleTtlStr,
-  sampleBigIntStr,
-  certificates,
-  withdrawals,
-  sampleMetadataHashHex,
-  sampleValidityIntervalStartStr,
-  resultsByron,
-  resultsShelley,
   resultsAllegra,
+  resultsByron,
   resultsMary,
+  resultsShelley,
+  sampleBigIntStr,
+  sampleFeeStr,
+  sampleMetadataHashHex,
+  sampleTtlStr,
+  sampleValidityIntervalStartStr,
+  withdrawals,
 } from './__fixtures__/signTx.js';
 
 
