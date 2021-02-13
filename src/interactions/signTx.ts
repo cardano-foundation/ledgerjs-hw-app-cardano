@@ -2,6 +2,7 @@ import type {
   BIP32Path,
   Certificate,
   InputTypeUTxO,
+  Network,
   PoolParams,
   SendFn,
   SignTransactionResponse,
@@ -40,8 +41,7 @@ const P2_UNUSED = 0x00;
 
 const signTx_init = async (
   _send: SendFn,
-  networkId: number,
-  protocolMagic: number,
+  network: Network,
   numInputs: number,
   numOutputs: number,
   includeTtl: boolean,
@@ -107,8 +107,8 @@ const signTx_init = async (
   };
 
   const data = Buffer.concat([
-    utils.uint8_to_buf(networkId),
-    utils.uint32_to_buf(protocolMagic),
+    utils.uint8_to_buf(network.networkId),
+    utils.uint32_to_buf(network.protocolMagic),
     _serializeIncludeInTxData(flags.appHasMultiassetSupport),
     _serializePoolRegistrationCode(flags.isSigningPoolRegistrationAsOwner),
     utils.uint32_to_buf(numInputs),
@@ -143,11 +143,6 @@ const signTx_addInput = async (
   });
 };
 
-type Network = {
-  protocolMagic: number
-  networkId: number
-}
-
 const signTx_addOutput = async (
   _send: SendFn,
   output: TxOutput,
@@ -167,15 +162,13 @@ const signTx_addOutput = async (
   if (flags.appHasMultiassetSupport) {
     outputData = cardano.serializeOutputBasicParams(
       output,
-      network.protocolMagic,
-      network.networkId
+      network
     );
     outputP2 = P2_BASIC_DATA;
   } else {
     outputData = cardano.serializeOutputBasicParamsBefore_2_2(
       output,
-      network.protocolMagic,
-      network.networkId
+      network
     );
     outputP2 = P2_UNUSED;
   }
@@ -464,8 +457,7 @@ const signTx_getWitness = async (
 
 export async function signTransaction(
   _send: SendFn,
-  networkId: number,
-  protocolMagic: number,
+  network: Network,
   inputs: Array<InputTypeUTxO>,
   outputs: Array<TxOutput>,
   feeStr: string,
@@ -511,8 +503,7 @@ export async function signTransaction(
   }
 
   cardano.validateTransaction(
-    networkId,
-    protocolMagic,
+    network,
     inputs,
     outputs,
     feeStr,
@@ -550,8 +541,7 @@ export async function signTransaction(
 
   await signTx_init(
     _send,
-    networkId,
-    protocolMagic,
+    network,
     inputs.length,
     outputs.length,
     ttlStr != null,
@@ -569,7 +559,7 @@ export async function signTransaction(
 
   // outputs
   for (const output of outputs) {
-    await signTx_addOutput(_send, output, { protocolMagic, networkId }, { appHasMultiassetSupport });
+    await signTx_addOutput(_send, output, network, { appHasMultiassetSupport });
   }
 
   await signTx_setFee(_send, feeStr);
