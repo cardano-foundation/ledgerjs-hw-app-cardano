@@ -17,8 +17,8 @@
 //import type Transport from "@ledgerhq/hw-transport";
 
 import cardano, {
-  AddressTypeNibbles,
-  CertificateTypes,
+  AddressTypeNibble,
+  CertificateType,
 } from "./cardano";
 import { INS } from "./interactions/common/ins";
 import { deriveAddress } from "./interactions/deriveAddress";
@@ -63,7 +63,7 @@ export type TxOutputTypeAddress = {
 export type TxOutputTypeAddressParams = {
   amountStr: string,
   tokenBundle: Array<AssetGroup>,
-  addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
+  addressTypeNibble: AddressTypeNibble,
   spendingPath: BIP32Path,
   stakingPath?: BIP32Path,
   stakingKeyHashHex?: string,
@@ -126,7 +126,7 @@ export type PoolParams = {
 };
 
 export type Certificate = {
-  type: ValueOf<typeof CertificateTypes>,
+  type: CertificateType,
   path: BIP32Path,
   poolKeyHashHex?: string,
   poolRegistrationParams?: PoolParams,
@@ -398,7 +398,7 @@ export default class Ada {
    *
    */
   async deriveAddress(
-    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
+    addressTypeNibble: AddressTypeNibble,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
     stakingPath: BIP32Path | null = null,
@@ -418,7 +418,7 @@ export default class Ada {
 
 
   async showAddress(
-    addressTypeNibble: ValueOf<typeof AddressTypeNibbles>,
+    addressTypeNibble: AddressTypeNibble,
     networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
     stakingPath: BIP32Path | null = null,
@@ -466,4 +466,4 @@ export default class Ada {
 }
 
 // reexport
-export { AddressTypeNibbles, CertificateTypes, TxErrors, cardano, utils };
+export { AddressTypeNibble, CertificateType, TxErrors, cardano, utils };
