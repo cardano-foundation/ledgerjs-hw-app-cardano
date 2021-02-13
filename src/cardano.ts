@@ -205,7 +205,7 @@ export function validateTransaction(
     // we try to serialize the data, an error is thrown if ada amount or address params are invalid
     serializeOutputBasicParams(output, protocolMagic, networkId);
 
-    if ('spendingPath' in output) {
+    if ("spendingPath" in output && output.spendingPath != null) {
       Precondition.check(
         !isSigningPoolRegistrationAsOwner,
         TxErrors.OUTPUT_WITH_PATH
@@ -393,7 +393,7 @@ export function serializeOutputBasicParams(
   let outputType;
   let addressBuf;
 
-  if ('addressHex' in output) {
+  if ("addressHex" in output && output.addressHex) {
     outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
 
     Precondition.checkIsHexString(
@@ -408,7 +408,7 @@ export function serializeOutputBasicParams(
       utils.uint32_to_buf(output.addressHex.length / 2),
       utils.hex_to_buf(output.addressHex),
     ]);
-  } else if ('spendingPath' in output) {
+  } else if ("spendingPath" in output && output.spendingPath) {
     outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
 
     addressBuf = serializeAddressParams(
@@ -443,7 +443,7 @@ export function serializeOutputBasicParamsBefore_2_2(
 ): Buffer {
   Precondition.checkIsValidAdaAmount(output.amountStr);
 
-  if ('addressHex' in output) {
+  if ("addressHex" in output && output.addressHex) {
     Precondition.checkIsHexString(
       output.addressHex,
       TxErrors.OUTPUT_INVALID_ADDRESS
@@ -458,7 +458,7 @@ export function serializeOutputBasicParamsBefore_2_2(
       utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
       utils.hex_to_buf(output.addressHex),
     ]);
-  } else if (output.spendingPath) {
+  } else if ('spendingPath' in output && output.spendingPath) {
     return Buffer.concat([
       utils.ada_amount_to_buf(output.amountStr),
       utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
@@ -606,7 +606,7 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   noBuf.writeUInt8(RELAY_NO);
 
   let portBuf: Buffer;
-  if ('portNumber' in params) {
+  if ('portNumber' in params && params.portNumber) {
     Precondition.checkIsUint32(
       params.portNumber,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
@@ -623,7 +623,7 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   }
 
   let ipv4Buf: Buffer;
-  if ('ipv4' in params) {
+  if ('ipv4' in params && params.ipv4) {
     Precondition.checkIsString(
       params.ipv4,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
@@ -649,7 +649,7 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   }
 
   let ipv6Buf: Buffer;
-  if ('ipv6' in params) {
+  if ('ipv6' in params && params.ipv6) {
     Precondition.checkIsString(
       params.ipv6,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
@@ -670,7 +670,7 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
   }
 
   let dnsBuf: Buffer | undefined;
-  if ('dnsName' in params) {
+  if ("dnsName" in params && params.dnsName) {
     Precondition.checkIsString(params.dnsName);
     Precondition.check(
       params.dnsName.length <= 64,
