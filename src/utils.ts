@@ -1,5 +1,6 @@
 import basex from "base-x";
 import bech32 from "bech32";
+
 import { AddressTypeNibbles } from "./Ada";
 import cardano from "./cardano";
 
@@ -34,16 +35,16 @@ export const Precondition = {
     if (!cond) throw new Error(msg);
   },
   // Basic types
-  checkIsString: (data: any, msg?: string ) => {
+  checkIsString: (data: any, msg?: string) => {
     Precondition.check(typeof data === "string", msg);
   },
   checkIsInteger: (data: any, msg?: string) => {
     Precondition.check(Number.isInteger(data), msg);
   },
-  checkIsArray: (data: any, msg?: string ) => {
+  checkIsArray: (data: any, msg?: string) => {
     Precondition.check(Array.isArray(data), msg);
   },
-  checkIsBuffer: (data: any, msg?: string ) => {
+  checkIsBuffer: (data: any, msg?: string) => {
     Precondition.check(Buffer.isBuffer(data), msg);
   },
 
@@ -53,18 +54,18 @@ export const Precondition = {
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 4294967295, msg);
   },
-  checkIsUint16: (data: any, msg?: string ) => {
+  checkIsUint16: (data: any, msg?: string) => {
     Precondition.checkIsInteger(data, msg);
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 65535, msg);
   },
-  checkIsUint8: (data: any, msg?: string ) => {
+  checkIsUint8: (data: any, msg?: string) => {
     Precondition.checkIsInteger(data, msg);
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 255, msg);
   },
 
-  checkIsHexString: (data: any, msg?: string ) => {
+  checkIsHexString: (data: any, msg?: string) => {
     Precondition.checkIsString(data, msg);
     Precondition.check(data.length % 2 === 0, msg);
     Precondition.check(/^[0-9a-fA-F]*$/.test(data), msg);
@@ -82,7 +83,7 @@ export const Precondition = {
     Precondition.checkIsUint64Str(data, msg);
     Precondition.check(data !== "0", msg);
   },
-  checkIsValidAdaAmount: (amount: string, msg?: string ) => {
+  checkIsValidAdaAmount: (amount: string, msg?: string) => {
     Precondition.checkIsValidUintStr(amount, MAX_LOVELACE_SUPPLY_STR, msg);
   },
   checkIsValidPoolMarginDenominator: (data: string, msg?: string) => {
