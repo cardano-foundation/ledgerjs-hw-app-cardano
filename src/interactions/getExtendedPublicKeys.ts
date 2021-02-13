@@ -1,4 +1,4 @@
-import { BIP32Path, GetExtendedPublicKeyResponse, SendFn } from "../Ada";
+import type { BIP32Path, GetExtendedPublicKeyResponse, SendFn } from "../Ada";
 import cardano from "../cardano";
 import { Assert, Precondition } from "../utils";
 import utils from "../utils";

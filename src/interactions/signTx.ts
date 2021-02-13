@@ -6,7 +6,6 @@ import type {
   SendFn,
   SignTransactionResponse,
   TxOutput,
-  ValueOf,
   Withdrawal,
 } from "../Ada";
 import {

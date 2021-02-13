@@ -20,7 +20,7 @@ import cardano, {
   AddressTypeNibble,
   CertificateType,
 } from "./cardano";
-import { INS } from "./interactions/common/ins";
+import type { INS } from "./interactions/common/ins";
 import { deriveAddress } from "./interactions/deriveAddress";
 import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
 import { getSerial } from "./interactions/getSerial";
