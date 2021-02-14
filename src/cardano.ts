@@ -106,14 +106,10 @@ function validateCertificates(certificates: Array<Certificate>) {
           cert.path,
           TxErrors.CERTIFICATE_MISSING_PATH
         );
-        Precondition.checkIsHexString(
+        Precondition.checkIsHexStringOfLength(
           cert.poolKeyHashHex,
+          KEY_HASH_LENGTH,
           TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH
-        );
-        Precondition.check(
-          // @ts-ignore
-          cert.poolKeyHashHex.length == KEY_HASH_LENGTH * 2,
-          TxErrors.CERTIFICATE_INVALID_POOL_KEY_HASH
         );
         break;
       }
@@ -183,12 +179,9 @@ export function validateTransaction(
   // inputs
   Precondition.checkIsArray(inputs, TxErrors.INPUTS_NOT_ARRAY);
   for (const input of inputs) {
-    Precondition.checkIsHexString(
+    Precondition.checkIsHexStringOfLength(
       input.txHashHex,
-      TxErrors.INPUT_INVALID_TX_HASH
-    );
-    Precondition.check(
-      input.txHashHex.length === TX_HASH_LENGTH * 2,
+      TX_HASH_LENGTH,
       TxErrors.INPUT_INVALID_TX_HASH
     );
 
@@ -220,12 +213,9 @@ export function validateTransaction(
       Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
 
       for (const assetGroup of output.tokenBundle) {
-        Precondition.checkIsHexString(
+        Precondition.checkIsHexStringOfLength(
           assetGroup.policyIdHex,
-          TxErrors.OUTPUT_INVALID_TOKEN_POLICY
-        );
-        Precondition.check(
-          assetGroup.policyIdHex.length === TOKEN_POLICY_LENGTH * 2,
+          TOKEN_POLICY_LENGTH,
           TxErrors.OUTPUT_INVALID_TOKEN_POLICY
         );
 
@@ -270,11 +260,7 @@ export function validateTransaction(
 
   // metadata could be null
   if (metadataHashHex != null) {
-    Precondition.checkIsHexString(metadataHashHex, TxErrors.METADATA_INVALID);
-    Precondition.check(
-      metadataHashHex.length == 32 * 2,
-      TxErrors.METADATA_INVALID
-    );
+    Precondition.checkIsHexStringOfLength(metadataHashHex, 32, TxErrors.METADATA_INVALID);
   }
 
   //  validity interval start
@@ -478,21 +464,15 @@ export function serializeOutputBasicParamsBefore_2_2(
 }
 
 export function serializePoolInitialParams(params: PoolParams): Buffer {
-  Precondition.checkIsHexString(
+  Precondition.checkIsHexStringOfLength(
     params.poolKeyHashHex,
-    TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH
-  );
-  Precondition.check(
-    params.poolKeyHashHex.length === KEY_HASH_LENGTH * 2,
+    KEY_HASH_LENGTH,
     TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH
   );
 
-  Precondition.checkIsHexString(
+  Precondition.checkIsHexStringOfLength(
     params.vrfKeyHashHex,
-    TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH
-  );
-  Precondition.check(
-    params.vrfKeyHashHex.length === 32 * 2,
+    32,
     TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH
   );
 
@@ -522,12 +502,9 @@ export function serializePoolInitialParams(params: PoolParams): Buffer {
     TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
   );
 
-  Precondition.checkIsHexString(
+  Precondition.checkIsHexStringOfLength(
     params.rewardAccountHex,
-    TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT
-  );
-  Precondition.check(
-    params.rewardAccountHex.length === 29 * 2,
+    29,
     TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT
   );
 
@@ -573,12 +550,9 @@ export function serializePoolOwnerParams(params: PoolOwnerParams): Buffer {
   }
 
   if (hashHex) {
-    Precondition.checkIsHexString(
+    Precondition.checkIsHexStringOfLength(
       hashHex,
-      TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH
-    );
-    Precondition.check(
-      hashHex.length === KEY_HASH_LENGTH * 2,
+      KEY_HASH_LENGTH,
       TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH
     );
 
@@ -655,12 +629,9 @@ export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
     );
     // @ts-ignore
     let ipHex = params.ipv6.split(":").join("");
-    Precondition.checkIsHexString(
+    Precondition.checkIsHexStringOfLength(
       ipHex,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
-    );
-    Precondition.check(
-      ipHex.length === 16 * 2,
+      16,
       TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
     );
     ipv6Buf = Buffer.concat([yesBuf, hex_to_buf(ipHex)]);
@@ -743,12 +714,9 @@ export function serializePoolMetadataParams(
   );
 
   const hashHex = params.metadataHashHex;
-  Precondition.checkIsHexString(
+  Precondition.checkIsHexStringOfLength(
     hashHex,
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
-  );
-  Precondition.check(
-    hashHex.length === 32 * 2,
+    32,
     TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
   );
 
