@@ -38,6 +38,12 @@ export type ValueOf<T> = T[keyof T];
 
 export type BIP32Path = Array<number>;
 
+
+export type Network = {
+  protocolMagic: number
+  networkId: number
+}
+
 export type InputTypeUTxO = {
   txHashHex: string,
   outputIndex: number,
@@ -451,8 +457,10 @@ export default class Ada {
   ): Promise<SignTransactionResponse> {
     return signTransaction(
       this._send,
-      networkId,
-      protocolMagic,
+      {
+        networkId,
+        protocolMagic,
+      },
       inputs,
       outputs,
       feeStr,

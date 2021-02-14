@@ -2,6 +2,7 @@ import type {
   BIP32Path,
   Certificate,
   InputTypeUTxO,
+  Network,
   PoolMetadataParams,
   PoolOwnerParams,
   PoolParams,
@@ -164,8 +165,7 @@ function validateCertificates(certificates: Array<Certificate>) {
 }
 
 export function validateTransaction(
-  networkId: number,
-  protocolMagic: number,
+  network: Network,
   inputs: Array<InputTypeUTxO>,
   outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
   feeStr: string,
@@ -203,7 +203,7 @@ export function validateTransaction(
   Precondition.checkIsArray(outputs, TxErrors.OUTPUTS_NOT_ARRAY);
   for (const output of outputs) {
     // we try to serialize the data, an error is thrown if ada amount or address params are invalid
-    serializeOutputBasicParams(output, protocolMagic, networkId);
+    serializeOutputBasicParams(output, network);
 
     if ("spendingPath" in output && output.spendingPath != null) {
       Precondition.check(
@@ -387,8 +387,7 @@ export function serializeAddressParams(
 
 export function serializeOutputBasicParams(
   output: TxOutput,
-  protocolMagic: number,
-  networkId: number
+  network: Network,
 ): Buffer {
   Precondition.checkIsValidAdaAmount(output.amountStr);
   let outputType;
@@ -415,8 +414,8 @@ export function serializeOutputBasicParams(
     addressBuf = serializeAddressParams(
       output.addressTypeNibble,
       output.addressTypeNibble === AddressTypeNibble.BYRON
-        ? protocolMagic
-        : networkId,
+        ? network.protocolMagic
+        : network.networkId,
       output.spendingPath,
       output.stakingPath,
       output.stakingKeyHashHex,
@@ -439,8 +438,7 @@ export function serializeOutputBasicParams(
 // TODO remove after ledger app 2.2 is widespread
 export function serializeOutputBasicParamsBefore_2_2(
   output: TxOutput,
-  protocolMagic: number,
-  networkId: number
+  network: Network
 ): Buffer {
   Precondition.checkIsValidAdaAmount(output.amountStr);
 
@@ -466,8 +464,8 @@ export function serializeOutputBasicParamsBefore_2_2(
       serializeAddressParams(
         output.addressTypeNibble,
         output.addressTypeNibble === AddressTypeNibble.BYRON
-          ? protocolMagic
-          : networkId,
+          ? network.protocolMagic
+          : network.networkId,
         output.spendingPath,
         output.stakingPath,
         output.stakingKeyHashHex,
