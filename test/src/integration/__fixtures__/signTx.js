@@ -114,7 +114,7 @@ export const outputs = {
             amountStr: "7878754"
           },
           {
-            assetNameHex: "456c204e69c3b16f",
+            assetNameHex: "",
             amountStr: "1234"
           }
         ]
@@ -125,6 +125,23 @@ export const outputs = {
           {
             assetNameHex: "7564247542686911",
             amountStr: "47"
+          }
+        ]
+      }
+    ]
+  },
+  multiassetChange: {
+    addressTypeNibble: AddressTypeNibble.BASE,
+    spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+    stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+    amountStr: "1234",
+    tokenBundle: [
+      {
+        policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "74652474436f696e",
+            amountStr: "7878754"
           }
         ]
       }
@@ -469,14 +486,28 @@ export const resultsMary = {
 
   multiassetManyTokens: {
     /*
-    * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a0078386248456c204e69c3b16f1904d2581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1487564247542686911182f8258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f
+    * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a00783862401904d2581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1487564247542686911182f8258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f
     */
-    txHashHex: "1cbdf2c78d46c65f4d9bf96e478066a468b5f7205366c30637816db68e021d3a",
+    txHashHex: "76e0af0eb9eb19b374d002b0eedbb9175eb3e5c5327db376be0ae94a4fcf4b84",
     witnesses: [
       {
         path: str_to_path("1852'/1815'/0'/0/0"),
         witnessSignatureHex:
-          "391c3f0ba1c31b11d6cd36ffb5dcfa1c88a54daae043a1f48402d50d9f67388cca50536b44ab0b9b79fcd922da26e847e0e186d844e8d90543d0c56c2afffa0c"
+          "562497549b44d34926598d8a6511c4b58da0cb8da77033b633983f2897dbd59f1d45a4bef987574d83ebe74a016ccab042d0462df813e86896db624d221a5207"
+      }
+    ]
+  },
+
+  withMultiassetChange: {
+    /*
+    * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f3461114018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a08182f
+    */
+    txHashHex: "75ef0b3ac08d56e8ca4a6d3a3de054ed028bad025b0fad3cbb351fc94e967bc5",
+    witnesses: [
+      {
+        path: str_to_path("1852'/1815'/0'/0/0"),
+        witnessSignatureHex:
+          "f19c5f698d3d46dac99c83268d8b5154262c22f9599d38b5221b78d08cef8f5bb81de648a0c94d328b74e88c58d46535de289123f08a47a05a1c253980d6b80e"
       }
     ]
   },

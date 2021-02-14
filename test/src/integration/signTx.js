@@ -466,4 +466,24 @@ describe("signTxOrdinaryMary", async () => {
     );
     expect(response).to.deep.equal(resultsMary.bigNumbersEverywhere);
   });
+
+  it("Mary era transaction with a multiasset change output", async () => {
+    const response = await ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxoShelley],
+      [
+        outputs.externalShelley,
+        outputs.multiassetChange,
+      ],
+      sampleFeeStr,
+      sampleTtlStr,
+      [],
+      [],
+      null,
+      sampleValidityIntervalStartStr
+    );
+    expect(response).to.deep.equal(resultsMary.withMultiassetChange);
+  });
+
 });
