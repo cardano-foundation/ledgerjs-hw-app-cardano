@@ -323,11 +323,12 @@ const signTx_addCertificate = async (
       });
     }
     for (const relay of certificate.poolRegistrationParams.relays) {
+      const parsed = cardano.parsePoolRelayParams(relay)
       await _send({
         ins: INS.SIGN_TX,
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.RELAYS,
-        data: cardano.serializePoolRelayParams(relay),
+        data: cardano.serializePoolRelay(parsed),
         expectedResponseLength: 0,
       });
     }

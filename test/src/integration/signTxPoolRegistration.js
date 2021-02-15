@@ -358,7 +358,7 @@ describe("signTxPoolRegistrationReject", async () => {
         );
       }
 
-      await checkThrows(f, TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS);
+      await checkThrows(f, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS);
     }
   });
 

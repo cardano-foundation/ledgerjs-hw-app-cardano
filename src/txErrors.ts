@@ -81,8 +81,6 @@ export const TxErrors = {
     "invalid ipv6 in a relay in a pool registration certificate",
   CERTIFICATE_POOL_RELAY_INVALID_DNS:
     "invalid dns record in a relay in a pool registration certificate",
-  CERTIFICATE_POOL_RELAY_MISSING_DNS:
-    "missing dns record in a relay in a pool registration certificate",
   CERTIFICATE_POOL_METADATA_INVALID_URL:
     "invalid metadata in a pool registration certificate: invalid url",
   CERTIFICATE_POOL_METADATA_INVALID_HASH:

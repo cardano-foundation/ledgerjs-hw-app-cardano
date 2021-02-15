@@ -129,7 +129,16 @@ export const Precondition = {
   },
 };
 
+export function assert(cond: boolean, errMsg: string): asserts cond {
+  if (!cond) throw new Error('Assertion failed' + errMsg ? ': ' + errMsg : '')
+}
+
+export function unreachable(val: never): never {
+  assert(false, 'Unreachable code hit')
+}
+
 export const Assert = {
+  // TODO(migrate to raw assert above as 'asserts' annotated TS functions cannot be in object scope :shrug:)
   assert: (cond: boolean, errMsg: string = "Assertion failed") => {
     if (!cond) throw new Error(errMsg);
   },

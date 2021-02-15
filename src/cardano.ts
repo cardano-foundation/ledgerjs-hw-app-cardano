@@ -2,11 +2,14 @@ import type {
   BIP32Path,
   Certificate,
   InputTypeUTxO,
+  MultiHostNameRelay,
   Network,
   PoolMetadataParams,
   PoolOwnerParams,
   PoolParams,
   RelayParams,
+  SingleHostIPRelay,
+  SingleHostNameRelay,
   StakingBlockchainPointer,
   TxOutput,
   TxOutputTypeAddress,
@@ -16,7 +19,7 @@ import type {
 } from "./Ada";
 import { TxOutputTypeCodes } from "./Ada";
 import { TxErrors } from "./txErrors";
-import utils, { Assert, invariant, Precondition } from "./utils";
+import utils, { Assert, invariant, Precondition, unreachable } from "./utils";
 import { hex_to_buf } from "./utils";
 
 const HARDENED = 0x80000000;
@@ -146,7 +149,7 @@ function validateCertificates(certificates: Array<Certificate>) {
           TxErrors.CERTIFICATE_POOL_RELAYS_NOT_ARRAY
         );
         for (const relay of poolParams.relays) {
-          serializePoolRelayParams(relay);
+          parsePoolRelayParams(relay);
         }
 
         // metadata
@@ -565,127 +568,150 @@ export function serializePoolOwnerParams(params: PoolOwnerParams): Buffer {
   throw new Error(TxErrors.CERTIFICATE_POOL_OWNER_INCOMPLETE);
 }
 
-export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
-  const type = relayParams.type;
-  const params = relayParams.params;
+const enum RelayType {
+  SingleHostAddr = 0,
+  SingleHostName = 1,
+  MultiHostName = 2,
+}
 
-  const RELAY_NO = 1;
-  const RELAY_YES = 2;
+type ParsedPoolRelay = {
+  type: RelayType.SingleHostAddr,
+  port: number | null,
+  ipv4: Buffer | null,
+  ipv6: Buffer | null,
+} | {
+  type: RelayType.SingleHostName,
+  port: number | null,
+  dnsName: string,
+} | {
+  type: RelayType.MultiHostName,
+  dnsName: string
+}
 
-  const yesBuf = Buffer.alloc(1);
-  yesBuf.writeUInt8(RELAY_YES);
+function parsePort(portNumber: number, err: string): number {
+  Precondition.checkIsUint32(portNumber, err)
+  Precondition.check(portNumber <= 65535, err)
+  return portNumber
+}
 
-  const noBuf = Buffer.alloc(1);
-  noBuf.writeUInt8(RELAY_NO);
+function parseIPv4(ipv4: string, err: string): Buffer {
+  Precondition.checkIsString(ipv4, err);
+  const ipParts = ipv4.split(".");
+  Precondition.check(ipParts.length === 4, err)
 
-  let portBuf: Buffer;
-  if ('portNumber' in params && params.portNumber) {
-    Precondition.checkIsUint32(
-      params.portNumber,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
-    );
-    Precondition.check(
-      // @ts-ignore
-      params.portNumber <= 65535,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
-    );
-    // @ts-ignore
-    portBuf = Buffer.concat([yesBuf, utils.uint16_to_buf(params.portNumber)]);
-  } else {
-    portBuf = noBuf;
+  const ipBytes = Buffer.alloc(4);
+  for (let i = 0; i < 4; i++) {
+    const ipPart = utils.safe_parseInt(ipParts[i]);
+    Precondition.checkIsUint8(ipPart, err)
+    ipBytes.writeUInt8(ipPart, i);
   }
+  return ipBytes
+}
 
-  let ipv4Buf: Buffer;
-  if ('ipv4' in params && params.ipv4) {
-    Precondition.checkIsString(
-      params.ipv4,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
-    );
-    // @ts-ignore
-    let ipParts = params.ipv4.split(".");
-    Precondition.check(
-      ipParts.length === 4,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
-    );
-    let ipBytes = Buffer.alloc(4);
-    for (let i = 0; i < 4; i++) {
-      let ipPart = utils.safe_parseInt(ipParts[i]);
-      Precondition.checkIsUint8(
-        ipPart,
-        TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
-      );
-      ipBytes.writeUInt8(ipPart, i);
+// FIXME(ppershing): This is terrible and wrong implementation
+function parseIPv6(ipv6: string, err: string): Buffer {
+  Precondition.checkIsString(ipv6, err)
+  const ipHex = ipv6.split(":").join("");
+  Precondition.checkIsHexStringOfLength(ipHex, 16, err)
+  return hex_to_buf(ipHex);
+}
+
+function parseDnsName(dnsName: string, err: string): string {
+  Precondition.checkIsString(dnsName, err);
+  Precondition.check(dnsName.length <= 64, err)
+  // eslint-disable-next-line no-control-regex
+  Precondition.check(/^[\x00-\x7F]*$/.test(dnsName), err)
+  Precondition.check(
+    dnsName
+      .split("")
+      .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
+    err
+  );
+  return dnsName
+}
+
+function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
+  switch (relayParams.type) {
+    case RelayType.SingleHostAddr: {
+      const params = relayParams.params as SingleHostIPRelay
+      return {
+        type: RelayType.SingleHostAddr,
+        port: ('portNumber' in params && params.portNumber != null)
+          ? parsePort(params.portNumber, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT)
+          : null,
+        ipv4: ('ipv4' in params && params.ipv4 != null)
+          ? parseIPv4(params.ipv4, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4)
+          : null,
+        ipv6: ('ipv6' in params && params.ipv6 != null)
+          ? parseIPv6(params.ipv6, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6)
+          : null,
+      }
     }
-    ipv4Buf = Buffer.concat([yesBuf, ipBytes]);
-  } else {
-    ipv4Buf = noBuf;
+    case RelayType.SingleHostName: {
+      const params = relayParams.params as SingleHostNameRelay
+
+      return {
+        type: RelayType.SingleHostName,
+        port: ('portNumber' in params && params.portNumber != null)
+          ? parsePort(params.portNumber, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT)
+          : null,
+        dnsName: parseDnsName(params.dnsName, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS)
+      }
+    }
+    case RelayType.MultiHostName: {
+      const params = relayParams.params as MultiHostNameRelay
+      return {
+        type: RelayType.MultiHostName,
+        dnsName: parseDnsName(params.dnsName, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS)
+      }
+    }
+    default:
+      throw new Error(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_TYPE);
+  }
+}
+
+export function serializePoolRelay(relay: ParsedPoolRelay) {
+  function serializeOptional<T>(x: T | null, cb: (t: T) => Buffer): Buffer {
+    const enum Optional {
+      None = 1,
+      Some = 2
+    }
+
+    if (x == null) {
+      return utils.uint8_to_buf(Optional.None)
+    } else {
+      return Buffer.concat([
+        utils.uint8_to_buf(Optional.Some),
+        cb(x)
+      ])
+    }
   }
 
-  let ipv6Buf: Buffer;
-  if ('ipv6' in params && params.ipv6) {
-    Precondition.checkIsString(
-      params.ipv6,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
-    );
-    // @ts-ignore
-    let ipHex = params.ipv6.split(":").join("");
-    Precondition.checkIsHexStringOfLength(
-      ipHex,
-      16,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
-    );
-    ipv6Buf = Buffer.concat([yesBuf, hex_to_buf(ipHex)]);
-  } else {
-    ipv6Buf = noBuf;
+  switch (relay.type) {
+    case RelayType.SingleHostAddr: {
+      return Buffer.concat([
+        utils.uint8_to_buf(relay.type),
+        serializeOptional(relay.port, port => utils.uint16_to_buf(port)),
+        serializeOptional(relay.ipv4, ipv4 => ipv4),
+        serializeOptional(relay.ipv6, ipv6 => ipv6)
+      ])
+    }
+    case RelayType.SingleHostName: {
+      return Buffer.concat([
+        utils.uint8_to_buf(relay.type),
+        serializeOptional(relay.port, port => utils.uint16_to_buf(port)),
+        Buffer.from(relay.dnsName, "ascii")
+      ])
+    }
+    case RelayType.MultiHostName: {
+      return Buffer.concat([
+        utils.uint8_to_buf(relay.type),
+        Buffer.from(relay.dnsName, "ascii")
+      ])
+    }
+    default:
+      unreachable(relay)
   }
-
-  let dnsBuf: Buffer | undefined;
-  if ("dnsName" in params && params.dnsName) {
-    Precondition.checkIsString(params.dnsName);
-    Precondition.check(
-      params.dnsName.length <= 64,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
-    );
-    Precondition.check(
-      // eslint-disable-next-line no-control-regex
-      /^[\x00-\x7F]*$/.test(params.dnsName),
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
-    );
-    Precondition.check(
-      params.dnsName
-        .split("")
-        .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
-    );
-    dnsBuf = Buffer.from(params.dnsName, "ascii");
-  }
-
-  Precondition.checkIsUint8(type);
-
-  let typeBuf = Buffer.alloc(1);
-  typeBuf.writeUInt8(type);
-
-  switch (type) {
-    case 0:
-      return Buffer.concat([typeBuf, portBuf, ipv4Buf, ipv6Buf]);
-
-    case 1:
-      Precondition.check(
-        dnsBuf !== undefined,
-        TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
-      );
-      // @ts-ignore
-      return Buffer.concat([typeBuf, portBuf, dnsBuf]);
-
-    case 2:
-      Precondition.check(
-        dnsBuf !== undefined,
-        TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
-      );
-      // @ts-ignore
-      return Buffer.concat([typeBuf, dnsBuf]);
-  }
-  throw new Error(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_TYPE);
 }
 
 export function serializePoolMetadataParams(
@@ -750,6 +776,7 @@ export default {
 
   serializePoolInitialParams,
   serializePoolOwnerParams,
-  serializePoolRelayParams,
+  serializePoolRelay,
+  parsePoolRelayParams,
   serializePoolMetadataParams,
 };
