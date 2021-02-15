@@ -3,7 +3,6 @@ import type {
   Certificate,
   InputTypeUTxO,
   Network,
-  PoolParams,
   SendFn,
   SignTransactionResponse,
   TxOutput,
@@ -24,20 +23,22 @@ const PoolRegistrationCodes = {
   SIGN_TX_POOL_REGISTRATION_YES: 4,
 };
 
-
-const P1_STAGE_INIT = 0x01;
-const P1_STAGE_INPUTS = 0x02;
-const P1_STAGE_OUTPUTS = 0x03;
-const P1_STAGE_FEE = 0x04;
-const P1_STAGE_TTL = 0x05;
-const P1_STAGE_CERTIFICATES = 0x06;
-const P1_STAGE_WITHDRAWALS = 0x07;
-const P1_STAGE_METADATA = 0x08;
-const P1_STAGE_VALIDITY_INTERVAL_START = 0x09;
-const P1_STAGE_CONFIRM = 0x0a;
-const P1_STAGE_WITNESSES = 0x0f;
-const P2_UNUSED = 0x00;
-
+const enum P1 {
+  STAGE_INIT = 0x01,
+  STAGE_INPUTS = 0x02,
+  STAGE_OUTPUTS = 0x03,
+  STAGE_FEE = 0x04,
+  STAGE_TTL = 0x05,
+  STAGE_CERTIFICATES = 0x06,
+  STAGE_WITHDRAWALS = 0x07,
+  STAGE_METADATA = 0x08,
+  STAGE_VALIDITY_INTERVAL_START = 0x09,
+  STAGE_CONFIRM = 0x0a,
+  STAGE_WITNESSES = 0x0f,
+  // legacy
+  STAGE_CONFIRM_BEFORE_2_2 = 0x09,
+  STAGE_WITNESSES_BEFORE_2_2 = 0x0a
+}
 
 const signTx_init = async (
   _send: SendFn,
@@ -56,6 +57,9 @@ const signTx_init = async (
     isSigningPoolRegistrationAsOwner: boolean,
   }
 ): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
   const _serializePoolRegistrationCode = (
     isSigningPoolRegistrationAsOwner: boolean
   ): Buffer => {
@@ -119,8 +123,8 @@ const signTx_init = async (
   ]);
   const _response = await wrapRetryStillInCall(_send)({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_INIT,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_INIT,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
@@ -130,18 +134,45 @@ const signTx_addInput = async (
   _send: SendFn,
   input: InputTypeUTxO
 ): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
   const data = Buffer.concat([
     utils.hex_to_buf(input.txHashHex),
     utils.uint32_to_buf(input.outputIndex),
   ]);
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_INPUTS,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_INPUTS,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
 };
+
+const signTx_addOutputBefore_2_2 = async (
+  _send: SendFn,
+  output: TxOutput,
+  network: Network,
+) => {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+
+  const data = cardano.serializeOutputBasicParamsBefore_2_2(
+    output,
+    network
+  );
+
+  await _send({
+    ins: INS.SIGN_TX,
+    p1: P1.STAGE_OUTPUTS,
+    p2: P2.UNUSED,
+    data,
+    expectedResponseLength: 0,
+  });
+
+}
 
 const signTx_addOutput = async (
   _send: SendFn,
@@ -151,77 +182,70 @@ const signTx_addOutput = async (
     appHasMultiassetSupport: boolean
   }
 ): Promise<void> => {
-  const P2_BASIC_DATA = 0x30;
-  const P2_ASSET_GROUP = 0x31;
-  const P2_TOKEN = 0x32;
-  const P2_CONFIRM = 0x33;
+  if (!flags.appHasMultiassetSupport) {
+    return await signTx_addOutputBefore_2_2(_send, output, network)
+  }
 
-  // TODO remove the Before_2_2 version after ledger app 2.2 is rolled out
-  let outputData;
-  let outputP2;
-  if (flags.appHasMultiassetSupport) {
-    outputData = cardano.serializeOutputBasicParams(
+  const enum P2 {
+    BASIC_DATA = 0x30,
+    ASSET_GROUP = 0x31,
+    TOKEN = 0x32,
+    CONFIRM = 0x33,
+  }
+
+  // Basic data
+  {
+    const data = cardano.serializeOutputBasicParams(
       output,
       network
     );
-    outputP2 = P2_BASIC_DATA;
-  } else {
-    outputData = cardano.serializeOutputBasicParamsBefore_2_2(
-      output,
-      network
-    );
-    outputP2 = P2_UNUSED;
+
+    await _send({
+      ins: INS.SIGN_TX,
+      p1: P1.STAGE_OUTPUTS,
+      p2: P2.BASIC_DATA,
+      data: data,
+      expectedResponseLength: 0,
+    });
+  }
+
+  // Assets
+  for (const assetGroup of output.tokenBundle || []) {
+    const data = Buffer.concat([
+      utils.hex_to_buf(assetGroup.policyIdHex),
+      utils.uint32_to_buf(assetGroup.tokens.length),
+    ]);
+    await _send({
+      ins: INS.SIGN_TX,
+      p1: P1.STAGE_OUTPUTS,
+      p2: P2.ASSET_GROUP,
+      data,
+      expectedResponseLength: 0,
+    });
+
+    for (const token of assetGroup.tokens) {
+      const data = Buffer.concat([
+        utils.uint32_to_buf(token.assetNameHex.length / 2),
+        utils.hex_to_buf(token.assetNameHex),
+        utils.uint64_to_buf(token.amountStr),
+      ]);
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_OUTPUTS,
+        p2: P2.TOKEN,
+        data,
+        expectedResponseLength: 0,
+      });
+    }
   }
 
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_OUTPUTS,
-    p2: outputP2,
-    data: outputData,
+    p1: P1.STAGE_OUTPUTS,
+    p2: P2.CONFIRM,
+    data: Buffer.alloc(0),
     expectedResponseLength: 0,
   });
-
-  if (output.tokenBundle != null) {
-    for (const assetGroup of output.tokenBundle) {
-      const data = Buffer.concat([
-        utils.hex_to_buf(assetGroup.policyIdHex),
-        utils.uint32_to_buf(assetGroup.tokens.length),
-      ]);
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1_STAGE_OUTPUTS,
-        p2: P2_ASSET_GROUP,
-        data,
-        expectedResponseLength: 0,
-      });
-
-      for (const token of assetGroup.tokens) {
-        const data = Buffer.concat([
-          utils.uint32_to_buf(token.assetNameHex.length / 2),
-          utils.hex_to_buf(token.assetNameHex),
-          utils.uint64_to_buf(token.amountStr),
-        ]);
-        await _send({
-          ins: INS.SIGN_TX,
-          p1: P1_STAGE_OUTPUTS,
-          p2: P2_TOKEN,
-          data,
-          expectedResponseLength: 0,
-        });
-      }
-    }
-  }
-
-  // TODO remove the if condition after ledger app 2.2 is rolled out
-  if (flags.appHasMultiassetSupport) {
-    await _send({
-      ins: INS.SIGN_TX,
-      p1: P1_STAGE_OUTPUTS,
-      p2: P2_CONFIRM,
-      data: Buffer.alloc(0),
-      expectedResponseLength: 0,
-    });
-  }
 };
 
 const signTx_addCertificate = async (
@@ -229,6 +253,9 @@ const signTx_addCertificate = async (
   certificate: Certificate,
   isSigningPoolRegistrationAsOwner: boolean
 ): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const dataFields = [utils.uint8_to_buf(certificate.type)];
 
   switch (certificate.type) {
@@ -258,8 +285,8 @@ const signTx_addCertificate = async (
   const data = Buffer.concat(dataFields);
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_CERTIFICATES,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
@@ -270,18 +297,18 @@ const signTx_addCertificate = async (
     invariant(certificate.poolRegistrationParams != null);
 
     // additional data for pool certificate
-    const APDU_INSTRUCTIONS = {
-      POOL_PARAMS: 0x30,
-      OWNERS: 0x31,
-      RELAYS: 0x32,
-      METADATA: 0x33,
-      CONFIRMATION: 0x34,
-    };
+    const enum P2 {
+      POOL_PARAMS = 0x30,
+      OWNERS = 0x31,
+      RELAYS = 0x32,
+      METADATA = 0x33,
+      CONFIRMATION = 0x34,
+    }
 
     await _send({
       ins: INS.SIGN_TX,
-      p1: P1_STAGE_CERTIFICATES,
-      p2: APDU_INSTRUCTIONS.POOL_PARAMS,
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.POOL_PARAMS,
       data: cardano.serializePoolInitialParams(certificate.poolRegistrationParams),
       expectedResponseLength: 0,
     });
@@ -289,8 +316,8 @@ const signTx_addCertificate = async (
     for (const owner of certificate.poolRegistrationParams.poolOwners) {
       await _send({
         ins: INS.SIGN_TX,
-        p1: P1_STAGE_CERTIFICATES,
-        p2: APDU_INSTRUCTIONS.OWNERS,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.OWNERS,
         data: cardano.serializePoolOwnerParams(owner),
         expectedResponseLength: 0,
       });
@@ -298,8 +325,8 @@ const signTx_addCertificate = async (
     for (const relay of certificate.poolRegistrationParams.relays) {
       await _send({
         ins: INS.SIGN_TX,
-        p1: P1_STAGE_CERTIFICATES,
-        p2: APDU_INSTRUCTIONS.RELAYS,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.RELAYS,
         data: cardano.serializePoolRelayParams(relay),
         expectedResponseLength: 0,
       });
@@ -307,16 +334,16 @@ const signTx_addCertificate = async (
 
     await _send({
       ins: INS.SIGN_TX,
-      p1: P1_STAGE_CERTIFICATES,
-      p2: APDU_INSTRUCTIONS.METADATA,
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.METADATA,
       data: cardano.serializePoolMetadataParams(certificate.poolRegistrationParams.metadata),
       expectedResponseLength: 0,
     });
 
     await _send({
       ins: INS.SIGN_TX,
-      p1: P1_STAGE_CERTIFICATES,
-      p2: APDU_INSTRUCTIONS.CONFIRMATION,
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.CONFIRMATION,
       data: Buffer.alloc(0),
       expectedResponseLength: 0,
     });
@@ -328,14 +355,17 @@ const signTx_addWithdrawal = async (
   path: BIP32Path,
   amountStr: string
 ): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const data = Buffer.concat([
     utils.ada_amount_to_buf(amountStr),
     utils.path_to_buf(path),
   ]);
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_WITHDRAWALS,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_WITHDRAWALS,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
@@ -344,11 +374,14 @@ const signTx_addWithdrawal = async (
 const signTx_setFee = async (
   _send: SendFn,
   feeStr: string): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const data = Buffer.concat([utils.ada_amount_to_buf(feeStr)]);
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_FEE,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_FEE,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
@@ -358,11 +391,14 @@ const signTx_setTtl = async (
   _send: SendFn,
   ttlStr: string
 ): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const data = Buffer.concat([utils.uint64_to_buf(ttlStr)]);
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_TTL,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_TTL,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
@@ -370,13 +406,17 @@ const signTx_setTtl = async (
 
 const signTx_setMetadata = async (
   _send: SendFn,
-  metadataHashHex: string): Promise<void> => {
+  metadataHashHex: string
+): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const data = utils.hex_to_buf(metadataHashHex);
 
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_METADATA,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_METADATA,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
@@ -386,11 +426,14 @@ const signTx_setValidityIntervalStart = async (
   _send: SendFn,
   validityIntervalStartStr: string
 ): Promise<void> => {
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const data = Buffer.concat([utils.uint64_to_buf(validityIntervalStartStr)]);
   await _send({
     ins: INS.SIGN_TX,
-    p1: P1_STAGE_VALIDITY_INTERVAL_START,
-    p2: P2_UNUSED,
+    p1: P1.STAGE_VALIDITY_INTERVAL_START,
+    p2: P2.UNUSED,
     data,
   });
 };
@@ -403,18 +446,14 @@ const signTx_awaitConfirm = async (
 ): Promise<{
   txHashHex: string;
 }> => {
-  // TODO remove after ledger app 2.2 is rolled out
-  let confirmP1;
-  if (flags.appHasMultiassetSupport) {
-    confirmP1 = P1_STAGE_CONFIRM;
-  } else {
-    confirmP1 = 0x09; // needed for backward compatibility
+  const enum P2 {
+    UNUSED = 0x00
   }
 
   const response = await _send({
     ins: INS.SIGN_TX,
-    p1: confirmP1,
-    p2: P2_UNUSED,
+    p1: flags.appHasMultiassetSupport ? P1.STAGE_CONFIRM : P1.STAGE_CONFIRM_BEFORE_2_2,
+    p2: P2.UNUSED,
     data: Buffer.alloc(0),
     expectedResponseLength: cardano.TX_HASH_LENGTH,
   });
@@ -433,19 +472,15 @@ const signTx_getWitness = async (
   path: BIP32Path;
   witnessSignatureHex: string;
 }> => {
-  // TODO remove after ledger app 2.2 is rolled out
-  let witnessP1;
-  if (flags.appHasMultiassetSupport) {
-    witnessP1 = P1_STAGE_WITNESSES;
-  } else {
-    witnessP1 = 0x0a; // needed for backward compatibility
+  const enum P2 {
+    UNUSED = 0x00
   }
 
   const data = Buffer.concat([utils.path_to_buf(path)]);
   const response = await _send({
     ins: INS.SIGN_TX,
-    p1: witnessP1,
-    p2: P2_UNUSED,
+    p1: flags.appHasMultiassetSupport ? P1.STAGE_WITNESSES : P1.STAGE_WITNESSES_BEFORE_2_2,
+    p2: P2.UNUSED,
     data,
     expectedResponseLength: 64,
   });
