@@ -153,7 +153,7 @@ function validateCertificates(certificates: Array<Certificate>) {
         }
 
         // metadata
-        serializePoolMetadataParams(poolParams.metadata);
+        parsePoolMetadataParams(poolParams.metadata);
 
         break;
       }
@@ -714,16 +714,13 @@ export function serializePoolRelay(relay: ParsedPoolRelay) {
   }
 }
 
-export function serializePoolMetadataParams(
-  params: PoolMetadataParams
-): Buffer {
-  const includeMetadataBuffer = Buffer.alloc(1);
-  if (params != null) {
-    includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_YES);
-  } else {
-    includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_NO);
-    return includeMetadataBuffer;
-  }
+type ParsedPoolMetadata = {
+  url: string,
+  hashHex: string,
+} & { __brand: 'pool_metadata' }
+
+export function parsePoolMetadataParams(params: PoolMetadataParams | null): ParsedPoolMetadata | null {
+  if (params == null) return null
 
   const url = params.metadataUrl;
   Precondition.checkIsString(
@@ -745,12 +742,27 @@ export function serializePoolMetadataParams(
     32,
     TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
   );
+  return {
+    url,
+    hashHex,
+    __brand: 'pool_metadata' as const
+  }
+}
 
-  return Buffer.concat([
-    includeMetadataBuffer,
-    utils.hex_to_buf(hashHex),
-    Buffer.from(url),
-  ]);
+export function serializePoolMetadata(
+  metadata: ParsedPoolMetadata | null
+): Buffer {
+  if (metadata == null) {
+    return Buffer.concat([
+      utils.uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_NO)
+    ])
+  } else {
+    return Buffer.concat([
+      utils.uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_YES),
+      utils.hex_to_buf(metadata.hashHex),
+      Buffer.from(metadata.url, 'ascii')
+    ])
+  }
 }
 
 export function serializeGetExtendedPublicKeyParams(path: BIP32Path): Buffer {
@@ -778,5 +790,6 @@ export default {
   serializePoolOwnerParams,
   serializePoolRelay,
   parsePoolRelayParams,
-  serializePoolMetadataParams,
+  serializePoolMetadata,
+  parsePoolMetadataParams,
 };

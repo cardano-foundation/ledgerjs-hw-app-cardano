@@ -333,11 +333,12 @@ const signTx_addCertificate = async (
       });
     }
 
+    const metadata = cardano.parsePoolMetadataParams(certificate.poolRegistrationParams.metadata)
     await _send({
       ins: INS.SIGN_TX,
       p1: P1.STAGE_CERTIFICATES,
       p2: P2.METADATA,
-      data: cardano.serializePoolMetadataParams(certificate.poolRegistrationParams.metadata),
+      data: cardano.serializePoolMetadata(metadata),
       expectedResponseLength: 0,
     });
 
