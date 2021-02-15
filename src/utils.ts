@@ -64,11 +64,14 @@ export const Precondition = {
     Precondition.check(data >= 0, msg);
     Precondition.check(data <= 255, msg);
   },
-
   checkIsHexString: (data: any, msg?: string) => {
     Precondition.checkIsString(data, msg);
     Precondition.check(data.length % 2 === 0, msg);
     Precondition.check(/^[0-9a-fA-F]*$/.test(data), msg);
+  },
+  checkIsHexStringOfLength: (data: any, expectedByteLength: number, msg?: string) => {
+    Precondition.checkIsHexString(data, msg)
+    Precondition.check(data.length === expectedByteLength * 2, msg)
   },
   checkIsValidPath: (path: Array<number>, msg?: string) => {
     Precondition.checkIsArray(path), msg;
