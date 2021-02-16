@@ -19,7 +19,7 @@ import type {
 } from "./Ada";
 import { TxOutputTypeCodes } from "./Ada";
 import { TxErrors } from "./txErrors";
-import utils, { Assert, invariant, Precondition, unreachable } from "./utils";
+import utils, { Assert, invariant, MAX_LOVELACE_SUPPLY_STR, Precondition, unreachable } from "./utils";
 import { hex_to_buf } from "./utils";
 
 const HARDENED = 0x80000000;
@@ -466,6 +466,28 @@ export function serializeOutputBasicParamsBefore_2_2(
   }
 }
 
+type VarlenAsciiString = string & { __type: 'ascii' }
+type FixlenHexString<N> = string & { __type: 'hex', __length: N }
+type Uint64_str = string & { __type: 'uint64_t' }
+
+function parseAscii(str: string, err: string): VarlenAsciiString {
+  Precondition.checkIsString(str, err);
+  Precondition.check(
+    str.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
+    err
+  );
+  return str as VarlenAsciiString
+}
+
+function parseHexStringOfLength<L extends number>(str: string, length: L, err: string): FixlenHexString<L> {
+  Precondition.checkIsHexStringOfLength(str, length, err)
+  return str as FixlenHexString<L>
+}
+
+function parseUint64_str(str: string, maxValue: string, err: string): Uint64_str {
+  Precondition.checkIsValidUintStr(str, maxValue, err);
+  return str as Uint64_str
+}
 export function serializePoolInitialParams(params: PoolParams): Buffer {
   Precondition.checkIsHexStringOfLength(
     params.poolKeyHashHex,
@@ -582,10 +604,10 @@ type ParsedPoolRelay = {
 } | {
   type: RelayType.SingleHostName,
   port: number | null,
-  dnsName: string,
+  dnsName: VarlenAsciiString,
 } | {
   type: RelayType.MultiHostName,
-  dnsName: string
+  dnsName: VarlenAsciiString
 }
 
 function parsePort(portNumber: number, err: string): number {
@@ -616,7 +638,7 @@ function parseIPv6(ipv6: string, err: string): Buffer {
   return hex_to_buf(ipHex);
 }
 
-function parseDnsName(dnsName: string, err: string): string {
+function parseDnsName(dnsName: string, err: string): VarlenAsciiString {
   Precondition.checkIsString(dnsName, err);
   Precondition.check(dnsName.length <= 64, err)
   // eslint-disable-next-line no-control-regex
@@ -627,7 +649,7 @@ function parseDnsName(dnsName: string, err: string): string {
       .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
     err
   );
-  return dnsName
+  return dnsName as VarlenAsciiString
 }
 
 function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
@@ -715,33 +737,22 @@ export function serializePoolRelay(relay: ParsedPoolRelay) {
 }
 
 type ParsedPoolMetadata = {
-  url: string,
-  hashHex: string,
+  url: VarlenAsciiString,
+  hashHex: FixlenHexString<32>,
 } & { __brand: 'pool_metadata' }
 
 export function parsePoolMetadataParams(params: PoolMetadataParams | null): ParsedPoolMetadata | null {
   if (params == null) return null
 
-  const url = params.metadataUrl;
-  Precondition.checkIsString(
-    url,
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
-  );
+  const url = parseAscii(params.metadataUrl, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
+  // Additional length check
   Precondition.check(
     url.length <= 64,
     TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
   );
-  Precondition.check(
-    url.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
-  );
 
-  const hashHex = params.metadataHashHex;
-  Precondition.checkIsHexStringOfLength(
-    hashHex,
-    32,
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
-  );
+  const hashHex = parseHexStringOfLength(params.metadataHashHex, 32, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH);
+
   return {
     url,
     hashHex,
