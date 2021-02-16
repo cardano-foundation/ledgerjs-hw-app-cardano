@@ -125,35 +125,12 @@ function validateCertificates(certificates: Array<Certificate>) {
           TxErrors.CERTIFICATE_POOL_MISSING_POOL_PARAMS
         );
         invariant(!!poolParams)
-        // serialization succeeds if and only if params are valid
-        serializePoolInitialParams(poolParams);
-
-        // owners
-        Precondition.checkIsArray(
-          poolParams.poolOwners,
-          TxErrors.CERTIFICATE_POOL_OWNERS_NOT_ARRAY
-        );
-        let numPathOwners = 0;
-        for (const owner of poolParams.poolOwners) {
-          if (owner.stakingPath) {
-            numPathOwners++;
-            serializePoolOwnerParams(owner);
-          }
-        }
-        if (numPathOwners !== 1)
+        const pool = parsePoolParams(poolParams)
+        // Additional check
+        const numPathOwners = pool.owners.filter(o => o.type === PoolOwnerType.PATH).length;
+        if (numPathOwners !== 1) {
           throw new Error(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-
-        // relays
-        Precondition.checkIsArray(
-          poolParams.relays,
-          TxErrors.CERTIFICATE_POOL_RELAYS_NOT_ARRAY
-        );
-        for (const relay of poolParams.relays) {
-          parsePoolRelayParams(relay);
         }
-
-        // metadata
-        parsePoolMetadataParams(poolParams.metadata);
 
         break;
       }
@@ -495,30 +472,14 @@ function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
   return path as ValidBIP32Path
 }
 
-export function serializePoolInitialParams(params: PoolParams): Buffer {
-  Precondition.checkIsHexStringOfLength(
-    params.poolKeyHashHex,
-    KEY_HASH_LENGTH,
-    TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH
-  );
+type ParsedMargin = {
+  numeratorStr: Uint64_str,
+  denominatorStr: Uint64_str
+}
 
-  Precondition.checkIsHexStringOfLength(
-    params.vrfKeyHashHex,
-    32,
-    TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH
-  );
-
-  Precondition.checkIsValidAdaAmount(
-    params.pledgeStr,
-    TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE
-  );
-  Precondition.checkIsValidAdaAmount(
-    params.costStr,
-    TxErrors.CERTIFICATE_POOL_INVALID_COST
-  );
-
-  const marginNumeratorStr = params.margin.numeratorStr;
-  const marginDenominatorStr = params.margin.denominatorStr;
+export function parseMargin(params: PoolParams['margin']): ParsedMargin {
+  const marginNumeratorStr = params.numeratorStr;
+  const marginDenominatorStr = params.denominatorStr;
   Precondition.checkIsUint64Str(
     marginNumeratorStr,
     TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
@@ -533,32 +494,73 @@ export function serializePoolInitialParams(params: PoolParams): Buffer {
     marginDenominatorStr,
     TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
   );
+  return {
+    numeratorStr: marginNumeratorStr as Uint64_str,
+    denominatorStr: marginDenominatorStr as Uint64_str,
+  }
+}
 
-  Precondition.checkIsHexStringOfLength(
-    params.rewardAccountHex,
-    29,
-    TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT
-  );
 
+type ParsedPoolParams = {
+  keyHashHex: FixlenHexString<28>,
+  vrfHashHex: FixlenHexString<32>,
+  pledgeStr: Uint64_str,
+  costStr: Uint64_str,
+  margin: ParsedMargin,
+  rewardAccountHex: FixlenHexString<29>
+  owners: ParsedPoolOwner[],
+  relays: ParsedPoolRelay[],
+  metadata: ParsedPoolMetadata | null
+}
+
+
+export function parsePoolParams(params: PoolParams): ParsedPoolParams {
+  const keyHashHex = parseHexStringOfLength(params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH)
+  const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, 32, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH)
+  const pledgeStr = parseUint64_str(params.pledgeStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
+  const costStr = parseUint64_str(params.costStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.CERTIFICATE_POOL_INVALID_COST)
+  const margin = parseMargin(params.margin)
+  const rewardAccountHex = parseHexStringOfLength(params.rewardAccountHex, 29, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT)
+
+  const owners = params.poolOwners.map(owner => parsePoolOwnerParams(owner))
+  const relays = params.relays.map(relay => parsePoolRelayParams(relay))
+  const metadata = parsePoolMetadataParams(params.metadata)
+
+  // Additional checks
   Precondition.check(
-    params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX,
+    owners.length <= POOL_REGISTRATION_OWNERS_MAX,
     TxErrors.CERTIFICATE_POOL_OWNERS_TOO_MANY
   );
   Precondition.check(
-    params.relays.length <= POOL_REGISTRATION_RELAYS_MAX,
+    relays.length <= POOL_REGISTRATION_RELAYS_MAX,
     TxErrors.CERTIFICATE_POOL_RELAYS_TOO_MANY
   );
 
+  return {
+    keyHashHex,
+    vrfHashHex,
+    pledgeStr,
+    costStr,
+    margin,
+    rewardAccountHex,
+    owners,
+    relays,
+    metadata
+  }
+
+}
+
+export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
-    utils.hex_to_buf(params.poolKeyHashHex),
-    utils.hex_to_buf(params.vrfKeyHashHex),
-    utils.ada_amount_to_buf(params.pledgeStr),
-    utils.ada_amount_to_buf(params.costStr),
-    utils.uint64_to_buf(params.margin.numeratorStr),
-    utils.uint64_to_buf(params.margin.denominatorStr),
-    utils.hex_to_buf(params.rewardAccountHex),
-    utils.uint32_to_buf(params.poolOwners.length),
-    utils.uint32_to_buf(params.relays.length),
+    utils.hex_to_buf(pool.keyHashHex),
+    utils.hex_to_buf(pool.vrfHashHex),
+    utils.ada_amount_to_buf(pool.pledgeStr),
+    utils.ada_amount_to_buf(pool.costStr),
+    utils.uint64_to_buf(pool.margin.numeratorStr),
+    utils.uint64_to_buf(pool.margin.denominatorStr),
+    utils.hex_to_buf(pool.rewardAccountHex),
+    utils.uint32_to_buf(pool.owners.length),
+    utils.uint32_to_buf(pool.relays.length),
   ]);
 }
 
@@ -601,7 +603,7 @@ export function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
   throw new Error(TxErrors.CERTIFICATE_POOL_OWNER_INCOMPLETE);
 }
 
-export function _serializePoolOwner(owner: ParsedPoolOwner): Buffer {
+export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
   switch (owner.type) {
     case PoolOwnerType.PATH: {
       return Buffer.concat([
@@ -618,10 +620,6 @@ export function _serializePoolOwner(owner: ParsedPoolOwner): Buffer {
     default:
       unreachable(owner)
   }
-}
-
-export function serializePoolOwner(params: PoolOwnerParams): Buffer {
-  return _serializePoolOwner(parsePoolOwnerParams(params))
 }
 
 const enum RelayType {
@@ -831,10 +829,15 @@ export default {
   serializeOutputBasicParams,
   serializeOutputBasicParamsBefore_2_2,
 
+  parsePoolParams,
   serializePoolInitialParams,
-  serializePoolOwnerParams,
-  serializePoolRelay,
+
+  parsePoolOwnerParams,
+  serializePoolOwner,
+
   parsePoolRelayParams,
-  serializePoolMetadata,
+  serializePoolRelay,
+
   parsePoolMetadataParams,
+  serializePoolMetadata,
 };
