@@ -469,6 +469,7 @@ export function serializeOutputBasicParamsBefore_2_2(
 type VarlenAsciiString = string & { __type: 'ascii' }
 type FixlenHexString<N> = string & { __type: 'hex', __length: N }
 type Uint64_str = string & { __type: 'uint64_t' }
+type ValidBIP32Path = BIP32Path & { __type: 'bip32_path' }
 
 function parseAscii(str: string, err: string): VarlenAsciiString {
   Precondition.checkIsString(str, err);
@@ -488,6 +489,12 @@ function parseUint64_str(str: string, maxValue: string, err: string): Uint64_str
   Precondition.checkIsValidUintStr(str, maxValue, err);
   return str as Uint64_str
 }
+
+function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
+  Precondition.checkIsValidPath(path, err);
+  return path as ValidBIP32Path
+}
+
 export function serializePoolInitialParams(params: PoolParams): Buffer {
   Precondition.checkIsHexStringOfLength(
     params.poolKeyHashHex,
@@ -555,39 +562,66 @@ export function serializePoolInitialParams(params: PoolParams): Buffer {
   ]);
 }
 
-export function serializePoolOwnerParams(params: PoolOwnerParams): Buffer {
-  const SIGN_TX_POOL_OWNER_TYPE_PATH = 1;
-  const SIGN_TX_POOL_OWNER_TYPE_KEY_HASH = 2;
+const enum PoolOwnerType {
+  PATH = 1,
+  KEY_HASH = 2,
+}
+type ParsedPoolOwner = {
+  type: PoolOwnerType.PATH,
+  path: BIP32Path
+} | {
+  type: PoolOwnerType.KEY_HASH
+  hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+}
 
-  const path = params.stakingPath;
-  const hashHex = params.stakingKeyHashHex;
+export function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
+  // TODO: should we check if mutually exclusive?
+  if (params.stakingPath) {
+    const path = parseBIP32Path(params.stakingPath, TxErrors.CERTIFICATE_POOL_OWNER_INVALID_PATH);
 
-  if (path) {
-    Precondition.checkIsValidPath(
+    return {
+      type: PoolOwnerType.PATH,
       path,
-      TxErrors.CERTIFICATE_POOL_OWNER_INVALID_PATH
-    );
-
-    const pathBuf = utils.path_to_buf(path);
-    const typeBuf = Buffer.alloc(1);
-    typeBuf.writeUInt8(SIGN_TX_POOL_OWNER_TYPE_PATH);
-    return Buffer.concat([typeBuf, pathBuf]);
+    }
   }
 
-  if (hashHex) {
-    Precondition.checkIsHexStringOfLength(
-      hashHex,
+  if (params.stakingKeyHashHex) {
+    const hashHex = parseHexStringOfLength(
+      params.stakingKeyHashHex,
       KEY_HASH_LENGTH,
       TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH
     );
 
-    const hashBuf = utils.hex_to_buf(hashHex);
-    const typeBuf = Buffer.alloc(1);
-    typeBuf.writeUInt8(SIGN_TX_POOL_OWNER_TYPE_KEY_HASH);
-    return Buffer.concat([typeBuf, hashBuf]);
+    return {
+      type: PoolOwnerType.KEY_HASH,
+      hashHex
+    }
   }
 
   throw new Error(TxErrors.CERTIFICATE_POOL_OWNER_INCOMPLETE);
+}
+
+export function _serializePoolOwner(owner: ParsedPoolOwner): Buffer {
+  switch (owner.type) {
+    case PoolOwnerType.PATH: {
+      return Buffer.concat([
+        utils.uint8_to_buf(owner.type),
+        utils.path_to_buf(owner.path)
+      ])
+    }
+    case PoolOwnerType.KEY_HASH: {
+      return Buffer.concat([
+        utils.uint8_to_buf(owner.type),
+        utils.hex_to_buf(owner.hashHex)
+      ])
+    }
+    default:
+      unreachable(owner)
+  }
+}
+
+export function serializePoolOwner(params: PoolOwnerParams): Buffer {
+  return _serializePoolOwner(parsePoolOwnerParams(params))
 }
 
 const enum RelayType {
