@@ -2,11 +2,14 @@ import type {
   BIP32Path,
   Certificate,
   InputTypeUTxO,
+  MultiHostNameRelay,
   Network,
   PoolMetadataParams,
   PoolOwnerParams,
   PoolParams,
   RelayParams,
+  SingleHostIPRelay,
+  SingleHostNameRelay,
   StakingBlockchainPointer,
   TxOutput,
   TxOutputTypeAddress,
@@ -16,7 +19,7 @@ import type {
 } from "./Ada";
 import { TxOutputTypeCodes } from "./Ada";
 import { TxErrors } from "./txErrors";
-import utils, { Assert, invariant, Precondition } from "./utils";
+import utils, { Assert, invariant, MAX_LOVELACE_SUPPLY_STR, Precondition, unreachable } from "./utils";
 import { hex_to_buf } from "./utils";
 
 const HARDENED = 0x80000000;
@@ -122,35 +125,12 @@ function validateCertificates(certificates: Array<Certificate>) {
           TxErrors.CERTIFICATE_POOL_MISSING_POOL_PARAMS
         );
         invariant(!!poolParams)
-        // serialization succeeds if and only if params are valid
-        serializePoolInitialParams(poolParams);
-
-        // owners
-        Precondition.checkIsArray(
-          poolParams.poolOwners,
-          TxErrors.CERTIFICATE_POOL_OWNERS_NOT_ARRAY
-        );
-        let numPathOwners = 0;
-        for (const owner of poolParams.poolOwners) {
-          if (owner.stakingPath) {
-            numPathOwners++;
-            serializePoolOwnerParams(owner);
-          }
-        }
-        if (numPathOwners !== 1)
+        const pool = parsePoolParams(poolParams)
+        // Additional check
+        const numPathOwners = pool.owners.filter(o => o.type === PoolOwnerType.PATH).length;
+        if (numPathOwners !== 1) {
           throw new Error(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-
-        // relays
-        Precondition.checkIsArray(
-          poolParams.relays,
-          TxErrors.CERTIFICATE_POOL_RELAYS_NOT_ARRAY
-        );
-        for (const relay of poolParams.relays) {
-          serializePoolRelayParams(relay);
         }
-
-        // metadata
-        serializePoolMetadataParams(poolParams.metadata);
 
         break;
       }
@@ -463,30 +443,43 @@ export function serializeOutputBasicParamsBefore_2_2(
   }
 }
 
-export function serializePoolInitialParams(params: PoolParams): Buffer {
-  Precondition.checkIsHexStringOfLength(
-    params.poolKeyHashHex,
-    KEY_HASH_LENGTH,
-    TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH
-  );
+type VarlenAsciiString = string & { __type: 'ascii' }
+type FixlenHexString<N> = string & { __type: 'hex', __length: N }
+type Uint64_str = string & { __type: 'uint64_t' }
+type ValidBIP32Path = BIP32Path & { __type: 'bip32_path' }
 
-  Precondition.checkIsHexStringOfLength(
-    params.vrfKeyHashHex,
-    32,
-    TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH
+function parseAscii(str: string, err: string): VarlenAsciiString {
+  Precondition.checkIsString(str, err);
+  Precondition.check(
+    str.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
+    err
   );
+  return str as VarlenAsciiString
+}
 
-  Precondition.checkIsValidAdaAmount(
-    params.pledgeStr,
-    TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE
-  );
-  Precondition.checkIsValidAdaAmount(
-    params.costStr,
-    TxErrors.CERTIFICATE_POOL_INVALID_COST
-  );
+function parseHexStringOfLength<L extends number>(str: string, length: L, err: string): FixlenHexString<L> {
+  Precondition.checkIsHexStringOfLength(str, length, err)
+  return str as FixlenHexString<L>
+}
 
-  const marginNumeratorStr = params.margin.numeratorStr;
-  const marginDenominatorStr = params.margin.denominatorStr;
+function parseUint64_str(str: string, maxValue: string, err: string): Uint64_str {
+  Precondition.checkIsValidUintStr(str, maxValue, err);
+  return str as Uint64_str
+}
+
+function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
+  Precondition.checkIsValidPath(path, err);
+  return path as ValidBIP32Path
+}
+
+type ParsedMargin = {
+  numeratorStr: Uint64_str,
+  denominatorStr: Uint64_str
+}
+
+export function parseMargin(params: PoolParams['margin']): ParsedMargin {
+  const marginNumeratorStr = params.numeratorStr;
+  const marginDenominatorStr = params.denominatorStr;
   Precondition.checkIsUint64Str(
     marginNumeratorStr,
     TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
@@ -501,230 +494,318 @@ export function serializePoolInitialParams(params: PoolParams): Buffer {
     marginDenominatorStr,
     TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
   );
+  return {
+    numeratorStr: marginNumeratorStr as Uint64_str,
+    denominatorStr: marginDenominatorStr as Uint64_str,
+  }
+}
 
-  Precondition.checkIsHexStringOfLength(
-    params.rewardAccountHex,
-    29,
-    TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT
-  );
 
+type ParsedPoolParams = {
+  keyHashHex: FixlenHexString<28>,
+  vrfHashHex: FixlenHexString<32>,
+  pledgeStr: Uint64_str,
+  costStr: Uint64_str,
+  margin: ParsedMargin,
+  rewardAccountHex: FixlenHexString<29>
+  owners: ParsedPoolOwner[],
+  relays: ParsedPoolRelay[],
+  metadata: ParsedPoolMetadata | null
+}
+
+
+export function parsePoolParams(params: PoolParams): ParsedPoolParams {
+  const keyHashHex = parseHexStringOfLength(params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH)
+  const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, 32, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH)
+  const pledgeStr = parseUint64_str(params.pledgeStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
+  const costStr = parseUint64_str(params.costStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.CERTIFICATE_POOL_INVALID_COST)
+  const margin = parseMargin(params.margin)
+  const rewardAccountHex = parseHexStringOfLength(params.rewardAccountHex, 29, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT)
+
+  const owners = params.poolOwners.map(owner => parsePoolOwnerParams(owner))
+  const relays = params.relays.map(relay => parsePoolRelayParams(relay))
+  const metadata = parsePoolMetadataParams(params.metadata)
+
+  // Additional checks
   Precondition.check(
-    params.poolOwners.length <= POOL_REGISTRATION_OWNERS_MAX,
+    owners.length <= POOL_REGISTRATION_OWNERS_MAX,
     TxErrors.CERTIFICATE_POOL_OWNERS_TOO_MANY
   );
   Precondition.check(
-    params.relays.length <= POOL_REGISTRATION_RELAYS_MAX,
+    relays.length <= POOL_REGISTRATION_RELAYS_MAX,
     TxErrors.CERTIFICATE_POOL_RELAYS_TOO_MANY
   );
 
+  return {
+    keyHashHex,
+    vrfHashHex,
+    pledgeStr,
+    costStr,
+    margin,
+    rewardAccountHex,
+    owners,
+    relays,
+    metadata
+  }
+
+}
+
+export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
-    utils.hex_to_buf(params.poolKeyHashHex),
-    utils.hex_to_buf(params.vrfKeyHashHex),
-    utils.ada_amount_to_buf(params.pledgeStr),
-    utils.ada_amount_to_buf(params.costStr),
-    utils.uint64_to_buf(params.margin.numeratorStr),
-    utils.uint64_to_buf(params.margin.denominatorStr),
-    utils.hex_to_buf(params.rewardAccountHex),
-    utils.uint32_to_buf(params.poolOwners.length),
-    utils.uint32_to_buf(params.relays.length),
+    utils.hex_to_buf(pool.keyHashHex),
+    utils.hex_to_buf(pool.vrfHashHex),
+    utils.ada_amount_to_buf(pool.pledgeStr),
+    utils.ada_amount_to_buf(pool.costStr),
+    utils.uint64_to_buf(pool.margin.numeratorStr),
+    utils.uint64_to_buf(pool.margin.denominatorStr),
+    utils.hex_to_buf(pool.rewardAccountHex),
+    utils.uint32_to_buf(pool.owners.length),
+    utils.uint32_to_buf(pool.relays.length),
   ]);
 }
 
-export function serializePoolOwnerParams(params: PoolOwnerParams): Buffer {
-  const SIGN_TX_POOL_OWNER_TYPE_PATH = 1;
-  const SIGN_TX_POOL_OWNER_TYPE_KEY_HASH = 2;
+const enum PoolOwnerType {
+  PATH = 1,
+  KEY_HASH = 2,
+}
+type ParsedPoolOwner = {
+  type: PoolOwnerType.PATH,
+  path: BIP32Path
+} | {
+  type: PoolOwnerType.KEY_HASH
+  hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+}
 
-  const path = params.stakingPath;
-  const hashHex = params.stakingKeyHashHex;
+export function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
+  // TODO: should we check if mutually exclusive?
+  if (params.stakingPath) {
+    const path = parseBIP32Path(params.stakingPath, TxErrors.CERTIFICATE_POOL_OWNER_INVALID_PATH);
 
-  if (path) {
-    Precondition.checkIsValidPath(
+    return {
+      type: PoolOwnerType.PATH,
       path,
-      TxErrors.CERTIFICATE_POOL_OWNER_INVALID_PATH
-    );
-
-    const pathBuf = utils.path_to_buf(path);
-    const typeBuf = Buffer.alloc(1);
-    typeBuf.writeUInt8(SIGN_TX_POOL_OWNER_TYPE_PATH);
-    return Buffer.concat([typeBuf, pathBuf]);
+    }
   }
 
-  if (hashHex) {
-    Precondition.checkIsHexStringOfLength(
-      hashHex,
+  if (params.stakingKeyHashHex) {
+    const hashHex = parseHexStringOfLength(
+      params.stakingKeyHashHex,
       KEY_HASH_LENGTH,
       TxErrors.CERTIFICATE_POOL_OWNER_INVALID_KEY_HASH
     );
 
-    const hashBuf = utils.hex_to_buf(hashHex);
-    const typeBuf = Buffer.alloc(1);
-    typeBuf.writeUInt8(SIGN_TX_POOL_OWNER_TYPE_KEY_HASH);
-    return Buffer.concat([typeBuf, hashBuf]);
+    return {
+      type: PoolOwnerType.KEY_HASH,
+      hashHex
+    }
   }
 
   throw new Error(TxErrors.CERTIFICATE_POOL_OWNER_INCOMPLETE);
 }
 
-export function serializePoolRelayParams(relayParams: RelayParams): Buffer {
-  const type = relayParams.type;
-  const params = relayParams.params;
-
-  const RELAY_NO = 1;
-  const RELAY_YES = 2;
-
-  const yesBuf = Buffer.alloc(1);
-  yesBuf.writeUInt8(RELAY_YES);
-
-  const noBuf = Buffer.alloc(1);
-  noBuf.writeUInt8(RELAY_NO);
-
-  let portBuf: Buffer;
-  if ('portNumber' in params && params.portNumber) {
-    Precondition.checkIsUint32(
-      params.portNumber,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
-    );
-    Precondition.check(
-      // @ts-ignore
-      params.portNumber <= 65535,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT
-    );
-    // @ts-ignore
-    portBuf = Buffer.concat([yesBuf, utils.uint16_to_buf(params.portNumber)]);
-  } else {
-    portBuf = noBuf;
-  }
-
-  let ipv4Buf: Buffer;
-  if ('ipv4' in params && params.ipv4) {
-    Precondition.checkIsString(
-      params.ipv4,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
-    );
-    // @ts-ignore
-    let ipParts = params.ipv4.split(".");
-    Precondition.check(
-      ipParts.length === 4,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
-    );
-    let ipBytes = Buffer.alloc(4);
-    for (let i = 0; i < 4; i++) {
-      let ipPart = utils.safe_parseInt(ipParts[i]);
-      Precondition.checkIsUint8(
-        ipPart,
-        TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4
-      );
-      ipBytes.writeUInt8(ipPart, i);
+export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
+  switch (owner.type) {
+    case PoolOwnerType.PATH: {
+      return Buffer.concat([
+        utils.uint8_to_buf(owner.type),
+        utils.path_to_buf(owner.path)
+      ])
     }
-    ipv4Buf = Buffer.concat([yesBuf, ipBytes]);
-  } else {
-    ipv4Buf = noBuf;
+    case PoolOwnerType.KEY_HASH: {
+      return Buffer.concat([
+        utils.uint8_to_buf(owner.type),
+        utils.hex_to_buf(owner.hashHex)
+      ])
+    }
+    default:
+      unreachable(owner)
   }
-
-  let ipv6Buf: Buffer;
-  if ('ipv6' in params && params.ipv6) {
-    Precondition.checkIsString(
-      params.ipv6,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
-    );
-    // @ts-ignore
-    let ipHex = params.ipv6.split(":").join("");
-    Precondition.checkIsHexStringOfLength(
-      ipHex,
-      16,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6
-    );
-    ipv6Buf = Buffer.concat([yesBuf, hex_to_buf(ipHex)]);
-  } else {
-    ipv6Buf = noBuf;
-  }
-
-  let dnsBuf: Buffer | undefined;
-  if ("dnsName" in params && params.dnsName) {
-    Precondition.checkIsString(params.dnsName);
-    Precondition.check(
-      params.dnsName.length <= 64,
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
-    );
-    Precondition.check(
-      // eslint-disable-next-line no-control-regex
-      /^[\x00-\x7F]*$/.test(params.dnsName),
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
-    );
-    Precondition.check(
-      params.dnsName
-        .split("")
-        .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
-      TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS
-    );
-    dnsBuf = Buffer.from(params.dnsName, "ascii");
-  }
-
-  Precondition.checkIsUint8(type);
-
-  let typeBuf = Buffer.alloc(1);
-  typeBuf.writeUInt8(type);
-
-  switch (type) {
-    case 0:
-      return Buffer.concat([typeBuf, portBuf, ipv4Buf, ipv6Buf]);
-
-    case 1:
-      Precondition.check(
-        dnsBuf !== undefined,
-        TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
-      );
-      // @ts-ignore
-      return Buffer.concat([typeBuf, portBuf, dnsBuf]);
-
-    case 2:
-      Precondition.check(
-        dnsBuf !== undefined,
-        TxErrors.CERTIFICATE_POOL_RELAY_MISSING_DNS
-      );
-      // @ts-ignore
-      return Buffer.concat([typeBuf, dnsBuf]);
-  }
-  throw new Error(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_TYPE);
 }
 
-export function serializePoolMetadataParams(
-  params: PoolMetadataParams
-): Buffer {
-  const includeMetadataBuffer = Buffer.alloc(1);
-  if (params != null) {
-    includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_YES);
-  } else {
-    includeMetadataBuffer.writeUInt8(SignTxIncluded.SIGN_TX_INCLUDED_NO);
-    return includeMetadataBuffer;
+const enum RelayType {
+  SingleHostAddr = 0,
+  SingleHostName = 1,
+  MultiHostName = 2,
+}
+
+type ParsedPoolRelay = {
+  type: RelayType.SingleHostAddr,
+  port: number | null,
+  ipv4: Buffer | null,
+  ipv6: Buffer | null,
+} | {
+  type: RelayType.SingleHostName,
+  port: number | null,
+  dnsName: VarlenAsciiString,
+} | {
+  type: RelayType.MultiHostName,
+  dnsName: VarlenAsciiString
+}
+
+function parsePort(portNumber: number, err: string): number {
+  Precondition.checkIsUint32(portNumber, err)
+  Precondition.check(portNumber <= 65535, err)
+  return portNumber
+}
+
+function parseIPv4(ipv4: string, err: string): Buffer {
+  Precondition.checkIsString(ipv4, err);
+  const ipParts = ipv4.split(".");
+  Precondition.check(ipParts.length === 4, err)
+
+  const ipBytes = Buffer.alloc(4);
+  for (let i = 0; i < 4; i++) {
+    const ipPart = utils.safe_parseInt(ipParts[i]);
+    Precondition.checkIsUint8(ipPart, err)
+    ipBytes.writeUInt8(ipPart, i);
+  }
+  return ipBytes
+}
+
+// FIXME(ppershing): This is terrible and wrong implementation
+function parseIPv6(ipv6: string, err: string): Buffer {
+  Precondition.checkIsString(ipv6, err)
+  const ipHex = ipv6.split(":").join("");
+  Precondition.checkIsHexStringOfLength(ipHex, 16, err)
+  return hex_to_buf(ipHex);
+}
+
+function parseDnsName(dnsName: string, err: string): VarlenAsciiString {
+  Precondition.checkIsString(dnsName, err);
+  Precondition.check(dnsName.length <= 64, err)
+  // eslint-disable-next-line no-control-regex
+  Precondition.check(/^[\x00-\x7F]*$/.test(dnsName), err)
+  Precondition.check(
+    dnsName
+      .split("")
+      .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
+    err
+  );
+  return dnsName as VarlenAsciiString
+}
+
+function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
+  switch (relayParams.type) {
+    case RelayType.SingleHostAddr: {
+      const params = relayParams.params as SingleHostIPRelay
+      return {
+        type: RelayType.SingleHostAddr,
+        port: ('portNumber' in params && params.portNumber != null)
+          ? parsePort(params.portNumber, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT)
+          : null,
+        ipv4: ('ipv4' in params && params.ipv4 != null)
+          ? parseIPv4(params.ipv4, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV4)
+          : null,
+        ipv6: ('ipv6' in params && params.ipv6 != null)
+          ? parseIPv6(params.ipv6, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_IPV6)
+          : null,
+      }
+    }
+    case RelayType.SingleHostName: {
+      const params = relayParams.params as SingleHostNameRelay
+
+      return {
+        type: RelayType.SingleHostName,
+        port: ('portNumber' in params && params.portNumber != null)
+          ? parsePort(params.portNumber, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_PORT)
+          : null,
+        dnsName: parseDnsName(params.dnsName, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS)
+      }
+    }
+    case RelayType.MultiHostName: {
+      const params = relayParams.params as MultiHostNameRelay
+      return {
+        type: RelayType.MultiHostName,
+        dnsName: parseDnsName(params.dnsName, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS)
+      }
+    }
+    default:
+      throw new Error(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_TYPE);
+  }
+}
+
+export function serializePoolRelay(relay: ParsedPoolRelay) {
+  function serializeOptional<T>(x: T | null, cb: (t: T) => Buffer): Buffer {
+    const enum Optional {
+      None = 1,
+      Some = 2
+    }
+
+    if (x == null) {
+      return utils.uint8_to_buf(Optional.None)
+    } else {
+      return Buffer.concat([
+        utils.uint8_to_buf(Optional.Some),
+        cb(x)
+      ])
+    }
   }
 
-  const url = params.metadataUrl;
-  Precondition.checkIsString(
-    url,
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
-  );
+  switch (relay.type) {
+    case RelayType.SingleHostAddr: {
+      return Buffer.concat([
+        utils.uint8_to_buf(relay.type),
+        serializeOptional(relay.port, port => utils.uint16_to_buf(port)),
+        serializeOptional(relay.ipv4, ipv4 => ipv4),
+        serializeOptional(relay.ipv6, ipv6 => ipv6)
+      ])
+    }
+    case RelayType.SingleHostName: {
+      return Buffer.concat([
+        utils.uint8_to_buf(relay.type),
+        serializeOptional(relay.port, port => utils.uint16_to_buf(port)),
+        Buffer.from(relay.dnsName, "ascii")
+      ])
+    }
+    case RelayType.MultiHostName: {
+      return Buffer.concat([
+        utils.uint8_to_buf(relay.type),
+        Buffer.from(relay.dnsName, "ascii")
+      ])
+    }
+    default:
+      unreachable(relay)
+  }
+}
+
+type ParsedPoolMetadata = {
+  url: VarlenAsciiString,
+  hashHex: FixlenHexString<32>,
+} & { __brand: 'pool_metadata' }
+
+export function parsePoolMetadataParams(params: PoolMetadataParams | null): ParsedPoolMetadata | null {
+  if (params == null) return null
+
+  const url = parseAscii(params.metadataUrl, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
+  // Additional length check
   Precondition.check(
     url.length <= 64,
     TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
   );
-  Precondition.check(
-    url.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
-  );
 
-  const hashHex = params.metadataHashHex;
-  Precondition.checkIsHexStringOfLength(
+  const hashHex = parseHexStringOfLength(params.metadataHashHex, 32, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH);
+
+  return {
+    url,
     hashHex,
-    32,
-    TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
-  );
+    __brand: 'pool_metadata' as const
+  }
+}
 
-  return Buffer.concat([
-    includeMetadataBuffer,
-    utils.hex_to_buf(hashHex),
-    Buffer.from(url),
-  ]);
+export function serializePoolMetadata(
+  metadata: ParsedPoolMetadata | null
+): Buffer {
+  if (metadata == null) {
+    return Buffer.concat([
+      utils.uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_NO)
+    ])
+  } else {
+    return Buffer.concat([
+      utils.uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_YES),
+      utils.hex_to_buf(metadata.hashHex),
+      Buffer.from(metadata.url, 'ascii')
+    ])
+  }
 }
 
 export function serializeGetExtendedPublicKeyParams(path: BIP32Path): Buffer {
@@ -748,8 +829,15 @@ export default {
   serializeOutputBasicParams,
   serializeOutputBasicParamsBefore_2_2,
 
+  parsePoolParams,
   serializePoolInitialParams,
-  serializePoolOwnerParams,
-  serializePoolRelayParams,
-  serializePoolMetadataParams,
+
+  parsePoolOwnerParams,
+  serializePoolOwner,
+
+  parsePoolRelayParams,
+  serializePoolRelay,
+
+  parsePoolMetadataParams,
+  serializePoolMetadata,
 };

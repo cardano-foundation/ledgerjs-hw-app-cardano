@@ -15,7 +15,7 @@ const bs10 = basex("0123456789");
 
 const MAX_UINT_64_STR = "18446744073709551615";
 // Max supply in lovelace
-const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
+export const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
 const POOL_MARGIN_DENOMINATOR_MAX_STR = [
   "1",
   "000",
@@ -129,7 +129,16 @@ export const Precondition = {
   },
 };
 
+export function assert(cond: boolean, errMsg: string): asserts cond {
+  if (!cond) throw new Error('Assertion failed' + errMsg ? ': ' + errMsg : '')
+}
+
+export function unreachable(val: never): never {
+  assert(false, 'Unreachable code hit')
+}
+
 export const Assert = {
+  // TODO(migrate to raw assert above as 'asserts' annotated TS functions cannot be in object scope :shrug:)
   assert: (cond: boolean, errMsg: string = "Assertion failed") => {
     if (!cond) throw new Error(errMsg);
   },

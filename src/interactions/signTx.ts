@@ -305,29 +305,31 @@ const signTx_addCertificate = async (
       CONFIRMATION = 0x34,
     }
 
+    const pool = cardano.parsePoolParams(certificate.poolRegistrationParams)
     await _send({
       ins: INS.SIGN_TX,
       p1: P1.STAGE_CERTIFICATES,
       p2: P2.POOL_PARAMS,
-      data: cardano.serializePoolInitialParams(certificate.poolRegistrationParams),
+      data: cardano.serializePoolInitialParams(pool),
       expectedResponseLength: 0,
     });
 
-    for (const owner of certificate.poolRegistrationParams.poolOwners) {
+    for (const owner of pool.owners) {
       await _send({
         ins: INS.SIGN_TX,
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.OWNERS,
-        data: cardano.serializePoolOwnerParams(owner),
+        data: cardano.serializePoolOwner(owner),
         expectedResponseLength: 0,
       });
     }
-    for (const relay of certificate.poolRegistrationParams.relays) {
+
+    for (const relay of pool.relays) {
       await _send({
         ins: INS.SIGN_TX,
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.RELAYS,
-        data: cardano.serializePoolRelayParams(relay),
+        data: cardano.serializePoolRelay(relay),
         expectedResponseLength: 0,
       });
     }
@@ -336,7 +338,7 @@ const signTx_addCertificate = async (
       ins: INS.SIGN_TX,
       p1: P1.STAGE_CERTIFICATES,
       p2: P2.METADATA,
-      data: cardano.serializePoolMetadataParams(certificate.poolRegistrationParams.metadata),
+      data: cardano.serializePoolMetadata(pool.metadata),
       expectedResponseLength: 0,
     });
 
