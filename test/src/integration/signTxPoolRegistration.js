@@ -1,9 +1,18 @@
 import { expect } from "chai";
-import { Assert, getAda, NetworkIds, ProtocolMagics} from "../test_utils";
+import { Assert, getAda, NetworkIds, ProtocolMagics } from "../test_utils";
 import { getErrorDescription, TxErrors } from "../../../lib/Ada";
 import { ERRORS } from "../direct/constants";
-import { inputs, outputs, relays, poolMetadataVariations, sampleFeeStr, sampleTtlStr, certificates, withdrawals, results } from './__fixtures__/signTxPoolRegistration';
-
+import {
+  inputs,
+  outputs,
+  relays,
+  poolMetadataVariations,
+  sampleFeeStr,
+  sampleTtlStr,
+  certificates,
+  withdrawals,
+  results,
+} from "./__fixtures__/signTxPoolRegistration";
 
 describe("signTxPoolRegistrationOK", async () => {
   let ada = {};
@@ -23,9 +32,7 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
@@ -41,9 +48,7 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
@@ -59,9 +64,7 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
@@ -77,16 +80,16 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
       [],
       null
     );
-    expect(response).to.deep.equal(results.poolRegistrationMixedOwnersIpv4SingleHostRelays);
+    expect(response).to.deep.equal(
+      results.poolRegistrationMixedOwnersIpv4SingleHostRelays
+    );
   });
 
   it("Should correctly witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration", async () => {
@@ -95,16 +98,16 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
       [],
       null
     );
-    expect(response).to.deep.equal(results.poolRegistrationMixedOwnersIpv4Ipv6Relays);
+    expect(response).to.deep.equal(
+      results.poolRegistrationMixedOwnersIpv4Ipv6Relays
+    );
   });
 
   it("Should correctly witness valid single path owner no relays pool registration ", async () => {
@@ -114,9 +117,7 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
@@ -133,9 +134,7 @@ describe("signTxPoolRegistrationOK", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxo],
-      [
-        outputs.external,
-      ],
+      [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
       [cert],
@@ -192,9 +191,7 @@ describe("signTxPoolRegistrationReject", async () => {
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
-        [
-          outputs.external,
-        ],
+        [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
         [cert],
@@ -216,9 +213,7 @@ describe("signTxPoolRegistrationReject", async () => {
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
-        [
-          outputs.external,
-        ],
+        [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
         [cert],
@@ -237,9 +232,7 @@ describe("signTxPoolRegistrationReject", async () => {
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
-        [
-          outputs.external,
-        ],
+        [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
         [cert],
@@ -255,8 +248,8 @@ describe("signTxPoolRegistrationReject", async () => {
     const invalidMetadataVariations = [
       poolMetadataVariations.poolMetadataUrlTooLong,
       poolMetadataVariations.poolMetadataInvalidUrl,
-      poolMetadataVariations.poolMetadataMissingUrl
-    ]
+      poolMetadataVariations.poolMetadataMissingUrl,
+    ];
 
     for (const metadataVariant of invalidMetadataVariations) {
       async function f() {
@@ -264,17 +257,15 @@ describe("signTxPoolRegistrationReject", async () => {
           ...certificates.poolRegistrationDefault,
           poolRegistrationParams: {
             ...certificates.poolRegistrationDefault.poolRegistrationParams,
-            metadata: metadataVariant
-          }
-        }
+            metadata: metadataVariant,
+          },
+        };
 
         const response = await ada.signTransaction(
           NetworkIds.MAINNET,
           ProtocolMagics.MAINNET,
           [inputs.utxo],
-          [
-            outputs.external,
-          ],
+          [outputs.external],
           sampleFeeStr,
           sampleTtlStr,
           [cert],
@@ -294,7 +285,7 @@ describe("signTxPoolRegistrationReject", async () => {
     const invalidMetadataVariations = [
       poolMetadataVariations.poolMetadataInvalidHexLength,
       poolMetadataVariations.poolMetadataMissingHash,
-    ]
+    ];
 
     for (const metadataVariant of invalidMetadataVariations) {
       async function f() {
@@ -302,17 +293,15 @@ describe("signTxPoolRegistrationReject", async () => {
           ...certificates.poolRegistrationDefault,
           poolRegistrationParams: {
             ...certificates.poolRegistrationDefault.poolRegistrationParams,
-            metadata: metadataVariant
-          }
-        }
+            metadata: metadataVariant,
+          },
+        };
 
         const response = await ada.signTransaction(
           NetworkIds.MAINNET,
           ProtocolMagics.MAINNET,
           [inputs.utxo],
-          [
-            outputs.external,
-          ],
+          [outputs.external],
           sampleFeeStr,
           sampleTtlStr,
           [cert],
@@ -331,8 +320,8 @@ describe("signTxPoolRegistrationReject", async () => {
   it("Should reject pool registration with invalid relay", async () => {
     const relayVariants = [
       relays.singleHostNameRelayMissingDns,
-      relays.multiHostNameRelayMissingDns
-    ]
+      relays.multiHostNameRelayMissingDns,
+    ];
 
     for (const relayVariant of relayVariants) {
       async function f() {
@@ -340,16 +329,14 @@ describe("signTxPoolRegistrationReject", async () => {
           ...certificates.poolRegistrationDefault,
           poolRegistrationParams: {
             ...certificates.poolRegistrationDefault.poolRegistrationParams,
-            relays: [relayVariant]
-          }
-        }
+            relays: [relayVariant],
+          },
+        };
         const response = await ada.signTransaction(
           NetworkIds.MAINNET,
           ProtocolMagics.MAINNET,
           [inputs.utxo],
-          [
-            outputs.external,
-          ],
+          [outputs.external],
           sampleFeeStr,
           sampleTtlStr,
           [cert],
@@ -369,9 +356,7 @@ describe("signTxPoolRegistrationReject", async () => {
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
-        [
-          outputs.external,
-        ],
+        [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
         [cert],
@@ -388,14 +373,12 @@ describe("signTxPoolRegistrationReject", async () => {
       const certs = [
         certificates.poolRegistrationDefault,
         certificates.stakeDelegation,
-      ]
+      ];
       const response = await ada.signTransaction(
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
-        [
-          outputs.external,
-        ],
+        [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
         certs,
@@ -410,14 +393,12 @@ describe("signTxPoolRegistrationReject", async () => {
   it("Should reject pool registration along with a withdrawal", async () => {
     async function f() {
       const cert = certificates.poolRegistrationDefault;
-      const withdrawal = withdrawals.withdrawal0
+      const withdrawal = withdrawals.withdrawal0;
       const response = await ada.signTransaction(
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
-        [
-          outputs.external,
-        ],
+        [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
         [cert],

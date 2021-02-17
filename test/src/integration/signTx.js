@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { getAda, NetworkIds, ProtocolMagics} from "../test_utils";
+import { getAda, NetworkIds, ProtocolMagics } from "../test_utils";
 import {
   certificates,
   inputs,
@@ -15,8 +15,7 @@ import {
   sampleTtlStr,
   sampleValidityIntervalStartStr,
   withdrawals,
-} from './__fixtures__/signTx.js';
-
+} from "./__fixtures__/signTx.js";
 
 // ========================================   BYRON   ========================================
 
@@ -37,9 +36,7 @@ describe("signTxOrdinaryByron", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoByron],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -54,9 +51,7 @@ describe("signTxOrdinaryByron", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoByron],
-      [
-        outputs.externalByronDaedalusMainnet,
-      ],
+      [outputs.externalByronDaedalusMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -71,9 +66,7 @@ describe("signTxOrdinaryByron", async () => {
       NetworkIds.TESTNET,
       ProtocolMagics.TESTNET,
       [inputs.utxoByron],
-      [
-        outputs.externalByronTestnet,
-      ],
+      [outputs.externalByronTestnet],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -83,7 +76,6 @@ describe("signTxOrdinaryByron", async () => {
     expect(response).to.deep.equal(resultsByron.noChangeByronTestnet);
   });
 });
-
 
 // ========================================   SHELLEY   ========================================
 
@@ -118,9 +110,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalShelley,
-      ],
+      [outputs.externalShelley],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -135,9 +125,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.TESTNET,
       ProtocolMagics.TESTNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalShelleyScripthash,
-      ],
+      [outputs.externalShelleyScripthash],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -152,10 +140,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-        outputs.internalBaseWithStakingPath,
-      ],
+      [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -170,10 +155,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-        outputs.internalBaseWithStakingKeyHash,
-      ],
+      [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -188,10 +170,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-        outputs.internalEnterprise,
-      ],
+      [outputs.externalByronMainnet, outputs.internalEnterprise],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -206,10 +185,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-        outputs.internalPointer,
-      ],
+      [outputs.externalByronMainnet, outputs.internalPointer],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -224,9 +200,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -241,9 +215,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [certificates.stakeRegistration],
@@ -258,9 +230,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [certificates.stakeDelegation],
@@ -275,16 +245,16 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [certificates.stakeDeregistration],
       [],
       null
     );
-    expect(response).to.deep.equal(resultsShelley.withDeregistrationCertificate);
+    expect(response).to.deep.equal(
+      resultsShelley.withDeregistrationCertificate
+    );
   });
 
   it("Should correctly sign tx and filter out witnesses with duplicate paths", async () => {
@@ -292,9 +262,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [certificates.stakeDeregistration, certificates.stakeDeregistration],
@@ -309,9 +277,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalByronMainnet,
-      ],
+      [outputs.externalByronMainnet],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -326,9 +292,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoNonReasonable],
-      [
-        outputs.internalBaseWithStakingPathNonReasonable,
-      ],
+      [outputs.internalBaseWithStakingPathNonReasonable],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -338,7 +302,6 @@ describe("signTxOrdinaryShelley", async () => {
     expect(response).to.deep.equal(resultsShelley.nonReasonable);
   });
 });
-
 
 // ========================================   ALLEGRA   ========================================
 
@@ -362,9 +325,7 @@ describe("signTxOrdinaryAllegra", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalShelley
-      ],
+      [outputs.externalShelley],
       sampleFeeStr,
       null,
       [],
@@ -380,9 +341,7 @@ describe("signTxOrdinaryAllegra", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalShelley
-      ],
+      [outputs.externalShelley],
       sampleFeeStr,
       null,
       [],
@@ -390,10 +349,11 @@ describe("signTxOrdinaryAllegra", async () => {
       null,
       sampleValidityIntervalStartStr
     );
-    expect(response).to.deep.equal(resultsAllegra.noTtlYesValidityIntervalStart);
+    expect(response).to.deep.equal(
+      resultsAllegra.noTtlYesValidityIntervalStart
+    );
   });
 });
-
 
 // ========================================   MARY   ========================================
 
@@ -416,10 +376,7 @@ describe("signTxOrdinaryMary", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.multiassetOneToken,
-        outputs.internalBaseWithStakingPath
-      ],
+      [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -435,10 +392,7 @@ describe("signTxOrdinaryMary", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.multiassetManyTokens,
-        outputs.internalBaseWithStakingPath
-      ],
+      [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -454,9 +408,7 @@ describe("signTxOrdinaryMary", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.multiassetBigNumber,
-      ],
+      [outputs.multiassetBigNumber],
       sampleBigIntStr,
       sampleBigIntStr,
       [],
@@ -472,10 +424,7 @@ describe("signTxOrdinaryMary", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [
-        outputs.externalShelley,
-        outputs.multiassetChange,
-      ],
+      [outputs.externalShelley, outputs.multiassetChange],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -485,5 +434,4 @@ describe("signTxOrdinaryMary", async () => {
     );
     expect(response).to.deep.equal(resultsMary.withMultiassetChange);
   });
-
 });

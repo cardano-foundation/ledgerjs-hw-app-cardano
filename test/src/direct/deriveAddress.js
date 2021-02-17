@@ -1,6 +1,12 @@
 import { expect } from "chai";
 
-import { str_to_path, serializeAddressInfo, getTransport, pathToBuffer, uint32_to_buf } from "../test_utils";
+import {
+  str_to_path,
+  serializeAddressInfo,
+  getTransport,
+  pathToBuffer,
+  uint32_to_buf,
+} from "../test_utils";
 import { CLA, INS_DERIVE_ADDRESS, ERRORS } from "./constants";
 
 const P1_RETURN = 0x01;
@@ -28,7 +34,7 @@ describe("deriveAddress", async () => {
       Buffer.from([0x00]), // testnet network id
       pathToBuffer("1852'/1815'/0'/0/1"), // spending path
       Buffer.from([0x22]), // "staking key path" staking choice
-      pathToBuffer("1852'/1815'/0'/2/0") // staking path
+      pathToBuffer("1852'/1815'/0'/2/0"), // staking path
     ]);
 
     send = (p1, p2, data) =>
@@ -54,7 +60,6 @@ describe("deriveAddress", async () => {
     const data = validDataBuffer.slice(0, -1);
     await checkThrows(P1_RETURN, 0x00, data, ERRORS.INVALID_DATA);
   });
-
 
   it("Should not permit zero data edge case", async () => {
     await checkThrows(P1_RETURN, 0x00, Buffer.alloc(0), ERRORS.INVALID_DATA);
@@ -82,7 +87,7 @@ describe("deriveAddress", async () => {
       "1852'/1815'/0'/0/1",
     ];
 
-    const testcase = async path =>
+    const testcase = async (path) =>
       checkThrows(
         P1_RETURN,
         0x00,
@@ -91,7 +96,7 @@ describe("deriveAddress", async () => {
           uint32_to_buf(764824073), // mainnet protocol magic
           pathToBuffer(path), // spending path
           Buffer.from([0x11]), // "no staking" staking choice
-          Buffer.alloc(0) // staking path
+          Buffer.alloc(0), // staking path
         ]),
         ERRORS.REJECTED_BY_POLICY
       );
@@ -111,7 +116,7 @@ describe("deriveAddress", async () => {
       "1852'/1815'/0'/2/0",
     ];
 
-    const testcase = async path =>
+    const testcase = async (path) =>
       checkThrows(
         P1_RETURN,
         0x00,
@@ -120,7 +125,7 @@ describe("deriveAddress", async () => {
           Buffer.from([0x00]), // testnet network id
           pathToBuffer(path), // spending path
           Buffer.from([0x22]), // "staking key path" staking choice
-          pathToBuffer("1852'/1815'/0'/2/0") // staking path
+          pathToBuffer("1852'/1815'/0'/2/0"), // staking path
         ]),
         ERRORS.REJECTED_BY_POLICY
       );
@@ -141,7 +146,7 @@ describe("deriveAddress", async () => {
       "1852'/1815'/0'/2/1",
     ];
 
-    const testcase = async path =>
+    const testcase = async (path) =>
       checkThrows(
         P1_RETURN,
         0x00,
@@ -150,7 +155,7 @@ describe("deriveAddress", async () => {
           Buffer.from([0x00]), // testnet network id
           pathToBuffer("1852'/1815'/0'/0/1"), // spending path
           Buffer.from([0x22]), // "staking key path" staking choice
-          pathToBuffer(path) // staking path
+          pathToBuffer(path), // staking path
         ]),
         ERRORS.REJECTED_BY_POLICY
       );
@@ -159,7 +164,6 @@ describe("deriveAddress", async () => {
       await testcase(path);
     }
   });
-
 
   it("Should not permit paths longer than 10 indexes", async () => {
     const path = "44'/1815'/1'/4/5/6/7/8/9/10/11";
@@ -172,10 +176,9 @@ describe("deriveAddress", async () => {
         uint32_to_buf(764824073), // mainnet protocol magic
         pathToBuffer(path), // spending path
         Buffer.from([0x11]), // "no staking" staking choice
-        Buffer.alloc(0) // staking path
+        Buffer.alloc(0), // staking path
       ]),
       ERRORS.INVALID_DATA
     );
   });
-
 });

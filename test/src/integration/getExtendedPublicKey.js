@@ -15,7 +15,7 @@ describe("getExtendedPublicKey", async () => {
   });
 
   it("Should successfully get a single extended public key", async () => {
-    const test = async path => {
+    const test = async (path) => {
       const derivation = getPathDerivationFixture({
         path,
       });
@@ -37,10 +37,7 @@ describe("getExtendedPublicKey", async () => {
   });
 
   it("Should successfully get several extended public keys, starting with a usual one", async () => {
-    const paths = [
-      "44'/1815'/1'",
-      "44'/1815'/1'/0/10'/1/2/3",
-    ];
+    const paths = ["44'/1815'/1'", "44'/1815'/1'/0/10'/1/2/3"];
 
     const inputs = [];
     const expectedResults = [];
@@ -53,9 +50,9 @@ describe("getExtendedPublicKey", async () => {
 
       expectedResults.push({
         publicKeyHex: derivation.publicKey,
-        chainCodeHex: derivation.chainCode
+        chainCodeHex: derivation.chainCode,
       });
-    };
+    }
 
     const results = await ada.getExtendedPublicKeys(inputs);
     for (let i = 0; i < expectedResults.length; i++) {
@@ -70,7 +67,7 @@ describe("getExtendedPublicKey", async () => {
       "44'/1815'/1'",
       "44'/1815'/1'/0/12'",
       "1852'/1815'/0'/0/1",
-      "1852'/1815'/0'/2/0"
+      "1852'/1815'/0'/2/0",
     ];
 
     const inputs = [];
@@ -84,9 +81,9 @@ describe("getExtendedPublicKey", async () => {
 
       expectedResults.push({
         publicKeyHex: derivation.publicKey,
-        chainCodeHex: derivation.chainCode
+        chainCodeHex: derivation.chainCode,
       });
-    };
+    }
 
     const results = await ada.getExtendedPublicKeys(inputs);
     for (let i = 0; i < expectedResults.length; i++) {

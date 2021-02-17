@@ -10,5 +10,5 @@ export const ERRORS = {
   REJECTED_BY_POLICY: "0x6e10",
   ERR_UNSUPPORTED_ADDRESS_TYPE: "0x6e12",
 
-  RE_SELECTED_ERRORS: /Ledger device:.*0x6e0[4-9]/
+  RE_SELECTED_ERRORS: /Ledger device:.*0x6e0[4-9]/,
 };

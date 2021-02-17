@@ -35,7 +35,10 @@ describe("getExtendedPublicKey", async () => {
     // If it is failing, you have to refactor all other tests
     await send(0x00, 0x00, validDataBuffer);
 
-    const data = Buffer.concat([validDataBuffer, Buffer.from("00000000", "hex")]);
+    const data = Buffer.concat([
+      validDataBuffer,
+      Buffer.from("00000000", "hex"),
+    ]);
     await send(0x00, 0x00, data);
   });
 
@@ -43,7 +46,10 @@ describe("getExtendedPublicKey", async () => {
     const data1 = Buffer.concat([validDataBuffer, Buffer.from("00", "hex")]);
     await checkThrows(0x00, 0x00, data1, ERRORS.INVALID_DATA);
 
-    const data2 = Buffer.concat([validDataBuffer, Buffer.from("1122334455", "hex")]);
+    const data2 = Buffer.concat([
+      validDataBuffer,
+      Buffer.from("1122334455", "hex"),
+    ]);
     await checkThrows(0x00, 0x00, data2, ERRORS.INVALID_DATA);
   });
 
@@ -55,7 +61,12 @@ describe("getExtendedPublicKey", async () => {
 
   it("Should not permit unknown P1/P2 parameters", async () => {
     const testcase = async (p1, p2) =>
-      await checkThrows(p1, p2, validDataBuffer, ERRORS.INVALID_REQUEST_PARAMETERS);
+      await checkThrows(
+        p1,
+        p2,
+        validDataBuffer,
+        ERRORS.INVALID_REQUEST_PARAMETERS
+      );
 
     // Invalid P1
     await testcase(0x03, 0x00);
@@ -71,10 +82,10 @@ describe("getExtendedPublicKey", async () => {
       "33'/1814'/1'",
       "44/1815'/1",
       "44'/1815/0",
-      "44'/1815'"
+      "44'/1815'",
     ];
 
-    const testcase = async path =>
+    const testcase = async (path) =>
       await checkThrows(
         0x00,
         0x00,
