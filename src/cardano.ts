@@ -145,11 +145,11 @@ export function validateTransaction(
   inputs: Array<InputTypeUTxO>,
   outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
   feeStr: string,
-  ttlStr: string | undefined,
+  ttlStr: string | null,
   certificates: Array<Certificate>,
   withdrawals: Array<Withdrawal>,
-  metadataHashHex?: string,
-  validityIntervalStartStr?: string
+  metadataHashHex?: string | null,
+  validityIntervalStartStr?: string | null
 ) {
   Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
   const isSigningPoolRegistrationAsOwner = certificates.some(

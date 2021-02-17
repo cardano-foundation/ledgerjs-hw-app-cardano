@@ -38,7 +38,6 @@ export type ValueOf<T> = T[keyof T];
 
 export type BIP32Path = Array<number>;
 
-
 export type Network = {
   protocolMagic: number
   networkId: number
@@ -62,7 +61,7 @@ export type AssetGroup = {
 
 export type TxOutputTypeAddress = {
   amountStr: string,
-  tokenBundle: Array<AssetGroup>,
+  tokenBundle?: Array<AssetGroup> | null,
   addressHex: string,
 };
 
@@ -71,9 +70,9 @@ export type TxOutputTypeAddressParams = {
   tokenBundle: Array<AssetGroup>,
   addressTypeNibble: AddressTypeNibble,
   spendingPath: BIP32Path,
-  stakingPath?: BIP32Path,
-  stakingKeyHashHex?: string,
-  stakingBlockchainPointer?: StakingBlockchainPointer,
+  stakingPath?: BIP32Path | null,
+  stakingKeyHashHex?: string | null,
+  stakingBlockchainPointer?: StakingBlockchainPointer | null,
 };
 
 export type TxOutput = TxOutputTypeAddress | TxOutputTypeAddressParams;
@@ -449,11 +448,11 @@ export default class Ada {
     inputs: Array<InputTypeUTxO>,
     outputs: Array<TxOutput>,
     feeStr: string,
-    ttlStr: string | undefined,
+    ttlStr: string | null,
     certificates: Array<Certificate>,
     withdrawals: Array<Withdrawal>,
-    metadataHashHex?: string,
-    validityIntervalStartStr?: string
+    metadataHashHex?: string | null,
+    validityIntervalStartStr?: string | null
   ): Promise<SignTransactionResponse> {
     return signTransaction(
       this._send,

@@ -1,31 +1,31 @@
 import { expect } from "chai";
 
-import { AddressTypeNibble, utils } from "../../../lib/Ada";
+import type Ada from "../../src/Ada";
+import { AddressTypeNibble, utils } from "../../src/Ada";
 import {
   getAda,
-  hex_to_buf,
-  NetworkIds,
   ProtocolMagics,
   str_to_path,
 } from "../test_utils";
 import getPathDerivationFixture from "./__fixtures__/pathDerivations";
 
 describe("deriveAddress", async () => {
-  let ada = {};
+  let ada: Ada = {} as any;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
+
   it("Should succesfully derive Byron address", async () => {
-    const test = async (path, protocolMagic) => {
+    const test = async (path: string, protocolMagic: number) => {
       const derivation = getPathDerivationFixture({
         path,
         protocolMagic,
-      });
+      })!;
 
       const { addressHex } = await ada.deriveAddress(
         0b1000,
@@ -54,8 +54,8 @@ describe("deriveAddress", async () => {
         stakingPathStr,
         stakingKeyHashHex,
         stakingBlockchainPointer,
-      },
-      expectedResult
+      }: any,
+      expectedResult: string
     ) => {
       const spendingPath = str_to_path(spendingPathStr);
       const stakingPath =
@@ -69,10 +69,10 @@ describe("deriveAddress", async () => {
         stakingKeyHashHex,
         stakingBlockchainPointer
           ? {
-              blockIndex: stakingBlockchainPointer[0],
-              txIndex: stakingBlockchainPointer[1],
-              certificateIndex: stakingBlockchainPointer[2],
-            }
+            blockIndex: stakingBlockchainPointer[0],
+            txIndex: stakingBlockchainPointer[1],
+            certificateIndex: stakingBlockchainPointer[2],
+          }
           : null
       );
 
@@ -209,7 +209,7 @@ describe("deriveAddress", async () => {
         },
         "stake1uvwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8qqucf2t",
       ],
-    ];
+    ] as const;
 
     for (const [args, expected] of testcases) {
       await test(args, expected);
@@ -217,12 +217,12 @@ describe("deriveAddress", async () => {
   }).timeout(60000);
 
   it("Should not permit invalid path", async () => {
-    const test = async (path) => {
+    const test = async (path: string) => {
       const SHOULD_HAVE_THROWN = "should have thrown earlier";
       try {
         await ada.deriveAddress(
           AddressTypeNibble.BYRON,
-          BYRON_PROTOCOL_MAGIC,
+          0, //TODO: BYRON_PROTOCOL_MAGIC,
           str_to_path(path)
         );
 

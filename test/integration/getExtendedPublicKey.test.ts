@@ -1,24 +1,25 @@
 import { expect } from "chai";
-import getPathDerivationFixture from "./__fixtures__/pathDerivations";
-import { AddressTypeNibbles, utils } from "../../../lib/Ada";
+
+import type Ada from "../../src/Ada";
 import { getAda, str_to_path } from "../test_utils";
+import getPathDerivationFixture from "./__fixtures__/pathDerivations";
 
 describe("getExtendedPublicKey", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Should successfully get a single extended public key", async () => {
-    const test = async (path) => {
+    const test = async (path: string) => {
       const derivation = getPathDerivationFixture({
         path,
-      });
+      })!;
 
       const result = await ada.getExtendedPublicKey(
         str_to_path(derivation.path)
@@ -44,7 +45,7 @@ describe("getExtendedPublicKey", async () => {
     for (const path of paths) {
       const derivation = getPathDerivationFixture({
         path,
-      });
+      })!;
 
       inputs.push(str_to_path(derivation.path));
 
@@ -75,7 +76,7 @@ describe("getExtendedPublicKey", async () => {
     for (const path of paths) {
       const derivation = getPathDerivationFixture({
         path,
-      });
+      })!;
 
       inputs.push(str_to_path(derivation.path));
 

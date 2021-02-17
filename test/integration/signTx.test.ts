@@ -1,5 +1,6 @@
 import { expect } from "chai";
 
+import type Ada from "../../src/Ada";
 import { getAda, NetworkIds, ProtocolMagics } from "../test_utils";
 import {
   certificates,
@@ -15,20 +16,20 @@ import {
   sampleTtlStr,
   sampleValidityIntervalStartStr,
   withdrawals,
-} from "./__fixtures__/signTx.js";
+} from "./__fixtures__/signTx";
 
 // ========================================   BYRON   ========================================
 
 // Shelley transaction format, but includes legacy Byron addresses in outputs
 describe("signTxOrdinaryByron", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Should correctly sign tx without change address with Byron mainnet output", async () => {
@@ -80,14 +81,14 @@ describe("signTxOrdinaryByron", async () => {
 // ========================================   SHELLEY   ========================================
 
 describe("signTxOrdinaryShelley", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Should correctly sign tx without outputs", async () => {
@@ -140,7 +141,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath],
+      [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath as any],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -155,7 +156,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash],
+      [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash as any],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -170,7 +171,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [outputs.externalByronMainnet, outputs.internalEnterprise],
+      [outputs.externalByronMainnet, outputs.internalEnterprise as any],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -185,7 +186,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [outputs.externalByronMainnet, outputs.internalPointer],
+      [outputs.externalByronMainnet, outputs.internalPointer as any],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -292,7 +293,7 @@ describe("signTxOrdinaryShelley", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoNonReasonable],
-      [outputs.internalBaseWithStakingPathNonReasonable],
+      [outputs.internalBaseWithStakingPathNonReasonable as any],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -310,14 +311,14 @@ describe("signTxOrdinaryShelley", async () => {
 // added validity_interval_start
 
 describe("signTxOrdinaryAllegra", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Transaction with no ttl and no validity interval start", async () => {
@@ -361,14 +362,14 @@ describe("signTxOrdinaryAllegra", async () => {
 // multiassets in outputs
 
 describe("signTxOrdinaryMary", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Mary era transaction with a multiasset output", async () => {
@@ -376,7 +377,7 @@ describe("signTxOrdinaryMary", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath],
+      [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath as any],
       sampleFeeStr,
       sampleTtlStr,
       [],
@@ -392,7 +393,7 @@ describe("signTxOrdinaryMary", async () => {
       NetworkIds.MAINNET,
       ProtocolMagics.MAINNET,
       [inputs.utxoShelley],
-      [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath],
+      [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath as any],
       sampleFeeStr,
       sampleTtlStr,
       [],

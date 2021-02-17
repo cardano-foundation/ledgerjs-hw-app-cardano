@@ -1,28 +1,29 @@
 import { expect } from "chai";
+
+import type Ada from "../../src/Ada";
+import { TxErrors } from "../../src/Ada";
 import { Assert, getAda, NetworkIds, ProtocolMagics } from "../test_utils";
-import { getErrorDescription, TxErrors } from "../../../lib/Ada";
-import { ERRORS } from "../direct/constants";
 import {
+  certificates,
   inputs,
   outputs,
-  relays,
   poolMetadataVariations,
+  relays,
+  results,
   sampleFeeStr,
   sampleTtlStr,
-  certificates,
   withdrawals,
-  results,
 } from "./__fixtures__/signTxPoolRegistration";
 
 describe("signTxPoolRegistrationOK", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
     ada = await getAda();
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Should correctly witness valid multiple mixed owners all relays pool registration", async () => {
@@ -35,7 +36,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       undefined
     );
@@ -51,7 +52,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       null
     );
@@ -67,7 +68,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       null
     );
@@ -83,7 +84,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       null
     );
@@ -101,7 +102,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       null
     );
@@ -120,7 +121,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       null
     );
@@ -137,7 +138,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [outputs.external],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       null
     );
@@ -153,7 +154,7 @@ describe("signTxPoolRegistrationOK", async () => {
       [],
       sampleFeeStr,
       sampleTtlStr,
-      [cert],
+      [cert as any],
       [],
       undefined
     );
@@ -164,9 +165,9 @@ describe("signTxPoolRegistrationOK", async () => {
 // ======================================== negative tests (tx should be rejected) ===============================
 
 describe("signTxPoolRegistrationReject", async () => {
-  let ada = {};
+  let ada: Ada = {} as Ada;
 
-  let checkThrows = async (f, errorMsg) => {
+  let checkThrows = async (f: () => void, errorMsg: string) => {
     Assert.assert(typeof f === "function", "the test is messed up");
     try {
       await f();
@@ -181,7 +182,7 @@ describe("signTxPoolRegistrationReject", async () => {
   });
 
   afterEach(async () => {
-    await ada.t.close();
+    await (ada as any).t.close();
   });
 
   it("Should reject pool registration with multiple path owners", async () => {
@@ -194,7 +195,7 @@ describe("signTxPoolRegistrationReject", async () => {
         [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
-        [cert],
+        [cert as any],
         [],
         null
       );
@@ -216,7 +217,7 @@ describe("signTxPoolRegistrationReject", async () => {
         [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
-        [cert],
+        [cert as any],
         [],
         null
       );
@@ -235,7 +236,7 @@ describe("signTxPoolRegistrationReject", async () => {
         [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
-        [cert],
+        [cert as any],
         [],
         null
       );
@@ -268,7 +269,7 @@ describe("signTxPoolRegistrationReject", async () => {
           [outputs.external],
           sampleFeeStr,
           sampleTtlStr,
-          [cert],
+          [cert as any],
           [],
           null
         );
@@ -304,7 +305,7 @@ describe("signTxPoolRegistrationReject", async () => {
           [outputs.external],
           sampleFeeStr,
           sampleTtlStr,
-          [cert],
+          [cert as any],
           [],
           null
         );
@@ -339,7 +340,7 @@ describe("signTxPoolRegistrationReject", async () => {
           [outputs.external],
           sampleFeeStr,
           sampleTtlStr,
-          [cert],
+          [cert as any],
           [],
           null
         );
@@ -359,7 +360,7 @@ describe("signTxPoolRegistrationReject", async () => {
         [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
-        [cert],
+        [cert as any],
         [],
         null
       );
@@ -381,7 +382,7 @@ describe("signTxPoolRegistrationReject", async () => {
         [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
-        certs,
+        certs as any,
         [],
         null
       );
@@ -401,7 +402,7 @@ describe("signTxPoolRegistrationReject", async () => {
         [outputs.external],
         sampleFeeStr,
         sampleTtlStr,
-        [cert],
+        [cert as any],
         [withdrawal],
         null
       );

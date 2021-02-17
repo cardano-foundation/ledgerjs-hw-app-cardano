@@ -1,15 +1,15 @@
 import "babel-polyfill";
 
+// @ts-ignore
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
-import Ada, { cardano, utils } from "../../lib/Ada";
+import Ada, { utils } from "../src/Ada";
 
 export const Assert = utils.Assert;
 
-export const serializeAddressInfo = cardano.serializeAddressInfo;
 export const str_to_path = utils.str_to_path;
 export const hex_to_buf = utils.hex_to_buf;
-export const pathToBuffer = (str) => utils.path_to_buf(str_to_path(str));
+export const pathToBuffer = (str: string) => utils.path_to_buf(str_to_path(str));
 export const uint32_to_buf = utils.uint32_to_buf;
 
 export async function getTransport() {
@@ -20,7 +20,7 @@ export async function getAda() {
   const transport = await TransportNodeHid.create(1000);
 
   const ada = new Ada(transport);
-  ada.t = transport;
+  (ada as any).t = transport;
   return Promise.resolve(ada);
 }
 

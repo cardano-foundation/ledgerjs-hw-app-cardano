@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base",
+  "compilerOptions": {
+    "lib": ["es2019"],
+    "module": "commonjs",
+    "outDir": "lib",
+    "baseUrl": "src"
+  },
+  "include": ["./**/*.ts"]
+}

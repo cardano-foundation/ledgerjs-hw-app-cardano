@@ -1,4 +1,4 @@
-import { AddressTypeNibble, utils } from "../../../../lib/Ada";
+import { AddressTypeNibble, utils } from "../../../src/Ada";
 import { str_to_path } from "../../test_utils";
 
 export const inputs = {

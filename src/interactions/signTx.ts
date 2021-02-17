@@ -498,11 +498,11 @@ export async function signTransaction(
   inputs: Array<InputTypeUTxO>,
   outputs: Array<TxOutput>,
   feeStr: string,
-  ttlStr: string | undefined,
+  ttlStr: string | null,
   certificates: Array<Certificate>,
   withdrawals: Array<Withdrawal>,
-  metadataHashHex?: string,
-  validityIntervalStartStr?: string
+  metadataHashHex?: string | null,
+  validityIntervalStartStr?: string | null
 ): Promise<SignTransactionResponse> {
   // pool registrations are quite restricted
   // this affects witness set construction and many validations

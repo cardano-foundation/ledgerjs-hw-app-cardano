@@ -96,6 +96,7 @@ const derivations = [
   },
 ];
 
-export default function getPathDerivationFixture(matchCriteria: Object) {
+type MatchCriteria = { path?: string, protocolMagic?: number }
+export default function getPathDerivationFixture(matchCriteria: MatchCriteria) {
   return derivations.find((derivation) => _.isMatch(derivation, matchCriteria));
 }
