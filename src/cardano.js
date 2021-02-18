@@ -220,7 +220,7 @@ export function validateTransaction(
       Precondition.check(!isSigningPoolRegistrationAsOwner, TxErrors.OUTPUT_WITH_PATH);
     }
 
-    if (output.tokenBundle) {
+    if (output.tokenBundle != null) {
       Precondition.checkIsArray(output.tokenBundle, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
       Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
 

@@ -59,13 +59,13 @@ export type AssetGroup =
 
 export type TxOutputTypeAddress = {|
   amountStr: string,
-  tokenBundle: Array<AssetGroup>,
+  tokenBundle: ?Array<AssetGroup>,
   addressHex: string
 |};
 
 export type TxOutputTypeAddressParams = {|
   amountStr: string,
-  tokenBundle: Array<AssetGroup>,
+  tokenBundle: ?Array<AssetGroup>,
   addressTypeNibble: $Values<typeof AddressTypeNibbles>,
   spendingPath: BIP32Path,
   stakingPath: ?BIP32Path,
@@ -599,7 +599,7 @@ export default class Ada {
     if (!appHasMultiassetSupport) {
 
       const containsMultiassets = outputs.some(
-        output => (output.tokenBundle != null)
+        output => (output.tokenBundle && output.tokenBundle.length > 0)
       );
 
       // for older app versions:
@@ -748,7 +748,7 @@ export default class Ada {
         0
       );
 
-      if (output.tokenBundle != null) {
+      if (output.tokenBundle && output.tokenBundle.length > 0) {
         for (const assetGroup of output.tokenBundle) {
           const data = Buffer.concat([
             utils.hex_to_buf(assetGroup.policyIdHex),
