@@ -12,8 +12,8 @@ import {
   CertificateType,
   Errors,
 } from "../Ada"
-import cardano, { SignTxIncluded } from "../cardano";
-import utils, { Assert, invariant, Precondition } from "../utils";
+import cardano, { ParsedCertificate, SignTxIncluded } from "../cardano";
+import utils, { Assert, invariant, Precondition, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 import { isLedgerAppVersionAtLeast } from "./getVersion";
@@ -250,105 +250,114 @@ const signTx_addOutput = async (
 
 const signTx_addCertificate = async (
   _send: SendFn,
-  certificate: Certificate,
-  isSigningPoolRegistrationAsOwner: boolean
+  certificate: ParsedCertificate,
 ): Promise<void> => {
   const enum P2 {
     UNUSED = 0x00
   }
-  const dataFields = [utils.uint8_to_buf(certificate.type)];
 
   switch (certificate.type) {
     case CertificateType.STAKE_REGISTRATION:
-    case CertificateType.STAKE_DEREGISTRATION:
+    case CertificateType.STAKE_DEREGISTRATION: {
+      const data = Buffer.concat([
+        utils.uint8_to_buf(certificate.type),
+        utils.path_to_buf(certificate.path)
+      ])
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
+      break
+    }
     case CertificateType.STAKE_DELEGATION: {
-      if (certificate.path != null) dataFields.push(utils.path_to_buf(certificate.path));
+      const data = Buffer.concat([
+        utils.uint8_to_buf(certificate.type),
+        utils.path_to_buf(certificate.path),
+        utils.hex_to_buf(certificate.poolKeyHashHex)
+      ])
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
       break;
     }
     case CertificateType.STAKE_POOL_REGISTRATION: {
-      Assert.assert(
-        isSigningPoolRegistrationAsOwner,
-        "tx certificates validation messed up"
-      );
-      // OK, data are serialized and sent later in additional APDUs
+      // additional data for pool certificate
+      const enum P2 {
+        UNUSED = 0x00,
+        POOL_PARAMS = 0x30,
+        OWNERS = 0x31,
+        RELAYS = 0x32,
+        METADATA = 0x33,
+        CONFIRMATION = 0x34,
+      }
+
+      const data = Buffer.concat([
+        utils.uint8_to_buf(certificate.type),
+      ])
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.UNUSED,
+        data,
+        expectedResponseLength: 0,
+      });
+
+      const pool = certificate.pool
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.POOL_PARAMS,
+        data: cardano.serializePoolInitialParams(pool),
+        expectedResponseLength: 0,
+      });
+
+      for (const owner of pool.owners) {
+        await _send({
+          ins: INS.SIGN_TX,
+          p1: P1.STAGE_CERTIFICATES,
+          p2: P2.OWNERS,
+          data: cardano.serializePoolOwner(owner),
+          expectedResponseLength: 0,
+        });
+      }
+
+      for (const relay of pool.relays) {
+        await _send({
+          ins: INS.SIGN_TX,
+          p1: P1.STAGE_CERTIFICATES,
+          p2: P2.RELAYS,
+          data: cardano.serializePoolRelay(relay),
+          expectedResponseLength: 0,
+        });
+      }
+
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.METADATA,
+        data: cardano.serializePoolMetadata(pool.metadata),
+        expectedResponseLength: 0,
+      });
+
+      await _send({
+        ins: INS.SIGN_TX,
+        p1: P1.STAGE_CERTIFICATES,
+        p2: P2.CONFIRMATION,
+        data: Buffer.alloc(0),
+        expectedResponseLength: 0,
+      });
+
       break;
     }
     default:
-      // validation should catch invalid certificate type
-      Assert.assert(false, "invalid certificate type");
-  }
-
-  if (certificate.poolKeyHashHex != null) {
-    dataFields.push(utils.hex_to_buf(certificate.poolKeyHashHex));
-  }
-
-  const data = Buffer.concat(dataFields);
-  await _send({
-    ins: INS.SIGN_TX,
-    p1: P1.STAGE_CERTIFICATES,
-    p2: P2.UNUSED,
-    data,
-    expectedResponseLength: 0,
-  });
-
-  // we are done for every certificate except pool registration
-
-  if (certificate.type === CertificateType.STAKE_POOL_REGISTRATION) {
-    invariant(certificate.poolRegistrationParams != null);
-
-    // additional data for pool certificate
-    const enum P2 {
-      POOL_PARAMS = 0x30,
-      OWNERS = 0x31,
-      RELAYS = 0x32,
-      METADATA = 0x33,
-      CONFIRMATION = 0x34,
-    }
-
-    const pool = cardano.parsePoolParams(certificate.poolRegistrationParams)
-    await _send({
-      ins: INS.SIGN_TX,
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.POOL_PARAMS,
-      data: cardano.serializePoolInitialParams(pool),
-      expectedResponseLength: 0,
-    });
-
-    for (const owner of pool.owners) {
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.OWNERS,
-        data: cardano.serializePoolOwner(owner),
-        expectedResponseLength: 0,
-      });
-    }
-
-    for (const relay of pool.relays) {
-      await _send({
-        ins: INS.SIGN_TX,
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.RELAYS,
-        data: cardano.serializePoolRelay(relay),
-        expectedResponseLength: 0,
-      });
-    }
-
-    await _send({
-      ins: INS.SIGN_TX,
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.METADATA,
-      data: cardano.serializePoolMetadata(pool.metadata),
-      expectedResponseLength: 0,
-    });
-
-    await _send({
-      ins: INS.SIGN_TX,
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.CONFIRMATION,
-      data: Buffer.alloc(0),
-      expectedResponseLength: 0,
-    });
+      unreachable(certificate)
   }
 };
 
@@ -605,13 +614,8 @@ export async function signTransaction(
     await signTx_setTtl(_send, ttlStr);
   }
 
-  if (certificates.length > 0) {
-    for (const certificate of certificates) {
-      await signTx_addCertificate(
-        _send,
-        certificate, isSigningPoolRegistrationAsOwner
-      );
-    }
+  for (const certificate of cardano.parseCertificates(certificates)) {
+    await signTx_addCertificate(_send, certificate);
   }
 
   if (withdrawals.length > 0) {
