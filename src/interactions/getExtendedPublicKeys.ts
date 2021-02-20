@@ -1,10 +1,16 @@
 import type { BIP32Path, GetExtendedPublicKeyResponse, SendFn } from "../Ada";
 import cardano from "../cardano";
+import { parseBIP32Path } from "../parsing";
 import { Assert, Precondition } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 import { ensureLedgerAppVersionAtLeast } from "./getVersion";
+
+
+export const GetKeyErrors = {
+  INVALID_PATH: "invalid key path",
+};
 
 export async function getExtendedPublicKeys(
   _send: SendFn,
@@ -27,7 +33,9 @@ export async function getExtendedPublicKeys(
   const result = [];
 
   for (let i = 0; i < paths.length; i++) {
-    const pathData = cardano.serializeGetExtendedPublicKeyParams(paths[i]);
+    // TODO: move to parsing
+    const path = parseBIP32Path(paths[i], GetKeyErrors.INVALID_PATH);
+    const pathData = cardano.serializeGetExtendedPublicKeyParams(path);
 
     let response: Buffer;
     if (i === 0) {

@@ -16,10 +16,7 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import cardano, {
-  AddressTypeNibble,
-  CertificateType,
-} from "./cardano";
+import cardano from './cardano'
 import type { INS } from "./interactions/common/ins";
 import { deriveAddress } from "./interactions/deriveAddress";
 import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
@@ -28,6 +25,10 @@ import { getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
+import {
+  AddressTypeNibble,
+  CertificateType,
+} from "./parsing";
 import { TxErrors } from "./txErrors";
 import utils, { Assert } from "./utils";
 
