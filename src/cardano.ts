@@ -19,7 +19,7 @@ import type {
 } from "./Ada";
 import { TxOutputTypeCodes } from "./Ada";
 import { TxErrors } from "./txErrors";
-import utils, { Assert, invariant, MAX_LOVELACE_SUPPLY_STR, Precondition, unreachable } from "./utils";
+import utils, { MAX_LOVELACE_SUPPLY_STR, Precondition, unreachable } from "./utils";
 import { hex_to_buf } from "./utils";
 
 const HARDENED = 0x80000000;
@@ -60,84 +60,78 @@ export const GetKeyErrors = {
   INVALID_PATH: "invalid key path",
 };
 
-function validateCertificates(certificates: Array<Certificate>) {
-  Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
-  const isSigningPoolRegistrationAsOwner = certificates.some(
-    (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
-  );
+export type ParsedCertificate = {
+  type: CertificateType.STAKE_REGISTRATION
+  path: ValidBIP32Path
+} | {
+  type: CertificateType.STAKE_DEREGISTRATION
+  path: ValidBIP32Path
+} | {
+  type: CertificateType.STAKE_DELEGATION
+  path: ValidBIP32Path
+  poolKeyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+} | {
+  type: CertificateType.STAKE_POOL_REGISTRATION
+  pool: ParsedPoolParams
+}
 
-  for (const cert of certificates) {
-    if (!cert) throw new Error(TxErrors.CERTIFICATE_INVALID);
-
-    switch (cert.type) {
-      case CertificateType.STAKE_REGISTRATION: {
-        Precondition.check(
-          !isSigningPoolRegistrationAsOwner,
-          TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
-        );
-        Precondition.checkIsValidPath(
-          cert.path,
-          TxErrors.CERTIFICATE_MISSING_PATH
-        );
-        Precondition.check(
-          !cert.poolKeyHashHex,
-          TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH
-        );
-        break;
+function parseCertificate(cert: Certificate): ParsedCertificate {
+  switch (cert.type) {
+    case CertificateType.STAKE_REGISTRATION:
+    case CertificateType.STAKE_DEREGISTRATION: {
+      Precondition.checkIsValidPath(
+        cert.path,
+        TxErrors.CERTIFICATE_MISSING_PATH
+      );
+      Precondition.check(
+        cert.poolKeyHashHex == null,
+        TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH
+      );
+      return {
+        type: cert.type,
+        path: parseBIP32Path(cert.path, TxErrors.CERTIFICATE_MISSING_PATH)
       }
-      case CertificateType.STAKE_DEREGISTRATION: {
-        Precondition.check(
-          !isSigningPoolRegistrationAsOwner,
-          TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
-        );
-        Precondition.checkIsValidPath(
-          cert.path,
-          TxErrors.CERTIFICATE_MISSING_PATH
-        );
-        Precondition.check(
-          !cert.poolKeyHashHex,
-          TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH
-        );
-        break;
-      }
-      case CertificateType.STAKE_DELEGATION: {
-        Precondition.check(
-          !isSigningPoolRegistrationAsOwner,
-          TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
-        );
-        Precondition.checkIsValidPath(
-          cert.path,
-          TxErrors.CERTIFICATE_MISSING_PATH
-        );
-        Precondition.checkIsHexStringOfLength(
-          cert.poolKeyHashHex,
-          KEY_HASH_LENGTH,
-          TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH
-        );
-        break;
-      }
-      case CertificateType.STAKE_POOL_REGISTRATION: {
-        Assert.assert(isSigningPoolRegistrationAsOwner);
-        Precondition.check(!cert.path, TxErrors.CERTIFICATE_SUPERFLUOUS_PATH);
-        const poolParams = cert.poolRegistrationParams;
-        Precondition.check(
-          !!poolParams,
-          TxErrors.CERTIFICATE_POOL_MISSING_POOL_PARAMS
-        );
-        invariant(!!poolParams)
-        const pool = parsePoolParams(poolParams)
-        // Additional check
-        const numPathOwners = pool.owners.filter(o => o.type === PoolOwnerType.PATH).length;
-        if (numPathOwners !== 1) {
-          throw new Error(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-        }
-
-        break;
-      }
-      default:
-        throw new Error(TxErrors.CERTIFICATE_INVALID);
     }
+    case CertificateType.STAKE_DELEGATION: {
+      Precondition.checkIsValidPath(
+        cert.path,
+        TxErrors.CERTIFICATE_MISSING_PATH
+      );
+      Precondition.checkIsHexStringOfLength(
+        cert.poolKeyHashHex,
+        KEY_HASH_LENGTH,
+        TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH
+      );
+      return {
+        type: cert.type,
+        path: parseBIP32Path(cert.path, TxErrors.CERTIFICATE_MISSING_PATH),
+        poolKeyHashHex: parseHexStringOfLength(cert.poolKeyHashHex!, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH)
+      }
+    }
+    case CertificateType.STAKE_POOL_REGISTRATION: {
+      return {
+        type: cert.type,
+        pool: parsePoolParams(cert.poolRegistrationParams!)
+      }
+    }
+
+    default:
+      throw new Error(TxErrors.CERTIFICATE_INVALID);
   }
+}
+
+function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertificate> {
+  Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
+
+  const parsed = certificates.map(cert => parseCertificate(cert))
+
+
+  // Pool registration certificate is not allowed to be combined with anything else
+  Precondition.check(
+    parsed.every((cert) => cert.type !== CertificateType.STAKE_POOL_REGISTRATION) || parsed.length === 1,
+    TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
+  );
+  return parsed
 }
 
 export function validateTransaction(
@@ -226,7 +220,7 @@ export function validateTransaction(
   }
 
   // certificates
-  validateCertificates(certificates);
+  parseCertificates(certificates);
 
   // withdrawals
   Precondition.checkIsArray(withdrawals, TxErrors.WITHDRAWALS_NOT_ARRAY);
@@ -535,6 +529,10 @@ export function parsePoolParams(params: PoolParams): ParsedPoolParams {
     relays.length <= POOL_REGISTRATION_RELAYS_MAX,
     TxErrors.CERTIFICATE_POOL_RELAYS_TOO_MANY
   );
+  Precondition.check(
+    owners.filter(o => o.type === PoolOwnerType.PATH).length === 1,
+    TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+  )
 
   return {
     keyHashHex,
@@ -828,6 +826,8 @@ export default {
   serializeAddressParams,
   serializeOutputBasicParams,
   serializeOutputBasicParamsBefore_2_2,
+
+  parseCertificates,
 
   parsePoolParams,
   serializePoolInitialParams,
