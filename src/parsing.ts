@@ -1,4 +1,5 @@
 import type {
+    AssetGroup,
     BIP32Path,
     Certificate,
     InputTypeUTxO,
@@ -10,6 +11,7 @@ import type {
     RelayParams,
     SingleHostIPRelay,
     SingleHostNameRelay,
+    Token,
     TxOutputTypeAddress,
     TxOutputTypeAddressParams,
     Withdrawal,
@@ -17,7 +19,7 @@ import type {
 // TODO: remove this dependency
 import { serializeOutputBasicParams } from "./cardano";
 import { TxErrors } from "./txErrors";
-import utils, { MAX_LOVELACE_SUPPLY_STR, Precondition } from "./utils";
+import utils, { MAX_LOVELACE_SUPPLY_STR, MAX_UINT_64_STR, Precondition } from "./utils";
 import { hex_to_buf } from "./utils";
 
 export enum AddressTypeNibble {
@@ -120,6 +122,41 @@ export function parseCertificates(certificates: Array<Certificate>): Array<Parse
     return parsed
 }
 
+
+export type ParsedToken = {
+    assetNameHex: HexString,
+    amountStr: Uint64_str,
+};
+
+export type ParsedAssetGroup = {
+    policyIdHex: FixlenHexString<typeof TOKEN_POLICY_LENGTH>,
+    tokens: Array<ParsedToken>,
+};
+
+function parseToken(token: Token): ParsedToken {
+    const assetNameHex = parseHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
+    Precondition.check(
+        token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2,
+        TxErrors.OUTPUT_INVALID_ASSET_NAME
+    );
+
+    const amountStr = parseUint64_str(token.amountStr, MAX_UINT_64_STR, 'TODO: missing error')
+    return {
+        assetNameHex,
+        amountStr,
+    }
+}
+
+export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
+    Precondition.checkIsArray(assetGroup.tokens, 'TODO: missing error');
+    Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, 'TODO: missing error');
+
+    return {
+        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, TxErrors.OUTPUT_INVALID_TOKEN_POLICY),
+        tokens: assetGroup.tokens.map(t => parseToken(t))
+    }
+}
+
 export function validateTransaction(
     network: Network,
     inputs: Array<InputTypeUTxO>,
@@ -173,26 +210,7 @@ export function validateTransaction(
             Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
 
             for (const assetGroup of output.tokenBundle) {
-                Precondition.checkIsHexStringOfLength(
-                    assetGroup.policyIdHex,
-                    TOKEN_POLICY_LENGTH,
-                    TxErrors.OUTPUT_INVALID_TOKEN_POLICY
-                );
-
-                Precondition.checkIsArray(assetGroup.tokens);
-                Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX);
-
-                for (const token of assetGroup.tokens) {
-                    Precondition.checkIsHexString(
-                        token.assetNameHex,
-                        TxErrors.OUTPUT_INVALID_ASSET_NAME
-                    );
-                    Precondition.check(
-                        token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2,
-                        TxErrors.OUTPUT_INVALID_ASSET_NAME
-                    );
-                    Precondition.checkIsUint64Str(token.amountStr);
-                }
+                parseAssetGroup(assetGroup)
             }
         }
     }
@@ -236,6 +254,7 @@ export function validateTransaction(
 
 export type VarlenAsciiString = string & { __type: 'ascii' }
 export type FixlenHexString<N> = string & { __type: 'hex', __length: N }
+export type HexString = string & { __type: 'hex' }
 export type Uint64_str = string & { __type: 'uint64_t' }
 export type ValidBIP32Path = BIP32Path & { __type: 'bip32_path' }
 
@@ -246,6 +265,12 @@ function parseAscii(str: string, err: string): VarlenAsciiString {
         err
     );
     return str as VarlenAsciiString
+}
+
+
+function parseHexString(str: string, err: string): HexString {
+    Precondition.checkIsHexString(str, err)
+    return str as HexString
 }
 
 function parseHexStringOfLength<L extends number>(str: string, length: L, err: string): FixlenHexString<L> {

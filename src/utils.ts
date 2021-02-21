@@ -13,7 +13,7 @@ const BECH32_ALPHABET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
 
-const MAX_UINT_64_STR = "18446744073709551615";
+export const MAX_UINT_64_STR = "18446744073709551615";
 // Max supply in lovelace
 export const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
 const POOL_MARGIN_DENOMINATOR_MAX_STR = [
