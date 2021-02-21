@@ -3,6 +3,7 @@ import type {
   SendFn,
 } from "../Ada";
 import cardano from "../cardano";
+import { parseAddressParams } from "../parsing";
 import { INS } from "./common/ins";
 
 export async function showAddress(
@@ -11,7 +12,9 @@ export async function showAddress(
 ): Promise<void> {
   const P1_DISPLAY = 0x02;
   const P2_UNUSED = 0x00;
-  const data = cardano.serializeAddressParams(addressParams);
+  const parsed = parseAddressParams(addressParams)
+
+  const data = cardano.serializeAddressParams(parsed);
 
   await _send({
     ins: INS.DERIVE_ADDRESS,

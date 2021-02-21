@@ -4,6 +4,7 @@ import type {
   SendFn,
 } from "../Ada";
 import cardano from "../cardano";
+import { parseAddressParams } from "../parsing";
 import { INS } from "./common/ins";
 
 export async function deriveAddress(
@@ -13,7 +14,8 @@ export async function deriveAddress(
   const P1_RETURN = 0x01;
   const P2_UNUSED = 0x00;
 
-  const data = cardano.serializeAddressParams(addressParams);
+  const parsed = parseAddressParams(addressParams)
+  const data = cardano.serializeAddressParams(parsed);
 
   const response = await _send({
     ins: INS.DERIVE_ADDRESS,
