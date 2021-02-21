@@ -1,7 +1,7 @@
-import type { BIP32Path, GetExtendedPublicKeyResponse, SendFn } from "../Ada";
+import type { GetExtendedPublicKeyResponse, SendFn } from "../Ada";
 import cardano from "../cardano";
-import { parseBIP32Path, ValidBIP32Path } from "../parsing";
-import { Assert, Precondition } from "../utils";
+import { ValidBIP32Path } from "../parsing";
+import { Assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
