@@ -208,8 +208,8 @@ export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
     utils.hex_to_buf(pool.keyHashHex),
     utils.hex_to_buf(pool.vrfHashHex),
-    utils.ada_amount_to_buf(pool.pledgeStr),
-    utils.ada_amount_to_buf(pool.costStr),
+    utils.uint64_to_buf(pool.pledgeStr),
+    utils.uint64_to_buf(pool.costStr),
     utils.uint64_to_buf(pool.margin.numeratorStr),
     utils.uint64_to_buf(pool.margin.denominatorStr),
     utils.hex_to_buf(pool.rewardAccountHex),
@@ -237,7 +237,7 @@ export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
   }
 }
 
-export function serializePoolRelay(relay: ParsedPoolRelay) {
+export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
   function serializeOptional<T>(x: T | null, cb: (t: T) => Buffer): Buffer {
     const enum Optional {
       None = 1,

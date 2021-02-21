@@ -377,7 +377,7 @@ export const enum PoolOwnerType {
 
 export type ParsedPoolOwner = {
     type: PoolOwnerType.PATH,
-    path: BIP32Path
+    path: ValidBIP32Path
 } | {
     type: PoolOwnerType.KEY_HASH
     hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
