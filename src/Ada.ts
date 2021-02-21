@@ -44,6 +44,15 @@ export type Network = {
   networkId: number
 }
 
+export type AddressParams = {
+  addressTypeNibble: AddressTypeNibble,
+  networkIdOrProtocolMagic: number,
+  spendingPath: BIP32Path,
+  stakingPath?: BIP32Path | null,
+  stakingKeyHashHex?: string | null,
+  stakingBlockchainPointer?: StakingBlockchainPointer | null
+}
+
 export type InputTypeUTxO = {
   txHashHex: string,
   outputIndex: number,
@@ -180,9 +189,9 @@ export type SignTransactionResponse = {
   witnesses: Array<Witness>,
 };
 
-export const TxOutputTypeCodes = {
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES: 1,
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2,
+export const enum TxOutputType {
+  SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES = 1,
+  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS = 2,
 };
 
 export const DeviceErrorCodes = {
@@ -413,12 +422,14 @@ export default class Ada {
   ): Promise<DeriveAddressResponse> {
     return deriveAddress(
       this._send,
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
+      {
+        addressTypeNibble,
+        networkIdOrProtocolMagic,
+        spendingPath,
+        stakingPath,
+        stakingKeyHashHex,
+        stakingBlockchainPointer
+      }
     );
   }
 
@@ -433,12 +444,14 @@ export default class Ada {
   ): Promise<void> {
     return showAddress(
       this._send,
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
+      {
+        addressTypeNibble,
+        networkIdOrProtocolMagic,
+        spendingPath,
+        stakingPath,
+        stakingKeyHashHex,
+        stakingBlockchainPointer
+      }
     );
   }
 

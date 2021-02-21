@@ -1,33 +1,19 @@
 import type {
-  AddressTypeNibble,
-  BIP32Path,
+  AddressParams,
   DeriveAddressResponse,
   SendFn,
-  StakingBlockchainPointer,
 } from "../Ada";
 import cardano from "../cardano";
 import { INS } from "./common/ins";
 
 export async function deriveAddress(
   _send: SendFn,
-  addressTypeNibble: AddressTypeNibble,
-  networkIdOrProtocolMagic: number,
-  spendingPath: BIP32Path,
-  stakingPath: BIP32Path | null = null,
-  stakingKeyHashHex: string | null = null,
-  stakingBlockchainPointer: StakingBlockchainPointer | null = null
+  addressParams: AddressParams,
 ): Promise<DeriveAddressResponse> {
   const P1_RETURN = 0x01;
   const P2_UNUSED = 0x00;
 
-  const data = cardano.serializeAddressParams(
-    addressTypeNibble,
-    networkIdOrProtocolMagic,
-    spendingPath,
-    stakingPath,
-    stakingKeyHashHex,
-    stakingBlockchainPointer
-  );
+  const data = cardano.serializeAddressParams(addressParams);
 
   const response = await _send({
     ins: INS.DERIVE_ADDRESS,

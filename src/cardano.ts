@@ -1,11 +1,10 @@
 import type {
-  BIP32Path,
+  AddressParams,
   Network,
-  StakingBlockchainPointer,
   TxOutput,
   ValueOf,
 } from "./Ada";
-import { TxOutputTypeCodes } from "./Ada";
+import { TxOutputType } from "./Ada";
 import type { ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ValidBIP32Path } from "./parsing";
 import { KEY_HASH_LENGTH, TX_HASH_LENGTH } from "./parsing";
 import { AddressTypeNibble, PoolOwnerType, RelayType } from "./parsing";
@@ -20,40 +19,35 @@ export const SignTxIncluded = Object.freeze({
 });
 
 export function serializeAddressParams(
-  addressTypeNibble: AddressTypeNibble,
-  networkIdOrProtocolMagic: number,
-  spendingPath: BIP32Path,
-  stakingPath: BIP32Path | null = null,
-  stakingKeyHashHex: string | null = null,
-  stakingBlockchainPointer: StakingBlockchainPointer | null = null
+  params: AddressParams
 ): Buffer {
   Precondition.checkIsUint8(
-    addressTypeNibble << 4,
+    params.addressTypeNibble << 4,
     TxErrors.OUTPUT_INVALID_ADDRESS_TYPE_NIBBLE
   );
-  const addressTypeNibbleBuf = utils.uint8_to_buf(addressTypeNibble);
+  const addressTypeNibbleBuf = utils.uint8_to_buf(params.addressTypeNibble);
 
   let networkIdOrProtocolMagicBuf;
 
-  if (addressTypeNibble === AddressTypeNibble.BYRON) {
+  if (params.addressTypeNibble === AddressTypeNibble.BYRON) {
     Precondition.checkIsUint32(
-      networkIdOrProtocolMagic,
+      params.networkIdOrProtocolMagic,
       TxErrors.INVALID_PROTOCOL_MAGIC
     );
-    networkIdOrProtocolMagicBuf = utils.uint32_to_buf(networkIdOrProtocolMagic);
+    networkIdOrProtocolMagicBuf = utils.uint32_to_buf(params.networkIdOrProtocolMagic);
   } else {
     Precondition.checkIsUint8(
-      networkIdOrProtocolMagic,
+      params.networkIdOrProtocolMagic,
       TxErrors.INVALID_NETWORK_ID
     );
-    networkIdOrProtocolMagicBuf = utils.uint8_to_buf(networkIdOrProtocolMagic);
+    networkIdOrProtocolMagicBuf = utils.uint8_to_buf(params.networkIdOrProtocolMagic);
   }
 
   Precondition.checkIsValidPath(
-    spendingPath,
+    params.spendingPath,
     TxErrors.OUTPUT_INVALID_SPENDING_PATH
   );
-  const spendingPathBuf = utils.path_to_buf(spendingPath);
+  const spendingPathBuf = utils.path_to_buf(params.spendingPath);
 
   const stakingChoices = {
     NO_STAKING: 0x11,
@@ -66,43 +60,44 @@ export function serializeAddressParams(
   // serialize staking info
   let stakingChoice: StakingChoice;
   let stakingInfoBuf: Buffer;
-  if (!stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
+  if (!params.stakingPath && !params.stakingKeyHashHex && !params.stakingBlockchainPointer) {
     stakingChoice = stakingChoices.NO_STAKING;
     stakingInfoBuf = Buffer.alloc(0);
-  } else if (stakingPath && !stakingKeyHashHex && !stakingBlockchainPointer) {
+  } else if (params.stakingPath && !params.stakingKeyHashHex && !params.stakingBlockchainPointer) {
     stakingChoice = stakingChoices.STAKING_KEY_PATH;
     Precondition.checkIsValidPath(
-      stakingPath,
+      params.stakingPath,
       TxErrors.OUTPUT_INVALID_STAKING_KEY_PATH
     );
-    stakingInfoBuf = utils.path_to_buf(stakingPath);
-  } else if (!stakingPath && stakingKeyHashHex && !stakingBlockchainPointer) {
-    const stakingKeyHash = utils.hex_to_buf(stakingKeyHashHex);
+    stakingInfoBuf = utils.path_to_buf(params.stakingPath);
+  } else if (!params.stakingPath && params.stakingKeyHashHex && !params.stakingBlockchainPointer) {
+    const stakingKeyHash = utils.hex_to_buf(params.stakingKeyHashHex);
     stakingChoice = stakingChoices.STAKING_KEY_HASH;
     Precondition.check(
       stakingKeyHash.length === KEY_HASH_LENGTH,
       TxErrors.OUTPUT_INVALID_STAKING_KEY_HASH
     );
     stakingInfoBuf = stakingKeyHash;
-  } else if (!stakingPath && !stakingKeyHashHex && stakingBlockchainPointer) {
+  } else if (!params.stakingPath && !params.stakingKeyHashHex && params.stakingBlockchainPointer) {
     stakingChoice = stakingChoices.BLOCKCHAIN_POINTER;
-    stakingInfoBuf = Buffer.alloc(3 * 4); // 3 x uint32
 
     Precondition.checkIsUint32(
-      stakingBlockchainPointer.blockIndex,
+      params.stakingBlockchainPointer.blockIndex,
       TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER
     );
-    stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.blockIndex, 0);
     Precondition.checkIsUint32(
-      stakingBlockchainPointer.txIndex,
+      params.stakingBlockchainPointer.txIndex,
       TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER
     );
-    stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.txIndex, 4);
     Precondition.checkIsUint32(
-      stakingBlockchainPointer.certificateIndex,
+      params.stakingBlockchainPointer.certificateIndex,
       TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER
     );
-    stakingInfoBuf.writeUInt32BE(stakingBlockchainPointer.certificateIndex, 8);
+    stakingInfoBuf = Buffer.concat([
+      utils.uint32_to_buf(params.stakingBlockchainPointer.blockIndex),
+      utils.uint32_to_buf(params.stakingBlockchainPointer.txIndex),
+      utils.uint32_to_buf(params.stakingBlockchainPointer.certificateIndex)
+    ])
   } else {
     throw new Error(TxErrors.OUTPUT_INVALID_STAKING_INFO);
   }
@@ -126,7 +121,7 @@ export function serializeOutputBasicParams(
   let addressBuf;
 
   if ("addressHex" in output && output.addressHex) {
-    outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
+    outputType = TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
 
     Precondition.checkIsHexString(
       output.addressHex,
@@ -141,18 +136,18 @@ export function serializeOutputBasicParams(
       utils.hex_to_buf(output.addressHex),
     ]);
   } else if ("spendingPath" in output && output.spendingPath) {
-    outputType = TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
+    outputType = TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
 
-    addressBuf = serializeAddressParams(
-      output.addressTypeNibble,
-      output.addressTypeNibble === AddressTypeNibble.BYRON
+    addressBuf = serializeAddressParams({
+      addressTypeNibble: output.addressTypeNibble,
+      networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
         ? network.protocolMagic
         : network.networkId,
-      output.spendingPath,
-      output.stakingPath,
-      output.stakingKeyHashHex,
-      output.stakingBlockchainPointer
-    );
+      spendingPath: output.spendingPath,
+      stakingPath: output.stakingPath,
+      stakingKeyHashHex: output.stakingKeyHashHex,
+      stakingBlockchainPointer: output.stakingBlockchainPointer
+    });
   } else {
     throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
   }
@@ -186,23 +181,23 @@ export function serializeOutputBasicParamsBefore_2_2(
 
     return Buffer.concat([
       utils.ada_amount_to_buf(output.amountStr),
-      utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
+      utils.uint8_to_buf(TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
       utils.hex_to_buf(output.addressHex),
     ]);
   } else if ('spendingPath' in output && output.spendingPath) {
     return Buffer.concat([
       utils.ada_amount_to_buf(output.amountStr),
-      utils.uint8_to_buf(TxOutputTypeCodes.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
-      serializeAddressParams(
-        output.addressTypeNibble,
-        output.addressTypeNibble === AddressTypeNibble.BYRON
+      utils.uint8_to_buf(TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
+      serializeAddressParams({
+        addressTypeNibble: output.addressTypeNibble,
+        networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
           ? network.protocolMagic
           : network.networkId,
-        output.spendingPath,
-        output.stakingPath,
-        output.stakingKeyHashHex,
-        output.stakingBlockchainPointer
-      ),
+        spendingPath: output.spendingPath,
+        stakingPath: output.stakingPath,
+        stakingKeyHashHex: output.stakingKeyHashHex,
+        stakingBlockchainPointer: output.stakingBlockchainPointer
+      }),
     ]);
   } else {
     throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
