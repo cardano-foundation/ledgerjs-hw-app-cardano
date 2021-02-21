@@ -8,11 +8,10 @@ import type {
   TxOutput,
   Withdrawal,
 } from "../Ada";
-import {
-  CertificateType,
-  Errors,
-} from "../Ada"
-import cardano, { ParsedCertificate, SignTxIncluded } from "../cardano";
+import { Errors, } from "../Ada"
+import cardano, { SignTxIncluded } from "../cardano";
+import type { ParsedCertificate } from "../parsing";
+import { CertificateType, parseCertificates, validateTransaction } from "../parsing";
 import utils, { Assert, invariant, Precondition, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -548,7 +547,7 @@ export async function signTransaction(
     }
   }
 
-  cardano.validateTransaction(
+  validateTransaction(
     network,
     inputs,
     outputs,
@@ -614,7 +613,7 @@ export async function signTransaction(
     await signTx_setTtl(_send, ttlStr);
   }
 
-  for (const certificate of cardano.parseCertificates(certificates)) {
+  for (const certificate of parseCertificates(certificates)) {
     await signTx_addCertificate(_send, certificate);
   }
 
