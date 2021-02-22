@@ -124,7 +124,7 @@ export function serializeOutputBasicParamsBefore_2_2(
 ): Buffer {
   Precondition.checkIsValidAdaAmount(output.amountStr);
 
-  if ("addressHex" in output && output.addressHex) {
+  if ("addressHex" in output && output.addressHex != null) {
     Precondition.checkIsHexString(
       output.addressHex,
       TxErrors.OUTPUT_INVALID_ADDRESS
@@ -139,7 +139,7 @@ export function serializeOutputBasicParamsBefore_2_2(
       utils.uint8_to_buf(TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
       utils.hex_to_buf(output.addressHex),
     ]);
-  } else if ('spendingPath' in output && output.spendingPath) {
+  } else if ('spendingPath' in output && output.spendingPath != null) {
     const parsed = parseAddressParams({
       addressTypeNibble: output.addressTypeNibble,
       networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON

@@ -42,7 +42,7 @@ export const KEY_HASH_LENGTH = 28;
 export const TX_HASH_LENGTH = 32;
 
 const TOKEN_POLICY_LENGTH = 28;
-const TOKEN_NAME_LENGTH = 32;
+const ASSET_NAME_LENGTH_MAX = 32;
 
 const ASSET_GROUPS_MAX = 1000;
 const TOKENS_IN_GROUP_MAX = 1000;
@@ -137,7 +137,7 @@ export type ParsedAssetGroup = {
 function parseToken(token: Token): ParsedToken {
     const assetNameHex = parseHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
     Precondition.check(
-        token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2,
+        token.assetNameHex.length <= ASSET_NAME_LENGTH_MAX * 2,
         TxErrors.OUTPUT_INVALID_ASSET_NAME
     );
 
@@ -628,6 +628,7 @@ export function parseAddressParams(
     }
 
     const networkId = parseUint8_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_NETWORK_ID)
+    Precondition.check(networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
     const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
 
     switch (params.addressTypeNibble) {
