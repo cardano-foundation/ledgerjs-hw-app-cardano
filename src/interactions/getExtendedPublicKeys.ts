@@ -1,41 +1,33 @@
-import type { BIP32Path, GetExtendedPublicKeyResponse, SendFn } from "../Ada";
+import type { GetExtendedPublicKeyResponse, SendFn } from "../Ada";
 import cardano from "../cardano";
-import { parseBIP32Path } from "../parsing";
-import { Assert, Precondition } from "../utils";
+import { ValidBIP32Path } from "../parsing";
+import { Assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 import { ensureLedgerAppVersionAtLeast } from "./getVersion";
 
 
-export const GetKeyErrors = {
-  INVALID_PATH: "invalid key path",
-};
-
 export async function getExtendedPublicKeys(
   _send: SendFn,
-  paths: Array<BIP32Path>
+  paths: Array<ValidBIP32Path>
 ): Promise<Array<GetExtendedPublicKeyResponse>> {
-  // validate the input
-  Precondition.checkIsArray(paths);
-  for (const path of paths) {
-    Precondition.checkIsValidPath(path);
-  }
 
   if (paths.length > 1) {
     await ensureLedgerAppVersionAtLeast(_send, 2, 1);
   }
 
-  const P1_INIT = 0x00;
-  const P1_NEXT_KEY = 0x01;
-  const P2_UNUSED = 0x00;
-
+  const enum P1 {
+    INIT = 0x00,
+    NEXT_KEY = 0x01
+  }
+  const enum P2 {
+    UNUSED = 0x00
+  }
   const result = [];
 
   for (let i = 0; i < paths.length; i++) {
-    // TODO: move to parsing
-    const path = parseBIP32Path(paths[i], GetKeyErrors.INVALID_PATH);
-    const pathData = cardano.serializeGetExtendedPublicKeyParams(path);
+    const pathData = cardano.serializeGetExtendedPublicKeyParams(paths[i]);
 
     let response: Buffer;
     if (i === 0) {
@@ -50,8 +42,8 @@ export async function getExtendedPublicKeys(
 
       response = await wrapRetryStillInCall(_send)({
         ins: INS.GET_EXT_PUBLIC_KEY,
-        p1: P1_INIT,
-        p2: P2_UNUSED,
+        p1: P1.INIT,
+        p2: P2.UNUSED,
         data: Buffer.concat([pathData, remainingKeysData]),
         expectedResponseLength: 64,
       });
@@ -59,8 +51,8 @@ export async function getExtendedPublicKeys(
       // next key APDU
       response = await _send({
         ins: INS.GET_EXT_PUBLIC_KEY,
-        p1: P1_NEXT_KEY,
-        p2: P2_UNUSED,
+        p1: P1.NEXT_KEY,
+        p2: P2.UNUSED,
         data: pathData,
         expectedResponseLength: 64,
       });

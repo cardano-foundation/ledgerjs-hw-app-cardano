@@ -1,4 +1,6 @@
 import type {
+    AddressParams,
+    AssetGroup,
     BIP32Path,
     Certificate,
     InputTypeUTxO,
@@ -10,6 +12,7 @@ import type {
     RelayParams,
     SingleHostIPRelay,
     SingleHostNameRelay,
+    Token,
     TxOutputTypeAddress,
     TxOutputTypeAddressParams,
     Withdrawal,
@@ -17,7 +20,7 @@ import type {
 // TODO: remove this dependency
 import { serializeOutputBasicParams } from "./cardano";
 import { TxErrors } from "./txErrors";
-import utils, { MAX_LOVELACE_SUPPLY_STR, Precondition } from "./utils";
+import utils, { MAX_LOVELACE_SUPPLY_STR, MAX_UINT_64_STR, Precondition } from "./utils";
 import { hex_to_buf } from "./utils";
 
 export enum AddressTypeNibble {
@@ -39,7 +42,7 @@ export const KEY_HASH_LENGTH = 28;
 export const TX_HASH_LENGTH = 32;
 
 const TOKEN_POLICY_LENGTH = 28;
-const TOKEN_NAME_LENGTH = 32;
+const ASSET_NAME_LENGTH_MAX = 32;
 
 const ASSET_GROUPS_MAX = 1000;
 const TOKENS_IN_GROUP_MAX = 1000;
@@ -120,6 +123,41 @@ export function parseCertificates(certificates: Array<Certificate>): Array<Parse
     return parsed
 }
 
+
+export type ParsedToken = {
+    assetNameHex: HexString,
+    amountStr: Uint64_str,
+};
+
+export type ParsedAssetGroup = {
+    policyIdHex: FixlenHexString<typeof TOKEN_POLICY_LENGTH>,
+    tokens: Array<ParsedToken>,
+};
+
+function parseToken(token: Token): ParsedToken {
+    const assetNameHex = parseHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
+    Precondition.check(
+        token.assetNameHex.length <= ASSET_NAME_LENGTH_MAX * 2,
+        TxErrors.OUTPUT_INVALID_ASSET_NAME
+    );
+
+    const amountStr = parseUint64_str(token.amountStr, MAX_UINT_64_STR, 'TODO: missing error')
+    return {
+        assetNameHex,
+        amountStr,
+    }
+}
+
+export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
+    Precondition.checkIsArray(assetGroup.tokens, 'TODO: missing error');
+    Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, 'TODO: missing error');
+
+    return {
+        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, TxErrors.OUTPUT_INVALID_TOKEN_POLICY),
+        tokens: assetGroup.tokens.map(t => parseToken(t))
+    }
+}
+
 export function validateTransaction(
     network: Network,
     inputs: Array<InputTypeUTxO>,
@@ -173,26 +211,7 @@ export function validateTransaction(
             Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
 
             for (const assetGroup of output.tokenBundle) {
-                Precondition.checkIsHexStringOfLength(
-                    assetGroup.policyIdHex,
-                    TOKEN_POLICY_LENGTH,
-                    TxErrors.OUTPUT_INVALID_TOKEN_POLICY
-                );
-
-                Precondition.checkIsArray(assetGroup.tokens);
-                Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX);
-
-                for (const token of assetGroup.tokens) {
-                    Precondition.checkIsHexString(
-                        token.assetNameHex,
-                        TxErrors.OUTPUT_INVALID_ASSET_NAME
-                    );
-                    Precondition.check(
-                        token.assetNameHex.length <= TOKEN_NAME_LENGTH * 2,
-                        TxErrors.OUTPUT_INVALID_ASSET_NAME
-                    );
-                    Precondition.checkIsUint64Str(token.amountStr);
-                }
+                parseAssetGroup(assetGroup)
             }
         }
     }
@@ -236,8 +255,11 @@ export function validateTransaction(
 
 export type VarlenAsciiString = string & { __type: 'ascii' }
 export type FixlenHexString<N> = string & { __type: 'hex', __length: N }
+export type HexString = string & { __type: 'hex' }
 export type Uint64_str = string & { __type: 'uint64_t' }
 export type ValidBIP32Path = BIP32Path & { __type: 'bip32_path' }
+export type Uint32_t = number & { __type: 'uint32_t' }
+export type Uint8_t = number & { __type: 'uint8_t' }
 
 function parseAscii(str: string, err: string): VarlenAsciiString {
     Precondition.checkIsString(str, err);
@@ -246,6 +268,12 @@ function parseAscii(str: string, err: string): VarlenAsciiString {
         err
     );
     return str as VarlenAsciiString
+}
+
+
+function parseHexString(str: string, err: string): HexString {
+    Precondition.checkIsHexString(str, err)
+    return str as HexString
 }
 
 function parseHexStringOfLength<L extends number>(str: string, length: L, err: string): FixlenHexString<L> {
@@ -257,6 +285,17 @@ function parseUint64_str(str: string, maxValue: string, err: string): Uint64_str
     Precondition.checkIsValidUintStr(str, maxValue, err);
     return str as Uint64_str
 }
+
+function parseUint32_t(value: number, err: string): Uint32_t {
+    Precondition.checkIsUint32(value, err);
+    return value as Uint32_t
+}
+
+function parseUint8_t(value: number, err: string): Uint8_t {
+    Precondition.checkIsUint8(value, err);
+    return value as Uint8_t
+}
+
 
 export function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
     Precondition.checkIsValidPath(path, err);
@@ -352,7 +391,7 @@ export const enum PoolOwnerType {
 
 export type ParsedPoolOwner = {
     type: PoolOwnerType.PATH,
-    path: BIP32Path
+    path: ValidBIP32Path
 } | {
     type: PoolOwnerType.KEY_HASH
     hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
@@ -508,5 +547,177 @@ export function parsePoolMetadataParams(params: PoolMetadataParams | null): Pars
         url,
         hashHex,
         __brand: 'pool_metadata' as const
+    }
+}
+
+export const enum StakingChoiceType {
+    NO_STAKING = 'no_staking',
+    STAKING_KEY_PATH = 'staking_key_path',
+    STAKING_KEY_HASH = 'staking_key_hash',
+    BLOCKCHAIN_POINTER = 'blockchain_pointer',
+}
+
+type ParsedBlockchainPointer = {
+    blockIndex: Uint32_t,
+    txIndex: Uint32_t,
+    certificateIndex: Uint32_t,
+}
+
+type StakingChoiceNone = {
+    type: StakingChoiceType.NO_STAKING
+}
+type StakingChoicePath = {
+    type: StakingChoiceType.STAKING_KEY_PATH,
+    path: ValidBIP32Path
+}
+type StakingChoiceHash = {
+    type: StakingChoiceType.STAKING_KEY_HASH,
+    hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+}
+type StakingChoicePointer = {
+    type: StakingChoiceType.BLOCKCHAIN_POINTER,
+    pointer: ParsedBlockchainPointer
+}
+
+
+export type StakingChoice = StakingChoiceNone | StakingChoicePath | StakingChoiceHash | StakingChoicePointer
+
+type ByronAddressParams = {
+    type: AddressTypeNibble.BYRON,
+    protocolMagic: Uint32_t
+    spendingPath: ValidBIP32Path,
+    stakingChoice: StakingChoiceNone,
+}
+
+type ShelleyAddressParams = {
+    type: AddressTypeNibble.BASE | AddressTypeNibble.ENTERPRISE | AddressTypeNibble.POINTER | AddressTypeNibble.REWARD,
+    networkId: Uint8_t,
+    spendingPath: ValidBIP32Path
+} & ( // Extra properties
+        {
+            type: AddressTypeNibble.BASE,
+            stakingChoice: StakingChoicePath | StakingChoiceHash
+        } | {
+            type: AddressTypeNibble.ENTERPRISE,
+            stakingChoice: StakingChoiceNone
+        } | {
+            type: AddressTypeNibble.POINTER,
+            stakingChoice: StakingChoicePointer
+        } | {
+            type: AddressTypeNibble.REWARD
+            stakingChoice: StakingChoiceNone // included in spending path
+        }
+    )
+
+export type ParsedAddressParams = ByronAddressParams | ShelleyAddressParams
+
+export function parseAddressParams(
+    params: AddressParams
+): ParsedAddressParams {
+    if (params.addressTypeNibble === AddressTypeNibble.BYRON) {
+        Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+        Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+        Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+
+        return {
+            type: params.addressTypeNibble,
+            protocolMagic: parseUint32_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
+            spendingPath: parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH),
+            stakingChoice: { type: StakingChoiceType.NO_STAKING }
+        }
+    }
+
+    const networkId = parseUint8_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_NETWORK_ID)
+    Precondition.check(networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
+
+    switch (params.addressTypeNibble) {
+        case AddressTypeNibble.BASE: {
+            Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            const _hash = params.stakingKeyHashHex != null ? 'hash' : ''
+            const _path = params.stakingPath != null ? 'path' : ''
+            switch (_hash + _path) {
+                case 'hash': {
+                    const hashHex = parseHexStringOfLength(params.stakingKeyHashHex!, KEY_HASH_LENGTH, TxErrors.OUTPUT_INVALID_STAKING_KEY_HASH)
+                    return {
+                        type: params.addressTypeNibble,
+                        networkId,
+                        spendingPath,
+                        stakingChoice: {
+                            type: StakingChoiceType.STAKING_KEY_HASH,
+                            hashHex,
+                        }
+                    }
+                }
+
+                case 'path': {
+                    const path = parseBIP32Path(params.stakingPath!, TxErrors.OUTPUT_INVALID_STAKING_KEY_PATH)
+
+                    return {
+                        type: params.addressTypeNibble,
+                        networkId,
+                        spendingPath,
+                        stakingChoice: {
+                            type: StakingChoiceType.STAKING_KEY_PATH,
+                            path,
+                        }
+                    }
+                }
+
+                default:
+                    throw new Error(TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            }
+        }
+        case AddressTypeNibble.ENTERPRISE: {
+            Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+
+            return {
+                type: params.addressTypeNibble,
+                networkId,
+                spendingPath,
+                stakingChoice: {
+                    type: StakingChoiceType.NO_STAKING,
+                }
+            }
+        }
+        case AddressTypeNibble.POINTER: {
+            Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+
+            Precondition.check(params.stakingBlockchainPointer != null, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER)
+            const pointer = params.stakingBlockchainPointer!
+
+            return {
+                type: params.addressTypeNibble,
+                networkId,
+                spendingPath,
+                stakingChoice: {
+                    type: StakingChoiceType.BLOCKCHAIN_POINTER,
+                    pointer: {
+                        blockIndex: parseUint32_t(pointer.blockIndex, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER),
+                        txIndex: parseUint32_t(pointer.txIndex, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER),
+                        certificateIndex: parseUint32_t(pointer.certificateIndex, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER)
+                    },
+                }
+            }
+        }
+        case AddressTypeNibble.REWARD: {
+            Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+
+            return {
+                type: params.addressTypeNibble,
+                networkId,
+                spendingPath,
+                stakingChoice: {
+                    type: StakingChoiceType.NO_STAKING
+                }
+            }
+        }
+        default:
+            throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
     }
 }

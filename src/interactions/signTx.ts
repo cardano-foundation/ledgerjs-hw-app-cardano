@@ -11,7 +11,7 @@ import type {
 import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
 import type { ParsedCertificate } from "../parsing";
-import { CertificateType, parseCertificates, validateTransaction } from "../parsing";
+import { CertificateType, parseAssetGroup, parseCertificates, validateTransaction } from "../parsing";
 import utils, { Assert, invariant, Precondition, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -209,7 +209,9 @@ const signTx_addOutput = async (
   }
 
   // Assets
-  for (const assetGroup of output.tokenBundle || []) {
+  for (const _assetGroup of output.tokenBundle || []) {
+    const assetGroup = parseAssetGroup(_assetGroup)
+
     const data = Buffer.concat([
       utils.hex_to_buf(assetGroup.policyIdHex),
       utils.uint32_to_buf(assetGroup.tokens.length),

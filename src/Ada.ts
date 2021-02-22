@@ -28,9 +28,10 @@ import { signTransaction } from "./interactions/signTx";
 import {
   AddressTypeNibble,
   CertificateType,
+  parseBIP32Path,
 } from "./parsing";
 import { TxErrors } from "./txErrors";
-import utils, { Assert } from "./utils";
+import utils, { Assert, Precondition } from "./utils";
 
 const CLA = 0xd7;
 
@@ -42,6 +43,15 @@ export type BIP32Path = Array<number>;
 export type Network = {
   protocolMagic: number
   networkId: number
+}
+
+export type AddressParams = {
+  addressTypeNibble: AddressTypeNibble,
+  networkIdOrProtocolMagic: number,
+  spendingPath: BIP32Path,
+  stakingPath?: BIP32Path | null,
+  stakingKeyHashHex?: string | null,
+  stakingBlockchainPointer?: StakingBlockchainPointer | null
 }
 
 export type InputTypeUTxO = {
@@ -180,9 +190,13 @@ export type SignTransactionResponse = {
   witnesses: Array<Witness>,
 };
 
-export const TxOutputTypeCodes = {
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES: 1,
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS: 2,
+export const enum TxOutputType {
+  SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES = 1,
+  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS = 2,
+}
+
+export const GetKeyErrors = {
+  INVALID_PATH: "invalid key path",
 };
 
 export const DeviceErrorCodes = {
@@ -350,7 +364,14 @@ export default class Ada {
   async getExtendedPublicKeys(
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
-    return getExtendedPublicKeys(this._send, paths);
+    // validate the input
+    Precondition.checkIsArray(paths);
+    for (const path of paths) {
+      Precondition.checkIsValidPath(path);
+    }
+    // TODO: move to parsing
+    const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));
+    return getExtendedPublicKeys(this._send, parsed);
   }
 
   /**
@@ -413,12 +434,14 @@ export default class Ada {
   ): Promise<DeriveAddressResponse> {
     return deriveAddress(
       this._send,
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
+      {
+        addressTypeNibble,
+        networkIdOrProtocolMagic,
+        spendingPath,
+        stakingPath,
+        stakingKeyHashHex,
+        stakingBlockchainPointer
+      }
     );
   }
 
@@ -433,12 +456,14 @@ export default class Ada {
   ): Promise<void> {
     return showAddress(
       this._send,
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
+      {
+        addressTypeNibble,
+        networkIdOrProtocolMagic,
+        spendingPath,
+        stakingPath,
+        stakingKeyHashHex,
+        stakingBlockchainPointer
+      }
     );
   }
 
