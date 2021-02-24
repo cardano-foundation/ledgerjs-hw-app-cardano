@@ -1,12 +1,9 @@
-import type { Network, TxOutput } from "./Ada";
 import { TxOutputType } from "./Ada";
-import type { ParsedAddressParams, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, ValidBIP32Path } from "./parsing";
-import { parseAddressParams } from "./parsing";
+import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, ValidBIP32Path } from "./parsing";
 import { StakingChoiceType } from "./parsing";
 import { KEY_HASH_LENGTH, TX_HASH_LENGTH } from "./parsing";
 import { AddressTypeNibble, PoolOwnerType, RelayType } from "./parsing";
-import { TxErrors } from "./txErrors";
-import utils, { Precondition, unreachable } from "./utils";
+import utils, { assert, unreachable } from "./utils";
 
 const HARDENED = 0x80000000;
 
@@ -65,100 +62,45 @@ export function serializeAddressParams(
   ]);
 }
 
-export function serializeOutputBasicParams(
-  output: TxOutput,
-  network: Network,
-): Buffer {
-  Precondition.checkIsValidAdaAmount(output.amountStr);
-  let outputType;
-  let addressBuf;
-
-  if ("addressHex" in output && output.addressHex) {
-    outputType = TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES;
-
-    Precondition.checkIsHexString(
-      output.addressHex,
-      TxErrors.OUTPUT_INVALID_ADDRESS
-    );
-    Precondition.check(
-      output.addressHex.length <= 128 * 2,
-      TxErrors.OUTPUT_INVALID_ADDRESS
-    );
-    addressBuf = Buffer.concat([
-      utils.uint32_to_buf(output.addressHex.length / 2),
-      utils.hex_to_buf(output.addressHex),
-    ]);
-  } else if ("spendingPath" in output && output.spendingPath) {
-    outputType = TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS;
-
-    const parsed = parseAddressParams({
-      addressTypeNibble: output.addressTypeNibble,
-      networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
-        ? network.protocolMagic
-        : network.networkId,
-      spendingPath: output.spendingPath,
-      stakingPath: output.stakingPath,
-      stakingKeyHashHex: output.stakingKeyHashHex,
-      stakingBlockchainPointer: output.stakingBlockchainPointer
-    });
-    addressBuf = serializeAddressParams(parsed)
-
-  } else {
-    throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
+function serializeOutputDestination(destination: OutputDestination) {
+  switch (destination.type) {
+    case TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES:
+      return Buffer.concat([
+        utils.uint8_to_buf(destination.type),
+        utils.uint32_to_buf(destination.addressHex.length / 2),
+        utils.hex_to_buf(destination.addressHex)
+      ])
+    case TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS:
+      return Buffer.concat([
+        utils.uint8_to_buf(destination.type),
+        serializeAddressParams(destination.addressParams)
+      ])
+    default:
+      unreachable(destination)
   }
+}
 
-  const numassetGroups = output.tokenBundle ? output.tokenBundle.length : 0;
-
+export function serializeOutputBasicParams(
+  output: ParsedOutput,
+): Buffer {
   return Buffer.concat([
-    utils.uint8_to_buf(outputType),
-    addressBuf,
+    serializeOutputDestination(output.destination),
     utils.ada_amount_to_buf(output.amountStr),
-    utils.uint32_to_buf(numassetGroups),
+    utils.uint32_to_buf(output.tokenBundle.length),
   ]);
 }
 
 // TODO remove after ledger app 2.2 is widespread
 export function serializeOutputBasicParamsBefore_2_2(
-  output: TxOutput,
-  network: Network
+  output: ParsedOutput,
 ): Buffer {
-  Precondition.checkIsValidAdaAmount(output.amountStr);
+  assert(output.tokenBundle.length === 0, 'Invalid assets length')
 
-  if ("addressHex" in output && output.addressHex != null) {
-    Precondition.checkIsHexString(
-      output.addressHex,
-      TxErrors.OUTPUT_INVALID_ADDRESS
-    );
-    Precondition.check(
-      output.addressHex.length <= 128 * 2,
-      TxErrors.OUTPUT_INVALID_ADDRESS
-    );
-
-    return Buffer.concat([
-      utils.ada_amount_to_buf(output.amountStr),
-      utils.uint8_to_buf(TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
-      utils.hex_to_buf(output.addressHex),
-    ]);
-  } else if ('spendingPath' in output && output.spendingPath != null) {
-    const parsed = parseAddressParams({
-      addressTypeNibble: output.addressTypeNibble,
-      networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
-        ? network.protocolMagic
-        : network.networkId,
-      spendingPath: output.spendingPath,
-      stakingPath: output.stakingPath,
-      stakingKeyHashHex: output.stakingKeyHashHex,
-      stakingBlockchainPointer: output.stakingBlockchainPointer
-    })
-
-    return Buffer.concat([
-      utils.ada_amount_to_buf(output.amountStr),
-      utils.uint8_to_buf(TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS),
-      serializeAddressParams(parsed),
-    ]);
-  } else {
-    throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
-  }
+  return Buffer.concat([
+    // Note: different ordering from 2.2 version
+    utils.ada_amount_to_buf(output.amountStr),
+    serializeOutputDestination(output.destination)
+  ])
 }
 
 export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {

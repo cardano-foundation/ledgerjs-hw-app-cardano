@@ -10,8 +10,9 @@ import type {
 } from "../Ada";
 import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
-import type { ParsedCertificate } from "../parsing";
-import { CertificateType, parseAssetGroup, parseCertificates, validateTransaction } from "../parsing";
+import type { ParsedCertificate, ParsedOutput } from "../parsing";
+import { parseTxOutput } from "../parsing";
+import { CertificateType, parseCertificates, validateTransaction } from "../parsing";
 import utils, { Assert, invariant, Precondition, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -151,8 +152,7 @@ const signTx_addInput = async (
 
 const signTx_addOutputBefore_2_2 = async (
   _send: SendFn,
-  output: TxOutput,
-  network: Network,
+  output: ParsedOutput,
 ) => {
   const enum P2 {
     UNUSED = 0x00,
@@ -160,7 +160,6 @@ const signTx_addOutputBefore_2_2 = async (
 
   const data = cardano.serializeOutputBasicParamsBefore_2_2(
     output,
-    network
   );
 
   await _send({
@@ -175,14 +174,13 @@ const signTx_addOutputBefore_2_2 = async (
 
 const signTx_addOutput = async (
   _send: SendFn,
-  output: TxOutput,
-  network: Network,
+  output: ParsedOutput,
   flags: {
     appHasMultiassetSupport: boolean
   }
 ): Promise<void> => {
   if (!flags.appHasMultiassetSupport) {
-    return await signTx_addOutputBefore_2_2(_send, output, network)
+    return await signTx_addOutputBefore_2_2(_send, output)
   }
 
   const enum P2 {
@@ -196,7 +194,6 @@ const signTx_addOutput = async (
   {
     const data = cardano.serializeOutputBasicParams(
       output,
-      network
     );
 
     await _send({
@@ -209,9 +206,7 @@ const signTx_addOutput = async (
   }
 
   // Assets
-  for (const _assetGroup of output.tokenBundle || []) {
-    const assetGroup = parseAssetGroup(_assetGroup)
-
+  for (const assetGroup of output.tokenBundle) {
     const data = Buffer.concat([
       utils.hex_to_buf(assetGroup.policyIdHex),
       utils.uint32_to_buf(assetGroup.tokens.length),
@@ -605,8 +600,8 @@ export async function signTransaction(
   }
 
   // outputs
-  for (const output of outputs) {
-    await signTx_addOutput(_send, output, network, { appHasMultiassetSupport });
+  for (const output of outputs.map(o => parseTxOutput(o, network))) {
+    await signTx_addOutput(_send, output, { appHasMultiassetSupport });
   }
 
   await signTx_setFee(_send, feeStr);

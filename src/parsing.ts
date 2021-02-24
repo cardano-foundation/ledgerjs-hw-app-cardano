@@ -13,12 +13,14 @@ import type {
     SingleHostIPRelay,
     SingleHostNameRelay,
     Token,
+    TxOutput,
     TxOutputTypeAddress,
     TxOutputTypeAddressParams,
     Withdrawal,
 } from "./Ada";
-// TODO: remove this dependency
-import { serializeOutputBasicParams } from "./cardano";
+import {
+    TxOutputType,
+} from './Ada'
 import { TxErrors } from "./txErrors";
 import utils, { MAX_LOVELACE_SUPPLY_STR, MAX_UINT_64_STR, Precondition } from "./utils";
 import { hex_to_buf } from "./utils";
@@ -194,7 +196,7 @@ export function validateTransaction(
     Precondition.checkIsArray(outputs, TxErrors.OUTPUTS_NOT_ARRAY);
     for (const output of outputs) {
         // we try to serialize the data, an error is thrown if ada amount or address params are invalid
-        serializeOutputBasicParams(output, network);
+        parseTxOutput(output, network)
 
         if ("spendingPath" in output && output.spendingPath != null) {
             Precondition.check(
@@ -719,5 +721,68 @@ export function parseAddressParams(
         }
         default:
             throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE);
+    }
+}
+
+
+export type OutputDestination = {
+    type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES
+    addressHex: HexString
+} | {
+    type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS
+    addressParams: ParsedAddressParams
+}
+
+export type ParsedOutput = {
+    amountStr: Uint64_str
+    tokenBundle: AssetGroup[]
+    destination: OutputDestination
+}
+
+export function parseTxOutput(
+    output: TxOutput,
+    network: Network,
+): ParsedOutput {
+    const amountStr = parseUint64_str(output.amountStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.OUTPUT_INVALID_AMOUNT)
+    const tokenBundle = (output.tokenBundle ?? []).map((ag) => parseAssetGroup(ag))
+
+    const hasAddressHex = "addressHex" in output && output.addressHex != null
+    const hasAddressParams = "spendingPath" in output && output.spendingPath != null
+    if (hasAddressHex && !hasAddressParams) {
+        output = output as TxOutputTypeAddress
+        const addressHex = parseHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS)
+        Precondition.check(
+            output.addressHex.length <= 128 * 2,
+            TxErrors.OUTPUT_INVALID_ADDRESS
+        );
+        return {
+            amountStr,
+            tokenBundle,
+            destination: {
+                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES,
+                addressHex,
+            }
+        }
+    } else if (!hasAddressHex && hasAddressParams) {
+        output = output as TxOutputTypeAddressParams
+        return {
+            amountStr,
+            tokenBundle,
+            destination: {
+                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
+                addressParams: parseAddressParams({
+                    addressTypeNibble: output.addressTypeNibble,
+                    networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
+                        ? network.protocolMagic
+                        : network.networkId,
+                    spendingPath: output.spendingPath,
+                    stakingPath: output.stakingPath,
+                    stakingKeyHashHex: output.stakingKeyHashHex,
+                    stakingBlockchainPointer: output.stakingBlockchainPointer
+                })
+            }
+        }
+    } else {
+        throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE)
     }
 }
