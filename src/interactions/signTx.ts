@@ -612,10 +612,8 @@ export async function signTransaction(
     await signTx_addCertificate(_send, certificate);
   }
 
-  if (withdrawals.length > 0) {
-    for (const withdrawal of withdrawals.map(w => parseWithdrawal(w))) {
-      await signTx_addWithdrawal(_send, withdrawal);
-    }
+  for (const withdrawal of withdrawals.map(w => parseWithdrawal(w))) {
+    await signTx_addWithdrawal(_send, withdrawal);
   }
 
   if (metadataHashHex != null) {
