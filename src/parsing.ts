@@ -235,8 +235,7 @@ export function validateTransaction(
         throw new Error(TxErrors.WITHDRAWALS_FORBIDDEN);
     }
     for (const withdrawal of withdrawals) {
-        Precondition.checkIsValidAdaAmount(withdrawal.amountStr);
-        Precondition.checkIsValidPath(withdrawal.path);
+        parseWithdrawal(withdrawal)
     }
 
     // metadata could be null
@@ -253,6 +252,17 @@ export function validateTransaction(
     }
 }
 
+export type ParsedWithdrawal = {
+    amountStr: Uint64_str
+    path: ValidBIP32Path
+}
+
+export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
+    return {
+        amountStr: parseUint64_str(params.amountStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.WITHDRAWAL_INVALID_AMOUNT),
+        path: parseBIP32Path(params.path, TxErrors.WITHDRAWAL_INVALID_PATH)
+    }
+}
 
 
 export type VarlenAsciiString = string & { __type: 'ascii' }

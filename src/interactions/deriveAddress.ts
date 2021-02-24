@@ -1,21 +1,19 @@
 import type {
-  AddressParams,
   DeriveAddressResponse,
   SendFn,
 } from "../Ada";
 import cardano from "../cardano";
-import { parseAddressParams } from "../parsing";
+import type { ParsedAddressParams } from "../parsing";
 import { INS } from "./common/ins";
 
 export async function deriveAddress(
   _send: SendFn,
-  addressParams: AddressParams,
+  addressParams: ParsedAddressParams,
 ): Promise<DeriveAddressResponse> {
   const P1_RETURN = 0x01;
   const P2_UNUSED = 0x00;
 
-  const parsed = parseAddressParams(addressParams)
-  const data = cardano.serializeAddressParams(parsed);
+  const data = cardano.serializeAddressParams(addressParams);
 
   const response = await _send({
     ins: INS.DERIVE_ADDRESS,

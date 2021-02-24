@@ -89,7 +89,8 @@ export enum TxErrors {
   WITHDRAWALS_NOT_ARRAY = "withdrawals not an array",
   WITHDRAWALS_FORBIDDEN =
   "no withdrawals allowed for transactions registering stake pools",
-
+  WITHDRAWAL_INVALID_AMOUNT = "invalid withdrawal amount",
+  WITHDRAWAL_INVALID_PATH = "invalid withdrawal path",
   METADATA_INVALID = "invalid metadata",
 
   VALIDITY_INTERVAL_START_INVALID = "invalid validity interval start",

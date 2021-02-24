@@ -10,9 +10,8 @@ import type {
 } from "../Ada";
 import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
-import type { ParsedCertificate, ParsedOutput } from "../parsing";
-import { parseTxOutput } from "../parsing";
-import { CertificateType, parseCertificates, validateTransaction } from "../parsing";
+import type { ParsedCertificate, ParsedOutput, ParsedWithdrawal } from "../parsing";
+import { CertificateType, parseCertificates, parseTxOutput, parseWithdrawal, validateTransaction } from "../parsing";
 import utils, { Assert, invariant, Precondition, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -359,15 +358,14 @@ const signTx_addCertificate = async (
 
 const signTx_addWithdrawal = async (
   _send: SendFn,
-  path: BIP32Path,
-  amountStr: string
+  withdrawal: ParsedWithdrawal
 ): Promise<void> => {
   const enum P2 {
     UNUSED = 0x00
   }
   const data = Buffer.concat([
-    utils.ada_amount_to_buf(amountStr),
-    utils.path_to_buf(path),
+    utils.ada_amount_to_buf(withdrawal.amountStr),
+    utils.path_to_buf(withdrawal.path),
   ]);
   await _send({
     ins: INS.SIGN_TX,
@@ -614,10 +612,8 @@ export async function signTransaction(
     await signTx_addCertificate(_send, certificate);
   }
 
-  if (withdrawals.length > 0) {
-    for (const withdrawal of withdrawals) {
-      await signTx_addWithdrawal(_send, withdrawal.path, withdrawal.amountStr);
-    }
+  for (const withdrawal of withdrawals.map(w => parseWithdrawal(w))) {
+    await signTx_addWithdrawal(_send, withdrawal);
   }
 
   if (metadataHashHex != null) {

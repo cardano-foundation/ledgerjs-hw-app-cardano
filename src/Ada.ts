@@ -28,6 +28,7 @@ import { signTransaction } from "./interactions/signTx";
 import {
   AddressTypeNibble,
   CertificateType,
+  parseAddressParams,
   parseBIP32Path,
 } from "./parsing";
 import { TxErrors } from "./txErrors";
@@ -432,17 +433,16 @@ export default class Ada {
     stakingKeyHashHex: string | null = null,
     stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<DeriveAddressResponse> {
-    return deriveAddress(
-      this._send,
-      {
-        addressTypeNibble,
-        networkIdOrProtocolMagic,
-        spendingPath,
-        stakingPath,
-        stakingKeyHashHex,
-        stakingBlockchainPointer
-      }
-    );
+    const addressParams = parseAddressParams({
+      addressTypeNibble,
+      networkIdOrProtocolMagic,
+      spendingPath,
+      stakingPath,
+      stakingKeyHashHex,
+      stakingBlockchainPointer
+    })
+
+    return deriveAddress(this._send, addressParams);
   }
 
 
@@ -454,17 +454,16 @@ export default class Ada {
     stakingKeyHashHex: string | null = null,
     stakingBlockchainPointer: StakingBlockchainPointer | null = null
   ): Promise<void> {
-    return showAddress(
-      this._send,
-      {
-        addressTypeNibble,
-        networkIdOrProtocolMagic,
-        spendingPath,
-        stakingPath,
-        stakingKeyHashHex,
-        stakingBlockchainPointer
-      }
-    );
+    const addressParams = parseAddressParams({
+      addressTypeNibble,
+      networkIdOrProtocolMagic,
+      spendingPath,
+      stakingPath,
+      stakingKeyHashHex,
+      stakingBlockchainPointer
+    })
+
+    return showAddress(this._send, addressParams);
   }
 
 
