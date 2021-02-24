@@ -10,8 +10,8 @@ import type {
 } from "../Ada";
 import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
-import type { ParsedCertificate, ParsedOutput, ParsedWithdrawal } from "../parsing";
-import { CertificateType, parseCertificates, parseTxOutput, parseWithdrawal, validateTransaction } from "../parsing";
+import type { ParsedCertificate, ParsedInput, ParsedOutput, ParsedWithdrawal } from "../parsing";
+import { CertificateType, parseCertificates, parseTxInput, parseTxOutput, parseWithdrawal, validateTransaction } from "../parsing";
 import utils, { Assert, invariant, Precondition, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -131,7 +131,7 @@ const signTx_init = async (
 
 const signTx_addInput = async (
   _send: SendFn,
-  input: InputTypeUTxO
+  input: ParsedInput
 ): Promise<void> => {
   const enum P2 {
     UNUSED = 0x00,
@@ -593,7 +593,7 @@ export async function signTransaction(
   );
 
   // inputs
-  for (const input of inputs) {
+  for (const input of inputs.map(i => parseTxInput(i))) {
     await signTx_addInput(_send, input);
   }
 
