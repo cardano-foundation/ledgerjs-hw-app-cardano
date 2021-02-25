@@ -5,7 +5,7 @@ export enum TxErrors {
 
   INPUTS_NOT_ARRAY = "inputs not an array",
   INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER =
-  "inputs should not contain the witness path if signing stake pool certificate as owner",
+  "inputs should not contain the witness path if signing stake pool certificate as an owner",
   INPUT_INVALID_TX_HASH = "invalid tx hash in an input",
   INPUT_INVALID_PATH = "invalid input path",
   INPUT_INVALID_UTXO_INDEX = "invalid input utxo index",
