@@ -178,18 +178,11 @@ export function validateTransaction(
 
     // inputs
     Precondition.checkIsArray(inputs, TxErrors.INPUTS_NOT_ARRAY);
-    for (const input of inputs) {
-        Precondition.checkIsHexStringOfLength(
-            input.txHashHex,
-            TX_HASH_LENGTH,
-            TxErrors.INPUT_INVALID_TX_HASH
-        );
-
-        if (isSigningPoolRegistrationAsOwner) {
-            // input should not be given with a path
-            // the path is not used, but we check just to avoid potential confusion of developers using this
-            Precondition.check(!input.path, TxErrors.INPUT_WITH_PATH);
-        }
+    const _inputs = inputs.map(inp => parseTxInput(inp))
+    if (isSigningPoolRegistrationAsOwner) {
+        // input should not be given with a path
+        // the path is not used, but we check just to avoid potential confusion of developers using this
+        Precondition.check(_inputs.every(inp => inp == null), TxErrors.INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER);
     }
 
     // outputs
@@ -249,6 +242,22 @@ export function validateTransaction(
             validityIntervalStartStr,
             TxErrors.VALIDITY_INTERVAL_START_INVALID
         );
+    }
+}
+
+export type ParsedInput = {
+    txHashHex: FixlenHexString<typeof TX_HASH_LENGTH>
+    outputIndex: Uint32_t
+    path: BIP32Path | null
+}
+
+export function parseTxInput(input: InputTypeUTxO): ParsedInput {
+    const txHashHex = parseHexStringOfLength(input.txHashHex, TX_HASH_LENGTH, TxErrors.INPUT_INVALID_TX_HASH)
+    const outputIndex = parseUint32_t(input.outputIndex, TxErrors.INPUT_INVALID_UTXO_INDEX)
+    return {
+        txHashHex,
+        outputIndex,
+        path: input.path != null ? parseBIP32Path(input.path, TxErrors.INPUT_INVALID_PATH) : null
     }
 }
 
