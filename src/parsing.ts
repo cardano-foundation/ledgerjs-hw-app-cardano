@@ -21,9 +21,14 @@ import type {
 import {
     TxOutputType,
 } from './Ada'
+import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./parseUtils";
+import { parseIntFromStr } from "./parseUtils";
+import { isPositiveUint64str, isValidAdaAmountStr } from "./parseUtils";
+import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isUint64str, isUintStr, isValidPath, validate } from "./parseUtils";
+import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
+import { hex_to_buf } from "./serializeUtils";
 import { TxErrors } from "./txErrors";
-import utils, { MAX_LOVELACE_SUPPLY_STR, MAX_UINT_64_STR, Precondition } from "./utils";
-import { hex_to_buf } from "./utils";
+import { MAX_LOVELACE_SUPPLY_STR, MAX_UINT_64_STR } from "./utils";
 
 export enum AddressTypeNibble {
     BASE = 0b0000,
@@ -71,29 +76,13 @@ function parseCertificate(cert: Certificate): ParsedCertificate {
     switch (cert.type) {
         case CertificateType.STAKE_REGISTRATION:
         case CertificateType.STAKE_DEREGISTRATION: {
-            Precondition.checkIsValidPath(
-                cert.path,
-                TxErrors.CERTIFICATE_MISSING_PATH
-            );
-            Precondition.check(
-                cert.poolKeyHashHex == null,
-                TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH
-            );
+            validate(cert.poolKeyHashHex == null, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
             return {
                 type: cert.type,
                 path: parseBIP32Path(cert.path, TxErrors.CERTIFICATE_MISSING_PATH)
             }
         }
         case CertificateType.STAKE_DELEGATION: {
-            Precondition.checkIsValidPath(
-                cert.path,
-                TxErrors.CERTIFICATE_MISSING_PATH
-            );
-            Precondition.checkIsHexStringOfLength(
-                cert.poolKeyHashHex,
-                KEY_HASH_LENGTH,
-                TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH
-            );
             return {
                 type: cert.type,
                 path: parseBIP32Path(cert.path, TxErrors.CERTIFICATE_MISSING_PATH),
@@ -113,12 +102,12 @@ function parseCertificate(cert: Certificate): ParsedCertificate {
 }
 
 export function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertificate> {
-    Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
+    validate(isArray(certificates), TxErrors.CERTIFICATES_NOT_ARRAY);
 
     const parsed = certificates.map(cert => parseCertificate(cert))
 
     // Pool registration certificate is not allowed to be combined with anything else
-    Precondition.check(
+    validate(
         parsed.every((cert) => cert.type !== CertificateType.STAKE_POOL_REGISTRATION) || parsed.length === 1,
         TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN
     );
@@ -138,12 +127,12 @@ export type ParsedAssetGroup = {
 
 function parseToken(token: Token): ParsedToken {
     const assetNameHex = parseHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
-    Precondition.check(
+    validate(
         token.assetNameHex.length <= ASSET_NAME_LENGTH_MAX * 2,
         TxErrors.OUTPUT_INVALID_ASSET_NAME
     );
 
-    const amountStr = parseUint64_str(token.amountStr, MAX_UINT_64_STR, 'TODO: missing error')
+    const amountStr = parseUint64_str(token.amountStr, MAX_UINT_64_STR, TxErrors.OUTPUT_INVALID_AMOUNT)
     return {
         assetNameHex,
         amountStr,
@@ -151,8 +140,8 @@ function parseToken(token: Token): ParsedToken {
 }
 
 export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
-    Precondition.checkIsArray(assetGroup.tokens, 'TODO: missing error');
-    Precondition.check(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, 'TODO: missing error');
+    validate(isArray(assetGroup.tokens), 'TODO: missing error');
+    validate(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, 'TODO: missing error');
 
     return {
         policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, TxErrors.OUTPUT_INVALID_TOKEN_POLICY),
@@ -171,39 +160,36 @@ export function validateTransaction(
     metadataHashHex?: string | null,
     validityIntervalStartStr?: string | null
 ) {
-    Precondition.checkIsArray(certificates, TxErrors.CERTIFICATES_NOT_ARRAY);
+    validate(isArray(certificates), TxErrors.CERTIFICATES_NOT_ARRAY);
     const isSigningPoolRegistrationAsOwner = certificates.some(
         (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
     );
 
     // inputs
-    Precondition.checkIsArray(inputs, TxErrors.INPUTS_NOT_ARRAY);
+    validate(isArray(inputs), TxErrors.INPUTS_NOT_ARRAY);
     const _inputs = inputs.map(inp => parseTxInput(inp))
     if (isSigningPoolRegistrationAsOwner) {
         // input should not be given with a path
         // the path is not used, but we check just to avoid potential confusion of developers using this
-        Precondition.check(_inputs.every(inp => inp == null), TxErrors.INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER);
+        validate(_inputs.every(inp => inp.path == null), TxErrors.INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER);
     }
 
     // outputs
-    Precondition.checkIsArray(outputs, TxErrors.OUTPUTS_NOT_ARRAY);
+    validate(isArray(outputs), TxErrors.OUTPUTS_NOT_ARRAY);
     for (const output of outputs) {
         // we try to serialize the data, an error is thrown if ada amount or address params are invalid
         parseTxOutput(output, network)
 
         if ("spendingPath" in output && output.spendingPath != null) {
-            Precondition.check(
+            validate(
                 !isSigningPoolRegistrationAsOwner,
                 TxErrors.OUTPUT_WITH_PATH
             );
         }
 
         if (output.tokenBundle) {
-            Precondition.checkIsArray(
-                output.tokenBundle,
-                TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE
-            );
-            Precondition.check(output.tokenBundle.length <= ASSET_GROUPS_MAX);
+            validate(isArray(output.tokenBundle), TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
+            validate(output.tokenBundle.length <= ASSET_GROUPS_MAX, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE);
 
             for (const assetGroup of output.tokenBundle) {
                 parseAssetGroup(assetGroup)
@@ -212,18 +198,18 @@ export function validateTransaction(
     }
 
     // fee
-    Precondition.checkIsValidAdaAmount(feeStr, TxErrors.FEE_INVALID);
+    validate(isValidAdaAmountStr(feeStr), TxErrors.FEE_INVALID);
 
     //  ttl
     if (ttlStr != null) {
-        Precondition.checkIsPositiveUint64Str(ttlStr, TxErrors.TTL_INVALID);
+        validate(isPositiveUint64str(ttlStr), TxErrors.TTL_INVALID);
     }
 
     // certificates
     parseCertificates(certificates);
 
     // withdrawals
-    Precondition.checkIsArray(withdrawals, TxErrors.WITHDRAWALS_NOT_ARRAY);
+    validate(isArray(withdrawals), TxErrors.WITHDRAWALS_NOT_ARRAY);
     if (isSigningPoolRegistrationAsOwner && withdrawals.length > 0) {
         throw new Error(TxErrors.WITHDRAWALS_FORBIDDEN);
     }
@@ -233,13 +219,13 @@ export function validateTransaction(
 
     // metadata could be null
     if (metadataHashHex != null) {
-        Precondition.checkIsHexStringOfLength(metadataHashHex, 32, TxErrors.METADATA_INVALID);
+        validate(isHexStringOfLength(metadataHashHex, 32), TxErrors.METADATA_INVALID);
     }
 
     //  validity interval start
     if (validityIntervalStartStr != null) {
-        Precondition.checkIsPositiveUint64Str(
-            validityIntervalStartStr,
+        validate(
+            isPositiveUint64str(validityIntervalStartStr),
             TxErrors.VALIDITY_INTERVAL_START_INVALID
         );
     }
@@ -274,52 +260,8 @@ export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
 }
 
 
-export type VarlenAsciiString = string & { __type: 'ascii' }
-export type FixlenHexString<N> = string & { __type: 'hex', __length: N }
-export type HexString = string & { __type: 'hex' }
-export type Uint64_str = string & { __type: 'uint64_t' }
-export type ValidBIP32Path = BIP32Path & { __type: 'bip32_path' }
-export type Uint32_t = number & { __type: 'uint32_t' }
-export type Uint8_t = number & { __type: 'uint8_t' }
-
-function parseAscii(str: string, err: string): VarlenAsciiString {
-    Precondition.checkIsString(str, err);
-    Precondition.check(
-        str.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
-        err
-    );
-    return str as VarlenAsciiString
-}
-
-
-function parseHexString(str: string, err: string): HexString {
-    Precondition.checkIsHexString(str, err)
-    return str as HexString
-}
-
-function parseHexStringOfLength<L extends number>(str: string, length: L, err: string): FixlenHexString<L> {
-    Precondition.checkIsHexStringOfLength(str, length, err)
-    return str as FixlenHexString<L>
-}
-
-function parseUint64_str(str: string, maxValue: string, err: string): Uint64_str {
-    Precondition.checkIsValidUintStr(str, maxValue, err);
-    return str as Uint64_str
-}
-
-function parseUint32_t(value: number, err: string): Uint32_t {
-    Precondition.checkIsUint32(value, err);
-    return value as Uint32_t
-}
-
-function parseUint8_t(value: number, err: string): Uint8_t {
-    Precondition.checkIsUint8(value, err);
-    return value as Uint8_t
-}
-
-
 export function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
-    Precondition.checkIsValidPath(path, err);
+    validate(isValidPath(path), err);
     return path as ValidBIP32Path
 }
 
@@ -329,20 +271,21 @@ export type ParsedMargin = {
 }
 
 export function parseMargin(params: PoolParams['margin']): ParsedMargin {
+    const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
+
     const marginNumeratorStr = params.numeratorStr;
     const marginDenominatorStr = params.denominatorStr;
-    Precondition.checkIsUint64Str(
-        marginNumeratorStr,
+    validate(
+        isUint64str(marginNumeratorStr),
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
     );
-    Precondition.checkIsValidPoolMarginDenominator(
-        marginDenominatorStr,
+    validate(
+        isUintStr(marginDenominatorStr, POOL_MARGIN_DENOMINATOR_MAX_STR),
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR
-    );
+    )
     // given both are valid uint strings, the check below is equivalent to "marginNumerator <= marginDenominator"
-    Precondition.checkIsValidUintStr(
-        marginNumeratorStr,
-        marginDenominatorStr,
+    validate(
+        isUintStr(marginNumeratorStr, marginDenominatorStr),
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
     );
     return {
@@ -378,15 +321,15 @@ export function parsePoolParams(params: PoolParams): ParsedPoolParams {
     const metadata = parsePoolMetadataParams(params.metadata)
 
     // Additional checks
-    Precondition.check(
+    validate(
         owners.length <= POOL_REGISTRATION_OWNERS_MAX,
         TxErrors.CERTIFICATE_POOL_OWNERS_TOO_MANY
     );
-    Precondition.check(
+    validate(
         relays.length <= POOL_REGISTRATION_RELAYS_MAX,
         TxErrors.CERTIFICATE_POOL_RELAYS_TOO_MANY
     );
-    Precondition.check(
+    validate(
         owners.filter(o => o.type === PoolOwnerType.PATH).length === 1,
         TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
     )
@@ -453,33 +396,32 @@ export const enum RelayType {
 
 export type ParsedPoolRelay = {
     type: RelayType.SingleHostAddr,
-    port: number | null,
+    port: Uint16_t | null,
     ipv4: Buffer | null,
     ipv6: Buffer | null,
 } | {
     type: RelayType.SingleHostName,
-    port: number | null,
+    port: Uint16_t | null,
     dnsName: VarlenAsciiString,
 } | {
     type: RelayType.MultiHostName,
     dnsName: VarlenAsciiString
 }
 
-function parsePort(portNumber: number, err: string): number {
-    Precondition.checkIsUint32(portNumber, err)
-    Precondition.check(portNumber <= 65535, err)
+function parsePort(portNumber: number, err: string): Uint16_t {
+    validate(isUint16(portNumber), err)
     return portNumber
 }
 
 function parseIPv4(ipv4: string, err: string): Buffer {
-    Precondition.checkIsString(ipv4, err);
+    validate(isString(ipv4), err);
     const ipParts = ipv4.split(".");
-    Precondition.check(ipParts.length === 4, err)
+    validate(ipParts.length === 4, err)
 
     const ipBytes = Buffer.alloc(4);
     for (let i = 0; i < 4; i++) {
-        const ipPart = utils.safe_parseInt(ipParts[i]);
-        Precondition.checkIsUint8(ipPart, err)
+        const ipPart = parseIntFromStr(ipParts[i], "invalid IP");
+        validate(isUint8(ipPart), err)
         ipBytes.writeUInt8(ipPart, i);
     }
     return ipBytes
@@ -487,18 +429,18 @@ function parseIPv4(ipv4: string, err: string): Buffer {
 
 // FIXME(ppershing): This is terrible and wrong implementation
 function parseIPv6(ipv6: string, err: string): Buffer {
-    Precondition.checkIsString(ipv6, err)
+    validate(isString(ipv6), err)
     const ipHex = ipv6.split(":").join("");
-    Precondition.checkIsHexStringOfLength(ipHex, 16, err)
+    validate(isHexStringOfLength(ipHex, 16), err)
     return hex_to_buf(ipHex);
 }
 
 function parseDnsName(dnsName: string, err: string): VarlenAsciiString {
-    Precondition.checkIsString(dnsName, err);
-    Precondition.check(dnsName.length <= 64, err)
+    validate(isString(dnsName), err);
+    validate(dnsName.length <= 64, err)
     // eslint-disable-next-line no-control-regex
-    Precondition.check(/^[\x00-\x7F]*$/.test(dnsName), err)
-    Precondition.check(
+    validate(/^[\x00-\x7F]*$/.test(dnsName), err)
+    validate(
         dnsName
             .split("")
             .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
@@ -557,7 +499,7 @@ export function parsePoolMetadataParams(params: PoolMetadataParams | null): Pars
 
     const url = parseAscii(params.metadataUrl, TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
     // Additional length check
-    Precondition.check(
+    validate(
         url.length <= 64,
         TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
     );
@@ -636,9 +578,9 @@ export function parseAddressParams(
     params: AddressParams
 ): ParsedAddressParams {
     if (params.addressTypeNibble === AddressTypeNibble.BYRON) {
-        Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-        Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-        Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+        validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+        validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+        validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
         return {
             type: params.addressTypeNibble,
@@ -649,12 +591,12 @@ export function parseAddressParams(
     }
 
     const networkId = parseUint8_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_NETWORK_ID)
-    Precondition.check(networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    validate(networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
     const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
 
     switch (params.addressTypeNibble) {
         case AddressTypeNibble.BASE: {
-            Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             const _hash = params.stakingKeyHashHex != null ? 'hash' : ''
             const _path = params.stakingPath != null ? 'path' : ''
             switch (_hash + _path) {
@@ -690,9 +632,9 @@ export function parseAddressParams(
             }
         }
         case AddressTypeNibble.ENTERPRISE: {
-            Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-            Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-            Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
             return {
                 type: params.addressTypeNibble,
@@ -704,10 +646,10 @@ export function parseAddressParams(
             }
         }
         case AddressTypeNibble.POINTER: {
-            Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-            Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
-            Precondition.check(params.stakingBlockchainPointer != null, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER)
+            validate(params.stakingBlockchainPointer != null, TxErrors.OUTPUT_INVALID_BLOCKCHAIN_POINTER)
             const pointer = params.stakingBlockchainPointer!
 
             return {
@@ -725,9 +667,9 @@ export function parseAddressParams(
             }
         }
         case AddressTypeNibble.REWARD: {
-            Precondition.check(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-            Precondition.check(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
-            Precondition.check(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
+            validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
             return {
                 type: params.addressTypeNibble,
@@ -770,10 +712,7 @@ export function parseTxOutput(
     if (hasAddressHex && !hasAddressParams) {
         output = output as TxOutputTypeAddress
         const addressHex = parseHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS)
-        Precondition.check(
-            output.addressHex.length <= 128 * 2,
-            TxErrors.OUTPUT_INVALID_ADDRESS
-        );
+        validate(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
         return {
             amountStr,
             tokenBundle,

@@ -25,6 +25,8 @@ import { getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
+import type { HexString, Uint64_str } from './parseUtils';
+import { isArray, isValidPath, validate } from './parseUtils';
 import {
   AddressTypeNibble,
   CertificateType,
@@ -32,7 +34,7 @@ import {
   parseBIP32Path,
 } from "./parsing";
 import { TxErrors } from "./txErrors";
-import utils, { Assert, Precondition } from "./utils";
+import utils, { assert } from "./utils";
 
 const CLA = 0xd7;
 
@@ -62,12 +64,12 @@ export type InputTypeUTxO = {
 };
 
 export type Token = {
-  assetNameHex: string,
-  amountStr: string,
+  assetNameHex: HexString,
+  amountStr: Uint64_str,
 };
 
 export type AssetGroup = {
-  policyIdHex: string,
+  policyIdHex: HexString,
   tokens: Array<Token>,
 };
 
@@ -301,7 +303,7 @@ export default class Ada {
       response = utils.stripRetcodeFromResponse(response);
 
       if (params.expectedResponseLength != null) {
-        Assert.assert(
+        assert(
           response.length === params.expectedResponseLength,
           `unexpected response length: ${response.length} instead of ${params.expectedResponseLength}`
         );
@@ -366,9 +368,9 @@ export default class Ada {
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
     // validate the input
-    Precondition.checkIsArray(paths);
+    validate(isArray(paths), "TODO");
     for (const path of paths) {
-      Precondition.checkIsValidPath(path);
+      validate(isValidPath(path), "TODO");
     }
     // TODO: move to parsing
     const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));

@@ -1,7 +1,8 @@
 import type { GetExtendedPublicKeyResponse, SendFn } from "../Ada";
-import cardano from "../cardano";
-import { ValidBIP32Path } from "../parsing";
-import { Assert } from "../utils";
+import { serializeGetExtendedPublicKeyParams } from "../cardano";
+import type { Uint32_t, ValidBIP32Path } from "../parseUtils";
+import { uint32_to_buf } from "../serializeUtils";
+import { assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -27,7 +28,7 @@ export async function getExtendedPublicKeys(
   const result = [];
 
   for (let i = 0; i < paths.length; i++) {
-    const pathData = cardano.serializeGetExtendedPublicKeyParams(paths[i]);
+    const pathData = serializeGetExtendedPublicKeyParams(paths[i]);
 
     let response: Buffer;
     if (i === 0) {
@@ -37,7 +38,7 @@ export async function getExtendedPublicKeys(
       // of single key export on Ledger app version 2.0.4
       const remainingKeysData =
         paths.length > 1
-          ? utils.uint32_to_buf(paths.length - 1)
+          ? uint32_to_buf(paths.length - 1 as Uint32_t)
           : Buffer.from([]);
 
       response = await wrapRetryStillInCall(_send)({
@@ -59,7 +60,7 @@ export async function getExtendedPublicKeys(
     }
 
     const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
-    Assert.assert(rest.length === 0);
+    assert(rest.length === 0, "invalid response length");
 
     result.push({
       publicKeyHex: publicKey.toString("hex"),

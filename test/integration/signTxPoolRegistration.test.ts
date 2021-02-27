@@ -2,7 +2,7 @@ import { expect } from "chai";
 
 import type Ada from "../../src/Ada";
 import { TxErrors } from "../../src/Ada";
-import { Assert, getAda, NetworkIds, ProtocolMagics } from "../test_utils";
+import { assert, getAda, NetworkIds, ProtocolMagics } from "../test_utils";
 import {
   certificates,
   inputs,
@@ -168,7 +168,7 @@ describe("signTxPoolRegistrationReject", async () => {
   let ada: Ada = {} as Ada;
 
   let checkThrows = async (f: () => void, errorMsg: string) => {
-    Assert.assert(typeof f === "function", "the test is messed up");
+    assert(typeof f === "function", "the test is messed up");
     try {
       await f();
       throw new Error("should have thrown by now");

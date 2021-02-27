@@ -1,5 +1,5 @@
 import type { GetSerialResponse, SendFn, } from "../Ada";
-import utils, { Assert } from "../utils";
+import utils, { assert } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 import { ensureLedgerAppVersionAtLeast } from "./getVersion";
@@ -16,7 +16,7 @@ export async function getSerial(_send: SendFn): Promise<GetSerialResponse> {
     data: Buffer.alloc(0),
     expectedResponseLength: 7,
   });
-  Assert.assert(response.length === 7);
+  assert(response.length === 7, "invalid response length");
 
   const serial = utils.buf_to_hex(response);
   return { serial };

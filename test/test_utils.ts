@@ -5,7 +5,7 @@ import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
 import Ada, { utils } from "../src/Ada";
 
-export const Assert = utils.Assert;
+export { assert } from '../src/utils';
 
 export const str_to_path = utils.str_to_path;
 export const hex_to_buf = utils.hex_to_buf;
