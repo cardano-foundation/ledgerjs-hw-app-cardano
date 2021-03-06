@@ -1,10 +1,11 @@
 import type { SendFn } from "../Ada";
 import { serializeAddressParams } from "../cardano";
-import type { ParsedAddressParams } from "../types/internal";
+import type { ParsedAddressParams, Version } from "../types/internal";
 import { INS } from "./common/ins";
 
 export async function showAddress(
   _send: SendFn,
+  _version: Version,
   addressParams: ParsedAddressParams,
 ): Promise<void> {
   const P1_DISPLAY = 0x02;
