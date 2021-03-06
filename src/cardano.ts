@@ -1,9 +1,11 @@
 import { TxOutputType } from "./Ada";
-import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, ValidBIP32Path } from "./parsing";
+import type { Uint8_t, Uint32_t, ValidBIP32Path } from "./parseUtils";
+import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice } from "./parsing";
 import { StakingChoiceType } from "./parsing";
 import { KEY_HASH_LENGTH, TX_HASH_LENGTH } from "./parsing";
 import { AddressTypeNibble, PoolOwnerType, RelayType } from "./parsing";
-import utils, { assert, unreachable } from "./utils";
+import { hex_to_buf, path_to_buf, uint8_to_buf, uint16_to_buf, uint32_to_buf, uint64_to_buf } from "./serializeUtils";
+import { assert, unreachable } from "./utils";
 
 const HARDENED = 0x80000000;
 
@@ -23,27 +25,27 @@ function serializeStakingChoice(stakingChoice: StakingChoice): Buffer {
   switch (stakingChoice.type) {
     case StakingChoiceType.NO_STAKING: {
       return Buffer.concat([
-        utils.uint8_to_buf(stakingChoicesEncoding[stakingChoice.type])
+        uint8_to_buf(stakingChoicesEncoding[stakingChoice.type] as Uint8_t)
       ])
     }
     case StakingChoiceType.STAKING_KEY_HASH: {
       return Buffer.concat([
-        utils.uint8_to_buf(stakingChoicesEncoding[stakingChoice.type]),
-        utils.hex_to_buf(stakingChoice.hashHex)
+        uint8_to_buf(stakingChoicesEncoding[stakingChoice.type] as Uint8_t),
+        hex_to_buf(stakingChoice.hashHex)
       ])
     }
     case StakingChoiceType.STAKING_KEY_PATH: {
       return Buffer.concat([
-        utils.uint8_to_buf(stakingChoicesEncoding[stakingChoice.type]),
-        utils.path_to_buf(stakingChoice.path)
+        uint8_to_buf(stakingChoicesEncoding[stakingChoice.type] as Uint8_t),
+        path_to_buf(stakingChoice.path)
       ])
     }
     case StakingChoiceType.BLOCKCHAIN_POINTER: {
       return Buffer.concat([
-        utils.uint8_to_buf(stakingChoicesEncoding[stakingChoice.type]),
-        utils.uint32_to_buf(stakingChoice.pointer.blockIndex),
-        utils.uint32_to_buf(stakingChoice.pointer.txIndex),
-        utils.uint32_to_buf(stakingChoice.pointer.certificateIndex)
+        uint8_to_buf(stakingChoicesEncoding[stakingChoice.type] as Uint8_t),
+        uint32_to_buf(stakingChoice.pointer.blockIndex),
+        uint32_to_buf(stakingChoice.pointer.txIndex),
+        uint32_to_buf(stakingChoice.pointer.certificateIndex)
       ])
     }
   }
@@ -53,11 +55,11 @@ export function serializeAddressParams(
   params: ParsedAddressParams
 ): Buffer {
   return Buffer.concat([
-    utils.uint8_to_buf(params.type),
+    uint8_to_buf(params.type as Uint8_t),
     params.type === AddressTypeNibble.BYRON
-      ? utils.uint32_to_buf(params.protocolMagic)
-      : utils.uint8_to_buf(params.networkId),
-    utils.path_to_buf(params.spendingPath),
+      ? uint32_to_buf(params.protocolMagic)
+      : uint8_to_buf(params.networkId),
+    path_to_buf(params.spendingPath),
     serializeStakingChoice(params.stakingChoice)
   ]);
 }
@@ -66,13 +68,13 @@ function serializeOutputDestination(destination: OutputDestination) {
   switch (destination.type) {
     case TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES:
       return Buffer.concat([
-        utils.uint8_to_buf(destination.type),
-        utils.uint32_to_buf(destination.addressHex.length / 2),
-        utils.hex_to_buf(destination.addressHex)
+        uint8_to_buf(destination.type as Uint8_t),
+        uint32_to_buf(destination.addressHex.length / 2 as Uint32_t),
+        hex_to_buf(destination.addressHex)
       ])
     case TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS:
       return Buffer.concat([
-        utils.uint8_to_buf(destination.type),
+        uint8_to_buf(destination.type as Uint8_t),
         serializeAddressParams(destination.addressParams)
       ])
     default:
@@ -85,8 +87,8 @@ export function serializeOutputBasicParams(
 ): Buffer {
   return Buffer.concat([
     serializeOutputDestination(output.destination),
-    utils.ada_amount_to_buf(output.amountStr),
-    utils.uint32_to_buf(output.tokenBundle.length),
+    uint64_to_buf(output.amountStr),
+    uint32_to_buf(output.tokenBundle.length as Uint32_t),
   ]);
 }
 
@@ -98,22 +100,22 @@ export function serializeOutputBasicParamsBefore_2_2(
 
   return Buffer.concat([
     // Note: different ordering from 2.2 version
-    utils.ada_amount_to_buf(output.amountStr),
+    uint64_to_buf(output.amountStr),
     serializeOutputDestination(output.destination)
   ])
 }
 
 export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
-    utils.hex_to_buf(pool.keyHashHex),
-    utils.hex_to_buf(pool.vrfHashHex),
-    utils.uint64_to_buf(pool.pledgeStr),
-    utils.uint64_to_buf(pool.costStr),
-    utils.uint64_to_buf(pool.margin.numeratorStr),
-    utils.uint64_to_buf(pool.margin.denominatorStr),
-    utils.hex_to_buf(pool.rewardAccountHex),
-    utils.uint32_to_buf(pool.owners.length),
-    utils.uint32_to_buf(pool.relays.length),
+    hex_to_buf(pool.keyHashHex),
+    hex_to_buf(pool.vrfHashHex),
+    uint64_to_buf(pool.pledgeStr),
+    uint64_to_buf(pool.costStr),
+    uint64_to_buf(pool.margin.numeratorStr),
+    uint64_to_buf(pool.margin.denominatorStr),
+    hex_to_buf(pool.rewardAccountHex),
+    uint32_to_buf(pool.owners.length as Uint32_t),
+    uint32_to_buf(pool.relays.length as Uint32_t),
   ]);
 }
 
@@ -121,14 +123,14 @@ export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
   switch (owner.type) {
     case PoolOwnerType.PATH: {
       return Buffer.concat([
-        utils.uint8_to_buf(owner.type),
-        utils.path_to_buf(owner.path)
+        uint8_to_buf(owner.type as Uint8_t),
+        path_to_buf(owner.path)
       ])
     }
     case PoolOwnerType.KEY_HASH: {
       return Buffer.concat([
-        utils.uint8_to_buf(owner.type),
-        utils.hex_to_buf(owner.hashHex)
+        uint8_to_buf(owner.type as Uint8_t),
+        hex_to_buf(owner.hashHex)
       ])
     }
     default:
@@ -144,10 +146,10 @@ export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
     }
 
     if (x == null) {
-      return utils.uint8_to_buf(Optional.None)
+      return uint8_to_buf(Optional.None as Uint8_t)
     } else {
       return Buffer.concat([
-        utils.uint8_to_buf(Optional.Some),
+        uint8_to_buf(Optional.Some as Uint8_t),
         cb(x)
       ])
     }
@@ -156,22 +158,22 @@ export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
   switch (relay.type) {
     case RelayType.SingleHostAddr: {
       return Buffer.concat([
-        utils.uint8_to_buf(relay.type),
-        serializeOptional(relay.port, port => utils.uint16_to_buf(port)),
+        uint8_to_buf(relay.type as Uint8_t),
+        serializeOptional(relay.port, port => uint16_to_buf(port)),
         serializeOptional(relay.ipv4, ipv4 => ipv4),
         serializeOptional(relay.ipv6, ipv6 => ipv6)
       ])
     }
     case RelayType.SingleHostName: {
       return Buffer.concat([
-        utils.uint8_to_buf(relay.type),
-        serializeOptional(relay.port, port => utils.uint16_to_buf(port)),
+        uint8_to_buf(relay.type as Uint8_t),
+        serializeOptional(relay.port, port => uint16_to_buf(port)),
         Buffer.from(relay.dnsName, "ascii")
       ])
     }
     case RelayType.MultiHostName: {
       return Buffer.concat([
-        utils.uint8_to_buf(relay.type),
+        uint8_to_buf(relay.type as Uint8_t),
         Buffer.from(relay.dnsName, "ascii")
       ])
     }
@@ -185,12 +187,12 @@ export function serializePoolMetadata(
 ): Buffer {
   if (metadata == null) {
     return Buffer.concat([
-      utils.uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_NO)
+      uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_NO as Uint8_t)
     ])
   } else {
     return Buffer.concat([
-      utils.uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_YES),
-      utils.hex_to_buf(metadata.hashHex),
+      uint8_to_buf(SignTxIncluded.SIGN_TX_INCLUDED_YES as Uint8_t),
+      hex_to_buf(metadata.hashHex),
       Buffer.from(metadata.url, 'ascii')
     ])
   }
@@ -198,7 +200,7 @@ export function serializePoolMetadata(
 
 export function serializeGetExtendedPublicKeyParams(path: ValidBIP32Path): Buffer {
   return Buffer.concat([
-    utils.path_to_buf(path),
+    path_to_buf(path),
   ])
 }
 

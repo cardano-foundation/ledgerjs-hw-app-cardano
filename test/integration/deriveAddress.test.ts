@@ -33,7 +33,7 @@ describe("deriveAddress", async () => {
         str_to_path(derivation.path)
       );
 
-      expect(utils.base58_encode(utils.hex_to_buf(addressHex))).to.equal(
+      expect(utils.base58_encode(utils.hex_to_buf(addressHex as any))).to.equal(
         derivation.address
       );
     };
@@ -76,7 +76,7 @@ describe("deriveAddress", async () => {
           : null
       );
 
-      expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex))).to.equal(
+      expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex as any))).to.equal(
         expectedResult
       );
     };

@@ -13,6 +13,7 @@ export enum TxErrors {
   OUTPUTS_NOT_ARRAY = "outputs not an array",
   OUTPUT_INVALID_AMOUNT = "invalid amount in an output",
   OUTPUT_INVALID_TOKEN_BUNDLE = "invalid multiasset token bundle in an output",
+  OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE = "multiasset token bundle too large",
   OUTPUT_INVALID_TOKEN_POLICY = "invalid multiasset token policy",
   OUTPUT_INVALID_ASSET_NAME =
   "invalid asset name in the token bundle in an output",
