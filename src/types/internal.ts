@@ -12,7 +12,7 @@ export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
 export { AddressTypeNibble, CertificateType, RelayType }
-
+export { GetVersionResponse as Version } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
 export const TX_HASH_LENGTH = 32;

@@ -1,10 +1,10 @@
 import type { SendFn } from "../Ada";
 import { Errors } from '../Ada'
-import type { GetVersionResponse } from "../types/public"
+import type { Version } from "../types/internal";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 
-export async function getVersion(_send: SendFn): Promise<GetVersionResponse> {
+export async function getVersion(_send: SendFn): Promise<Version> {
   // moving getVersion() logic to private function in order
   // to disable concurrent execution protection done by this.transport.decorateAppAPIMethods()
   // when invoked from within other calls to check app version
@@ -29,23 +29,23 @@ export async function getVersion(_send: SendFn): Promise<GetVersionResponse> {
   return { major, minor, patch, flags };
 }
 
-export async function isLedgerAppVersionAtLeast(
-  _send: SendFn,
+export function isLedgerAppVersionAtLeast(
+  version: Version,
   minMajor: number,
   minMinor: number
-): Promise<boolean> {
-  const { major, minor } = await getVersion(_send);
+): boolean {
+  const { major, minor } = version;
 
   return major >= minMajor && (major > minMajor || minor >= minMinor);
 }
 
-export async function ensureLedgerAppVersionAtLeast(
-  _send: SendFn,
+export function ensureLedgerAppVersionAtLeast(
+  version: Version,
   minMajor: number,
   minMinor: number
-) {
-  const versionCheckSuccess = await isLedgerAppVersionAtLeast(
-    _send,
+): void {
+  const versionCheckSuccess = isLedgerAppVersionAtLeast(
+    version,
     minMajor,
     minMinor
   );

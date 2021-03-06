@@ -1,7 +1,7 @@
 import type { SendFn } from "../Ada";
 import { serializeGetExtendedPublicKeyParams } from "../cardano";
 import { uint32_to_buf } from "../serializeUtils";
-import type { Uint32_t, ValidBIP32Path } from "../types/internal";
+import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal";
 import type { GetExtendedPublicKeyResponse } from "../types/public"
 import { assert } from "../utils";
 import utils from "../utils";
@@ -12,11 +12,12 @@ import { ensureLedgerAppVersionAtLeast } from "./getVersion";
 
 export async function getExtendedPublicKeys(
   _send: SendFn,
+  version: Version,
   paths: Array<ValidBIP32Path>
 ): Promise<Array<GetExtendedPublicKeyResponse>> {
 
   if (paths.length > 1) {
-    await ensureLedgerAppVersionAtLeast(_send, 2, 1);
+    ensureLedgerAppVersionAtLeast(version, 2, 1);
   }
 
   const enum P1 {

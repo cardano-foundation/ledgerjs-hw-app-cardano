@@ -186,7 +186,8 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    return getSerial(this._send);
+    const version = await getVersion(this._send)
+    return getSerial(this._send, version);
   }
 
 
@@ -196,7 +197,8 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    return runTests(this._send);
+    const version = await getVersion(this._send)
+    return runTests(this._send, version);
   }
 
 
@@ -222,7 +224,9 @@ export default class Ada {
     }
     // TODO: move to parsing
     const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));
-    return getExtendedPublicKeys(this._send, parsed);
+
+    const version = await getVersion(this._send)
+    return getExtendedPublicKeys(this._send, version, parsed);
   }
 
   /**
@@ -292,7 +296,8 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    return deriveAddress(this._send, addressParams);
+    const version = await getVersion(this._send)
+    return deriveAddress(this._send, version, addressParams);
   }
 
 
@@ -313,7 +318,8 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    return showAddress(this._send, addressParams);
+    const version = await getVersion(this._send)
+    return showAddress(this._send, version, addressParams);
   }
 
 
@@ -344,8 +350,9 @@ export default class Ada {
       metadataHashHex,
       validityIntervalStartStr
     })
-    return signTransaction(this._send, parsedTx)
 
+    const version = await getVersion(this._send)
+    return signTransaction(this._send, version, parsedTx)
   }
 }
 
