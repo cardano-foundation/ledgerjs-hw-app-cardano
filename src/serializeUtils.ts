@@ -1,8 +1,8 @@
 
 import basex from "base-x";
 
-import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str } from "./parseUtils";
 import { isHexString, isUint8, isUint16, isUint32, isUint64str, isValidPath } from "./parseUtils";
+import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str } from "./types/internal";
 import { assert } from './utils'
 
 // We use bs10 as an easy way to parse/encode amount strings

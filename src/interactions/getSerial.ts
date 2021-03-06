@@ -1,4 +1,5 @@
-import type { GetSerialResponse, SendFn, } from "../Ada";
+import type { SendFn, } from "../Ada";
+import type { GetSerialResponse } from "../types/public"
 import utils, { assert } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";

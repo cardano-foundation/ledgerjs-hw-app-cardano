@@ -1,7 +1,8 @@
-import type { GetExtendedPublicKeyResponse, SendFn } from "../Ada";
+import type { SendFn } from "../Ada";
 import { serializeGetExtendedPublicKeyParams } from "../cardano";
-import type { Uint32_t, ValidBIP32Path } from "../parseUtils";
 import { uint32_to_buf } from "../serializeUtils";
+import type { Uint32_t, ValidBIP32Path } from "../types/internal";
+import type { GetExtendedPublicKeyResponse } from "../types/public"
 import { assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";

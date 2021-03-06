@@ -16,6 +16,8 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
+import type { BIP32Path, Certificate, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, InputTypeUTxO, SignTransactionResponse, StakingBlockchainPointer, TxOutput, Withdrawal } from 'types/public';
+
 import cardano from './cardano'
 import type { INS } from "./interactions/common/ins";
 import { deriveAddress } from "./interactions/deriveAddress";
@@ -25,16 +27,17 @@ import { getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
-import type { HexString, Uint64_str } from './parseUtils';
 import { isArray, isValidPath, validate } from './parseUtils';
 import {
-  AddressTypeNibble,
-  CertificateType,
   parseAddressParams,
   parseBIP32Path,
   parseTransaction,
 } from "./parsing";
 import { TxErrors } from "./txErrors";
+import {
+  AddressTypeNibble,
+  CertificateType,
+} from './types/internal'
 import utils, { assert } from "./utils";
 
 const CLA = 0xd7;
@@ -42,162 +45,6 @@ const CLA = 0xd7;
 export type KeyOf<T> = keyof T;
 export type ValueOf<T> = T[keyof T];
 
-export type BIP32Path = Array<number>;
-
-export type Network = {
-  protocolMagic: number
-  networkId: number
-}
-
-export type AddressParams = {
-  addressTypeNibble: AddressTypeNibble,
-  networkIdOrProtocolMagic: number,
-  spendingPath: BIP32Path,
-  stakingPath?: BIP32Path | null,
-  stakingKeyHashHex?: string | null,
-  stakingBlockchainPointer?: StakingBlockchainPointer | null
-}
-
-export type InputTypeUTxO = {
-  txHashHex: string,
-  outputIndex: number,
-  path?: BIP32Path,
-};
-
-export type Token = {
-  assetNameHex: HexString,
-  amountStr: Uint64_str,
-};
-
-export type AssetGroup = {
-  policyIdHex: HexString,
-  tokens: Array<Token>,
-};
-
-export type TxOutputTypeAddress = {
-  amountStr: string,
-  tokenBundle?: Array<AssetGroup> | null,
-  addressHex: string,
-};
-
-export type TxOutputTypeAddressParams = {
-  amountStr: string,
-  tokenBundle?: Array<AssetGroup> | null,
-  addressTypeNibble: AddressTypeNibble,
-  spendingPath: BIP32Path,
-  stakingPath?: BIP32Path | null,
-  stakingKeyHashHex?: string | null,
-  stakingBlockchainPointer?: StakingBlockchainPointer | null,
-};
-
-export type TxOutput = TxOutputTypeAddress | TxOutputTypeAddressParams;
-
-export type StakingBlockchainPointer = {
-  blockIndex: number,
-  txIndex: number,
-  certificateIndex: number,
-};
-
-export type PoolOwnerParams = {
-  stakingPath?: BIP32Path,
-  stakingKeyHashHex?: string,
-};
-
-export type SingleHostIPRelay = {
-  portNumber?: number,
-  ipv4?: string, // e.g. "192.168.0.1"
-  ipv6?: string, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
-};
-
-export type SingleHostNameRelay = {
-  portNumber?: number,
-  dnsName: string,
-};
-
-export type MultiHostNameRelay = {
-  dnsName: string,
-};
-
-export type RelayParams = {
-  type: number, // single host ip = 0, single hostname = 1, multi host name = 2
-  params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay,
-};
-
-export type PoolMetadataParams = {
-  metadataUrl: string,
-  metadataHashHex: string,
-};
-
-export type Margin = {
-  numeratorStr: string,
-  denominatorStr: string,
-};
-
-export type PoolParams = {
-  poolKeyHashHex: string,
-  vrfKeyHashHex: string,
-  pledgeStr: string,
-  costStr: string,
-  margin: Margin,
-  rewardAccountHex: string,
-  poolOwners: Array<PoolOwnerParams>,
-  relays: Array<RelayParams>,
-  metadata: PoolMetadataParams,
-};
-
-export type Certificate = {
-  type: CertificateType,
-  path: BIP32Path,
-  poolKeyHashHex?: string,
-  poolRegistrationParams?: PoolParams,
-};
-
-export type Withdrawal = {
-  path: BIP32Path,
-  amountStr: string,
-};
-
-export type Flags = {
-  isDebug: boolean,
-};
-
-export type GetVersionResponse = {
-  major: number,
-  minor: number,
-  patch: number,
-  flags: Flags,
-};
-
-export type GetSerialResponse = {
-  serial: string,
-};
-
-export type DeriveAddressResponse = {
-  addressHex: string,
-};
-
-export type GetExtendedPublicKeyResponse = {
-  publicKeyHex: string,
-  chainCodeHex: string,
-};
-
-export type Witness = {
-  path: BIP32Path,
-  // Note: this is *only* a signature
-  // you need to add proper extended public key
-  // to form a full witness
-  witnessSignatureHex: string,
-};
-
-export type SignTransactionResponse = {
-  txHashHex: string,
-  witnesses: Array<Witness>,
-};
-
-export const enum TxOutputType {
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES = 1,
-  SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS = 2,
-}
 
 export const GetKeyErrors = {
   INVALID_PATH: "invalid key path",

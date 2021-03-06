@@ -1,5 +1,6 @@
-import type { GetVersionResponse, SendFn } from "../Ada";
+import type { SendFn } from "../Ada";
 import { Errors } from '../Ada'
+import type { GetVersionResponse } from "../types/public"
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 
