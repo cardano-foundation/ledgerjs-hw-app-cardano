@@ -1,3 +1,10 @@
+import { parseIntFromStr } from "./parseUtils";
+import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isValidPath, validate } from "./parseUtils";
+import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
+import { hex_to_buf } from "./serializeUtils";
+import { TxErrors } from "./txErrors";
+import type { ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
+import { AddressTypeNibble, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import type {
     AddressParams,
     AssetGroup,
@@ -17,39 +24,9 @@ import type {
     TxOutputTypeAddress,
     TxOutputTypeAddressParams,
     Withdrawal,
-} from "./Ada";
-import {
-    TxOutputType,
-} from './Ada'
-import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./parseUtils";
-import { parseIntFromStr } from "./parseUtils";
-import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isValidPath, validate } from "./parseUtils";
-import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
-import { hex_to_buf } from "./serializeUtils";
-import { TxErrors } from "./txErrors";
+} from "./types/public";
 
 export const MAX_LOVELACE_SUPPLY_STR = "45 000 000 000.000000".replace(/[ .]/, "");
-
-export enum AddressTypeNibble {
-    BASE = 0b0000,
-    POINTER = 0b0100,
-    ENTERPRISE = 0b0110,
-    BYRON = 0b1000,
-    REWARD = 0b1110,
-}
-
-export enum CertificateType {
-    STAKE_REGISTRATION = 0,
-    STAKE_DEREGISTRATION = 1,
-    STAKE_DELEGATION = 2,
-    STAKE_POOL_REGISTRATION = 3,
-}
-
-export const KEY_HASH_LENGTH = 28;
-export const TX_HASH_LENGTH = 32;
-
-const TOKEN_POLICY_LENGTH = 28;
-const ASSET_NAME_LENGTH_MAX = 32;
 
 const ASSET_GROUPS_MAX = 1000;
 const TOKENS_IN_GROUP_MAX = 1000;
@@ -57,20 +34,6 @@ const TOKENS_IN_GROUP_MAX = 1000;
 const POOL_REGISTRATION_OWNERS_MAX = 1000;
 const POOL_REGISTRATION_RELAYS_MAX = 1000;
 
-export type ParsedCertificate = {
-    type: CertificateType.STAKE_REGISTRATION
-    path: ValidBIP32Path
-} | {
-    type: CertificateType.STAKE_DEREGISTRATION
-    path: ValidBIP32Path
-} | {
-    type: CertificateType.STAKE_DELEGATION
-    path: ValidBIP32Path
-    poolKeyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
-} | {
-    type: CertificateType.STAKE_POOL_REGISTRATION
-    pool: ParsedPoolParams
-}
 
 function parseCertificate(cert: Certificate): ParsedCertificate {
     switch (cert.type) {
@@ -115,16 +78,6 @@ export function parseCertificates(certificates: Array<Certificate>): Array<Parse
 }
 
 
-export type ParsedToken = {
-    assetNameHex: HexString,
-    amountStr: Uint64_str,
-};
-
-export type ParsedAssetGroup = {
-    policyIdHex: FixlenHexString<typeof TOKEN_POLICY_LENGTH>,
-    tokens: Array<ParsedToken>,
-};
-
 function parseToken(token: Token): ParsedToken {
     const assetNameHex = parseHexString(token.assetNameHex, TxErrors.OUTPUT_INVALID_ASSET_NAME);
     validate(
@@ -149,6 +102,7 @@ export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 }
 
+// FIXME: extract to type files
 export type Transaction = {
     network: Network,
     inputs: Array<InputTypeUTxO>,
@@ -159,25 +113,6 @@ export type Transaction = {
     withdrawals: Array<Withdrawal>,
     metadataHashHex?: string | null,
     validityIntervalStartStr?: string | null
-}
-
-
-export type ParsedNetwork = {
-    protocolMagic: Uint32_t
-    networkId: Uint8_t
-}
-
-export type ParsedTransaction = {
-    network: ParsedNetwork
-    inputs: ParsedInput[]
-    outputs: ParsedOutput[]
-    feeStr: Uint64_str
-    ttlStr: Uint64_str | null
-    certificates: ParsedCertificate[]
-    withdrawals: ParsedWithdrawal[]
-    metadataHashHex: FixlenHexString<32> | null
-    validityIntervalStartStr: Uint64_str | null
-    isSigningPoolRegistrationAsOwner: boolean
 }
 
 export function parseTransaction(tx: Transaction): ParsedTransaction {
@@ -255,12 +190,6 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     }
 }
 
-export type ParsedInput = {
-    txHashHex: FixlenHexString<typeof TX_HASH_LENGTH>
-    outputIndex: Uint32_t
-    path: ValidBIP32Path | null
-}
-
 export function parseTxInput(input: InputTypeUTxO): ParsedInput {
     const txHashHex = parseHexStringOfLength(input.txHashHex, TX_HASH_LENGTH, TxErrors.INPUT_INVALID_TX_HASH)
     const outputIndex = parseUint32_t(input.outputIndex, TxErrors.INPUT_INVALID_UTXO_INDEX)
@@ -271,11 +200,6 @@ export function parseTxInput(input: InputTypeUTxO): ParsedInput {
     }
 }
 
-export type ParsedWithdrawal = {
-    amountStr: Uint64_str
-    path: ValidBIP32Path
-}
-
 export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     return {
         amountStr: parseUint64_str(params.amountStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.WITHDRAWAL_INVALID_AMOUNT),
@@ -283,16 +207,11 @@ export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     }
 }
 
-
 export function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
     validate(isValidPath(path), err);
     return path as ValidBIP32Path
 }
 
-export type ParsedMargin = {
-    numeratorStr: Uint64_str,
-    denominatorStr: Uint64_str
-}
 
 export function parseMargin(params: PoolParams['margin']): ParsedMargin {
     const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
@@ -315,18 +234,6 @@ export function parseMargin(params: PoolParams['margin']): ParsedMargin {
     }
 }
 
-
-export type ParsedPoolParams = {
-    keyHashHex: FixlenHexString<28>,
-    vrfHashHex: FixlenHexString<32>,
-    pledgeStr: Uint64_str,
-    costStr: Uint64_str,
-    margin: ParsedMargin,
-    rewardAccountHex: FixlenHexString<29>
-    owners: ParsedPoolOwner[],
-    relays: ParsedPoolRelay[],
-    metadata: ParsedPoolMetadata | null
-}
 
 
 export function parsePoolParams(params: PoolParams): ParsedPoolParams {
@@ -369,19 +276,6 @@ export function parsePoolParams(params: PoolParams): ParsedPoolParams {
 
 }
 
-export const enum PoolOwnerType {
-    PATH = 1,
-    KEY_HASH = 2,
-}
-
-export type ParsedPoolOwner = {
-    type: PoolOwnerType.PATH,
-    path: ValidBIP32Path
-} | {
-    type: PoolOwnerType.KEY_HASH
-    hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
-}
-
 export function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
     // TODO: should we check if mutually exclusive?
     if (params.stakingPath) {
@@ -409,25 +303,6 @@ export function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
     throw new Error(TxErrors.CERTIFICATE_POOL_OWNER_INCOMPLETE);
 }
 
-export const enum RelayType {
-    SingleHostAddr = 0,
-    SingleHostName = 1,
-    MultiHostName = 2,
-}
-
-export type ParsedPoolRelay = {
-    type: RelayType.SingleHostAddr,
-    port: Uint16_t | null,
-    ipv4: Buffer | null,
-    ipv6: Buffer | null,
-} | {
-    type: RelayType.SingleHostName,
-    port: Uint16_t | null,
-    dnsName: VarlenAsciiString,
-} | {
-    type: RelayType.MultiHostName,
-    dnsName: VarlenAsciiString
-}
 
 function parsePort(portNumber: number, err: string): Uint16_t {
     validate(isUint16(portNumber), err)
@@ -510,11 +385,6 @@ function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
     }
 }
 
-export type ParsedPoolMetadata = {
-    url: VarlenAsciiString,
-    hashHex: FixlenHexString<32>,
-} & { __brand: 'pool_metadata' }
-
 export function parsePoolMetadataParams(params: PoolMetadataParams | null): ParsedPoolMetadata | null {
     if (params == null) return null
 
@@ -533,67 +403,6 @@ export function parsePoolMetadataParams(params: PoolMetadataParams | null): Pars
         __brand: 'pool_metadata' as const
     }
 }
-
-export const enum StakingChoiceType {
-    NO_STAKING = 'no_staking',
-    STAKING_KEY_PATH = 'staking_key_path',
-    STAKING_KEY_HASH = 'staking_key_hash',
-    BLOCKCHAIN_POINTER = 'blockchain_pointer',
-}
-
-type ParsedBlockchainPointer = {
-    blockIndex: Uint32_t,
-    txIndex: Uint32_t,
-    certificateIndex: Uint32_t,
-}
-
-type StakingChoiceNone = {
-    type: StakingChoiceType.NO_STAKING
-}
-type StakingChoicePath = {
-    type: StakingChoiceType.STAKING_KEY_PATH,
-    path: ValidBIP32Path
-}
-type StakingChoiceHash = {
-    type: StakingChoiceType.STAKING_KEY_HASH,
-    hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
-}
-type StakingChoicePointer = {
-    type: StakingChoiceType.BLOCKCHAIN_POINTER,
-    pointer: ParsedBlockchainPointer
-}
-
-
-export type StakingChoice = StakingChoiceNone | StakingChoicePath | StakingChoiceHash | StakingChoicePointer
-
-type ByronAddressParams = {
-    type: AddressTypeNibble.BYRON,
-    protocolMagic: Uint32_t
-    spendingPath: ValidBIP32Path,
-    stakingChoice: StakingChoiceNone,
-}
-
-type ShelleyAddressParams = {
-    type: AddressTypeNibble.BASE | AddressTypeNibble.ENTERPRISE | AddressTypeNibble.POINTER | AddressTypeNibble.REWARD,
-    networkId: Uint8_t,
-    spendingPath: ValidBIP32Path
-} & ( // Extra properties
-        {
-            type: AddressTypeNibble.BASE,
-            stakingChoice: StakingChoicePath | StakingChoiceHash
-        } | {
-            type: AddressTypeNibble.ENTERPRISE,
-            stakingChoice: StakingChoiceNone
-        } | {
-            type: AddressTypeNibble.POINTER,
-            stakingChoice: StakingChoicePointer
-        } | {
-            type: AddressTypeNibble.REWARD
-            stakingChoice: StakingChoiceNone // included in spending path
-        }
-    )
-
-export type ParsedAddressParams = ByronAddressParams | ShelleyAddressParams
 
 export function parseAddressParams(
     params: AddressParams
@@ -706,20 +515,6 @@ export function parseAddressParams(
     }
 }
 
-
-export type OutputDestination = {
-    type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES
-    addressHex: HexString
-} | {
-    type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS
-    addressParams: ParsedAddressParams
-}
-
-export type ParsedOutput = {
-    amountStr: Uint64_str
-    tokenBundle: AssetGroup[]
-    destination: OutputDestination
-}
 
 export function parseTxOutput(
     output: TxOutput,

@@ -1,10 +1,6 @@
-import { TxOutputType } from "./Ada";
-import type { Uint8_t, Uint32_t, ValidBIP32Path } from "./parseUtils";
-import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice } from "./parsing";
-import { StakingChoiceType } from "./parsing";
-import { KEY_HASH_LENGTH, TX_HASH_LENGTH } from "./parsing";
-import { AddressTypeNibble, PoolOwnerType, RelayType } from "./parsing";
 import { hex_to_buf, path_to_buf, uint8_to_buf, uint16_to_buf, uint32_to_buf, uint64_to_buf } from "./serializeUtils";
+import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, Uint8_t, Uint32_t, ValidBIP32Path } from "./types/internal";
+import { AddressTypeNibble, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import { assert, unreachable } from "./utils";
 
 const HARDENED = 0x80000000;

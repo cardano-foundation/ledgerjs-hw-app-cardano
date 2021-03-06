@@ -1,9 +1,7 @@
-import type {
-  DeriveAddressResponse,
-  SendFn,
-} from "../Ada";
+import type { SendFn, } from "../Ada";
 import cardano from "../cardano";
-import type { ParsedAddressParams } from "../parsing";
+import type { ParsedAddressParams } from "../types/internal";
+import type { DeriveAddressResponse, } from '../types/public'
 import { INS } from "./common/ins";
 
 export async function deriveAddress(

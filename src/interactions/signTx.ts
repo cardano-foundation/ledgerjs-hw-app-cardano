@@ -1,11 +1,10 @@
-import type { BIP32Path, SendFn, SignTransactionResponse, } from "../Ada";
+import type { SendFn, } from "../Ada";
 import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
-import type { HexString, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path } from "../parseUtils";
-import type { ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal } from "../parsing";
-import { PoolOwnerType } from "../parsing";
-import { CertificateType } from "../parsing";
 import { buf_to_hex, hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../serializeUtils";
+import type { HexString, ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path } from "../types/internal";
+import { CertificateType, PoolOwnerType } from "../types/internal";
+import type { SignTransactionResponse, } from '../types/public'
 import utils, { assert, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
@@ -454,12 +453,12 @@ const signTx_awaitConfirm = async (
 
 const signTx_getWitness = async (
   _send: SendFn,
-  path: BIP32Path,
+  path: ValidBIP32Path,
   flags: {
     appHasMultiassetSupport: boolean
   }
 ): Promise<{
-  path: BIP32Path;
+  path: ValidBIP32Path;
   witnessSignatureHex: string;
 }> => {
   const enum P2 {
