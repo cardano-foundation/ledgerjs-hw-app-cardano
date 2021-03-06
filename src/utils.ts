@@ -10,11 +10,6 @@ const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
 
-export const MAX_UINT_64_STR = "18446744073709551615";
-// Max supply in lovelace
-export const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
-
-
 const TESTNET_NETWORK_ID = 0x00;
 
 export function assert(cond: boolean, errMsg: string): asserts cond {

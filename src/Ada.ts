@@ -32,6 +32,7 @@ import {
   CertificateType,
   parseAddressParams,
   parseBIP32Path,
+  parseTransaction,
 } from "./parsing";
 import { TxErrors } from "./txErrors";
 import utils, { assert } from "./utils";
@@ -81,7 +82,7 @@ export type TxOutputTypeAddress = {
 
 export type TxOutputTypeAddressParams = {
   amountStr: string,
-  tokenBundle: Array<AssetGroup>,
+  tokenBundle?: Array<AssetGroup> | null,
   addressTypeNibble: AddressTypeNibble,
   spendingPath: BIP32Path,
   stakingPath?: BIP32Path | null,
@@ -481,9 +482,9 @@ export default class Ada {
     metadataHashHex?: string | null,
     validityIntervalStartStr?: string | null
   ): Promise<SignTransactionResponse> {
-    return signTransaction(
-      this._send,
-      {
+
+    const parsedTx = parseTransaction({
+      network: {
         networkId,
         protocolMagic,
       },
@@ -495,7 +496,9 @@ export default class Ada {
       withdrawals,
       metadataHashHex,
       validityIntervalStartStr
-    );
+    })
+    return signTransaction(this._send, parsedTx)
+
   }
 }
 
