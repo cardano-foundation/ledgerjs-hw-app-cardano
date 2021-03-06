@@ -1,4 +1,3 @@
-import type { SendFn } from "../Ada";
 import { serializeGetExtendedPublicKeyParams } from "../cardano";
 import { uint32_to_buf } from "../serializeUtils";
 import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal";
@@ -6,15 +5,22 @@ import type { GetExtendedPublicKeyResponse } from "../types/public"
 import { assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
-import { wrapRetryStillInCall } from "./common/retry";
+import type { Interaction, SendParams } from "./common/types";
 import { ensureLedgerAppVersionAtLeast } from "./getVersion";
 
 
-export async function getExtendedPublicKeys(
-  _send: SendFn,
+const send = (params: {
+  p1: number,
+  p2: number,
+  data: Buffer,
+  expectedResponseLength?: number
+}): SendParams => ({ ins: INS.GET_EXT_PUBLIC_KEY, ...params })
+
+
+export function* getExtendedPublicKeys(
   version: Version,
   paths: Array<ValidBIP32Path>
-): Promise<Array<GetExtendedPublicKeyResponse>> {
+): Interaction<Array<GetExtendedPublicKeyResponse>> {
 
   if (paths.length > 1) {
     ensureLedgerAppVersionAtLeast(version, 2, 1);
@@ -43,8 +49,7 @@ export async function getExtendedPublicKeys(
           ? uint32_to_buf(paths.length - 1 as Uint32_t)
           : Buffer.from([]);
 
-      response = await wrapRetryStillInCall(_send)({
-        ins: INS.GET_EXT_PUBLIC_KEY,
+      response = yield send({
         p1: P1.INIT,
         p2: P2.UNUSED,
         data: Buffer.concat([pathData, remainingKeysData]),
@@ -52,8 +57,7 @@ export async function getExtendedPublicKeys(
       });
     } else {
       // next key APDU
-      response = await _send({
-        ins: INS.GET_EXT_PUBLIC_KEY,
+      response = yield send({
         p1: P1.NEXT_KEY,
         p2: P2.UNUSED,
         data: pathData,

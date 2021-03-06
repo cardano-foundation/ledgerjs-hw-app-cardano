@@ -20,6 +20,8 @@ import type { BIP32Path, Certificate, DeriveAddressResponse, GetExtendedPublicKe
 
 import cardano from './cardano'
 import type { INS } from "./interactions/common/ins";
+import { wrapRetryStillInCall } from './interactions/common/retry';
+import type { Interaction, SendParams } from './interactions/common/types';
 import { deriveAddress } from "./interactions/deriveAddress";
 import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
 import { getSerial } from "./interactions/getSerial";
@@ -114,16 +116,28 @@ function wrapConvertError<T extends Function>(fn: T): T {
  * const ada = new Ada(transport);
  */
 
-export type SendParams = {
-  ins: INS,
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number,
-};
+
 export type SendFn = (params: SendParams) => Promise<Buffer>;
 
 export type Transport = any
+
+async function interact<T>(
+  _send: SendFn,
+  interaction: Interaction<T>,
+): Promise<T> {
+  let cursor = interaction.next();
+  let first = true
+  while (!cursor.done) {
+    const apdu = cursor.value
+    const res = first
+      ? await wrapRetryStillInCall(_send)(apdu)
+      : await _send(apdu);
+    first = false
+    cursor = interaction.next(res);
+  }
+  return cursor.value;
+}
+
 
 export default class Ada {
   transport: Transport;
@@ -172,7 +186,7 @@ export default class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    return getVersion(this._send);
+    return interact(this._send, getVersion())
   }
 
   /**
@@ -186,8 +200,11 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    const version = await getVersion(this._send)
-    return getSerial(this._send, version);
+    function* interaction() {
+      const version = yield* getVersion()
+      return yield* getSerial(version)
+    }
+    return interact(this._send, interaction());
   }
 
 
@@ -197,8 +214,11 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    const version = await getVersion(this._send)
-    return runTests(this._send, version);
+    function* interaction() {
+      const version = yield* getVersion()
+      return yield* runTests(version)
+    }
+    return interact(this._send, interaction())
   }
 
 
@@ -225,8 +245,11 @@ export default class Ada {
     // TODO: move to parsing
     const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));
 
-    const version = await getVersion(this._send)
-    return getExtendedPublicKeys(this._send, version, parsed);
+    function* interaction() {
+      const version = yield* getVersion()
+      return yield* getExtendedPublicKeys(version, parsed)
+    }
+    return interact(this._send, interaction());
   }
 
   /**
@@ -296,8 +319,11 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    const version = await getVersion(this._send)
-    return deriveAddress(this._send, version, addressParams);
+    function* interaction() {
+      const version = yield* getVersion()
+      return yield* deriveAddress(version, addressParams)
+    }
+    return interact(this._send, interaction());
   }
 
 
@@ -318,8 +344,11 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    const version = await getVersion(this._send)
-    return showAddress(this._send, version, addressParams);
+    function* interaction() {
+      const version = yield* getVersion()
+      return yield* showAddress(version, addressParams)
+    }
+    return interact(this._send, interaction());
   }
 
 
@@ -351,8 +380,11 @@ export default class Ada {
       validityIntervalStartStr
     })
 
-    const version = await getVersion(this._send)
-    return signTransaction(this._send, version, parsedTx)
+    function* interaction() {
+      const version = yield* getVersion()
+      return yield* signTransaction(version, parsedTx)
+    }
+    return interact(this._send, interaction());
   }
 }
 

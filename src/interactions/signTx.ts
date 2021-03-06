@@ -7,7 +7,7 @@ import { CertificateType, PoolOwnerType } from "../types/internal";
 import type { SignTransactionResponse, } from '../types/public'
 import utils, { assert, unreachable } from "../utils";
 import { INS } from "./common/ins";
-import { wrapRetryStillInCall } from "./common/retry";
+import type { Interaction, SendParams } from "./common/types";
 import { isLedgerAppVersionAtLeast } from "./getVersion";
 
 const enum P1 {
@@ -27,15 +27,22 @@ const enum P1 {
   STAGE_WITNESSES_BEFORE_2_2 = 0x0a
 }
 
-const signTx_init = async (
-  _send: SendFn,
+const send = (params: {
+  p1: number,
+  p2: number,
+  data: Buffer,
+  expectedResponseLength?: number
+}): SendParams => ({ ins: INS.SIGN_TX, ...params })
+
+
+function* signTx_init(
   tx: ParsedTransaction,
   wittnessPaths: ValidBIP32Path[],
   flags: {
     appHasStakePoolOwnerSupport: boolean,
     appHasMultiassetSupport: boolean,
   }
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
   }
@@ -104,19 +111,17 @@ const signTx_init = async (
     uint32_to_buf(tx.withdrawals.length as Uint32_t),
     uint32_to_buf(wittnessPaths.length as Uint32_t),
   ]);
-  const _response = await wrapRetryStillInCall(_send)({
-    ins: INS.SIGN_TX,
+  const _response = yield send({
     p1: P1.STAGE_INIT,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_addInput = async (
-  _send: SendFn,
+function* signTx_addInput(
   input: ParsedInput
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
   }
@@ -124,19 +129,17 @@ const signTx_addInput = async (
     hex_to_buf(input.txHashHex),
     uint32_to_buf(input.outputIndex),
   ]);
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_INPUTS,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_addOutputBefore_2_2 = async (
-  _send: SendFn,
+function* signTx_addOutputBefore_2_2(
   output: ParsedOutput,
-) => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
   }
@@ -145,8 +148,7 @@ const signTx_addOutputBefore_2_2 = async (
     output,
   );
 
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_OUTPUTS,
     p2: P2.UNUSED,
     data,
@@ -155,15 +157,14 @@ const signTx_addOutputBefore_2_2 = async (
 
 }
 
-const signTx_addOutput = async (
-  _send: SendFn,
+function* signTx_addOutput(
   output: ParsedOutput,
   flags: {
     appHasMultiassetSupport: boolean
   }
-): Promise<void> => {
+): Interaction<void> {
   if (!flags.appHasMultiassetSupport) {
-    return await signTx_addOutputBefore_2_2(_send, output)
+    return yield* signTx_addOutputBefore_2_2(output)
   }
 
   const enum P2 {
@@ -179,8 +180,7 @@ const signTx_addOutput = async (
       output,
     );
 
-    await _send({
-      ins: INS.SIGN_TX,
+    yield send({
       p1: P1.STAGE_OUTPUTS,
       p2: P2.BASIC_DATA,
       data: data,
@@ -194,8 +194,7 @@ const signTx_addOutput = async (
       hex_to_buf(assetGroup.policyIdHex),
       uint32_to_buf(assetGroup.tokens.length as Uint32_t),
     ]);
-    await _send({
-      ins: INS.SIGN_TX,
+    yield send({
       p1: P1.STAGE_OUTPUTS,
       p2: P2.ASSET_GROUP,
       data,
@@ -208,8 +207,7 @@ const signTx_addOutput = async (
         hex_to_buf(token.assetNameHex),
         uint64_to_buf(token.amountStr),
       ]);
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_OUTPUTS,
         p2: P2.TOKEN,
         data,
@@ -218,19 +216,17 @@ const signTx_addOutput = async (
     }
   }
 
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_OUTPUTS,
     p2: P2.CONFIRM,
     data: Buffer.alloc(0),
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_addCertificate = async (
-  _send: SendFn,
+function* signTx_addCertificate(
   certificate: ParsedCertificate,
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
@@ -242,8 +238,7 @@ const signTx_addCertificate = async (
         uint8_to_buf(certificate.type as Uint8_t),
         path_to_buf(certificate.path)
       ])
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.UNUSED,
         data,
@@ -257,8 +252,7 @@ const signTx_addCertificate = async (
         path_to_buf(certificate.path),
         hex_to_buf(certificate.poolKeyHashHex)
       ])
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.UNUSED,
         data,
@@ -280,8 +274,7 @@ const signTx_addCertificate = async (
       const data = Buffer.concat([
         uint8_to_buf(certificate.type as Uint8_t),
       ])
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.UNUSED,
         data,
@@ -289,8 +282,7 @@ const signTx_addCertificate = async (
       });
 
       const pool = certificate.pool
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.POOL_PARAMS,
         data: cardano.serializePoolInitialParams(pool),
@@ -298,8 +290,7 @@ const signTx_addCertificate = async (
       });
 
       for (const owner of pool.owners) {
-        await _send({
-          ins: INS.SIGN_TX,
+        yield send({
           p1: P1.STAGE_CERTIFICATES,
           p2: P2.OWNERS,
           data: cardano.serializePoolOwner(owner),
@@ -308,8 +299,7 @@ const signTx_addCertificate = async (
       }
 
       for (const relay of pool.relays) {
-        await _send({
-          ins: INS.SIGN_TX,
+        yield send({
           p1: P1.STAGE_CERTIFICATES,
           p2: P2.RELAYS,
           data: cardano.serializePoolRelay(relay),
@@ -317,16 +307,14 @@ const signTx_addCertificate = async (
         });
       }
 
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.METADATA,
         data: cardano.serializePoolMetadata(pool.metadata),
         expectedResponseLength: 0,
       });
 
-      await _send({
-        ins: INS.SIGN_TX,
+      yield send({
         p1: P1.STAGE_CERTIFICATES,
         p2: P2.CONFIRMATION,
         data: Buffer.alloc(0),
@@ -338,12 +326,11 @@ const signTx_addCertificate = async (
     default:
       unreachable(certificate)
   }
-};
+}
 
-const signTx_addWithdrawal = async (
-  _send: SendFn,
+function* signTx_addWithdrawal(
   withdrawal: ParsedWithdrawal
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
@@ -351,96 +338,84 @@ const signTx_addWithdrawal = async (
     uint64_to_buf(withdrawal.amountStr),
     path_to_buf(withdrawal.path),
   ]);
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_WITHDRAWALS,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_setFee = async (
-  _send: SendFn,
-  feeStr: Uint64_str): Promise<void> => {
+function* signTx_setFee(
+  feeStr: Uint64_str
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
   const data = Buffer.concat([uint64_to_buf(feeStr)]);
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_FEE,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_setTtl = async (
-  _send: SendFn,
+function* signTx_setTtl(
   ttlStr: Uint64_str
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
   const data = Buffer.concat([uint64_to_buf(ttlStr)]);
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_TTL,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_setMetadata = async (
-  _send: SendFn,
+function* signTx_setMetadata(
   metadataHashHex: HexString
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
   const data = utils.hex_to_buf(metadataHashHex);
 
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_METADATA,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 0,
   });
-};
+}
 
-const signTx_setValidityIntervalStart = async (
-  _send: SendFn,
+function* signTx_setValidityIntervalStart(
   validityIntervalStartStr: Uint64_str
-): Promise<void> => {
+): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
   const data = Buffer.concat([uint64_to_buf(validityIntervalStartStr)]);
-  await _send({
-    ins: INS.SIGN_TX,
+  yield send({
     p1: P1.STAGE_VALIDITY_INTERVAL_START,
     p2: P2.UNUSED,
     data,
   });
-};
+}
 
-const signTx_awaitConfirm = async (
-  _send: SendFn,
+function* signTx_awaitConfirm(
   flags: {
     appHasMultiassetSupport: boolean
   }
-): Promise<{
-  txHashHex: string;
-}> => {
+): Interaction<{ txHashHex: string; }> {
   const enum P2 {
     UNUSED = 0x00
   }
 
-  const response = await _send({
-    ins: INS.SIGN_TX,
+  const response = yield send({
     p1: flags.appHasMultiassetSupport ? P1.STAGE_CONFIRM : P1.STAGE_CONFIRM_BEFORE_2_2,
     p2: P2.UNUSED,
     data: Buffer.alloc(0),
@@ -449,25 +424,23 @@ const signTx_awaitConfirm = async (
   return {
     txHashHex: response.toString("hex"),
   };
-};
+}
 
-const signTx_getWitness = async (
-  _send: SendFn,
+function* signTx_getWitness(
   path: ValidBIP32Path,
   flags: {
     appHasMultiassetSupport: boolean
   }
-): Promise<{
+): Interaction<{
   path: ValidBIP32Path;
   witnessSignatureHex: string;
-}> => {
+}> {
   const enum P2 {
     UNUSED = 0x00
   }
 
   const data = Buffer.concat([path_to_buf(path)]);
-  const response = await _send({
-    ins: INS.SIGN_TX,
+  const response = yield send({
     p1: flags.appHasMultiassetSupport ? P1.STAGE_WITNESSES : P1.STAGE_WITNESSES_BEFORE_2_2,
     p2: P2.UNUSED,
     data,
@@ -477,7 +450,7 @@ const signTx_getWitness = async (
     path: path,
     witnessSignatureHex: buf_to_hex(response),
   };
-};
+}
 
 
 function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
@@ -517,7 +490,7 @@ function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
   }
 }
 
-export async function signTransaction(_send: SendFn, version: Version, tx: ParsedTransaction): Promise<SignTransactionResponse> {
+export function* signTransaction(version: Version, tx: ParsedTransaction): Interaction<SignTransactionResponse> {
   const appHasStakePoolOwnerSupport = isLedgerAppVersionAtLeast(version, 2, 1);
   const appHasMultiassetSupport = isLedgerAppVersionAtLeast(version, 2, 2);
 
@@ -546,56 +519,56 @@ export async function signTransaction(_send: SendFn, version: Version, tx: Parse
   const witnessPaths = generateWitnessPaths(tx)
 
   // init
-  await signTx_init(
-    _send, tx, witnessPaths,
+  yield* signTx_init(
+    tx, witnessPaths,
     { appHasStakePoolOwnerSupport, appHasMultiassetSupport }
   );
 
   // inputs
   for (const input of tx.inputs) {
-    await signTx_addInput(_send, input);
+    yield* signTx_addInput(input);
   }
 
   // outputs
   for (const output of tx.outputs) {
-    await signTx_addOutput(_send, output, { appHasMultiassetSupport });
+    yield* signTx_addOutput(output, { appHasMultiassetSupport });
   }
 
   // fee
-  await signTx_setFee(_send, tx.feeStr);
+  yield* signTx_setFee(tx.feeStr);
 
   // ttl
   if (tx.ttlStr != null) {
-    await signTx_setTtl(_send, tx.ttlStr);
+    yield* signTx_setTtl(tx.ttlStr);
   }
 
   // certificates
   for (const certificate of tx.certificates) {
-    await signTx_addCertificate(_send, certificate);
+    yield* signTx_addCertificate(certificate);
   }
 
   // withdrawals
   for (const withdrawal of tx.withdrawals) {
-    await signTx_addWithdrawal(_send, withdrawal);
+    yield* signTx_addWithdrawal(withdrawal);
   }
 
   // metadata
   if (tx.metadataHashHex != null) {
-    await signTx_setMetadata(_send, tx.metadataHashHex);
+    yield* signTx_setMetadata(tx.metadataHashHex);
   }
 
   // validity start
   if (tx.validityIntervalStartStr != null) {
-    await signTx_setValidityIntervalStart(_send, tx.validityIntervalStartStr);
+    yield* signTx_setValidityIntervalStart(tx.validityIntervalStartStr);
   }
 
   // confirm
-  const { txHashHex } = await signTx_awaitConfirm(_send, { appHasMultiassetSupport });
+  const { txHashHex } = yield* signTx_awaitConfirm({ appHasMultiassetSupport });
 
   // witnesses
   const witnesses = [];
   for (const path of witnessPaths) {
-    const witness = await signTx_getWitness(_send, path, { appHasMultiassetSupport });
+    const witness = yield* signTx_getWitness(path, { appHasMultiassetSupport });
     witnesses.push(witness);
   }
 
