@@ -23,12 +23,12 @@ import {
 } from './Ada'
 import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./parseUtils";
 import { parseIntFromStr } from "./parseUtils";
-import { isPositiveUint64str, isValidAdaAmountStr } from "./parseUtils";
-import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isUint64str, isUintStr, isValidPath, validate } from "./parseUtils";
+import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isValidPath, validate } from "./parseUtils";
 import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
 import { hex_to_buf } from "./serializeUtils";
 import { TxErrors } from "./txErrors";
-import { MAX_LOVELACE_SUPPLY_STR, MAX_UINT_64_STR } from "./utils";
+
+export const MAX_LOVELACE_SUPPLY_STR = "45 000 000 000.000000".replace(/[ .]/, "");
 
 export enum AddressTypeNibble {
     BASE = 0b0000,
@@ -132,7 +132,7 @@ function parseToken(token: Token): ParsedToken {
         TxErrors.OUTPUT_INVALID_ASSET_NAME
     );
 
-    const amountStr = parseUint64_str(token.amountStr, MAX_UINT_64_STR, TxErrors.OUTPUT_INVALID_AMOUNT)
+    const amountStr = parseUint64_str(token.amountStr, {}, TxErrors.OUTPUT_INVALID_AMOUNT)
     return {
         assetNameHex,
         amountStr,
@@ -149,7 +149,7 @@ export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 }
 
-export function validateTransaction(
+export type Transaction = {
     network: Network,
     inputs: Array<InputTypeUTxO>,
     outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
@@ -159,82 +159,106 @@ export function validateTransaction(
     withdrawals: Array<Withdrawal>,
     metadataHashHex?: string | null,
     validityIntervalStartStr?: string | null
-) {
-    validate(isArray(certificates), TxErrors.CERTIFICATES_NOT_ARRAY);
-    const isSigningPoolRegistrationAsOwner = certificates.some(
-        (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
-    );
+}
+
+
+export type ParsedNetwork = {
+    protocolMagic: Uint32_t
+    networkId: Uint8_t
+}
+
+export type ParsedTransaction = {
+    network: ParsedNetwork
+    inputs: ParsedInput[]
+    outputs: ParsedOutput[]
+    feeStr: Uint64_str
+    ttlStr: Uint64_str | null
+    certificates: ParsedCertificate[]
+    withdrawals: ParsedWithdrawal[]
+    metadataHashHex: FixlenHexString<32> | null
+    validityIntervalStartStr: Uint64_str | null
+    isSigningPoolRegistrationAsOwner: boolean
+}
+
+export function parseTransaction(tx: Transaction): ParsedTransaction {
+    const network: ParsedNetwork = {
+        protocolMagic: parseUint32_t(tx.network.protocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
+        networkId: parseUint8_t(tx.network.networkId, TxErrors.INVALID_NETWORK_ID)
+    }
+    validate(network.networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
 
     // inputs
-    validate(isArray(inputs), TxErrors.INPUTS_NOT_ARRAY);
-    const _inputs = inputs.map(inp => parseTxInput(inp))
+    validate(isArray(tx.inputs), TxErrors.INPUTS_NOT_ARRAY);
+    const inputs = tx.inputs.map(inp => parseTxInput(inp))
+
+    // outputs
+    validate(isArray(tx.outputs), TxErrors.OUTPUTS_NOT_ARRAY);
+    const outputs = tx.outputs.map(o => parseTxOutput(o, tx.network))
+
+    // fee
+    const feeStr = parseUint64_str(tx.feeStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.FEE_INVALID);
+
+    //  ttl
+    const ttlStr = tx.ttlStr == null
+        ? null
+        : parseUint64_str(tx.ttlStr, { min: "1" }, TxErrors.TTL_INVALID)
+
+    // certificates
+    validate(isArray(tx.certificates), TxErrors.CERTIFICATES_NOT_ARRAY);
+    const certificates = parseCertificates(tx.certificates);
+
+    // withdrawals
+    validate(isArray(tx.withdrawals), TxErrors.WITHDRAWALS_NOT_ARRAY);
+    const withdrawals = tx.withdrawals.map(w => parseWithdrawal(w))
+
+    // metadata
+    const metadataHashHex = tx.metadataHashHex == null
+        ? null
+        : parseHexStringOfLength(tx.metadataHashHex, 32, TxErrors.METADATA_INVALID)
+
+    // validity start
+    const validityIntervalStart = tx.validityIntervalStartStr == null
+        ? null
+        : parseUint64_str(tx.validityIntervalStartStr, { min: "1" }, TxErrors.VALIDITY_INTERVAL_START_INVALID)
+
+    // Additional restrictions for signing pool registration as an owner
+    const isSigningPoolRegistrationAsOwner = tx.certificates.some(
+        (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
+    );
     if (isSigningPoolRegistrationAsOwner) {
         // input should not be given with a path
         // the path is not used, but we check just to avoid potential confusion of developers using this
-        validate(_inputs.every(inp => inp.path == null), TxErrors.INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER);
-    }
-
-    // outputs
-    validate(isArray(outputs), TxErrors.OUTPUTS_NOT_ARRAY);
-    for (const output of outputs) {
-        // we try to serialize the data, an error is thrown if ada amount or address params are invalid
-        parseTxOutput(output, network)
-
-        if ("spendingPath" in output && output.spendingPath != null) {
-            validate(
-                !isSigningPoolRegistrationAsOwner,
-                TxErrors.OUTPUT_WITH_PATH
-            );
-        }
-
-        if (output.tokenBundle) {
-            validate(isArray(output.tokenBundle), TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
-            validate(output.tokenBundle.length <= ASSET_GROUPS_MAX, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE);
-
-            for (const assetGroup of output.tokenBundle) {
-                parseAssetGroup(assetGroup)
-            }
-        }
-    }
-
-    // fee
-    validate(isValidAdaAmountStr(feeStr), TxErrors.FEE_INVALID);
-
-    //  ttl
-    if (ttlStr != null) {
-        validate(isPositiveUint64str(ttlStr), TxErrors.TTL_INVALID);
-    }
-
-    // certificates
-    parseCertificates(certificates);
-
-    // withdrawals
-    validate(isArray(withdrawals), TxErrors.WITHDRAWALS_NOT_ARRAY);
-    if (isSigningPoolRegistrationAsOwner && withdrawals.length > 0) {
-        throw new Error(TxErrors.WITHDRAWALS_FORBIDDEN);
-    }
-    for (const withdrawal of withdrawals) {
-        parseWithdrawal(withdrawal)
-    }
-
-    // metadata could be null
-    if (metadataHashHex != null) {
-        validate(isHexStringOfLength(metadataHashHex, 32), TxErrors.METADATA_INVALID);
-    }
-
-    //  validity interval start
-    if (validityIntervalStartStr != null) {
         validate(
-            isPositiveUint64str(validityIntervalStartStr),
-            TxErrors.VALIDITY_INTERVAL_START_INVALID
+            inputs.every(inp => inp.path == null),
+            TxErrors.INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER
         );
+        // cannot have our output in the tx
+        validate(
+            outputs.every(out => out.destination.type === TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
+            TxErrors.OUTPUT_WITH_PATH
+        )
+        // cannot have withdrawal in the tx
+        validate(withdrawals.length === 0, TxErrors.WITHDRAWALS_FORBIDDEN)
+    }
+
+    return {
+        network,
+        inputs,
+        outputs,
+        ttlStr,
+        metadataHashHex,
+        validityIntervalStartStr: validityIntervalStart,
+        withdrawals,
+        certificates,
+        feeStr,
+        isSigningPoolRegistrationAsOwner
     }
 }
 
 export type ParsedInput = {
     txHashHex: FixlenHexString<typeof TX_HASH_LENGTH>
     outputIndex: Uint32_t
-    path: BIP32Path | null
+    path: ValidBIP32Path | null
 }
 
 export function parseTxInput(input: InputTypeUTxO): ParsedInput {
@@ -254,7 +278,7 @@ export type ParsedWithdrawal = {
 
 export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     return {
-        amountStr: parseUint64_str(params.amountStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.WITHDRAWAL_INVALID_AMOUNT),
+        amountStr: parseUint64_str(params.amountStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.WITHDRAWAL_INVALID_AMOUNT),
         path: parseBIP32Path(params.path, TxErrors.WITHDRAWAL_INVALID_PATH)
     }
 }
@@ -273,21 +297,18 @@ export type ParsedMargin = {
 export function parseMargin(params: PoolParams['margin']): ParsedMargin {
     const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
 
-    const marginNumeratorStr = params.numeratorStr;
-    const marginDenominatorStr = params.denominatorStr;
-    validate(
-        isUint64str(marginNumeratorStr),
-        TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
-    );
-    validate(
-        isUintStr(marginDenominatorStr, POOL_MARGIN_DENOMINATOR_MAX_STR),
+    const marginDenominatorStr = parseUint64_str(
+        params.denominatorStr,
+        { max: POOL_MARGIN_DENOMINATOR_MAX_STR },
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR
-    )
-    // given both are valid uint strings, the check below is equivalent to "marginNumerator <= marginDenominator"
-    validate(
-        isUintStr(marginNumeratorStr, marginDenominatorStr),
+    );
+
+    const marginNumeratorStr = parseUint64_str(
+        params.numeratorStr,
+        { max: marginDenominatorStr },
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
     );
+
     return {
         numeratorStr: marginNumeratorStr as Uint64_str,
         denominatorStr: marginDenominatorStr as Uint64_str,
@@ -311,8 +332,8 @@ export type ParsedPoolParams = {
 export function parsePoolParams(params: PoolParams): ParsedPoolParams {
     const keyHashHex = parseHexStringOfLength(params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH)
     const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, 32, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH)
-    const pledgeStr = parseUint64_str(params.pledgeStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
-    const costStr = parseUint64_str(params.costStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.CERTIFICATE_POOL_INVALID_COST)
+    const pledgeStr = parseUint64_str(params.pledgeStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
+    const costStr = parseUint64_str(params.costStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_COST)
     const margin = parseMargin(params.margin)
     const rewardAccountHex = parseHexStringOfLength(params.rewardAccountHex, 29, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT)
 
@@ -704,7 +725,10 @@ export function parseTxOutput(
     output: TxOutput,
     network: Network,
 ): ParsedOutput {
-    const amountStr = parseUint64_str(output.amountStr, MAX_LOVELACE_SUPPLY_STR, TxErrors.OUTPUT_INVALID_AMOUNT)
+    const amountStr = parseUint64_str(output.amountStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.OUTPUT_INVALID_AMOUNT)
+
+    validate(isArray(output.tokenBundle ?? []), TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
+    validate((output.tokenBundle ?? []).length <= ASSET_GROUPS_MAX, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE);
     const tokenBundle = (output.tokenBundle ?? []).map((ag) => parseAssetGroup(ag))
 
     const hasAddressHex = "addressHex" in output && output.addressHex != null

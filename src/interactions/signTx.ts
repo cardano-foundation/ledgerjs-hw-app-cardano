@@ -1,29 +1,15 @@
-import type {
-  BIP32Path,
-  Certificate,
-  InputTypeUTxO,
-  Network,
-  SendFn,
-  SignTransactionResponse,
-  TxOutput,
-  Withdrawal,
-} from "../Ada";
+import type { BIP32Path, SendFn, SignTransactionResponse, } from "../Ada";
 import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
-import type { HexString, Uint8_t, Uint32_t, Uint64_str } from "../parseUtils";
-import { isValidPath } from "../parseUtils";
-import type { ParsedCertificate, ParsedInput, ParsedOutput, ParsedWithdrawal } from "../parsing";
-import { CertificateType, parseCertificates, parseTxInput, parseTxOutput, parseWithdrawal, validateTransaction } from "../parsing";
+import type { HexString, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path } from "../parseUtils";
+import type { ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal } from "../parsing";
+import { PoolOwnerType } from "../parsing";
+import { CertificateType } from "../parsing";
 import { buf_to_hex, hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../serializeUtils";
-import utils, { assert, invariant, unreachable } from "../utils";
+import utils, { assert, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import { wrapRetryStillInCall } from "./common/retry";
 import { isLedgerAppVersionAtLeast } from "./getVersion";
-
-const PoolRegistrationCodes = {
-  SIGN_TX_POOL_REGISTRATION_NO: 3,
-  SIGN_TX_POOL_REGISTRATION_YES: 4,
-};
 
 const enum P1 {
   STAGE_INIT = 0x01,
@@ -44,19 +30,11 @@ const enum P1 {
 
 const signTx_init = async (
   _send: SendFn,
-  network: Network,
-  numInputs: Uint32_t,
-  numOutputs: Uint32_t,
-  includeTtl: boolean,
-  numCertificates: Uint32_t,
-  numWithdrawals: Uint32_t,
-  includeMetadata: boolean,
-  includeValidityIntervalStart: boolean,
-  numWitnesses: Uint32_t,
+  tx: ParsedTransaction,
+  wittnessPaths: ValidBIP32Path[],
   flags: {
     appHasStakePoolOwnerSupport: boolean,
     appHasMultiassetSupport: boolean,
-    isSigningPoolRegistrationAsOwner: boolean,
   }
 ): Promise<void> => {
   const enum P2 {
@@ -71,6 +49,10 @@ const signTx_init = async (
     if (!flags.appHasStakePoolOwnerSupport) {
       return Buffer.from([]);
     }
+    const PoolRegistrationCodes = {
+      SIGN_TX_POOL_REGISTRATION_NO: 3,
+      SIGN_TX_POOL_REGISTRATION_YES: 4,
+    };
 
     return uint8_to_buf(
       (isSigningPoolRegistrationAsOwner
@@ -86,42 +68,42 @@ const signTx_init = async (
     if (!hasMultiassetSupport) {
       return Buffer.concat([
         uint8_to_buf(
-          (includeMetadata
+          (tx.metadataHashHex != null
+            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
+        ),
+      ]);
+    } else {
+      return Buffer.concat([
+        uint8_to_buf(
+          (tx.ttlStr != null
+            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
+        ),
+        uint8_to_buf(
+          (tx.metadataHashHex != null
+            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
+        ),
+        uint8_to_buf(
+          (tx.validityIntervalStartStr != null
             ? SignTxIncluded.SIGN_TX_INCLUDED_YES
             : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
         ),
       ]);
     }
-
-    return Buffer.concat([
-      uint8_to_buf(
-        (includeTtl
-          ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-          : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-      ),
-      uint8_to_buf(
-        (includeMetadata
-          ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-          : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-      ),
-      uint8_to_buf(
-        (includeValidityIntervalStart
-          ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-          : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-      ),
-    ]);
   };
 
   const data = Buffer.concat([
-    uint8_to_buf(network.networkId as Uint8_t), // TODO: proper network typing
-    uint32_to_buf(network.protocolMagic as Uint8_t), // TODO: proper network typing
+    uint8_to_buf(tx.network.networkId),
+    uint32_to_buf(tx.network.protocolMagic),
     _serializeIncludeInTxData(flags.appHasMultiassetSupport),
-    _serializePoolRegistrationCode(flags.isSigningPoolRegistrationAsOwner),
-    uint32_to_buf(numInputs),
-    uint32_to_buf(numOutputs),
-    uint32_to_buf(numCertificates),
-    uint32_to_buf(numWithdrawals),
-    uint32_to_buf(numWitnesses),
+    _serializePoolRegistrationCode(tx.isSigningPoolRegistrationAsOwner),
+    uint32_to_buf(tx.inputs.length as Uint32_t),
+    uint32_to_buf(tx.outputs.length as Uint32_t),
+    uint32_to_buf(tx.certificates.length as Uint32_t),
+    uint32_to_buf(tx.withdrawals.length as Uint32_t),
+    uint32_to_buf(wittnessPaths.length as Uint32_t),
   ]);
   const _response = await wrapRetryStillInCall(_send)({
     ins: INS.SIGN_TX,
@@ -498,134 +480,115 @@ const signTx_getWitness = async (
   };
 };
 
-export async function signTransaction(
-  _send: SendFn,
-  network: Network,
-  inputs: Array<InputTypeUTxO>,
-  outputs: Array<TxOutput>,
-  feeStr: string,
-  ttlStr: string | null,
-  certificates: Array<Certificate>,
-  withdrawals: Array<Withdrawal>,
-  metadataHashHex?: string | null,
-  validityIntervalStartStr?: string | null
-): Promise<SignTransactionResponse> {
-  // pool registrations are quite restricted
-  // this affects witness set construction and many validations
-  const isSigningPoolRegistrationAsOwner = certificates.some(
-    (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
-  );
 
-  const appHasStakePoolOwnerSupport = await isLedgerAppVersionAtLeast(
-    _send,
-    2,
-    1
-  );
-  if (isSigningPoolRegistrationAsOwner && !appHasStakePoolOwnerSupport) {
-    throw Error(Errors.INCORRECT_APP_VERSION);
-  }
-
-  // TODO replace this with a better mechanism for detecting ledger app capabilities
-  const appHasMultiassetSupport = await isLedgerAppVersionAtLeast(_send, 2, 2);
-  if (!appHasMultiassetSupport) {
-    const containsMultiassets = outputs.some(
-      (output) => output.tokenBundle != null
-    );
-
-    // for older app versions:
-    // multiasset outputs must not be given
-    // validity interval start must not be given
-    // ttl must be given
-    if (
-      containsMultiassets ||
-      validityIntervalStartStr != null ||
-      ttlStr == null
-    ) {
-      throw Error(Errors.INCORRECT_APP_VERSION);
-    }
-  }
-
-  validateTransaction(
-    network,
-    inputs,
-    outputs,
-    feeStr,
-    ttlStr,
-    certificates,
-    withdrawals,
-    metadataHashHex,
-    validityIntervalStartStr
-  );
-
-
-  const witnessPaths = [];
-  if (isSigningPoolRegistrationAsOwner) {
+function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
+  if (tx.isSigningPoolRegistrationAsOwner) {
     // there should be exactly one owner given by path which will be used for the witness
-    assert(certificates.length == 1, "bad certificates length");
-    invariant(certificates[0].poolRegistrationParams != null);
+    assert(tx.certificates.length == 1, "bad certificates length");
+    const cert = tx.certificates[0]
+    assert(cert.type === CertificateType.STAKE_POOL_REGISTRATION, "bad certificate type");
 
-    const owners = certificates[0].poolRegistrationParams.poolOwners;
-    const witnessOwner = owners.find((owner) => !!owner.stakingPath);
-    invariant(witnessOwner != null);
-
-    witnessPaths.push(witnessOwner.stakingPath);
+    const witnessOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.PATH);
+    assert(witnessOwner != null, "missing witness owner");
+    assert(witnessOwner.type === PoolOwnerType.PATH, "bad witness owner type")
+    return [witnessOwner.path]
   } else {
     // we collect required witnesses for inputs, certificates and withdrawals
     // each path is included only once
-    const witnessPathsSet = new Set();
-    for (const { path } of [...inputs, ...certificates, ...withdrawals]) {
+    const witnessPaths: Record<string, ValidBIP32Path> = {}
+    // eslint-disable-next-line no-inner-declarations
+    function _insert(path: ValidBIP32Path) {
       const pathKey = JSON.stringify(path);
-      if (!witnessPathsSet.has(pathKey)) {
-        witnessPathsSet.add(pathKey);
-        witnessPaths.push(path);
-      }
+      witnessPaths[pathKey] = path
     }
+
+    for (const input of tx.inputs) {
+      assert(input.path != null, "input missing path")
+      _insert(input.path)
+    }
+    for (const cert of tx.certificates) {
+      assert(cert.type !== CertificateType.STAKE_POOL_REGISTRATION, "wrong cert type")
+      _insert(cert.path)
+    }
+    for (const withdrawal of tx.withdrawals) {
+      _insert(withdrawal.path)
+    }
+
+    return Object.values(witnessPaths)
+  }
+}
+
+export async function signTransaction(_send: SendFn, tx: ParsedTransaction): Promise<SignTransactionResponse> {
+  // TODO replace this with a better mechanism for detecting ledger app capabilities
+  const appHasStakePoolOwnerSupport = await isLedgerAppVersionAtLeast(_send, 2, 1);
+  const appHasMultiassetSupport = await isLedgerAppVersionAtLeast(_send, 2, 2);
+
+  // check capabilities
+  if (tx.isSigningPoolRegistrationAsOwner && !appHasStakePoolOwnerSupport) {
+    throw Error(Errors.INCORRECT_APP_VERSION);
   }
 
+  if (tx.outputs.some((output) => output.tokenBundle.length > 0) && !appHasMultiassetSupport) {
+    throw Error(Errors.INCORRECT_APP_VERSION);
+  }
+
+  // for older app versions:
+  // multiasset outputs must not be given
+  // validity interval start must not be given
+  // ttl must be given
+  if (
+    !appHasMultiassetSupport && (
+      tx.validityIntervalStartStr != null ||
+      tx.ttlStr == null
+    )
+  ) {
+    throw Error(Errors.INCORRECT_APP_VERSION);
+  }
+
+  const witnessPaths = generateWitnessPaths(tx)
+
+  // init
   await signTx_init(
-    _send,
-    network,
-    inputs.length as Uint32_t,
-    outputs.length as Uint32_t,
-    ttlStr != null,
-    certificates.length as Uint32_t,
-    withdrawals.length as Uint32_t,
-    metadataHashHex != null,
-    validityIntervalStartStr != null,
-    witnessPaths.length as Uint32_t,
-    { appHasStakePoolOwnerSupport, appHasMultiassetSupport, isSigningPoolRegistrationAsOwner }
+    _send, tx, witnessPaths,
+    { appHasStakePoolOwnerSupport, appHasMultiassetSupport }
   );
 
   // inputs
-  for (const input of inputs.map(i => parseTxInput(i))) {
+  for (const input of tx.inputs) {
     await signTx_addInput(_send, input);
   }
 
   // outputs
-  for (const output of outputs.map(o => parseTxOutput(o, network))) {
+  for (const output of tx.outputs) {
     await signTx_addOutput(_send, output, { appHasMultiassetSupport });
   }
 
-  await signTx_setFee(_send, feeStr as Uint64_str);
+  // fee
+  await signTx_setFee(_send, tx.feeStr);
 
-  if (ttlStr != null) {
-    await signTx_setTtl(_send, ttlStr as Uint64_str);
+  // ttl
+  if (tx.ttlStr != null) {
+    await signTx_setTtl(_send, tx.ttlStr);
   }
 
-  for (const certificate of parseCertificates(certificates)) {
+  // certificates
+  for (const certificate of tx.certificates) {
     await signTx_addCertificate(_send, certificate);
   }
 
-  for (const withdrawal of withdrawals.map(w => parseWithdrawal(w))) {
+  // withdrawals
+  for (const withdrawal of tx.withdrawals) {
     await signTx_addWithdrawal(_send, withdrawal);
   }
 
-  if (metadataHashHex != null) {
-    await signTx_setMetadata(_send, metadataHashHex as HexString);
+  // metadata
+  if (tx.metadataHashHex != null) {
+    await signTx_setMetadata(_send, tx.metadataHashHex);
   }
 
-  if (validityIntervalStartStr != null) {
-    await signTx_setValidityIntervalStart(_send, validityIntervalStartStr as Uint64_str);
+  // validity start
+  if (tx.validityIntervalStartStr != null) {
+    await signTx_setValidityIntervalStart(_send, tx.validityIntervalStartStr);
   }
 
   // confirm
@@ -634,8 +597,6 @@ export async function signTransaction(
   // witnesses
   const witnesses = [];
   for (const path of witnessPaths) {
-    assert(isValidPath(path), "Invalid path to witness has been supplied");
-
     const witness = await signTx_getWitness(_send, path, { appHasMultiassetSupport });
     witnesses.push(witness);
   }

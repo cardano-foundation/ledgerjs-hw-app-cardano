@@ -8,7 +8,6 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 export const MAX_UINT_64_STR = "18446744073709551615";
-export const MAX_LOVELACE_SUPPLY_STR = "45 000 000 000.000000".replace(/[ .]/, "");
 
 export const isString = (data: unknown): data is string =>
     typeof data === "string"
@@ -41,28 +40,28 @@ export const isValidPath = (data: unknown): data is ValidBIP32Path =>
     isArray(data) && data.every(x => isUint32(x)) && data.length < 10
 
 export const isUint64str = (data: unknown): data is Uint64_str =>
-    isUintStr(data, MAX_UINT_64_STR)
+    isUintStr(data, {})
 
-// TODO: get rid of this
-export const isPositiveUint64str = (data: unknown): data is Uint64_str =>
-    isUintStr(data, MAX_UINT_64_STR) && data !== "0"
+export const isUintStr = (data: unknown, constraints: { min?: string, max?: string }): data is string => {
+    const min = constraints.min ?? "0"
+    const max = constraints.max ?? MAX_UINT_64_STR
 
-export const isValidAdaAmountStr = (data: unknown): data is Uint64_str =>
-    isUintStr(data, MAX_LOVELACE_SUPPLY_STR)
-
-export const isUintStr = (data: unknown, max: string): data is string =>
-    isString(data)
-    && /^[0-9]*$/.test(data)
-    // Length checks
-    && data.length > 0
-    && data.length <= max.length
-    // Leading zeros
-    && (data.length === 0 || data[0] !== "0")
-    // less or equal than max value
-    && (data.length < max.length ||
-        // Note: this is string comparison!
-        data <= max
-    )
+    return isString(data)
+        && /^[0-9]*$/.test(data)
+        // Length checks
+        && data.length > 0
+        && data.length <= max.length
+        // Leading zeros
+        && (data.length === 0 || data[0] !== "0")
+        // less or equal than max value
+        && (data.length < max.length ||
+            // Note: this is string comparison!
+            data <= max
+        ) && (data.length > min.length ||
+            // Note: this is string comparison!
+            data >= min
+        )
+}
 
 export function validate(cond: boolean, errMsg: string): asserts cond {
     // TODO: Error
@@ -90,8 +89,8 @@ export function parseHexStringOfLength<L extends number>(str: unknown, length: L
     return str
 }
 
-export function parseUint64_str(str: unknown, maxValue: string, err: string): Uint64_str {
-    validate(isUint64str(str) && isUintStr(str, maxValue), err)
+export function parseUint64_str(str: unknown, constraints: { min?: string, max?: string }, err: string): Uint64_str {
+    validate(isUint64str(str) && isUintStr(str, constraints), err)
     return str
 }
 
