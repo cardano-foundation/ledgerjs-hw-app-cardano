@@ -2,17 +2,24 @@ import type { SendFn } from "../Ada";
 import { Errors } from '../Ada'
 import type { Version } from "../types/internal";
 import { INS } from "./common/ins";
-import { wrapRetryStillInCall } from "./common/retry";
+import type { Interaction, SendParams } from "./common/types";
 
-export async function getVersion(_send: SendFn): Promise<Version> {
+const send = (params: {
+  p1: number,
+  p2: number,
+  data: Buffer,
+  expectedResponseLength?: number
+}): SendParams => ({ ins: INS.GET_VERSION, ...params })
+
+
+export function* getVersion(): Interaction<Version> {
   // moving getVersion() logic to private function in order
   // to disable concurrent execution protection done by this.transport.decorateAppAPIMethods()
   // when invoked from within other calls to check app version
 
   const P1_UNUSED = 0x00;
   const P2_UNUSED = 0x00;
-  const response = await wrapRetryStillInCall(_send)({
-    ins: INS.GET_VERSION,
+  const response = yield send({
     p1: P1_UNUSED,
     p2: P2_UNUSED,
     data: Buffer.alloc(0),

@@ -19,7 +19,7 @@
 import type { BIP32Path, Certificate, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, InputTypeUTxO, SignTransactionResponse, StakingBlockchainPointer, TxOutput, Withdrawal } from 'types/public';
 
 import cardano from './cardano'
-import type { INS } from "./interactions/common/ins";
+import type { Interaction, SendParams } from './interactions/common/types';
 import { deriveAddress } from "./interactions/deriveAddress";
 import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
 import { getSerial } from "./interactions/getSerial";
@@ -37,6 +37,10 @@ import { TxErrors } from "./txErrors";
 import {
   AddressTypeNibble,
   CertificateType,
+  ParsedAddressParams,
+  ParsedTransaction,
+  ValidBIP32Path,
+  Version,
 } from './types/internal'
 import utils, { assert } from "./utils";
 
@@ -114,16 +118,56 @@ function wrapConvertError<T extends Function>(fn: T): T {
  * const ada = new Ada(transport);
  */
 
-export type SendParams = {
-  ins: INS,
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number,
-};
+
 export type SendFn = (params: SendParams) => Promise<Buffer>;
 
 export type Transport = any
+
+// It can happen that we try to send a message to the device
+// when the device thinks it is still in a middle of previous ADPU stream.
+// This happens mostly if host does abort communication for some reason
+// leaving ledger mid-call.
+// In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
+// default. We can therefore transparently retry the request.
+
+// Note though that only the *first* request in an multi-APDU exchange should be retried.
+function wrapRetryStillInCall<T extends Function>(fn: T): T {
+  // @ts-ignore
+  return async (...args: any) => {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      if (
+        e &&
+        e.statusCode &&
+        e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
+      ) {
+        // Do the retry
+        return await fn(...args);
+      }
+      throw e;
+    }
+  };
+}
+
+
+async function interact<T>(
+  interaction: Interaction<T>,
+  send: SendFn,
+): Promise<T> {
+  let cursor = interaction.next();
+  let first = true
+  while (!cursor.done) {
+    const apdu = cursor.value
+    const res = first
+      ? await wrapRetryStillInCall(send)(apdu)
+      : await send(apdu);
+    first = false
+    cursor = interaction.next(res);
+  }
+  return cursor.value;
+}
+
 
 export default class Ada {
   transport: Transport;
@@ -172,7 +216,11 @@ export default class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    return getVersion(this._send);
+    return interact(this._getVersion(), this._send)
+  }
+  // Just for consistency
+  *_getVersion(): Interaction<Version> {
+    return yield* getVersion()
   }
 
   /**
@@ -186,8 +234,12 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    const version = await getVersion(this._send)
-    return getSerial(this._send, version);
+    return interact(this._getSerial(), this._send);
+  }
+
+  *_getSerial(): Interaction<GetSerialResponse> {
+    const version = yield* getVersion()
+    return yield* getSerial(version)
   }
 
 
@@ -197,8 +249,12 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    const version = await getVersion(this._send)
-    return runTests(this._send, version);
+    return interact(this._runTests(), this._send)
+  }
+
+  *_runTests(): Interaction<void> {
+    const version = yield* getVersion()
+    return yield* runTests(version)
   }
 
 
@@ -225,8 +281,12 @@ export default class Ada {
     // TODO: move to parsing
     const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));
 
-    const version = await getVersion(this._send)
-    return getExtendedPublicKeys(this._send, version, parsed);
+    return interact(this._getExtendedPublicKeys(parsed), this._send);
+  }
+
+  *_getExtendedPublicKeys(paths: ValidBIP32Path[]) {
+    const version = yield* getVersion()
+    return yield* getExtendedPublicKeys(version, paths)
   }
 
   /**
@@ -296,8 +356,12 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    const version = await getVersion(this._send)
-    return deriveAddress(this._send, version, addressParams);
+    return interact(this._deriveAddress(addressParams), this._send);
+  }
+
+  *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DeriveAddressResponse> {
+    const version = yield* getVersion()
+    return yield* deriveAddress(version, addressParams)
   }
 
 
@@ -318,8 +382,12 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    const version = await getVersion(this._send)
-    return showAddress(this._send, version, addressParams);
+    return interact(this._showAddress(addressParams), this._send);
+  }
+
+  *_showAddress(addressParams: ParsedAddressParams): Interaction<void> {
+    const version = yield* getVersion()
+    return yield* showAddress(version, addressParams)
   }
 
 
@@ -351,8 +419,13 @@ export default class Ada {
       validityIntervalStartStr
     })
 
-    const version = await getVersion(this._send)
-    return signTransaction(this._send, version, parsedTx)
+
+    return interact(this._signTx(parsedTx), this._send);
+  }
+
+  * _signTx(tx: ParsedTransaction): Interaction<SignTransactionResponse> {
+    const version = yield* getVersion()
+    return yield* signTransaction(version, tx)
   }
 }
 
