@@ -7,9 +7,9 @@ import { getAda, NetworkIds, ProtocolMagics } from "../test_utils";
 import {
   certificates,
   inputs,
+  invalidCertificates,
+  invalidPoolMetadataTestcases,
   outputs,
-  poolMetadataVariations,
-  relays,
   results,
   sampleFeeStr,
   sampleTtlStr,
@@ -177,72 +177,30 @@ describe("signTxPoolRegistrationReject", async () => {
     await (ada as any).t.close();
   });
 
-  it("Should reject pool registration with multiple path owners", async () => {
-    const cert = certificates.poolRegistration2PathOwners;
-    const promise = ada.signTransaction(
-      NetworkIds.MAINNET,
-      ProtocolMagics.MAINNET,
-      [inputs.utxo],
-      [outputs.external],
-      sampleFeeStr,
-      sampleTtlStr,
-      [cert as any],
-      [],
-      null
-    );
+  for (const { testName, poolRegistrationCertificate, expectedReject } of invalidCertificates) {
+    it(`Should reject ${testName}`, async () => {
+      const promise = ada.signTransaction(
+        NetworkIds.MAINNET,
+        ProtocolMagics.MAINNET,
+        [inputs.utxo],
+        [outputs.external],
+        sampleFeeStr,
+        sampleTtlStr,
+        [poolRegistrationCertificate as any],
+        [],
+        null
+      );
+      await expect(promise).to.be.rejectedWith(expectedReject);
+    });
+  }
 
-    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-  });
-
-  it("Should reject pool registration with only hash owners", async () => {
-    const cert = certificates.poolRegistration2HashOwners;
-    const promise = ada.signTransaction(
-      NetworkIds.MAINNET,
-      ProtocolMagics.MAINNET,
-      [inputs.utxo],
-      [outputs.external],
-      sampleFeeStr,
-      sampleTtlStr,
-      [cert as any],
-      [],
-      null
-    );
-
-
-    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-  });
-
-  it("Should reject pool registration with no owners", async () => {
-
-    const cert = certificates.poolRegistrationNoOwners;
-    const promise = ada.signTransaction(
-      NetworkIds.MAINNET,
-      ProtocolMagics.MAINNET,
-      [inputs.utxo],
-      [outputs.external],
-      sampleFeeStr,
-      sampleTtlStr,
-      [cert as any],
-      [],
-      null
-    );
-
-    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-  });
-
-  it("Should reject pool registration with invalid metadata url", async () => {
-    const invalidMetadataVariations = [
-      poolMetadataVariations.poolMetadataUrlTooLong,
-      poolMetadataVariations.poolMetadataInvalidUrl,
-      poolMetadataVariations.poolMetadataMissingUrl,
-    ];
-
-    for (const metadataVariant of invalidMetadataVariations) {
+  for (const { testName, metadata, rejectReason } of invalidPoolMetadataTestcases) {
+    it(`Should reject ${testName}`, async () => {
       const cert = {
         ...certificates.poolRegistrationDefault,
         poolRegistrationParams: {
           ...certificates.poolRegistrationDefault.poolRegistrationParams,
-          metadata: metadataVariant,
+          metadata,
         },
       };
 
@@ -257,70 +215,10 @@ describe("signTxPoolRegistrationReject", async () => {
         [],
         null
       );
-      await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL);
-    }
-  });
+      await expect(promise).to.be.rejectedWith(rejectReason);
+    });
+  }
 
-  it("Should reject pool registration with invalid metadata hash", async () => {
-    const invalidMetadataVariations = [
-      poolMetadataVariations.poolMetadataInvalidHexLength,
-      poolMetadataVariations.poolMetadataMissingHash,
-    ];
-
-    for (const metadataVariant of invalidMetadataVariations) {
-      const cert = {
-        ...certificates.poolRegistrationDefault,
-        poolRegistrationParams: {
-          ...certificates.poolRegistrationDefault.poolRegistrationParams,
-          metadata: metadataVariant,
-        },
-      };
-
-      const promise = ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert as any],
-        [],
-        null
-      );
-
-      await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH);
-    }
-  });
-
-  it("Should reject pool registration with invalid relay", async () => {
-    const relayVariants = [
-      relays.singleHostNameRelayMissingDns,
-      relays.multiHostNameRelayMissingDns,
-    ];
-
-    for (const relayVariant of relayVariants) {
-      const cert = {
-        ...certificates.poolRegistrationDefault,
-        poolRegistrationParams: {
-          ...certificates.poolRegistrationDefault.poolRegistrationParams,
-          relays: [relayVariant],
-        },
-      };
-      const promise = ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert as any],
-        [],
-        null
-      );
-
-      await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS);
-    }
-  });
 
   it("Should reject pool registration with numerator bigger than denominator", async () => {
     const cert = certificates.poolRegistrationWrongMargin;

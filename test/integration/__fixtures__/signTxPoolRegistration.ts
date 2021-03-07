@@ -1,4 +1,5 @@
-import { utils } from "../../../src/Ada";
+import { TxErrors, utils } from "../../../src/Ada";
+import { PoolMetadataParams } from "../../../src/types/public";
 import { str_to_path } from "../../test_utils";
 
 export const inputs = {
@@ -23,37 +24,62 @@ export const outputs = {
 export const sampleFeeStr = "42";
 export const sampleTtlStr = "10";
 
-export const poolMetadataVariations = {
+const poolMetadataVariations = {
   poolMetadataDefault: {
     metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
     metadataHashHex:
       "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
   },
-  poolMetadataUrlTooLong: {
-    metadataUrl:
-      "https://www.vacuumlabs.com/aaaaaaaaaaaaaaaaaaaaaaaasampleUrl.json",
-    metadataHashHex:
-      "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
-  },
-  poolMetadataInvalidHexLength: {
-    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
-    metadataHashHex:
-      "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948",
-  },
-  poolMetadataInvalidUrl: {
-    metadataUrl: "\n",
-    metadataHashHex:
-      "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948",
-  },
-  poolMetadataMissingHash: {
-    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
-  },
-  poolMetadataMissingUrl: {
-    metadataHashHex:
-      "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
-  },
   poolMetadataNone: null,
 };
+
+export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: PoolMetadataParams, rejectReason: string }> = [
+  // Invalid url
+  {
+    testName: "pool metadata url too long",
+    metadata: {
+      metadataUrl:
+        "https://www.vacuumlabs.com/aaaaaaaaaaaaaaaaaaaaaaaasampleUrl.json",
+      metadataHashHex:
+        "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
+    },
+    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+  },
+  {
+    testName: "pool metadata invalid url",
+    metadata: {
+      metadataUrl: "\n",
+      metadataHashHex:
+        "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948",
+    },
+    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+  },
+  {
+    testName: "pool metadata missing url",
+    metadata: {
+      metadataHashHex:
+        "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
+    } as PoolMetadataParams,
+    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+  },
+  // Invalid hash
+  {
+    testName: "pool metadata invalid hash length",
+    metadata: {
+      metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
+      metadataHashHex:
+        "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948",
+    },
+    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
+  },
+  {
+    testName: "pool metadata missing hash",
+    metadata: {
+      metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
+    } as PoolMetadataParams,
+    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
+  }
+]
 
 const stakingHashOwners = {
   owner0: {
@@ -84,7 +110,7 @@ const poolOwnerVariationSet = {
   twoCombinedOwners: [stakingPathOwners.owner0, stakingHashOwners.owner0],
 };
 
-export const relays = {
+const relays = {
   singleHostIPV4Relay0: {
     type: 0,
     params: {
@@ -235,27 +261,6 @@ export const certificates = {
       relays: relayVariationSet.allRelays,
     },
   },
-  poolRegistration2PathOwners: {
-    ...defaultPoolRegistration,
-    poolRegistrationParams: {
-      ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariationSet.twoPathOwners,
-    },
-  },
-  poolRegistration2HashOwners: {
-    ...defaultPoolRegistration,
-    poolRegistrationParams: {
-      ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariationSet.twoHashOwners,
-    },
-  },
-  poolRegistrationNoOwners: {
-    ...defaultPoolRegistration,
-    poolRegistrationParams: {
-      ...defaultPoolRegistration.poolRegistrationParams,
-      poolOwners: poolOwnerVariationSet.noOwners,
-    },
-  },
   poolRegistrationMixedOwnersIpv4SingleHostRelays: {
     ...defaultPoolRegistration,
     poolRegistrationParams: {
@@ -297,6 +302,42 @@ export const certificates = {
     },
   },
 };
+
+export const invalidCertificates: Array<{ testName: string, poolRegistrationCertificate: any, expectedReject: string }> = [
+  {
+    testName: "pool registration with multiple path owners",
+    poolRegistrationCertificate: {
+      ...defaultPoolRegistration,
+      poolRegistrationParams: {
+        ...defaultPoolRegistration.poolRegistrationParams,
+        poolOwners: poolOwnerVariationSet.twoPathOwners,
+      },
+    },
+    expectedReject: TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+  },
+  {
+    testName: "pool registration with only hash owners",
+    poolRegistrationCertificate: {
+      ...defaultPoolRegistration,
+      poolRegistrationParams: {
+        ...defaultPoolRegistration.poolRegistrationParams,
+        poolOwners: poolOwnerVariationSet.twoHashOwners,
+      },
+    },
+    expectedReject: TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+  },
+  {
+    testName: "pool registration with no owners",
+    poolRegistrationCertificate: {
+      ...defaultPoolRegistration,
+      poolRegistrationParams: {
+        ...defaultPoolRegistration.poolRegistrationParams,
+        poolOwners: poolOwnerVariationSet.noOwners,
+      },
+    },
+    expectedReject: TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+  }
+]
 
 export const withdrawals = {
   withdrawal0: {
