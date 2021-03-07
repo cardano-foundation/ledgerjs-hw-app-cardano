@@ -37,6 +37,10 @@ import { TxErrors } from "./txErrors";
 import {
   AddressTypeNibble,
   CertificateType,
+  ParsedAddressParams,
+  ParsedTransaction,
+  ValidBIP32Path,
+  Version,
 } from './types/internal'
 import utils, { assert } from "./utils";
 
@@ -148,16 +152,16 @@ function wrapRetryStillInCall<T extends Function>(fn: T): T {
 
 
 async function interact<T>(
-  _send: SendFn,
   interaction: Interaction<T>,
+  send: SendFn,
 ): Promise<T> {
   let cursor = interaction.next();
   let first = true
   while (!cursor.done) {
     const apdu = cursor.value
     const res = first
-      ? await wrapRetryStillInCall(_send)(apdu)
-      : await _send(apdu);
+      ? await wrapRetryStillInCall(send)(apdu)
+      : await send(apdu);
     first = false
     cursor = interaction.next(res);
   }
@@ -212,7 +216,11 @@ export default class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    return interact(this._send, getVersion())
+    return interact(this._getVersion(), this._send)
+  }
+  // Just for consistency
+  *_getVersion(): Interaction<Version> {
+    return yield* getVersion()
   }
 
   /**
@@ -226,11 +234,12 @@ export default class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    function* interaction() {
-      const version = yield* getVersion()
-      return yield* getSerial(version)
-    }
-    return interact(this._send, interaction());
+    return interact(this._getSerial(), this._send);
+  }
+
+  *_getSerial(): Interaction<GetSerialResponse> {
+    const version = yield* getVersion()
+    return yield* getSerial(version)
   }
 
 
@@ -240,11 +249,12 @@ export default class Ada {
    * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
-    function* interaction() {
-      const version = yield* getVersion()
-      return yield* runTests(version)
-    }
-    return interact(this._send, interaction())
+    return interact(this._runTests(), this._send)
+  }
+
+  *_runTests(): Interaction<void> {
+    const version = yield* getVersion()
+    return yield* runTests(version)
   }
 
 
@@ -271,11 +281,12 @@ export default class Ada {
     // TODO: move to parsing
     const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));
 
-    function* interaction() {
-      const version = yield* getVersion()
-      return yield* getExtendedPublicKeys(version, parsed)
-    }
-    return interact(this._send, interaction());
+    return interact(this._getExtendedPublicKeys(parsed), this._send);
+  }
+
+  *_getExtendedPublicKeys(paths: ValidBIP32Path[]) {
+    const version = yield* getVersion()
+    return yield* getExtendedPublicKeys(version, paths)
   }
 
   /**
@@ -345,11 +356,12 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    function* interaction() {
-      const version = yield* getVersion()
-      return yield* deriveAddress(version, addressParams)
-    }
-    return interact(this._send, interaction());
+    return interact(this._deriveAddress(addressParams), this._send);
+  }
+
+  *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DeriveAddressResponse> {
+    const version = yield* getVersion()
+    return yield* deriveAddress(version, addressParams)
   }
 
 
@@ -370,11 +382,12 @@ export default class Ada {
       stakingBlockchainPointer
     })
 
-    function* interaction() {
-      const version = yield* getVersion()
-      return yield* showAddress(version, addressParams)
-    }
-    return interact(this._send, interaction());
+    return interact(this._showAddress(addressParams), this._send);
+  }
+
+  *_showAddress(addressParams: ParsedAddressParams): Interaction<void> {
+    const version = yield* getVersion()
+    return yield* showAddress(version, addressParams)
   }
 
 
@@ -406,11 +419,13 @@ export default class Ada {
       validityIntervalStartStr
     })
 
-    function* interaction() {
-      const version = yield* getVersion()
-      return yield* signTransaction(version, parsedTx)
-    }
-    return interact(this._send, interaction());
+
+    return interact(this._signTx(parsedTx), this._send);
+  }
+
+  * _signTx(tx: ParsedTransaction): Interaction<SignTransactionResponse> {
+    const version = yield* getVersion()
+    return yield* signTransaction(version, tx)
   }
 }
 
