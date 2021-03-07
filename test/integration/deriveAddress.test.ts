@@ -1,4 +1,5 @@
-import { expect } from "chai";
+import chai, { expect } from "chai";
+import chaiAsPromised from "chai-as-promised"
 
 import type Ada from "../../src/Ada";
 import { AddressTypeNibble, utils } from "../../src/Ada";
@@ -8,6 +9,7 @@ import {
   str_to_path,
 } from "../test_utils";
 import getPathDerivationFixture from "./__fixtures__/pathDerivations";
+chai.use(chaiAsPromised)
 
 describe("deriveAddress", async () => {
   let ada: Ada = {} as any;
@@ -218,18 +220,12 @@ describe("deriveAddress", async () => {
 
   it("Should not permit invalid path", async () => {
     const test = async (path: string) => {
-      const SHOULD_HAVE_THROWN = "should have thrown earlier";
-      try {
-        await ada.deriveAddress(
-          AddressTypeNibble.BYRON,
-          0, //TODO: BYRON_PROTOCOL_MAGIC,
-          str_to_path(path)
-        );
-
-        throw new Error(SHOULD_HAVE_THROWN);
-      } catch (error) {
-        expect(error.message).not.to.have.string(SHOULD_HAVE_THROWN);
-      }
+      const promise = ada.deriveAddress(
+        AddressTypeNibble.BYRON,
+        0, //TODO: BYRON_PROTOCOL_MAGIC,
+        str_to_path(path)
+      )
+      await expect(promise).to.be.rejectedWith("Ledger device: Action rejected by Ledger's security policy");
     };
 
     await test("44'/1815'/1'");
