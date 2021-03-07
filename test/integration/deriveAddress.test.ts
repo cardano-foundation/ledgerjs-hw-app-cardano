@@ -3,6 +3,7 @@ import chaiAsPromised from "chai-as-promised"
 
 import type Ada from "../../src/Ada";
 import { AddressTypeNibble, utils } from "../../src/Ada";
+import type { AddressParams } from "../../src/types/public";
 import {
   getAda,
   ProtocolMagics,
@@ -52,17 +53,13 @@ describe("deriveAddress", async () => {
       {
         addressTypeNibble,
         networkIdOrProtocolMagic,
-        spendingPathStr,
-        stakingPathStr,
+        spendingPath,
+        stakingPath,
         stakingKeyHashHex,
         stakingBlockchainPointer,
-      }: any,
+      }: AddressParams,
       expectedResult: string
     ) => {
-      const spendingPath = str_to_path(spendingPathStr);
-      const stakingPath =
-        stakingPathStr !== null ? str_to_path(stakingPathStr) : null;
-
       const { addressHex } = await ada.deriveAddress(
         addressTypeNibble,
         networkIdOrProtocolMagic,
@@ -70,12 +67,6 @@ describe("deriveAddress", async () => {
         stakingPath,
         stakingKeyHashHex,
         stakingBlockchainPointer
-          ? {
-            blockIndex: stakingBlockchainPointer[0],
-            txIndex: stakingBlockchainPointer[1],
-            certificateIndex: stakingBlockchainPointer[2],
-          }
-          : null
       );
 
       expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex as any))).to.equal(
@@ -83,14 +74,15 @@ describe("deriveAddress", async () => {
       );
     };
 
-    const testcases = [
+    const Pointer = (blockIndex: number, txIndex: number, certificateIndex: number) => ({ blockIndex, txIndex, certificateIndex })
+    const testcases: Array<[AddressParams, string]> = [
       // base
       [
         {
           addressTypeNibble: AddressTypeNibble.BASE,
           networkIdOrProtocolMagic: 0x03,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: "1852'/1815'/0'/2/0",
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingKeyHashHex: null,
           stakingBlockchainPointer: null,
         },
@@ -100,8 +92,8 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.BASE,
           networkIdOrProtocolMagic: 0x00,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: "1852'/1815'/0'/2/0",
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingKeyHashHex: null,
           stakingBlockchainPointer: null,
         },
@@ -111,8 +103,8 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.BASE,
           networkIdOrProtocolMagic: 0x00,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex:
             "1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c",
           stakingBlockchainPointer: null,
@@ -123,8 +115,8 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.BASE,
           networkIdOrProtocolMagic: 0x03,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex:
             "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
           stakingBlockchainPointer: null,
@@ -136,8 +128,8 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.ENTERPRISE,
           networkIdOrProtocolMagic: 0x00,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex: null,
           stakingBlockchainPointer: null,
         },
@@ -147,8 +139,8 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.ENTERPRISE,
           networkIdOrProtocolMagic: 0x03,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex: null,
           stakingBlockchainPointer: null,
         },
@@ -159,10 +151,10 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.POINTER,
           networkIdOrProtocolMagic: 0x00,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex: null,
-          stakingBlockchainPointer: [1, 2, 3],
+          stakingBlockchainPointer: Pointer(1, 2, 3),
         },
         "addr_test1gpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcpqgpsg6s2p6",
       ],
@@ -170,10 +162,10 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.POINTER,
           networkIdOrProtocolMagic: 0x03,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex: null,
-          stakingBlockchainPointer: [24157, 177, 42],
+          stakingBlockchainPointer: Pointer(24157, 177, 42),
         },
         "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vuph3wczvf288aeyu",
       ],
@@ -181,10 +173,10 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.POINTER,
           networkIdOrProtocolMagic: 0x03,
-          spendingPathStr: "1852'/1815'/0'/0/1",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+          stakingPath: null,
           stakingKeyHashHex: null,
-          stakingBlockchainPointer: [0, 0, 0],
+          stakingBlockchainPointer: Pointer(0, 0, 0),
         },
         "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcqqqqqnnd32q",
       ],
@@ -193,8 +185,8 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.REWARD,
           networkIdOrProtocolMagic: 0x00,
-          spendingPathStr: "1852'/1815'/0'/2/0",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/2/0"),
+          stakingPath: null,
           stakingKeyHashHex: null,
           stakingBlockchainPointer: null,
         },
@@ -204,14 +196,14 @@ describe("deriveAddress", async () => {
         {
           addressTypeNibble: AddressTypeNibble.REWARD,
           networkIdOrProtocolMagic: 0x03,
-          spendingPathStr: "1852'/1815'/0'/2/0",
-          stakingPathStr: null,
+          spendingPath: str_to_path("1852'/1815'/0'/2/0"),
+          stakingPath: null,
           stakingKeyHashHex: null,
           stakingBlockchainPointer: null,
         },
         "stake1uvwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8qqucf2t",
       ],
-    ] as const;
+    ];
 
     for (const [args, expected] of testcases) {
       await test(args, expected);
