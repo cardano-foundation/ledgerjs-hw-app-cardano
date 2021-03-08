@@ -16,7 +16,7 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import type { AddressParams, BIP32Path, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, SignTransactionResponse, Transaction } from 'types/public';
+import type { AddressParams, BIP32Path, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, Network, SignTransactionResponse, Transaction } from 'types/public';
 
 import cardano from './cardano'
 import type { Interaction, SendParams } from './interactions/common/types';
@@ -335,10 +335,11 @@ export class Ada {
    * );
    *
    */
-  async deriveAddress(
+  async deriveAddress({ network, addressParams }: {
+    network: Network,
     addressParams: AddressParams
-  ): Promise<DeriveAddressResponse> {
-    const parsedParams = parseAddressParams(addressParams)
+  }): Promise<DeriveAddressResponse> {
+    const parsedParams = parseAddressParams(network, addressParams)
 
     return interact(this._deriveAddress(parsedParams), this._send);
   }
@@ -349,10 +350,11 @@ export class Ada {
   }
 
 
-  async showAddress(
+  async showAddress({ network, addressParams }: {
+    network: Network,
     addressParams: AddressParams
-  ): Promise<void> {
-    const parsedParams = parseAddressParams(addressParams)
+  }): Promise<void> {
+    const parsedParams = parseAddressParams(network, addressParams)
 
     return interact(this._showAddress(parsedParams), this._send);
   }

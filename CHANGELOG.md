@@ -14,6 +14,7 @@ Major release. Switched from flow to TypeScript.
 - All API calls now use single structured argument instead of long list of partial arguments.
   (For the overview see `src/Ada.ts` changes in https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/61)
 - `AddressTypeNibble` enum renamed to `AddressType`
+- `derive/showAddress` now take `network` as an explicit parameter instead of `networkIdOrProtocolMagic` field in `AddressParams`
 
 ## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2020]
 

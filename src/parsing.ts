@@ -104,11 +104,7 @@ export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
 }
 
 export function parseTransaction(tx: Transaction): ParsedTransaction {
-    const network: ParsedNetwork = {
-        protocolMagic: parseUint32_t(tx.network.protocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
-        networkId: parseUint8_t(tx.network.networkId, TxErrors.INVALID_NETWORK_ID)
-    }
-    validate(network.networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    const network = parseNetwork(tx.network)
 
     // inputs
     validate(isArray(tx.inputs), TxErrors.INPUTS_NOT_ARRAY);
@@ -392,9 +388,20 @@ export function parsePoolMetadataParams(params: PoolMetadataParams | null): Pars
     }
 }
 
+export function parseNetwork(network: Network): ParsedNetwork {
+    const parsed = {
+        protocolMagic: parseUint32_t(network.protocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
+        networkId: parseUint8_t(network.networkId, TxErrors.INVALID_NETWORK_ID)
+    }
+    validate(parsed.networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    return parsed
+}
+
 export function parseAddressParams(
+    network: Network,
     params: AddressParams
 ): ParsedAddressParams {
+    const parsedNetwork = parseNetwork(network)
     if (params.addressTypeNibble === AddressType.BYRON) {
         validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
@@ -402,14 +409,13 @@ export function parseAddressParams(
 
         return {
             type: params.addressTypeNibble,
-            protocolMagic: parseUint32_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
+            protocolMagic: parsedNetwork.protocolMagic,
             spendingPath: parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH),
             stakingChoice: { type: StakingChoiceType.NO_STAKING }
         }
     }
 
-    const networkId = parseUint8_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_NETWORK_ID)
-    validate(networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    const networkId = parsedNetwork.networkId
     const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
 
     switch (params.addressTypeNibble) {
@@ -535,11 +541,8 @@ export function parseTxOutput(
             tokenBundle,
             destination: {
                 type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
-                addressParams: parseAddressParams({
+                addressParams: parseAddressParams(network, {
                     addressTypeNibble: output.addressTypeNibble,
-                    networkIdOrProtocolMagic: output.addressTypeNibble === AddressType.BYRON
-                        ? network.protocolMagic
-                        : network.networkId,
                     spendingPath: output.spendingPath,
                     stakingPath: output.stakingPath,
                     stakingKeyHashHex: output.stakingKeyHashHex,

@@ -42,5 +42,9 @@ export const Networks = {
   Testnet: {
     networkId: NetworkIds.TESTNET,
     protocolMagic: ProtocolMagics.TESTNET,
+  },
+  Fake: {
+    networkId: 0x03,
+    protocolMagic: 47,
   }
 }

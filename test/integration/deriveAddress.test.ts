@@ -3,7 +3,7 @@ import chaiAsPromised from "chai-as-promised"
 
 import type { Ada } from "../../src/Ada";
 import { AddressType, utils } from "../../src/Ada";
-import type { AddressParams } from "../../src/types/public";
+import type { AddressParams, Network } from "../../src/types/public";
 import {
   getAda,
   Networks,
@@ -24,16 +24,18 @@ describe("deriveAddress", async () => {
   });
 
   it("Should succesfully derive Byron address", async () => {
-    const test = async (path: string, protocolMagic: number) => {
+    const test = async (path: string, network: Network) => {
       const derivation = getPathDerivationFixture({
         path,
-        protocolMagic,
+        protocolMagic: network.protocolMagic,
       })!;
 
       const { addressHex } = await ada.deriveAddress({
-        addressTypeNibble: AddressType.BYRON,
-        networkIdOrProtocolMagic: protocolMagic,
-        spendingPath: str_to_path(derivation.path)
+        network,
+        addressParams: {
+          addressTypeNibble: AddressType.BYRON,
+          spendingPath: str_to_path(derivation.path)
+        }
       });
 
       expect(utils.base58_encode(utils.hex_to_buf(addressHex as any))).to.equal(
@@ -41,8 +43,8 @@ describe("deriveAddress", async () => {
       );
     };
 
-    await test("44'/1815'/1'/0/12'", Networks.Mainnet.protocolMagic);
-    await test("44'/1815'/1'/0/12'", Networks.Testnet.protocolMagic);
+    await test("44'/1815'/1'/0/12'", Networks.Mainnet);
+    await test("44'/1815'/1'/0/12'", Networks.Testnet);
 
     // rejected by the present security policy, but we might want to return it in the future
     // await test("44'/1815'/1'/0/10'/1/2/3", ProtocolMagics.MAINNET);
@@ -50,10 +52,11 @@ describe("deriveAddress", async () => {
 
   it("Should succesfully derive Shelley address", async () => {
     const test = async (
+      network: Network,
       addressParams: AddressParams,
       expectedResult: string
     ) => {
-      const { addressHex } = await ada.deriveAddress(addressParams)
+      const { addressHex } = await ada.deriveAddress({ network, addressParams })
 
       expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex as any))).to.equal(
         expectedResult
@@ -61,12 +64,12 @@ describe("deriveAddress", async () => {
     };
 
     const Pointer = (blockIndex: number, txIndex: number, certificateIndex: number) => ({ blockIndex, txIndex, certificateIndex })
-    const testcases: Array<[AddressParams, string]> = [
+    const testcases: Array<[Network, AddressParams, string]> = [
       // base
       [
+        Networks.Fake,
         {
           addressTypeNibble: AddressType.BASE,
-          networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingKeyHashHex: null,
@@ -75,9 +78,9 @@ describe("deriveAddress", async () => {
         "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqdquehe",
       ],
       [
+        Networks.Testnet,
         {
           addressTypeNibble: AddressType.BASE,
-          networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingKeyHashHex: null,
@@ -86,9 +89,9 @@ describe("deriveAddress", async () => {
         "addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4",
       ],
       [
+        Networks.Testnet,
         {
           addressTypeNibble: AddressType.BASE,
-          networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex:
@@ -98,9 +101,9 @@ describe("deriveAddress", async () => {
         "addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4",
       ],
       [
+        Networks.Fake,
         {
           addressTypeNibble: AddressType.BASE,
-          networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex:
@@ -111,9 +114,9 @@ describe("deriveAddress", async () => {
       ],
       // enterprise
       [
+        Networks.Testnet,
         {
           addressTypeNibble: AddressType.ENTERPRISE,
-          networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -122,9 +125,9 @@ describe("deriveAddress", async () => {
         "addr_test1vpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vc7t2fks",
       ],
       [
+        Networks.Fake,
         {
           addressTypeNibble: AddressType.ENTERPRISE,
-          networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -134,9 +137,9 @@ describe("deriveAddress", async () => {
       ],
       // pointer
       [
+        Networks.Testnet,
         {
           addressTypeNibble: AddressType.POINTER,
-          networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -145,9 +148,9 @@ describe("deriveAddress", async () => {
         "addr_test1gpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcpqgpsg6s2p6",
       ],
       [
+        Networks.Fake,
         {
           addressTypeNibble: AddressType.POINTER,
-          networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -156,9 +159,9 @@ describe("deriveAddress", async () => {
         "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vuph3wczvf288aeyu",
       ],
       [
+        Networks.Fake,
         {
           addressTypeNibble: AddressType.POINTER,
-          networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -168,9 +171,9 @@ describe("deriveAddress", async () => {
       ],
       // reward
       [
+        Networks.Testnet,
         {
           addressTypeNibble: AddressType.REWARD,
-          networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -179,9 +182,9 @@ describe("deriveAddress", async () => {
         "stake_test1uqwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8q8mmqwc",
       ],
       [
+        Networks.Fake,
         {
           addressTypeNibble: AddressType.REWARD,
-          networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingPath: null,
           stakingKeyHashHex: null,
@@ -191,17 +194,19 @@ describe("deriveAddress", async () => {
       ],
     ];
 
-    for (const [args, expected] of testcases) {
-      await test(args, expected);
+    for (const [network, addressParams, expected] of testcases) {
+      await test(network, addressParams, expected);
     }
   }).timeout(60000);
 
   it("Should not permit invalid path", async () => {
     const test = async (path: string) => {
       const promise = ada.deriveAddress({
-        addressTypeNibble: AddressType.BYRON,
-        networkIdOrProtocolMagic: 0, //TODO: BYRON_PROTOCOL_MAGIC,
-        spendingPath: str_to_path(path)
+        network: Networks.Fake,
+        addressParams: {
+          addressTypeNibble: AddressType.BYRON,
+          spendingPath: str_to_path(path)
+        }
       })
       await expect(promise).to.be.rejectedWith("Ledger device: Action rejected by Ledger's security policy");
     };

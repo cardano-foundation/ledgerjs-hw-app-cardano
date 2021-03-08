@@ -30,7 +30,6 @@ export type Network = {
 
 export type AddressParams = {
     addressTypeNibble: number,
-    networkIdOrProtocolMagic: number,
     spendingPath: BIP32Path,
     stakingPath?: BIP32Path | null,
     stakingKeyHashHex?: string | null,
