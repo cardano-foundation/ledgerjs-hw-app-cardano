@@ -172,3 +172,15 @@ export type SignTransactionResponse = {
     txHashHex: string,
     witnesses: Array<Witness>,
 };
+
+export type Transaction = {
+    network: Network,
+    inputs: Array<InputTypeUTxO>,
+    outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
+    feeStr: string,
+    ttlStr: string | null,
+    certificates: Array<Certificate>,
+    withdrawals: Array<Withdrawal>,
+    metadataHashHex?: string | null,
+    validityIntervalStartStr?: string | null
+}

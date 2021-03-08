@@ -16,7 +16,7 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import type { BIP32Path, Certificate, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, InputTypeUTxO, SignTransactionResponse, StakingBlockchainPointer, TxOutput, Withdrawal } from 'types/public';
+import type { AddressParams, BIP32Path, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, SignTransactionResponse, Transaction } from 'types/public';
 
 import cardano from './cardano'
 import type { Interaction, SendParams } from './interactions/common/types';
@@ -34,13 +34,15 @@ import {
   parseTransaction,
 } from "./parsing";
 import { TxErrors } from "./txErrors";
-import {
-  AddressTypeNibble,
-  CertificateType,
+import type {
   ParsedAddressParams,
   ParsedTransaction,
   ValidBIP32Path,
-  Version,
+  Version
+} from './types/internal';
+import {
+  AddressTypeNibble,
+  CertificateType
 } from './types/internal'
 import utils, { assert } from "./utils";
 
@@ -169,7 +171,7 @@ async function interact<T>(
 }
 
 
-export default class Ada {
+export class Ada {
   transport: Transport;
   _send: SendFn;
 
@@ -208,7 +210,7 @@ export default class Ada {
   /**
    * Returns an object containing the app version.
    *
-   * @returns {Promise<GetVersionResponse>} Result object containing the application version number.
+   * @returns Result object containing the application version number.
    *
    * @example
    * const { major, minor, patch, flags } = await ada.getVersion();
@@ -226,7 +228,7 @@ export default class Ada {
   /**
    * Returns an object containing the device serial number.
    *
-   * @returns {Promise<GetSerialResponse>} Result object containing the device serial number.
+   * @returns Result object containing the device serial number.
    *
    * @example
    * const { serial } = await ada.getSerial();
@@ -245,8 +247,6 @@ export default class Ada {
 
   /**
    * Runs unit tests on the device (DEVEL app build only)
-   *
-   * @returns {Promise<void>}
    */
   async runTests(): Promise<void> {
     return interact(this._runTests(), this._send)
@@ -261,15 +261,14 @@ export default class Ada {
   /**
    * @description Get several public keys; one for each of the specified BIP 32 paths.
    *
-   * @param {Array<BIP32Path>} paths The paths. A path must begin with `44'/1815'/account'` or `1852'/1815'/account'`, and may be up to 10 indexes long.
-   * @return {Promise<Array<GetExtendedPublicKeyResponse>>} The extended public keys (i.e. with chaincode) for the given paths.
+   * @param paths The paths. A path must begin with `44'/1815'/account'` or `1852'/1815'/account'`, and may be up to 10 indexes long.
+   * @returns The extended public keys (i.e. with chaincode) for the given paths.
    *
    * @example
    * const [{ publicKey, chainCode }] = await ada.getExtendedPublicKeys([[ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]]);
    * console.log(publicKey);
    *
    */
-
   async getExtendedPublicKeys(
     paths: Array<BIP32Path>
   ): Promise<Array<GetExtendedPublicKeyResponse>> {
@@ -292,8 +291,8 @@ export default class Ada {
   /**
    * @description Get a public key from the specified BIP 32 path.
    *
-   * @param {BIP32Path} indexes The path indexes. Path must begin with `44'/1815'/n'`, and may be up to 10 indexes long.
-   * @return {Promise<GetExtendedPublicKeyResponse>} The public key with chaincode for the given path.
+   * @param path BIP32 array. Path must start with `(44 or 1852)'/1815'/n'`, and may be up to 10 indexes long.
+   * @return The public key with chaincode for the given path.
    *
    * @example
    * const { publicKey, chainCode } = await ada.getExtendedPublicKey([ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]);
@@ -309,8 +308,8 @@ export default class Ada {
   /**
    * @description Gets an address from the specified BIP 32 path.
    *
-   * @param {BIP32Path} indexes The path indexes. Path must begin with `(44 or 1852)'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
-   * @return {Promise<DeriveAddressResponse>} The address for the given path.
+   * @param addressParams The path indexes. Path must begin with `(44 or 1852)'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
+   * @return The address for the given path.
    *
    * @throws 5001 - The path provided does not have the first 3 indexes hardened or 4th index is not 0, 1 or 2
    * @throws 5002 - The path provided is less than 5 indexes
@@ -340,23 +339,11 @@ export default class Ada {
    *
    */
   async deriveAddress(
-    addressTypeNibble: AddressTypeNibble,
-    networkIdOrProtocolMagic: number,
-    spendingPath: BIP32Path,
-    stakingPath: BIP32Path | null = null,
-    stakingKeyHashHex: string | null = null,
-    stakingBlockchainPointer: StakingBlockchainPointer | null = null
+    addressParams: AddressParams
   ): Promise<DeriveAddressResponse> {
-    const addressParams = parseAddressParams({
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
-    })
+    const parsedParams = parseAddressParams(addressParams)
 
-    return interact(this._deriveAddress(addressParams), this._send);
+    return interact(this._deriveAddress(parsedParams), this._send);
   }
 
   *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DeriveAddressResponse> {
@@ -366,23 +353,11 @@ export default class Ada {
 
 
   async showAddress(
-    addressTypeNibble: AddressTypeNibble,
-    networkIdOrProtocolMagic: number,
-    spendingPath: BIP32Path,
-    stakingPath: BIP32Path | null = null,
-    stakingKeyHashHex: string | null = null,
-    stakingBlockchainPointer: StakingBlockchainPointer | null = null
+    addressParams: AddressParams
   ): Promise<void> {
-    const addressParams = parseAddressParams({
-      addressTypeNibble,
-      networkIdOrProtocolMagic,
-      spendingPath,
-      stakingPath,
-      stakingKeyHashHex,
-      stakingBlockchainPointer
-    })
+    const parsedParams = parseAddressParams(addressParams)
 
-    return interact(this._showAddress(addressParams), this._send);
+    return interact(this._showAddress(parsedParams), this._send);
   }
 
   *_showAddress(addressParams: ParsedAddressParams): Interaction<void> {
@@ -392,32 +367,10 @@ export default class Ada {
 
 
   async signTransaction(
-    networkId: number,
-    protocolMagic: number,
-    inputs: Array<InputTypeUTxO>,
-    outputs: Array<TxOutput>,
-    feeStr: string,
-    ttlStr: string | null,
-    certificates: Array<Certificate>,
-    withdrawals: Array<Withdrawal>,
-    metadataHashHex?: string | null,
-    validityIntervalStartStr?: string | null
+    tx: Transaction
   ): Promise<SignTransactionResponse> {
 
-    const parsedTx = parseTransaction({
-      network: {
-        networkId,
-        protocolMagic,
-      },
-      inputs,
-      outputs,
-      feeStr,
-      ttlStr,
-      certificates,
-      withdrawals,
-      metadataHashHex,
-      validityIntervalStartStr
-    })
+    const parsedTx = parseTransaction(tx)
 
 
     return interact(this._signTx(parsedTx), this._send);
@@ -429,5 +382,7 @@ export default class Ada {
   }
 }
 
+export type { Transaction, SignTransactionResponse, AddressParams, DeriveAddressResponse, GetExtendedPublicKeyResponse }
 // reexport
 export { AddressTypeNibble, CertificateType, TxErrors, cardano, utils };
+export default Ada;

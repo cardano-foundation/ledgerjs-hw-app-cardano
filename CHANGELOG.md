@@ -1,8 +1,18 @@
 # Change Log
+
 All notable changes to this project will be documented in this file.
- 
+
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## [?.?.?]
+
+Major release. Switched from flow to TypeScript.
+
+### Changed
+
+- All API calls now use single structured argument instead of long list of partial arguments.
+  (For the overview see `src/Ada.ts` changes in https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/61)
 
 ## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2020]
 
@@ -26,7 +36,6 @@ Works with Ledger Cardano app 2.2.0 and is backwards compatible with older versi
 - Support for Mary-era multiasset outputs (no minting yet) https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/27/files
 - Update docs with a stake pool registration (as an owner) example https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/23
 
- 
 ### Changed
 
 ### Fixed
@@ -42,7 +51,7 @@ Works with Ledger Cardano app 2.1.0 and is backwards compatible with 2.0.4/2.0.5
 - Support for bulk public key export https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/13/files
 - Support for stake pool registration certificate as a pool owner https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/12
 - Docs for available calls https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/17
- 
+
 ### Changed
 
 - Allow transactions without outputs: https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/16
@@ -51,26 +60,23 @@ Works with Ledger Cardano app 2.1.0 and is backwards compatible with 2.0.4/2.0.5
 ### Fixed
 
 ## [2.0.1] - [August 20th 2020]
- 
+
 ### Added
 
 - Certificate and address type Flow enums, [commit](https://github.com/vacuumlabs/ledgerjs-cardano-shelley/commit/df08b3fdb7383b1065e7ad971626430a126f98aa)
- 
+
 ### Changed
 
 ### Fixed
-
 
 ## [2.0.0] - [August 18th 2020]
 
 First release with Shelley-era support, works with Ledger Cardano app version 2.0.4 (Nano S) and 2.0.5 (Nano X). Older versions of this library no longer work with the Cardano blockchain.
 
-
 ### Added
 
 ### Changed
 
 ### Fixed
 
-
-\* *backwards compatibility refers only to features supported by the respective app versions, unsupported features result in an error being thrown.*
+\* _backwards compatibility refers only to features supported by the respective app versions, unsupported features result in an error being thrown._

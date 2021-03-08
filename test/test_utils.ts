@@ -24,12 +24,23 @@ export async function getAda() {
   return Promise.resolve(ada);
 }
 
-export const ProtocolMagics = {
+const ProtocolMagics = {
   MAINNET: 764824073,
   TESTNET: 42,
 };
 
-export const NetworkIds = {
+const NetworkIds = {
   TESTNET: 0x00,
   MAINNET: 0x01,
 };
+
+export const Networks = {
+  Mainnet: {
+    networkId: NetworkIds.MAINNET,
+    protocolMagic: ProtocolMagics.MAINNET,
+  },
+  Testnet: {
+    networkId: NetworkIds.TESTNET,
+    protocolMagic: ProtocolMagics.TESTNET,
+  }
+}

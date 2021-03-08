@@ -1,5 +1,5 @@
 import { TxErrors, utils } from "../../../src/Ada";
-import { PoolMetadataParams } from "../../../src/types/public";
+import type { PoolMetadataParams } from "../../../src/types/public";
 import { str_to_path } from "../../test_utils";
 
 export const inputs = {

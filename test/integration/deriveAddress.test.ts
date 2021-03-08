@@ -1,12 +1,12 @@
 import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised"
 
-import type Ada from "../../src/Ada";
+import type { Ada } from "../../src/Ada";
 import { AddressTypeNibble, utils } from "../../src/Ada";
 import type { AddressParams } from "../../src/types/public";
 import {
   getAda,
-  ProtocolMagics,
+  Networks,
   str_to_path,
 } from "../test_utils";
 import getPathDerivationFixture from "./__fixtures__/pathDerivations";
@@ -30,19 +30,19 @@ describe("deriveAddress", async () => {
         protocolMagic,
       })!;
 
-      const { addressHex } = await ada.deriveAddress(
-        0b1000,
-        protocolMagic,
-        str_to_path(derivation.path)
-      );
+      const { addressHex } = await ada.deriveAddress({
+        addressTypeNibble: AddressTypeNibble.BYRON,
+        networkIdOrProtocolMagic: protocolMagic,
+        spendingPath: str_to_path(derivation.path)
+      });
 
       expect(utils.base58_encode(utils.hex_to_buf(addressHex as any))).to.equal(
         derivation.address
       );
     };
 
-    await test("44'/1815'/1'/0/12'", ProtocolMagics.MAINNET);
-    await test("44'/1815'/1'/0/12'", ProtocolMagics.TESTNET);
+    await test("44'/1815'/1'/0/12'", Networks.Mainnet.protocolMagic);
+    await test("44'/1815'/1'/0/12'", Networks.Testnet.protocolMagic);
 
     // rejected by the present security policy, but we might want to return it in the future
     // await test("44'/1815'/1'/0/10'/1/2/3", ProtocolMagics.MAINNET);
@@ -50,24 +50,10 @@ describe("deriveAddress", async () => {
 
   it("Should succesfully derive Shelley address", async () => {
     const test = async (
-      {
-        addressTypeNibble,
-        networkIdOrProtocolMagic,
-        spendingPath,
-        stakingPath,
-        stakingKeyHashHex,
-        stakingBlockchainPointer,
-      }: AddressParams,
+      addressParams: AddressParams,
       expectedResult: string
     ) => {
-      const { addressHex } = await ada.deriveAddress(
-        addressTypeNibble,
-        networkIdOrProtocolMagic,
-        spendingPath,
-        stakingPath,
-        stakingKeyHashHex,
-        stakingBlockchainPointer
-      );
+      const { addressHex } = await ada.deriveAddress(addressParams)
 
       expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex as any))).to.equal(
         expectedResult
@@ -212,11 +198,11 @@ describe("deriveAddress", async () => {
 
   it("Should not permit invalid path", async () => {
     const test = async (path: string) => {
-      const promise = ada.deriveAddress(
-        AddressTypeNibble.BYRON,
-        0, //TODO: BYRON_PROTOCOL_MAGIC,
-        str_to_path(path)
-      )
+      const promise = ada.deriveAddress({
+        addressTypeNibble: AddressTypeNibble.BYRON,
+        networkIdOrProtocolMagic: 0, //TODO: BYRON_PROTOCOL_MAGIC,
+        spendingPath: str_to_path(path)
+      })
       await expect(promise).to.be.rejectedWith("Ledger device: Action rejected by Ledger's security policy");
     };
 

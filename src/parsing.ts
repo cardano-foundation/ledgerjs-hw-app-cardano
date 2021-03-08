@@ -20,6 +20,7 @@ import type {
     SingleHostIPRelay,
     SingleHostNameRelay,
     Token,
+    Transaction,
     TxOutput,
     TxOutputTypeAddress,
     TxOutputTypeAddressParams,
@@ -100,19 +101,6 @@ export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
         policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, TxErrors.OUTPUT_INVALID_TOKEN_POLICY),
         tokens: assetGroup.tokens.map(t => parseToken(t))
     }
-}
-
-// FIXME: extract to type files
-export type Transaction = {
-    network: Network,
-    inputs: Array<InputTypeUTxO>,
-    outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
-    feeStr: string,
-    ttlStr: string | null,
-    certificates: Array<Certificate>,
-    withdrawals: Array<Withdrawal>,
-    metadataHashHex?: string | null,
-    validityIntervalStartStr?: string | null
 }
 
 export function parseTransaction(tx: Transaction): ParsedTransaction {
