@@ -1,6 +1,6 @@
 import { hex_to_buf, path_to_buf, uint8_to_buf, uint16_to_buf, uint32_to_buf, uint64_to_buf } from "./serializeUtils";
 import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, Uint8_t, Uint32_t, ValidBIP32Path } from "./types/internal";
-import { AddressTypeNibble, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
+import { AddressType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import { assert, unreachable } from "./utils";
 
 const HARDENED = 0x80000000;
@@ -52,7 +52,7 @@ export function serializeAddressParams(
 ): Buffer {
   return Buffer.concat([
     uint8_to_buf(params.type as Uint8_t),
-    params.type === AddressTypeNibble.BYRON
+    params.type === AddressType.BYRON
       ? uint32_to_buf(params.protocolMagic)
       : uint8_to_buf(params.networkId),
     path_to_buf(params.spendingPath),
@@ -202,7 +202,6 @@ export function serializeGetExtendedPublicKeyParams(path: ValidBIP32Path): Buffe
 
 export default {
   HARDENED,
-  AddressTypeNibble,
   KEY_HASH_LENGTH,
   TX_HASH_LENGTH,
 

@@ -1,4 +1,4 @@
-import { AddressTypeNibble, utils } from "../../../src/Ada";
+import { AddressType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../test_utils";
 
 export const inputs = {
@@ -64,31 +64,31 @@ export const outputs = {
     ),
   },
   internalBaseWithStakingKeyHash: {
-    addressTypeNibble: AddressTypeNibble.BASE,
+    addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingKeyHashHex:
       "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
     amountStr: "7120787",
   },
   internalBaseWithStakingPath: {
-    addressTypeNibble: AddressTypeNibble.BASE,
+    addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingPath: str_to_path("1852'/1815'/0'/2/0"),
     amountStr: "7120787",
   },
   internalBaseWithStakingPathNonReasonable: {
-    addressTypeNibble: AddressTypeNibble.BASE,
+    addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
     stakingPath: str_to_path("1852'/1815'/456'/2/0"),
     amountStr: "7120787",
   },
   internalEnterprise: {
-    addressTypeNibble: AddressTypeNibble.ENTERPRISE,
+    addressTypeNibble: AddressType.ENTERPRISE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     amountStr: "7120787",
   },
   internalPointer: {
-    addressTypeNibble: AddressTypeNibble.POINTER,
+    addressTypeNibble: AddressType.POINTER,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingBlockchainPointer: {
       blockIndex: 1,
@@ -149,7 +149,7 @@ export const outputs = {
     ],
   },
   multiassetChange: {
-    addressTypeNibble: AddressTypeNibble.BASE,
+    addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingPath: str_to_path("1852'/1815'/0'/2/0"),
     amountStr: "1234",

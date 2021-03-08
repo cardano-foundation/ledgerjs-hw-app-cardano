@@ -40,10 +40,7 @@ import type {
   ValidBIP32Path,
   Version
 } from './types/internal';
-import {
-  AddressTypeNibble,
-  CertificateType
-} from './types/internal'
+import { AddressType, CertificateType, RelayType } from "./types/public"
 import utils, { assert } from "./utils";
 
 const CLA = 0xd7;
@@ -384,5 +381,5 @@ export class Ada {
 
 export type { Transaction, SignTransactionResponse, AddressParams, DeriveAddressResponse, GetExtendedPublicKeyResponse }
 // reexport
-export { AddressTypeNibble, CertificateType, TxErrors, cardano, utils };
+export { AddressType, CertificateType, RelayType, TxErrors, cardano, utils };
 export default Ada;

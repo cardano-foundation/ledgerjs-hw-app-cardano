@@ -1,4 +1,4 @@
-import { AddressTypeNibble, CertificateType, RelayType } from './public'
+import { AddressType, CertificateType, RelayType } from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -11,7 +11,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressTypeNibble, CertificateType, RelayType }
+export { AddressType, CertificateType, RelayType }
 export { GetVersionResponse as Version } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
@@ -164,28 +164,28 @@ type StakingChoicePointer = {
 export type StakingChoice = StakingChoiceNone | StakingChoicePath | StakingChoiceHash | StakingChoicePointer
 
 type ByronAddressParams = {
-    type: AddressTypeNibble.BYRON,
+    type: AddressType.BYRON,
     protocolMagic: Uint32_t
     spendingPath: ValidBIP32Path,
     stakingChoice: StakingChoiceNone,
 }
 
 type ShelleyAddressParams = {
-    type: AddressTypeNibble.BASE | AddressTypeNibble.ENTERPRISE | AddressTypeNibble.POINTER | AddressTypeNibble.REWARD,
+    type: AddressType.BASE | AddressType.ENTERPRISE | AddressType.POINTER | AddressType.REWARD,
     networkId: Uint8_t,
     spendingPath: ValidBIP32Path
 } & ( // Extra properties
         {
-            type: AddressTypeNibble.BASE,
+            type: AddressType.BASE,
             stakingChoice: StakingChoicePath | StakingChoiceHash
         } | {
-            type: AddressTypeNibble.ENTERPRISE,
+            type: AddressType.ENTERPRISE,
             stakingChoice: StakingChoiceNone
         } | {
-            type: AddressTypeNibble.POINTER,
+            type: AddressType.POINTER,
             stakingChoice: StakingChoicePointer
         } | {
-            type: AddressTypeNibble.REWARD
+            type: AddressType.REWARD
             stakingChoice: StakingChoiceNone // included in spending path
         }
     )

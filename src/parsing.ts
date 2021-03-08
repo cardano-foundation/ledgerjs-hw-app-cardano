@@ -4,7 +4,7 @@ import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parse
 import { hex_to_buf } from "./serializeUtils";
 import { TxErrors } from "./txErrors";
 import type { ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
-import { AddressTypeNibble, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
+import { AddressType, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import type {
     AddressParams,
     AssetGroup,
@@ -395,7 +395,7 @@ export function parsePoolMetadataParams(params: PoolMetadataParams | null): Pars
 export function parseAddressParams(
     params: AddressParams
 ): ParsedAddressParams {
-    if (params.addressTypeNibble === AddressTypeNibble.BYRON) {
+    if (params.addressTypeNibble === AddressType.BYRON) {
         validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
@@ -413,7 +413,7 @@ export function parseAddressParams(
     const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
 
     switch (params.addressTypeNibble) {
-        case AddressTypeNibble.BASE: {
+        case AddressType.BASE: {
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             const _hash = params.stakingKeyHashHex != null ? 'hash' : ''
             const _path = params.stakingPath != null ? 'path' : ''
@@ -449,7 +449,7 @@ export function parseAddressParams(
                     throw new Error(TxErrors.OUTPUT_INVALID_STAKING_INFO)
             }
         }
-        case AddressTypeNibble.ENTERPRISE: {
+        case AddressType.ENTERPRISE: {
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
@@ -463,7 +463,7 @@ export function parseAddressParams(
                 }
             }
         }
-        case AddressTypeNibble.POINTER: {
+        case AddressType.POINTER: {
             validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
@@ -484,7 +484,7 @@ export function parseAddressParams(
                 }
             }
         }
-        case AddressTypeNibble.REWARD: {
+        case AddressType.REWARD: {
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
@@ -537,7 +537,7 @@ export function parseTxOutput(
                 type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
                 addressParams: parseAddressParams({
                     addressTypeNibble: output.addressTypeNibble,
-                    networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
+                    networkIdOrProtocolMagic: output.addressTypeNibble === AddressType.BYRON
                         ? network.protocolMagic
                         : network.networkId,
                     spendingPath: output.spendingPath,

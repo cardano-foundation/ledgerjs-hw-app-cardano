@@ -2,7 +2,7 @@ import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised"
 
 import type { Ada } from "../../src/Ada";
-import { AddressTypeNibble, utils } from "../../src/Ada";
+import { AddressType, utils } from "../../src/Ada";
 import type { AddressParams } from "../../src/types/public";
 import {
   getAda,
@@ -31,7 +31,7 @@ describe("deriveAddress", async () => {
       })!;
 
       const { addressHex } = await ada.deriveAddress({
-        addressTypeNibble: AddressTypeNibble.BYRON,
+        addressTypeNibble: AddressType.BYRON,
         networkIdOrProtocolMagic: protocolMagic,
         spendingPath: str_to_path(derivation.path)
       });
@@ -65,7 +65,7 @@ describe("deriveAddress", async () => {
       // base
       [
         {
-          addressTypeNibble: AddressTypeNibble.BASE,
+          addressTypeNibble: AddressType.BASE,
           networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: str_to_path("1852'/1815'/0'/2/0"),
@@ -76,7 +76,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.BASE,
+          addressTypeNibble: AddressType.BASE,
           networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: str_to_path("1852'/1815'/0'/2/0"),
@@ -87,7 +87,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.BASE,
+          addressTypeNibble: AddressType.BASE,
           networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -99,7 +99,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.BASE,
+          addressTypeNibble: AddressType.BASE,
           networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -112,7 +112,7 @@ describe("deriveAddress", async () => {
       // enterprise
       [
         {
-          addressTypeNibble: AddressTypeNibble.ENTERPRISE,
+          addressTypeNibble: AddressType.ENTERPRISE,
           networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -123,7 +123,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.ENTERPRISE,
+          addressTypeNibble: AddressType.ENTERPRISE,
           networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -135,7 +135,7 @@ describe("deriveAddress", async () => {
       // pointer
       [
         {
-          addressTypeNibble: AddressTypeNibble.POINTER,
+          addressTypeNibble: AddressType.POINTER,
           networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -146,7 +146,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.POINTER,
+          addressTypeNibble: AddressType.POINTER,
           networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -157,7 +157,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.POINTER,
+          addressTypeNibble: AddressType.POINTER,
           networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/0/1"),
           stakingPath: null,
@@ -169,7 +169,7 @@ describe("deriveAddress", async () => {
       // reward
       [
         {
-          addressTypeNibble: AddressTypeNibble.REWARD,
+          addressTypeNibble: AddressType.REWARD,
           networkIdOrProtocolMagic: 0x00,
           spendingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingPath: null,
@@ -180,7 +180,7 @@ describe("deriveAddress", async () => {
       ],
       [
         {
-          addressTypeNibble: AddressTypeNibble.REWARD,
+          addressTypeNibble: AddressType.REWARD,
           networkIdOrProtocolMagic: 0x03,
           spendingPath: str_to_path("1852'/1815'/0'/2/0"),
           stakingPath: null,
@@ -199,7 +199,7 @@ describe("deriveAddress", async () => {
   it("Should not permit invalid path", async () => {
     const test = async (path: string) => {
       const promise = ada.deriveAddress({
-        addressTypeNibble: AddressTypeNibble.BYRON,
+        addressTypeNibble: AddressType.BYRON,
         networkIdOrProtocolMagic: 0, //TODO: BYRON_PROTOCOL_MAGIC,
         spendingPath: str_to_path(path)
       })

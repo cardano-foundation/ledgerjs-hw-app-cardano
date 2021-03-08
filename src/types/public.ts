@@ -1,5 +1,5 @@
 // Blockchain-defined constants
-export enum AddressTypeNibble {
+export enum AddressType {
     BASE = 0b0000,
     POINTER = 0b0100,
     ENTERPRISE = 0b0110,
@@ -62,7 +62,7 @@ export type TxOutputTypeAddress = {
 export type TxOutputTypeAddressParams = {
     amountStr: string,
     tokenBundle?: Array<AssetGroup> | null,
-    addressTypeNibble: AddressTypeNibble,
+    addressTypeNibble: AddressType,
     spendingPath: BIP32Path,
     stakingPath?: BIP32Path | null,
     stakingKeyHashHex?: string | null,

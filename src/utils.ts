@@ -1,7 +1,7 @@
 import basex from "base-x";
 import bech32 from "bech32";
 
-import { AddressTypeNibble } from "./Ada";
+import { AddressType } from "./Ada";
 import cardano from "./cardano";
 import { isArray, isBuffer, isInteger, isString, parseIntFromStr, validate } from "./parseUtils";
 import { buf_to_hex, hex_to_buf, path_to_buf, uint32_to_buf } from './serializeUtils'
@@ -119,7 +119,7 @@ function getShelleyAddressPrefix(data: Buffer): string {
 
   const addressType = (data[0] & 0b11110000) >> 4;
   switch (addressType) {
-    case AddressTypeNibble.REWARD:
+    case AddressType.REWARD:
       result = "stake";
       break;
     default:
