@@ -1,19 +1,21 @@
-import { expect } from "chai";
+import chai, { expect } from "chai"
+import chaiAsPromised from "chai-as-promised"
 
 import type Ada from "../../src/Ada";
 import { TxErrors } from "../../src/Ada";
-import { assert, getAda, NetworkIds, ProtocolMagics } from "../test_utils";
+import { getAda, NetworkIds, ProtocolMagics } from "../test_utils";
 import {
   certificates,
   inputs,
+  invalidCertificates,
+  invalidPoolMetadataTestcases,
   outputs,
-  poolMetadataVariations,
-  relays,
   results,
   sampleFeeStr,
   sampleTtlStr,
   withdrawals,
 } from "./__fixtures__/signTxPoolRegistration";
+chai.use(chaiAsPromised)
 
 describe("signTxPoolRegistrationOK", async () => {
   let ada: Ada = {} as Ada;
@@ -167,16 +169,6 @@ describe("signTxPoolRegistrationOK", async () => {
 describe("signTxPoolRegistrationReject", async () => {
   let ada: Ada = {} as Ada;
 
-  let checkThrows = async (f: () => void, errorMsg: string) => {
-    assert(typeof f === "function", "the test is messed up");
-    try {
-      await f();
-      throw new Error("should have thrown by now");
-    } catch (error) {
-      expect(error.message).to.have.string(errorMsg);
-    }
-  };
-
   beforeEach(async () => {
     ada = await getAda();
   });
@@ -185,10 +177,34 @@ describe("signTxPoolRegistrationReject", async () => {
     await (ada as any).t.close();
   });
 
-  it("Should reject pool registration with multiple path owners", async () => {
-    async function f() {
-      const cert = certificates.poolRegistration2PathOwners;
-      const response = await ada.signTransaction(
+  for (const { testName, poolRegistrationCertificate, expectedReject } of invalidCertificates) {
+    it(`Should reject ${testName}`, async () => {
+      const promise = ada.signTransaction(
+        NetworkIds.MAINNET,
+        ProtocolMagics.MAINNET,
+        [inputs.utxo],
+        [outputs.external],
+        sampleFeeStr,
+        sampleTtlStr,
+        [poolRegistrationCertificate as any],
+        [],
+        null
+      );
+      await expect(promise).to.be.rejectedWith(expectedReject);
+    });
+  }
+
+  for (const { testName, metadata, rejectReason } of invalidPoolMetadataTestcases) {
+    it(`Should reject ${testName}`, async () => {
+      const cert = {
+        ...certificates.poolRegistrationDefault,
+        poolRegistrationParams: {
+          ...certificates.poolRegistrationDefault.poolRegistrationParams,
+          metadata,
+        },
+      };
+
+      const promise = ada.signTransaction(
         NetworkIds.MAINNET,
         ProtocolMagics.MAINNET,
         [inputs.utxo],
@@ -199,218 +215,63 @@ describe("signTxPoolRegistrationReject", async () => {
         [],
         null
       );
-    }
+      await expect(promise).to.be.rejectedWith(rejectReason);
+    });
+  }
 
-    const errMsg = TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH;
-    // after removing js validation, this should pass instead:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
-    await checkThrows(f, errMsg);
-  });
-
-  it("Should reject pool registration with only hash owners", async () => {
-    async function f() {
-      const cert = certificates.poolRegistration2HashOwners;
-      const response = await ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert as any],
-        [],
-        null
-      );
-    }
-
-    await checkThrows(f, TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-  });
-
-  it("Should reject pool registration with no owners", async () => {
-    async function f() {
-      const cert = certificates.poolRegistrationNoOwners;
-      const response = await ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert as any],
-        [],
-        null
-      );
-    }
-
-    await checkThrows(f, TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH);
-  });
-
-  it("Should reject pool registration with invalid metadata url", async () => {
-    const invalidMetadataVariations = [
-      poolMetadataVariations.poolMetadataUrlTooLong,
-      poolMetadataVariations.poolMetadataInvalidUrl,
-      poolMetadataVariations.poolMetadataMissingUrl,
-    ];
-
-    for (const metadataVariant of invalidMetadataVariations) {
-      async function f() {
-        const cert = {
-          ...certificates.poolRegistrationDefault,
-          poolRegistrationParams: {
-            ...certificates.poolRegistrationDefault.poolRegistrationParams,
-            metadata: metadataVariant,
-          },
-        };
-
-        const response = await ada.signTransaction(
-          NetworkIds.MAINNET,
-          ProtocolMagics.MAINNET,
-          [inputs.utxo],
-          [outputs.external],
-          sampleFeeStr,
-          sampleTtlStr,
-          [cert as any],
-          [],
-          null
-        );
-      }
-
-      const errMsg = TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL;
-      // for poolMetadataUrlTooLong, after removing js validation, this should pass instead:
-      // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
-      await checkThrows(f, errMsg);
-    }
-  });
-
-  it("Should reject pool registration with invalid metadata hash", async () => {
-    const invalidMetadataVariations = [
-      poolMetadataVariations.poolMetadataInvalidHexLength,
-      poolMetadataVariations.poolMetadataMissingHash,
-    ];
-
-    for (const metadataVariant of invalidMetadataVariations) {
-      async function f() {
-        const cert = {
-          ...certificates.poolRegistrationDefault,
-          poolRegistrationParams: {
-            ...certificates.poolRegistrationDefault.poolRegistrationParams,
-            metadata: metadataVariant,
-          },
-        };
-
-        const response = await ada.signTransaction(
-          NetworkIds.MAINNET,
-          ProtocolMagics.MAINNET,
-          [inputs.utxo],
-          [outputs.external],
-          sampleFeeStr,
-          sampleTtlStr,
-          [cert as any],
-          [],
-          null
-        );
-      }
-
-      const errMsg = TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH;
-      // for poolMetadataUrlTooLong, after removing js validation, this should pass instead:
-      // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
-      await checkThrows(f, errMsg);
-    }
-  });
-
-  it("Should reject pool registration with invalid relay", async () => {
-    const relayVariants = [
-      relays.singleHostNameRelayMissingDns,
-      relays.multiHostNameRelayMissingDns,
-    ];
-
-    for (const relayVariant of relayVariants) {
-      async function f() {
-        const cert = {
-          ...certificates.poolRegistrationDefault,
-          poolRegistrationParams: {
-            ...certificates.poolRegistrationDefault.poolRegistrationParams,
-            relays: [relayVariant],
-          },
-        };
-        const response = await ada.signTransaction(
-          NetworkIds.MAINNET,
-          ProtocolMagics.MAINNET,
-          [inputs.utxo],
-          [outputs.external],
-          sampleFeeStr,
-          sampleTtlStr,
-          [cert as any],
-          [],
-          null
-        );
-      }
-
-      await checkThrows(f, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS);
-    }
-  });
 
   it("Should reject pool registration with numerator bigger than denominator", async () => {
-    async function f() {
-      const cert = certificates.poolRegistrationWrongMargin;
-      const response = await ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert as any],
-        [],
-        null
-      );
-    }
+    const cert = certificates.poolRegistrationWrongMargin;
+    const promise = ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [outputs.external],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert as any],
+      [],
+      null
+    );
 
-    await checkThrows(f, TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
+    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
   });
 
   it("Should reject pool registration along with other certificates", async () => {
-    async function f() {
-      const certs = [
-        certificates.poolRegistrationDefault,
-        certificates.stakeDelegation,
-      ];
-      const response = await ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        certs as any,
-        [],
-        null
-      );
-    }
+    const certs = [
+      certificates.poolRegistrationDefault,
+      certificates.stakeDelegation,
+    ];
+    const promise = ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [outputs.external],
+      sampleFeeStr,
+      sampleTtlStr,
+      certs as any,
+      [],
+      null
+    );
 
-    await checkThrows(f, TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
+    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
   });
 
   it("Should reject pool registration along with a withdrawal", async () => {
-    async function f() {
-      const cert = certificates.poolRegistrationDefault;
-      const withdrawal = withdrawals.withdrawal0;
-      const response = await ada.signTransaction(
-        NetworkIds.MAINNET,
-        ProtocolMagics.MAINNET,
-        [inputs.utxo],
-        [outputs.external],
-        sampleFeeStr,
-        sampleTtlStr,
-        [cert as any],
-        [withdrawal],
-        null
-      );
-    }
+    const cert = certificates.poolRegistrationDefault;
+    const withdrawal = withdrawals.withdrawal0;
+    const promise = ada.signTransaction(
+      NetworkIds.MAINNET,
+      ProtocolMagics.MAINNET,
+      [inputs.utxo],
+      [outputs.external],
+      sampleFeeStr,
+      sampleTtlStr,
+      [cert as any],
+      [withdrawal],
+      null
+    );
 
-    const errMsg = TxErrors.WITHDRAWALS_FORBIDDEN;
-    // after removing js validation, this should pass instead:
-    // const errMsg = getErrorDescription(parseInt(ERRORS.INVALID_DATA));
-    await checkThrows(f, errMsg);
+    await expect(promise).to.be.rejectedWith(TxErrors.WITHDRAWALS_FORBIDDEN);
   });
 });
