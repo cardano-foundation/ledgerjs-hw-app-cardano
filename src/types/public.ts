@@ -36,7 +36,7 @@ export type AddressParams = {
     stakingBlockchainPointer?: StakingBlockchainPointer | null
 }
 
-export type InputTypeUTxO = {
+export type TxInput = {
     txHashHex: string,
     outputIndex: number,
     path?: BIP32Path,
@@ -52,23 +52,28 @@ export type AssetGroup = {
     tokens: Array<Token>,
 };
 
-export type TxOutputTypeAddress = {
-    amount: bigint_like,
-    tokenBundle?: Array<AssetGroup> | null,
-    addressHex: string,
-};
+export type TxOutput = {
+    amount: bigint_like
+    tokenBundle?: Array<AssetGroup> | null
+    destination: TxOutputDestination
+}
 
-export type TxOutputTypeAddressParams = {
-    amount: bigint_like,
-    tokenBundle?: Array<AssetGroup> | null,
-    addressTypeNibble: AddressType,
-    spendingPath: BIP32Path,
-    stakingPath?: BIP32Path | null,
-    stakingKeyHashHex?: string | null,
-    stakingBlockchainPointer?: StakingBlockchainPointer | null,
-};
+export enum TxOutputDestinationType {
+    ThirdParty = 'third_party',
+    DeviceOwned = 'device_owned',
+}
 
-export type TxOutput = TxOutputTypeAddress | TxOutputTypeAddressParams;
+export type ThirdPartyAddressParams = {
+    addressHex: string
+}
+
+export type TxOutputDestination = {
+    type: TxOutputDestinationType.ThirdParty
+    params: ThirdPartyAddressParams
+} | {
+    type: TxOutputDestinationType.DeviceOwned
+    params: AddressParams
+}
 
 export type StakingBlockchainPointer = {
     blockIndex: number,
@@ -81,25 +86,31 @@ export type PoolOwnerParams = {
     stakingKeyHashHex?: string,
 };
 
-export type SingleHostIPRelay = {
+export type SingleHostIPRelayParams = {
     portNumber?: number | null,
     ipv4?: string | null, // e.g. "192.168.0.1"
     ipv6?: string | null, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
 };
 
-export type SingleHostNameRelay = {
+export type SingleHostNameRelayParams = {
     portNumber?: number | null,
     dnsName: string,
 };
 
-export type MultiHostNameRelay = {
+export type MultiHostNameRelayParams = {
     dnsName: string,
 };
 
-export type RelayParams = {
-    type: number, // single host ip = 0, single hostname = 1, multi host name = 2
-    params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay,
-};
+export type Relay = {
+    type: RelayType.SingleHostAddr
+    params: SingleHostIPRelayParams
+} | {
+    type: RelayType.SingleHostName
+    params: SingleHostNameRelayParams
+} | {
+    type: RelayType.MultiHostName
+    params: MultiHostNameRelayParams
+}
 
 export type PoolMetadataParams = {
     metadataUrl: string,
@@ -111,7 +122,7 @@ export type Margin = {
     denominator: bigint_like,
 };
 
-export type PoolParams = {
+export type PoolRegistrationParams = {
     poolKeyHashHex: string,
     vrfKeyHashHex: string,
     pledge: bigint_like,
@@ -119,16 +130,36 @@ export type PoolParams = {
     margin: Margin,
     rewardAccountHex: string,
     poolOwners: Array<PoolOwnerParams>,
-    relays: Array<RelayParams>,
+    relays: Array<Relay>,
     metadata: PoolMetadataParams,
 };
 
+export type StakeRegistrationParams = {
+    path: BIP32Path
+}
+
+export type StakeDeregistrationParams = {
+    path: BIP32Path
+}
+
+export type StakeDelegationParams = {
+    path: BIP32Path
+    poolKeyHashHex: string
+}
+
 export type Certificate = {
-    type: number,
-    path?: BIP32Path | null,
-    poolKeyHashHex?: string | null,
-    poolRegistrationParams?: PoolParams | null,
-};
+    type: CertificateType.STAKE_REGISTRATION
+    params: StakeRegistrationParams
+} | {
+    type: CertificateType.STAKE_DEREGISTRATION
+    params: StakeDeregistrationParams
+} | {
+    type: CertificateType.STAKE_DELEGATION
+    params: StakeDelegationParams
+} | {
+    type: CertificateType.STAKE_POOL_REGISTRATION
+    params: PoolRegistrationParams
+}
 
 export type Withdrawal = {
     path: BIP32Path,
@@ -176,8 +207,8 @@ export type bigint_like = number | bigint | string
 
 export type Transaction = {
     network: Network,
-    inputs: Array<InputTypeUTxO>,
-    outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
+    inputs: Array<TxInput>,
+    outputs: Array<TxOutput>,
     fee: bigint_like,
     ttl: bigint_like | null,
     certificates: Array<Certificate>,

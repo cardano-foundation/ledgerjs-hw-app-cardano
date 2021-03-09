@@ -3,28 +3,30 @@ import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isValidPath,
 import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
 import { hex_to_buf } from "./serializeUtils";
 import { TxErrors } from "./txErrors";
-import type { ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
+import type { OutputDestination, ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
 import { AddressType, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import type {
     AddressParams,
     AssetGroup,
     BIP32Path,
     Certificate,
-    InputTypeUTxO,
-    MultiHostNameRelay,
+    MultiHostNameRelayParams,
     Network,
     PoolMetadataParams,
     PoolOwnerParams,
-    PoolParams,
-    RelayParams,
-    SingleHostIPRelay,
-    SingleHostNameRelay,
+    PoolRegistrationParams,
+    Relay,
+    SingleHostIPRelayParams,
+    SingleHostNameRelayParams,
     Token,
     Transaction,
+    TxInput,
     TxOutput,
-    TxOutputTypeAddress,
-    TxOutputTypeAddressParams,
-    Withdrawal,
+    TxOutputDestination,
+    Withdrawal
+} from "./types/public";
+import {
+    TxOutputDestinationType,
 } from "./types/public";
 
 export const MAX_LOVELACE_SUPPLY_STR = "45 000 000 000.000000".replace(/[ .]/, "");
@@ -40,23 +42,23 @@ function parseCertificate(cert: Certificate): ParsedCertificate {
     switch (cert.type) {
         case CertificateType.STAKE_REGISTRATION:
         case CertificateType.STAKE_DEREGISTRATION: {
-            validate(cert.poolKeyHashHex == null, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
+            validate((cert.params as any).poolKeyHashHex == null, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
             return {
                 type: cert.type,
-                path: parseBIP32Path(cert.path!, TxErrors.CERTIFICATE_MISSING_PATH)
+                path: parseBIP32Path(cert.params.path, TxErrors.CERTIFICATE_MISSING_PATH)
             }
         }
         case CertificateType.STAKE_DELEGATION: {
             return {
                 type: cert.type,
-                path: parseBIP32Path(cert.path!, TxErrors.CERTIFICATE_MISSING_PATH),
-                poolKeyHashHex: parseHexStringOfLength(cert.poolKeyHashHex!, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH)
+                path: parseBIP32Path(cert.params.path, TxErrors.CERTIFICATE_MISSING_PATH),
+                poolKeyHashHex: parseHexStringOfLength(cert.params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH)
             }
         }
         case CertificateType.STAKE_POOL_REGISTRATION: {
             return {
                 type: cert.type,
-                pool: parsePoolParams(cert.poolRegistrationParams!)
+                pool: parsePoolParams(cert.params)
             }
         }
 
@@ -174,7 +176,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     }
 }
 
-export function parseTxInput(input: InputTypeUTxO): ParsedInput {
+export function parseTxInput(input: TxInput): ParsedInput {
     const txHashHex = parseHexStringOfLength(input.txHashHex, TX_HASH_LENGTH, TxErrors.INPUT_INVALID_TX_HASH)
     const outputIndex = parseUint32_t(input.outputIndex, TxErrors.INPUT_INVALID_UTXO_INDEX)
     return {
@@ -197,7 +199,7 @@ export function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
 }
 
 
-export function parseMargin(params: PoolParams['margin']): ParsedMargin {
+export function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
     const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
 
     const marginDenominator = parseUint64_str(
@@ -220,7 +222,7 @@ export function parseMargin(params: PoolParams['margin']): ParsedMargin {
 
 
 
-export function parsePoolParams(params: PoolParams): ParsedPoolParams {
+export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParams {
     const keyHashHex = parseHexStringOfLength(params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH)
     const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, 32, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH)
     const pledge = parseUint64_str(params.pledge, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
@@ -329,10 +331,10 @@ function parseDnsName(dnsName: string, err: string): VarlenAsciiString {
     return dnsName as VarlenAsciiString
 }
 
-function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
+function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {
     switch (relayParams.type) {
         case RelayType.SingleHostAddr: {
-            const params = relayParams.params as SingleHostIPRelay
+            const params = relayParams.params as SingleHostIPRelayParams
             return {
                 type: RelayType.SingleHostAddr,
                 port: ('portNumber' in params && params.portNumber != null)
@@ -347,7 +349,7 @@ function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
             }
         }
         case RelayType.SingleHostName: {
-            const params = relayParams.params as SingleHostNameRelay
+            const params = relayParams.params as SingleHostNameRelayParams
 
             return {
                 type: RelayType.SingleHostName,
@@ -358,7 +360,7 @@ function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
             }
         }
         case RelayType.MultiHostName: {
-            const params = relayParams.params as MultiHostNameRelay
+            const params = relayParams.params as MultiHostNameRelayParams
             return {
                 type: RelayType.MultiHostName,
                 dnsName: parseDnsName(params.dnsName, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS)
@@ -509,6 +511,32 @@ export function parseAddressParams(
     }
 }
 
+export function parseTxDestination(
+    network: Network,
+    destination: TxOutputDestination
+): OutputDestination {
+    switch (destination.type) {
+        case TxOutputDestinationType.ThirdParty: {
+            const params = destination.params
+            const addressHex = parseHexString(params.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS)
+            validate(params.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
+            return {
+                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES,
+                addressHex,
+            }
+        }
+        case TxOutputDestinationType.DeviceOwned: {
+            const params = destination.params
+
+            return {
+                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
+                addressParams: parseAddressParams(network, params)
+            }
+        }
+        default:
+            throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE)
+    }
+}
 
 export function parseTxOutput(
     output: TxOutput,
@@ -520,37 +548,10 @@ export function parseTxOutput(
     validate((output.tokenBundle ?? []).length <= ASSET_GROUPS_MAX, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE);
     const tokenBundle = (output.tokenBundle ?? []).map((ag) => parseAssetGroup(ag))
 
-    const hasAddressHex = "addressHex" in output && output.addressHex != null
-    const hasAddressParams = "spendingPath" in output && output.spendingPath != null
-    if (hasAddressHex && !hasAddressParams) {
-        output = output as TxOutputTypeAddress
-        const addressHex = parseHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS)
-        validate(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
-        return {
-            amount,
-            tokenBundle,
-            destination: {
-                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES,
-                addressHex,
-            }
-        }
-    } else if (!hasAddressHex && hasAddressParams) {
-        output = output as TxOutputTypeAddressParams
-        return {
-            amount: amount,
-            tokenBundle,
-            destination: {
-                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
-                addressParams: parseAddressParams(network, {
-                    addressTypeNibble: output.addressTypeNibble,
-                    spendingPath: output.spendingPath,
-                    stakingPath: output.stakingPath,
-                    stakingKeyHashHex: output.stakingKeyHashHex,
-                    stakingBlockchainPointer: output.stakingBlockchainPointer
-                })
-            }
-        }
-    } else {
-        throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE)
+    const destination = parseTxDestination(network, output.destination)
+    return {
+        amount,
+        tokenBundle,
+        destination
     }
 }

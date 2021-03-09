@@ -1,9 +1,9 @@
 import { TxErrors, utils } from "../../../src/Ada";
-import type { Certificate, InputTypeUTxO, MultiHostNameRelay, PoolMetadataParams, PoolOwnerParams, PoolParams, RelayParams, SingleHostNameRelay, TxOutput, Withdrawal } from "../../../src/types/public";
-import { CertificateType, RelayType } from "../../../src/types/public";
+import type { Certificate, MultiHostNameRelayParams, PoolMetadataParams, PoolOwnerParams, PoolRegistrationParams, Relay, SingleHostNameRelayParams, TxInput, TxOutput, Withdrawal } from "../../../src/types/public";
+import { CertificateType, RelayType, TxOutputDestinationType } from "../../../src/types/public";
 import { str_to_path } from "../../test_utils";
 
-export const inputs: Record<string, InputTypeUTxO> = {
+export const inputs: Record<string, TxInput> = {
   utxo: {
     txHashHex:
       "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
@@ -14,11 +14,16 @@ export const inputs: Record<string, InputTypeUTxO> = {
 export const outputs: Record<string, TxOutput> = {
   external: {
     amount: "1",
-    addressHex: utils.buf_to_hex(
-      utils.bech32_decodeAddress(
-        "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vys6wkj5d"
-      )
-    ),
+    destination: {
+      type: TxOutputDestinationType.ThirdParty,
+      params: {
+        addressHex: utils.buf_to_hex(
+          utils.bech32_decodeAddress(
+            "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vys6wkj5d"
+          )
+        ),
+      }
+    }
   },
 };
 
@@ -110,7 +115,7 @@ const poolOwnerVariationSet: Record<string, PoolOwnerParams[]> = {
   twoCombinedOwners: [stakingPathOwners.owner0, stakingHashOwners.owner0],
 };
 
-const relays: Record<string, RelayParams> = {
+const relays: Record<string, Relay> = {
   singleHostIPV4Relay0: {
     type: RelayType.SingleHostAddr,
     params: {
@@ -170,7 +175,7 @@ const relays: Record<string, RelayParams> = {
     params: {
       portNumber: 3000,
       dnsName: null,
-    } as any as SingleHostNameRelay,
+    } as any as SingleHostNameRelayParams,
   },
   multiHostNameRelay: {
     type: RelayType.MultiHostName,
@@ -182,11 +187,11 @@ const relays: Record<string, RelayParams> = {
     type: RelayType.MultiHostName,
     params: {
       dnsName: null,
-    } as any as MultiHostNameRelay,
+    } as any as MultiHostNameRelayParams,
   },
 };
 
-const relayVariationSet: Record<string, RelayParams[]> = {
+const relayVariationSet: Record<string, Relay[]> = {
   noRelays: [],
   singleHostIPV4Relay: [relays.singleHostIPV4Relay0],
   singleHostIPV6Relay: [relays.singleHostIPV6Relay],
@@ -209,7 +214,7 @@ const relayVariationSet: Record<string, RelayParams[]> = {
   ],
 };
 
-const defaultPoolRegistration: PoolParams = {
+const defaultPoolRegistration: PoolRegistrationParams = {
   poolKeyHashHex: "13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad",
   vrfKeyHashHex:
     "07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450",
@@ -229,31 +234,37 @@ const defaultPoolRegistration: PoolParams = {
 export const certificates: Record<string, Certificate> = {
   stakeRegistration: {
     type: CertificateType.STAKE_REGISTRATION,
-    path: str_to_path("1852'/1815'/0'/2/0"),
+    params: {
+      path: str_to_path("1852'/1815'/0'/2/0"),
+    }
   },
   stakeDeregistration: {
     type: CertificateType.STAKE_DEREGISTRATION,
-    path: str_to_path("1852'/1815'/0'/2/0"),
+    params: {
+      path: str_to_path("1852'/1815'/0'/2/0"),
+    }
   },
   stakeDelegation: {
     type: CertificateType.STAKE_DELEGATION,
-    path: str_to_path("1852'/1815'/0'/2/0"),
-    poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
+    params: {
+      path: str_to_path("1852'/1815'/0'/2/0"),
+      poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
+    }
   },
   poolRegistrationDefault: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: defaultPoolRegistration
+    params: defaultPoolRegistration
   },
   poolRegistrationMixedOwners: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       poolOwners: poolOwnerVariationSet.twoCombinedOwners,
     },
   },
   poolRegistrationMixedOwnersAllRelays: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       poolOwners: poolOwnerVariationSet.twoCombinedOwners,
       relays: relayVariationSet.allRelays,
@@ -261,7 +272,7 @@ export const certificates: Record<string, Certificate> = {
   },
   poolRegistrationMixedOwnersIpv4SingleHostRelays: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       poolOwners: poolOwnerVariationSet.twoCombinedOwners,
       relays: relayVariationSet.combinedIPV4SingleHostNameRelays,
@@ -269,7 +280,7 @@ export const certificates: Record<string, Certificate> = {
   },
   poolRegistrationMixedOwnersIpv4Ipv6Relays: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       poolOwners: poolOwnerVariationSet.twoCombinedOwners,
       relays: relayVariationSet.combinedIPV4IPV6Relays,
@@ -277,21 +288,21 @@ export const certificates: Record<string, Certificate> = {
   },
   poolRegistrationNoRelays: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       relays: relayVariationSet.noRelays,
     },
   },
   poolRegistrationNoMetadata: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       metadata: poolMetadataVariations.poolMetadataNone,
     },
   },
   poolRegistrationWrongMargin: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
-    poolRegistrationParams: {
+    params: {
       ...defaultPoolRegistration,
       margin: {
         numerator: "3",
@@ -301,12 +312,12 @@ export const certificates: Record<string, Certificate> = {
   },
 };
 
-export const invalidCertificates: Array<{ testName: string, poolRegistrationCertificate: any, expectedReject: string }> = [
+export const invalidCertificates: Array<{ testName: string, poolRegistrationCertificate: Certificate, expectedReject: string }> = [
   {
     testName: "pool registration with multiple path owners",
     poolRegistrationCertificate: {
       type: CertificateType.STAKE_POOL_REGISTRATION,
-      poolRegistrationParams: {
+      params: {
         ...defaultPoolRegistration,
         poolOwners: poolOwnerVariationSet.twoPathOwners,
       },
@@ -317,7 +328,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
     testName: "pool registration with only hash owners",
     poolRegistrationCertificate: {
       type: CertificateType.STAKE_POOL_REGISTRATION,
-      poolRegistrationParams: {
+      params: {
         ...defaultPoolRegistration,
         poolOwners: poolOwnerVariationSet.twoHashOwners,
       },
@@ -328,7 +339,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
     testName: "pool registration with no owners",
     poolRegistrationCertificate: {
       type: CertificateType.STAKE_POOL_REGISTRATION,
-      poolRegistrationParams: {
+      params: {
         ...defaultPoolRegistration,
         poolOwners: poolOwnerVariationSet.noOwners,
       },

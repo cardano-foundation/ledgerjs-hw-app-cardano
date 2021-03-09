@@ -189,8 +189,8 @@ describe("signTxPoolRegistrationReject", async () => {
     it(`Should reject ${testName}`, async () => {
       const cert = {
         ...certificates.poolRegistrationDefault,
-        poolRegistrationParams: {
-          ...certificates.poolRegistrationDefault.poolRegistrationParams,
+        params: {
+          ...certificates.poolRegistrationDefault.params,
           metadata,
         },
       };
