@@ -1,4 +1,5 @@
 import { AddressType, utils } from "../../../src/Ada";
+import type { TxOutput, Withdrawal } from "../../../src/types/public";
 import { str_to_path } from "../../test_utils";
 
 export const inputs = {
@@ -22,9 +23,9 @@ export const inputs = {
   },
 };
 
-export const outputs = {
+export const outputs: Record<string, TxOutput> = {
   externalByronMainnet: {
-    amountStr: "3003112",
+    amount: 3003112,
     addressHex: utils.buf_to_hex(
       utils.base58_decode(
         "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
@@ -32,7 +33,7 @@ export const outputs = {
     ),
   },
   externalByronDaedalusMainnet: {
-    amountStr: "3003112",
+    amount: 3003112,
     addressHex: utils.buf_to_hex(
       utils.base58_decode(
         "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
@@ -40,7 +41,7 @@ export const outputs = {
     ),
   },
   externalByronTestnet: {
-    amountStr: "3003112",
+    amount: 3003112,
     addressHex: utils.buf_to_hex(
       utils.base58_decode(
         "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
@@ -48,7 +49,7 @@ export const outputs = {
     ),
   },
   externalShelley: {
-    amountStr: "1",
+    amount: 1,
     addressHex: utils.buf_to_hex(
       utils.bech32_decodeAddress(
         "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
@@ -56,7 +57,7 @@ export const outputs = {
     ),
   },
   externalShelleyScripthash: {
-    amountStr: "1",
+    amount: 1,
     addressHex: utils.buf_to_hex(
       utils.bech32_decodeAddress(
         "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
@@ -68,24 +69,24 @@ export const outputs = {
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingKeyHashHex:
       "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
-    amountStr: "7120787",
+    amount: 7120787,
   },
   internalBaseWithStakingPath: {
     addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingPath: str_to_path("1852'/1815'/0'/2/0"),
-    amountStr: "7120787",
+    amount: 7120787,
   },
   internalBaseWithStakingPathNonReasonable: {
     addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
     stakingPath: str_to_path("1852'/1815'/456'/2/0"),
-    amountStr: "7120787",
+    amount: "7120787",
   },
   internalEnterprise: {
     addressTypeNibble: AddressType.ENTERPRISE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-    amountStr: "7120787",
+    amount: "7120787",
   },
   internalPointer: {
     addressTypeNibble: AddressType.POINTER,
@@ -95,7 +96,7 @@ export const outputs = {
       txIndex: 2,
       certificateIndex: 3,
     },
-    amountStr: "7120787",
+    amount: 7120787,
   },
   multiassetOneToken: {
     addressHex: utils.buf_to_hex(
@@ -103,14 +104,14 @@ export const outputs = {
         "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
       )
     ),
-    amountStr: "1234",
+    amount: 1234,
     tokenBundle: [
       {
         policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
         tokens: [
           {
             assetNameHex: "74652474436f696e",
-            amountStr: "7878754",
+            amount: "7878754",
           },
         ],
       },
@@ -122,18 +123,18 @@ export const outputs = {
         "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
       )
     ),
-    amountStr: "1234",
+    amount: "1234",
     tokenBundle: [
       {
         policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
         tokens: [
           {
             assetNameHex: "74652474436f696e",
-            amountStr: "7878754",
+            amount: "7878754",
           },
           {
             assetNameHex: "",
-            amountStr: "1234",
+            amount: "1234",
           },
         ],
       },
@@ -142,7 +143,7 @@ export const outputs = {
         tokens: [
           {
             assetNameHex: "7564247542686911",
-            amountStr: "47",
+            amount: "47",
           },
         ],
       },
@@ -152,14 +153,14 @@ export const outputs = {
     addressTypeNibble: AddressType.BASE,
     spendingPath: str_to_path("1852'/1815'/0'/0/0"),
     stakingPath: str_to_path("1852'/1815'/0'/2/0"),
-    amountStr: "1234",
+    amount: "1234",
     tokenBundle: [
       {
         policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
         tokens: [
           {
             assetNameHex: "74652474436f696e",
-            amountStr: "7878754",
+            amount: "7878754",
           },
         ],
       },
@@ -171,14 +172,14 @@ export const outputs = {
         "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
       )
     ),
-    amountStr: "24103998870869519",
+    amount: "24103998870869519",
     tokenBundle: [
       {
         policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
         tokens: [
           {
             assetNameHex: "74652474436f696e",
-            amountStr: "24103998870869519",
+            amount: "24103998870869519",
           },
         ],
       },
@@ -202,16 +203,16 @@ export const certificates = {
   },
 };
 
-export const withdrawals = {
+export const withdrawals: Record<string, Withdrawal> = {
   withdrawal0: {
     path: str_to_path("1852'/1815'/0'/2/0"),
-    amountStr: "111",
+    amount: "111",
   },
 };
 
 export const sampleMetadataHashHex = "deadbeef".repeat(8);
-export const sampleFeeStr = "42";
-export const sampleTtlStr = "10";
+export const sampleFee = 42;
+export const sampleTtl = 10;
 export const sampleValidityIntervalStartStr = "47";
 export const sampleBigIntStr = "24103998870869519";
 

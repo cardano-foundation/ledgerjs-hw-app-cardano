@@ -11,9 +11,9 @@ import {
   resultsMary,
   resultsShelley,
   sampleBigIntStr,
-  sampleFeeStr,
+  sampleFee,
   sampleMetadataHashHex,
-  sampleTtlStr,
+  sampleTtl,
   sampleValidityIntervalStartStr,
   withdrawals,
 } from "./__fixtures__/signTx";
@@ -39,8 +39,8 @@ describe("signTxOrdinaryByron", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoByron],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -53,8 +53,8 @@ describe("signTxOrdinaryByron", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoByron],
       outputs: [outputs.externalByronDaedalusMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -67,8 +67,8 @@ describe("signTxOrdinaryByron", async () => {
       network: Networks.Testnet,
       inputs: [inputs.utxoByron],
       outputs: [outputs.externalByronTestnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -95,8 +95,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -109,8 +109,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalShelley],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -123,8 +123,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Testnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalShelleyScripthash],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -137,8 +137,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -151,8 +151,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -165,8 +165,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet, outputs.internalEnterprise as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -179,8 +179,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet, outputs.internalPointer as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null
@@ -193,8 +193,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [withdrawals.withdrawal0],
       metadataHashHex: null
@@ -207,8 +207,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [certificates.stakeRegistration],
       withdrawals: [],
       metadataHashHex: null
@@ -221,8 +221,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [certificates.stakeDelegation],
       withdrawals: [],
       metadataHashHex: null
@@ -235,8 +235,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [certificates.stakeDeregistration],
       withdrawals: [],
       metadataHashHex: null
@@ -251,8 +251,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [certificates.stakeDeregistration, certificates.stakeDeregistration],
       withdrawals: [],
       metadataHashHex: null
@@ -265,8 +265,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalByronMainnet],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: sampleMetadataHashHex
@@ -279,8 +279,8 @@ describe("signTxOrdinaryShelley", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoNonReasonable],
       outputs: [outputs.internalBaseWithStakingPathNonReasonable as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: sampleMetadataHashHex
@@ -311,12 +311,12 @@ describe("signTxOrdinaryAllegra", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalShelley],
-      feeStr: sampleFeeStr,
-      ttlStr: null,
+      fee: sampleFee,
+      ttl: null,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null,
-      validityIntervalStartStr: null
+      validityIntervalStart: null
     });
     expect(response).to.deep.equal(resultsAllegra.noTtlNoValidityIntervalStart);
   });
@@ -326,12 +326,12 @@ describe("signTxOrdinaryAllegra", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalShelley],
-      feeStr: sampleFeeStr,
-      ttlStr: null,
+      fee: sampleFee,
+      ttl: null,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null,
-      validityIntervalStartStr: sampleValidityIntervalStartStr
+      validityIntervalStart: sampleValidityIntervalStartStr
     });
     expect(response).to.deep.equal(
       resultsAllegra.noTtlYesValidityIntervalStart
@@ -360,12 +360,12 @@ describe("signTxOrdinaryMary", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null,
-      validityIntervalStartStr: sampleValidityIntervalStartStr
+      validityIntervalStart: sampleValidityIntervalStartStr
     });
     expect(response).to.deep.equal(resultsMary.multiassetOneToken);
   });
@@ -375,12 +375,12 @@ describe("signTxOrdinaryMary", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null,
-      validityIntervalStartStr: sampleValidityIntervalStartStr
+      validityIntervalStart: sampleValidityIntervalStartStr
     });
     expect(response).to.deep.equal(resultsMary.multiassetManyTokens);
   });
@@ -390,12 +390,12 @@ describe("signTxOrdinaryMary", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.multiassetBigNumber as any],
-      feeStr: sampleBigIntStr,
-      ttlStr: sampleBigIntStr,
+      fee: sampleBigIntStr,
+      ttl: sampleBigIntStr,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null,
-      validityIntervalStartStr: sampleBigIntStr
+      validityIntervalStart: sampleBigIntStr
     });
     expect(response).to.deep.equal(resultsMary.bigNumbersEverywhere);
   });
@@ -405,12 +405,12 @@ describe("signTxOrdinaryMary", async () => {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
       outputs: [outputs.externalShelley, outputs.multiassetChange as any],
-      feeStr: sampleFeeStr,
-      ttlStr: sampleTtlStr,
+      fee: sampleFee,
+      ttl: sampleTtl,
       certificates: [],
       withdrawals: [],
       metadataHashHex: null,
-      validityIntervalStartStr: sampleValidityIntervalStartStr
+      validityIntervalStart: sampleValidityIntervalStartStr
     });
     expect(response).to.deep.equal(resultsMary.withMultiassetChange);
   });

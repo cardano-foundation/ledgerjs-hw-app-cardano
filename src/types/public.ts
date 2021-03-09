@@ -44,7 +44,7 @@ export type InputTypeUTxO = {
 
 export type Token = {
     assetNameHex: string,
-    amountStr: string,
+    amount: bigint_like,
 };
 
 export type AssetGroup = {
@@ -53,13 +53,13 @@ export type AssetGroup = {
 };
 
 export type TxOutputTypeAddress = {
-    amountStr: string,
+    amount: bigint_like,
     tokenBundle?: Array<AssetGroup> | null,
     addressHex: string,
 };
 
 export type TxOutputTypeAddressParams = {
-    amountStr: string,
+    amount: bigint_like,
     tokenBundle?: Array<AssetGroup> | null,
     addressTypeNibble: AddressType,
     spendingPath: BIP32Path,
@@ -82,13 +82,13 @@ export type PoolOwnerParams = {
 };
 
 export type SingleHostIPRelay = {
-    portNumber?: number,
-    ipv4?: string, // e.g. "192.168.0.1"
-    ipv6?: string, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+    portNumber?: number | null,
+    ipv4?: string | null, // e.g. "192.168.0.1"
+    ipv6?: string | null, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
 };
 
 export type SingleHostNameRelay = {
-    portNumber?: number,
+    portNumber?: number | null,
     dnsName: string,
 };
 
@@ -107,15 +107,15 @@ export type PoolMetadataParams = {
 };
 
 export type Margin = {
-    numeratorStr: string,
-    denominatorStr: string,
+    numerator: bigint_like,
+    denominator: bigint_like,
 };
 
 export type PoolParams = {
     poolKeyHashHex: string,
     vrfKeyHashHex: string,
-    pledgeStr: string,
-    costStr: string,
+    pledge: bigint_like,
+    cost: bigint_like,
     margin: Margin,
     rewardAccountHex: string,
     poolOwners: Array<PoolOwnerParams>,
@@ -125,14 +125,14 @@ export type PoolParams = {
 
 export type Certificate = {
     type: number,
-    path: BIP32Path,
-    poolKeyHashHex?: string,
-    poolRegistrationParams?: PoolParams,
+    path?: BIP32Path | null,
+    poolKeyHashHex?: string | null,
+    poolRegistrationParams?: PoolParams | null,
 };
 
 export type Withdrawal = {
     path: BIP32Path,
-    amountStr: string,
+    amount: bigint_like,
 };
 
 export type Flags = {
@@ -172,14 +172,16 @@ export type SignTransactionResponse = {
     witnesses: Array<Witness>,
 };
 
+export type bigint_like = number | bigint | string
+
 export type Transaction = {
     network: Network,
     inputs: Array<InputTypeUTxO>,
     outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
-    feeStr: string,
-    ttlStr: string | null,
+    fee: bigint_like,
+    ttl: bigint_like | null,
     certificates: Array<Certificate>,
     withdrawals: Array<Withdrawal>,
     metadataHashHex?: string | null,
-    validityIntervalStartStr?: string | null
+    validityIntervalStart?: string | null
 }

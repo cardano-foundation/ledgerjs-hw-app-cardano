@@ -4,8 +4,12 @@ import { AddressType, CertificateType, RelayType } from './public'
 export type VarlenAsciiString = string & { __type: 'ascii' }
 export type FixlenHexString<N> = string & { __type: 'hex', __length: N }
 export type HexString = string & { __type: 'hex' }
-export type Uint64_str = string & { __type: 'uint64_t' }
+
+export type _Uint64_num = number & { __type: 'uint64_t' }
+export type _Uint64_bigint = bigint & { __type: 'uint64_t' }
+
 export type ValidBIP32Path = Array<Uint32_t> & { __type: 'bip32_path' }
+export type Uint64_str = string & { __type: 'uint64_t' }
 export type Uint32_t = number & { __type: 'uint32_t' }
 export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
@@ -37,7 +41,7 @@ export const TOKEN_POLICY_LENGTH = 28;
 
 export type ParsedToken = {
     assetNameHex: HexString,
-    amountStr: Uint64_str,
+    amount: Uint64_str,
 };
 
 export type ParsedAssetGroup = {
@@ -55,12 +59,12 @@ export type ParsedTransaction = {
     network: ParsedNetwork
     inputs: ParsedInput[]
     outputs: ParsedOutput[]
-    feeStr: Uint64_str
-    ttlStr: Uint64_str | null
+    fee: Uint64_str
+    ttl: Uint64_str | null
     certificates: ParsedCertificate[]
     withdrawals: ParsedWithdrawal[]
     metadataHashHex: FixlenHexString<32> | null
-    validityIntervalStartStr: Uint64_str | null
+    validityIntervalStart: Uint64_str | null
     isSigningPoolRegistrationAsOwner: boolean
 }
 
@@ -73,22 +77,22 @@ export type ParsedInput = {
 
 
 export type ParsedWithdrawal = {
-    amountStr: Uint64_str
+    amount: Uint64_str
     path: ValidBIP32Path
 }
 
 
 export type ParsedMargin = {
-    numeratorStr: Uint64_str,
-    denominatorStr: Uint64_str
+    numerator: Uint64_str,
+    denominator: Uint64_str
 }
 
 
 export type ParsedPoolParams = {
     keyHashHex: FixlenHexString<28>,
     vrfHashHex: FixlenHexString<32>,
-    pledgeStr: Uint64_str,
-    costStr: Uint64_str,
+    pledge: Uint64_str,
+    cost: Uint64_str,
     margin: ParsedMargin,
     rewardAccountHex: FixlenHexString<29>
     owners: ParsedPoolOwner[],
@@ -206,7 +210,7 @@ export type OutputDestination = {
 }
 
 export type ParsedOutput = {
-    amountStr: Uint64_str
+    amount: Uint64_str
     tokenBundle: ParsedAssetGroup[]
     destination: OutputDestination
 }

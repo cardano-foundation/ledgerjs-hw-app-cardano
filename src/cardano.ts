@@ -83,7 +83,7 @@ export function serializeOutputBasicParams(
 ): Buffer {
   return Buffer.concat([
     serializeOutputDestination(output.destination),
-    uint64_to_buf(output.amountStr),
+    uint64_to_buf(output.amount),
     uint32_to_buf(output.tokenBundle.length as Uint32_t),
   ]);
 }
@@ -96,7 +96,7 @@ export function serializeOutputBasicParamsBefore_2_2(
 
   return Buffer.concat([
     // Note: different ordering from 2.2 version
-    uint64_to_buf(output.amountStr),
+    uint64_to_buf(output.amount),
     serializeOutputDestination(output.destination)
   ])
 }
@@ -105,10 +105,10 @@ export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
     hex_to_buf(pool.keyHashHex),
     hex_to_buf(pool.vrfHashHex),
-    uint64_to_buf(pool.pledgeStr),
-    uint64_to_buf(pool.costStr),
-    uint64_to_buf(pool.margin.numeratorStr),
-    uint64_to_buf(pool.margin.denominatorStr),
+    uint64_to_buf(pool.pledge),
+    uint64_to_buf(pool.cost),
+    uint64_to_buf(pool.margin.numerator),
+    uint64_to_buf(pool.margin.denominator),
     hex_to_buf(pool.rewardAccountHex),
     uint32_to_buf(pool.owners.length as Uint32_t),
     uint32_to_buf(pool.relays.length as Uint32_t),

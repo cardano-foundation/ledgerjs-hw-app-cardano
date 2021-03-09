@@ -1,4 +1,4 @@
-import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
+import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString, _Uint64_num, _Uint64_bigint } from "./types/internal";
 
 export const MAX_UINT_64_STR = "18446744073709551615";
 
@@ -34,6 +34,12 @@ export const isValidPath = (data: unknown): data is ValidBIP32Path =>
 
 export const isUint64str = (data: unknown): data is Uint64_str =>
     isUintStr(data, {})
+
+export const isUint64Number = (data: unknown): data is _Uint64_num =>
+    isInteger(data) && data >= 0 && data <= Number.MAX_SAFE_INTEGER
+
+export const isUint64Bigint = (data: unknown): data is _Uint64_bigint =>
+    (typeof data === 'bigint') && isUint64str(data.toString())
 
 export const isUintStr = (data: unknown, constraints: { min?: string, max?: string }): data is string => {
     const min = constraints.min ?? "0"
@@ -82,9 +88,20 @@ export function parseHexStringOfLength<L extends number>(str: unknown, length: L
     return str
 }
 
-export function parseUint64_str(str: unknown, constraints: { min?: string, max?: string }, err: string): Uint64_str {
-    validate(isUint64str(str) && isUintStr(str, constraints), err)
-    return str
+export function parseUint64_str(val: unknown, constraints: { min?: string, max?: string }, err: string): Uint64_str {
+    switch (typeof val) {
+        case 'string':
+            validate(isUint64str(val) && isUintStr(val, constraints), err)
+            return val
+        case 'number':
+            validate(isUint64Number(val) && isUintStr(val.toString(), constraints), err)
+            return val.toString() as Uint64_str
+        case 'bigint':
+            validate(isUint64Bigint(val) && isUintStr(val.toString(), constraints), err)
+            return val.toString() as Uint64_str
+        default:
+            validate(false, err)
+    }
 }
 
 export function parseUint32_t(value: unknown, err: string): Uint32_t {
