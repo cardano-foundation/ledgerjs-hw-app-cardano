@@ -16,6 +16,12 @@ Major release. Switched from flow to TypeScript.
 - `AddressTypeNibble` enum renamed to `AddressType`
 - `derive/showAddress` now take `network` as an explicit parameter instead of `networkIdOrProtocolMagic` field in `AddressParams`
 - all 64-bit integers that were previously stored in fields ending with `Str` (e.g. `feeStr`) are now without the suffix (i.e. `fee`) and take a "bignumber-like" argument which can be `Number` (if it is small enough, i.e. `<= Number.MAX_SAFE_INTEGER`), string, or native `BigInt`. Non-native bigint implementations are not supported and should be converted to strings)
+- all "tagged enums" now use `{type: SomeType.Variant, params: SomeTypeVariantParams}` typing. This unified previously mixed tagging with sometimes arbitrarily variant fields into the parent type. As part of this change
+  - Relays are now typed properly with variants
+  - TxOutput was separated into "amount" part (amount & tokenBundle) & `destination` specification.
+    - Destination is now explicitly of type `DestinationType.ThirdParty` or `DestinationType.DeviceOwned` to clarify what the device should sign
+    - Device owned destination reuses existing `Address` param type
+  - `Address` is now tagged enum across different address types (Byron, Base, Enterprise, Pointer, Reward). Reward address still uses `spendingPath` instead of `stakingPath` to denote that this key can be used to spend funds
 
 ## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2020]
 

@@ -28,12 +28,45 @@ export type Network = {
     networkId: number
 }
 
-export type AddressParams = {
-    addressTypeNibble: number,
-    spendingPath: BIP32Path,
-    stakingPath?: BIP32Path | null,
-    stakingKeyHashHex?: string | null,
-    stakingBlockchainPointer?: StakingBlockchainPointer | null
+export type DeviceOwnedAddress = {
+    type: AddressType.BYRON
+    params: AddressParamsByron
+} | {
+    type: AddressType.BASE
+    params: AddressParamsBase
+} | {
+    type: AddressType.ENTERPRISE
+    params: AddressParamsEnterprise
+} | {
+    type: AddressType.POINTER
+    params: AddressParamsPointer
+} | {
+    type: AddressType.REWARD
+    params: AddressParamsReward
+}
+
+export type AddressParamsByron = {
+    spendingPath: BIP32Path
+}
+
+export type AddressParamsBase = {
+    spendingPath: BIP32Path
+} & ( // Not really worth the effort of disambiguation through additional tagged enum
+        | { stakingPath: BIP32Path }
+        | { stakingKeyHashHex: string }
+    )
+
+export type AddressParamsEnterprise = {
+    spendingPath: BIP32Path
+}
+
+export type AddressParamsPointer = {
+    spendingPath: BIP32Path
+    stakingBlockchainPointer: BlockchainPointer
+}
+
+export type AddressParamsReward = {
+    spendingPath: BIP32Path
 }
 
 export type TxInput = {
@@ -72,10 +105,10 @@ export type TxOutputDestination = {
     params: ThirdPartyAddressParams
 } | {
     type: TxOutputDestinationType.DeviceOwned
-    params: AddressParams
+    params: DeviceOwnedAddress
 }
 
-export type StakingBlockchainPointer = {
+export type BlockchainPointer = {
     blockIndex: number,
     txIndex: number,
     certificateIndex: number,

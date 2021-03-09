@@ -16,7 +16,7 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import type { AddressParams, BIP32Path, DeriveAddressResponse, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, Network, SignTransactionResponse, Transaction } from 'types/public';
+import type { BIP32Path, DeriveAddressResponse, DeviceOwnedAddress, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, Network, SignTransactionResponse, Transaction } from 'types/public';
 
 import cardano from './cardano'
 import type { Interaction, SendParams } from './interactions/common/types';
@@ -29,7 +29,7 @@ import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
 import { isArray, isValidPath, validate } from './parseUtils';
 import {
-  parseAddressParams,
+  parseAddress,
   parseBIP32Path,
   parseTransaction,
 } from "./parsing";
@@ -335,11 +335,11 @@ export class Ada {
    * );
    *
    */
-  async deriveAddress({ network, addressParams }: {
+  async deriveAddress({ network, address }: {
     network: Network,
-    addressParams: AddressParams
+    address: DeviceOwnedAddress
   }): Promise<DeriveAddressResponse> {
-    const parsedParams = parseAddressParams(network, addressParams)
+    const parsedParams = parseAddress(network, address)
 
     return interact(this._deriveAddress(parsedParams), this._send);
   }
@@ -350,11 +350,11 @@ export class Ada {
   }
 
 
-  async showAddress({ network, addressParams }: {
+  async showAddress({ network, address }: {
     network: Network,
-    addressParams: AddressParams
+    address: DeviceOwnedAddress
   }): Promise<void> {
-    const parsedParams = parseAddressParams(network, addressParams)
+    const parsedParams = parseAddress(network, address)
 
     return interact(this._showAddress(parsedParams), this._send);
   }
@@ -381,7 +381,7 @@ export class Ada {
   }
 }
 
-export type { Transaction, SignTransactionResponse, AddressParams, DeriveAddressResponse, GetExtendedPublicKeyResponse }
+export type { Transaction, SignTransactionResponse, DeviceOwnedAddress as AddressParams, DeriveAddressResponse, GetExtendedPublicKeyResponse }
 // reexport
 export { AddressType, CertificateType, RelayType, TxErrors, cardano, utils };
 export default Ada;

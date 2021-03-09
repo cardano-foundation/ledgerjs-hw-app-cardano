@@ -1,6 +1,6 @@
 import { AddressType, utils } from "../../../src/Ada";
-import { Certificate, TxOutput, TxOutputDestinationType, Withdrawal } from "../../../src/types/public";
-import { CertificateType } from "../../../src/types/public";
+import type { Certificate, TxOutput, Withdrawal } from "../../../src/types/public";
+import { CertificateType, TxOutputDestinationType } from "../../../src/types/public";
 import { str_to_path } from "../../test_utils";
 
 export const inputs = {
@@ -97,10 +97,12 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.DeviceOwned,
       params: {
-        addressTypeNibble: AddressType.BASE,
-        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-        stakingKeyHashHex:
-          "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+        type: AddressType.BASE,
+        params: {
+          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+          stakingKeyHashHex:
+            "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+        }
       }
     }
   },
@@ -108,9 +110,11 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.DeviceOwned,
       params: {
-        addressTypeNibble: AddressType.BASE,
-        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-        stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+        type: AddressType.BASE,
+        params: {
+          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+        }
       }
     },
     amount: 7120787,
@@ -119,9 +123,11 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.DeviceOwned,
       params: {
-        addressTypeNibble: AddressType.BASE,
-        spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
-        stakingPath: str_to_path("1852'/1815'/456'/2/0"),
+        type: AddressType.BASE,
+        params: {
+          spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
+          stakingPath: str_to_path("1852'/1815'/456'/2/0"),
+        }
       }
     },
     amount: "7120787",
@@ -130,8 +136,10 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.DeviceOwned,
       params: {
-        addressTypeNibble: AddressType.ENTERPRISE,
-        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+        type: AddressType.ENTERPRISE,
+        params: {
+          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+        }
       }
     },
     amount: "7120787",
@@ -140,13 +148,15 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.DeviceOwned,
       params: {
-        addressTypeNibble: AddressType.POINTER,
-        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-        stakingBlockchainPointer: {
-          blockIndex: 1,
-          txIndex: 2,
-          certificateIndex: 3,
-        },
+        type: AddressType.POINTER,
+        params: {
+          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+          stakingBlockchainPointer: {
+            blockIndex: 1,
+            txIndex: 2,
+            certificateIndex: 3,
+          },
+        }
       }
     },
     amount: 7120787,
@@ -216,9 +226,11 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.DeviceOwned,
       params: {
-        addressTypeNibble: AddressType.BASE,
-        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-        stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+        type: AddressType.BASE,
+        params: {
+          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+        }
       }
     },
     amount: "1234",

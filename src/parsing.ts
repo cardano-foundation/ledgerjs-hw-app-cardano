@@ -6,10 +6,11 @@ import { TxErrors } from "./txErrors";
 import type { OutputDestination, ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
 import { AddressType, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import type {
-    AddressParams,
     AssetGroup,
     BIP32Path,
+    BlockchainPointer,
     Certificate,
+    DeviceOwnedAddress,
     MultiHostNameRelayParams,
     Network,
     PoolMetadataParams,
@@ -399,29 +400,38 @@ export function parseNetwork(network: Network): ParsedNetwork {
     return parsed
 }
 
-export function parseAddressParams(
+export function parseAddress(
     network: Network,
-    params: AddressParams
+    address: DeviceOwnedAddress
 ): ParsedAddressParams {
     const parsedNetwork = parseNetwork(network)
-    if (params.addressTypeNibble === AddressType.BYRON) {
+
+    // Cast to union of all param fields
+    const params = address.params as {
+        stakingPath?: BIP32Path
+        stakingKeyHashHex?: string
+        stakingBlockchainPointer?: BlockchainPointer
+    }
+
+    if (address.type === AddressType.BYRON) {
         validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
         return {
-            type: params.addressTypeNibble,
+            type: address.type,
             protocolMagic: parsedNetwork.protocolMagic,
-            spendingPath: parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH),
+            spendingPath: parseBIP32Path(address.params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH),
             stakingChoice: { type: StakingChoiceType.NO_STAKING }
         }
     }
 
     const networkId = parsedNetwork.networkId
-    const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
+    const spendingPath = parseBIP32Path(address.params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
 
-    switch (params.addressTypeNibble) {
+    switch (address.type) {
         case AddressType.BASE: {
+
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             const _hash = params.stakingKeyHashHex != null ? 'hash' : ''
             const _path = params.stakingPath != null ? 'path' : ''
@@ -429,7 +439,7 @@ export function parseAddressParams(
                 case 'hash': {
                     const hashHex = parseHexStringOfLength(params.stakingKeyHashHex!, KEY_HASH_LENGTH, TxErrors.OUTPUT_INVALID_STAKING_KEY_HASH)
                     return {
-                        type: params.addressTypeNibble,
+                        type: address.type,
                         networkId,
                         spendingPath,
                         stakingChoice: {
@@ -443,7 +453,7 @@ export function parseAddressParams(
                     const path = parseBIP32Path(params.stakingPath!, TxErrors.OUTPUT_INVALID_STAKING_KEY_PATH)
 
                     return {
-                        type: params.addressTypeNibble,
+                        type: address.type,
                         networkId,
                         spendingPath,
                         stakingChoice: {
@@ -463,7 +473,7 @@ export function parseAddressParams(
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
             return {
-                type: params.addressTypeNibble,
+                type: address.type,
                 networkId,
                 spendingPath,
                 stakingChoice: {
@@ -479,7 +489,7 @@ export function parseAddressParams(
             const pointer = params.stakingBlockchainPointer!
 
             return {
-                type: params.addressTypeNibble,
+                type: address.type,
                 networkId,
                 spendingPath,
                 stakingChoice: {
@@ -498,7 +508,7 @@ export function parseAddressParams(
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
             return {
-                type: params.addressTypeNibble,
+                type: address.type,
                 networkId,
                 spendingPath,
                 stakingChoice: {
@@ -530,7 +540,7 @@ export function parseTxDestination(
 
             return {
                 type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
-                addressParams: parseAddressParams(network, params)
+                addressParams: parseAddress(network, params)
             }
         }
         default:
