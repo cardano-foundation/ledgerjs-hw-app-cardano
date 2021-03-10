@@ -72,7 +72,10 @@ export type AddressParamsReward = {
 export type TxInput = {
     txHashHex: string,
     outputIndex: number,
-    path?: BIP32Path,
+    // Note: null indicates we don't want to sign this utxo. This is highly non-standard
+    // and the only usecase so far is pool registration as owner.
+    // We therefore don't mark it as optional so that people won't forget specifying it
+    path: BIP32Path | null,
 };
 
 export type Token = {
