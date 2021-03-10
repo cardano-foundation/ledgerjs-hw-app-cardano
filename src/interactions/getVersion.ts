@@ -1,6 +1,5 @@
-import type { SendFn } from "../Ada";
 import { Errors } from '../Ada'
-import type { Version } from "../types/internal";
+import type { DeviceCompatibility, Version } from "../types/internal";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
 
@@ -36,6 +35,18 @@ export function* getVersion(): Interaction<Version> {
   return { major, minor, patch, flags };
 }
 
+export function getCompatibility(version: Version): DeviceCompatibility {
+  // We restrict forward compatibility only to backward-compatible semver changes
+  const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 2, Infinity)
+
+  return {
+    isCompatible: v2_2,
+    recommendedVersion: v2_2 ? null : '2.2.0',
+    supportsMary: v2_2,
+    // supportsCatalyst: TODO
+  }
+}
+
 export function isLedgerAppVersionAtLeast(
   version: Version,
   minMajor: number,
@@ -43,21 +54,25 @@ export function isLedgerAppVersionAtLeast(
 ): boolean {
   const { major, minor } = version;
 
-  return major >= minMajor && (major > minMajor || minor >= minMinor);
+  return major > minMajor || (major === minMajor && minor >= minMinor);
 }
 
-export function ensureLedgerAppVersionAtLeast(
+export function isLedgerAppVersionAtMost(
   version: Version,
-  minMajor: number,
-  minMinor: number
-): void {
-  const versionCheckSuccess = isLedgerAppVersionAtLeast(
-    version,
-    minMajor,
-    minMinor
-  );
+  maxMajor: number,
+  maxMinor: number
+): boolean {
+  const { major, minor } = version;
 
-  if (!versionCheckSuccess) {
+  return major < maxMajor || (major === maxMajor && minor <= maxMinor);
+}
+
+export function ensureLedgerAppVersionCompatible(
+  version: Version,
+): void {
+  const isCompatible = getCompatibility(version).isCompatible
+
+  if (!isCompatible) {
     throw new Error(Errors.INCORRECT_APP_VERSION);
   }
 }

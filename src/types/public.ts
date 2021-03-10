@@ -213,6 +213,12 @@ export type Version = {
     flags: Flags,
 };
 
+export type DeviceCompatibility = {
+    isCompatible: boolean
+    recommendedVersion: string | null
+    supportsMary: boolean
+}
+
 export type GetSerialResponse = {
     serial: string,
 };
