@@ -173,10 +173,11 @@ export class Ada {
 
   constructor(transport: Transport, scrambleKey: string = "ADA") {
     this.transport = transport;
+    // Note: this is list of methods that should "lock" the transport to avoid concurrent use
     const methods = [
       "getVersion",
       "getSerial",
-      "getExtendedPublicKey",
+      "getExtendedPublicKeys",
       "signTransaction",
       "deriveAddress",
       "showAddress",
