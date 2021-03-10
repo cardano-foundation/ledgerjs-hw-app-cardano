@@ -49,7 +49,7 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
       metadataHashHex:
         "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
     },
-    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+    rejectReason: TxErrors.POOL_REGISTRATION_METADATA_INVALID_URL
   },
   {
     testName: "pool metadata invalid url",
@@ -58,7 +58,7 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
       metadataHashHex:
         "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948",
     },
-    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+    rejectReason: TxErrors.POOL_REGISTRATION_METADATA_INVALID_URL
   },
   {
     testName: "pool metadata missing url",
@@ -66,7 +66,7 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
       metadataHashHex:
         "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
     } as PoolMetadataParams,
-    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_URL
+    rejectReason: TxErrors.POOL_REGISTRATION_METADATA_INVALID_URL
   },
   // Invalid hash
   {
@@ -76,14 +76,14 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
       metadataHashHex:
         "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948",
     },
-    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
+    rejectReason: TxErrors.POOL_REGISTRATION_METADATA_INVALID_HASH
   },
   {
     testName: "pool metadata missing hash",
     metadata: {
       metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
     } as PoolMetadataParams,
-    rejectReason: TxErrors.CERTIFICATE_POOL_METADATA_INVALID_HASH
+    rejectReason: TxErrors.POOL_REGISTRATION_METADATA_INVALID_HASH
   }
 ]
 
@@ -323,7 +323,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
         poolOwners: poolOwnerVariationSet.twoPathOwners,
       },
     },
-    expectedReject: TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+    expectedReject: TxErrors.POOL_REGISTRATION_OWNERS_SINGLE_PATH
   },
   {
     testName: "pool registration with only hash owners",
@@ -334,7 +334,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
         poolOwners: poolOwnerVariationSet.twoHashOwners,
       },
     },
-    expectedReject: TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+    expectedReject: TxErrors.POOL_REGISTRATION_OWNERS_SINGLE_PATH
   },
   {
     testName: "pool registration with no owners",
@@ -345,7 +345,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
         poolOwners: poolOwnerVariationSet.noOwners,
       },
     },
-    expectedReject: TxErrors.CERTIFICATE_POOL_OWNERS_SINGLE_PATH
+    expectedReject: TxErrors.POOL_REGISTRATION_OWNERS_SINGLE_PATH
   }
 ]
 

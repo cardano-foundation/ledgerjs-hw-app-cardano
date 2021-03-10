@@ -19,6 +19,8 @@
 import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, GetSerialResponse, Network, SignedTransactionData, Transaction, Version } from 'types/public';
 
 import cardano from './cardano'
+import { DeviceStatusCodes, DeviceStatusError } from './errors';
+import { InvalidDataReason } from "./errors/invalidDataReason";
 import type { Interaction, SendParams } from './interactions/common/types';
 import { deriveAddress } from "./interactions/deriveAddress";
 import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
@@ -27,13 +29,12 @@ import { getCompatibility, getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
-import { isArray, isValidPath, validate } from './parseUtils';
+import { isArray, validate } from './parseUtils';
 import {
   parseAddress,
   parseBIP32Path,
   parseTransaction,
 } from "./parsing";
-import { TxErrors } from "./txErrors";
 import type {
   ParsedAddressParams,
   ParsedTransaction,
@@ -52,56 +53,14 @@ export const GetKeyErrors = {
   INVALID_PATH: "invalid key path",
 };
 
-export const DeviceErrorCodes = {
-  ERR_STILL_IN_CALL: 0x6e04, // internal
-  ERR_INVALID_DATA: 0x6e07,
-  ERR_INVALID_BIP_PATH: 0x6e08,
-  ERR_REJECTED_BY_USER: 0x6e09,
-  ERR_REJECTED_BY_POLICY: 0x6e10,
-  ERR_DEVICE_LOCKED: 0x6e11,
-  ERR_UNSUPPORTED_ADDRESS_TYPE: 0x6e12,
-
-  // Not thrown by ledger-app-cardano itself but other apps
-  ERR_CLA_NOT_SUPPORTED: 0x6e00,
-};
-
-const GH_ERRORS_LINK =
-  "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h";
-
-const DeviceErrorMessages = {
-  [DeviceErrorCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
-  [DeviceErrorCodes.ERR_INVALID_BIP_PATH]:
-    "Invalid derivation path supplied to Ledger",
-  [DeviceErrorCodes.ERR_REJECTED_BY_USER]: "Action rejected by user",
-  [DeviceErrorCodes.ERR_REJECTED_BY_POLICY]:
-    "Action rejected by Ledger's security policy",
-  [DeviceErrorCodes.ERR_DEVICE_LOCKED]: "Device is locked",
-  [DeviceErrorCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app",
-  [DeviceErrorCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type",
-};
-
-export const Errors = {
-  INCORRECT_APP_VERSION:
-    "Operation not supported by the Ledger device, make sure to have the latest version of the Cardano app installed",
-};
-
-export const getErrorDescription = (statusCode: number) => {
-  const statusCodeHex = `0x${statusCode.toString(16)}`;
-  const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_ERRORS_LINK}`;
-
-  return DeviceErrorMessages[statusCode] || defaultMsg;
-};
-
-function wrapConvertError<T extends Function>(fn: T): T {
+function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
   // @ts-ignore
   return async (...args) => {
     try {
       return await fn(...args);
     } catch (e) {
       if (e && e.statusCode) {
-        // keep HwTransport.TransportStatusError
-        // just override the message
-        e.message = `Ledger device: ${getErrorDescription(e.statusCode)}`;
+        throw new DeviceStatusError(e.statusCode)
       }
       throw e;
     }
@@ -138,7 +97,7 @@ function wrapRetryStillInCall<T extends Function>(fn: T): T {
       if (
         e &&
         e.statusCode &&
-        e.statusCode === DeviceErrorCodes.ERR_STILL_IN_CALL
+        e.statusCode === DeviceStatusCodes.ERR_STILL_IN_CALL
       ) {
         // Do the retry
         return await fn(...args);
@@ -184,7 +143,7 @@ export class Ada {
     ];
     this.transport.decorateAppAPIMethods(this, methods, scrambleKey);
     this._send = async (params: SendParams): Promise<Buffer> => {
-      let response = await wrapConvertError(this.transport.send)(
+      let response = await wrapConvertDeviceStatusError(this.transport.send)(
         CLA,
         params.ins,
         params.p1,
@@ -271,12 +230,8 @@ export class Ada {
     { paths }: GetExtendedPublicKeysRequest
   ): Promise<GetExtendedPublicKeysResponse> {
     // validate the input
-    validate(isArray(paths), "TODO");
-    for (const path of paths) {
-      validate(isValidPath(path), "TODO");
-    }
-    // TODO: move to parsing
-    const parsed = paths.map((path) => parseBIP32Path(path, GetKeyErrors.INVALID_PATH));
+    validate(isArray(paths), InvalidDataReason.GET_EXT_PUB_KEY_PATHS_NOT_ARRAY);
+    const parsed = paths.map((path) => parseBIP32Path(path, InvalidDataReason.INVALID_PATH));
 
     return interact(this._getExtendedPublicKeys(parsed), this._send);
   }
@@ -411,5 +366,5 @@ export type SignTransactionResponse = SignedTransactionData
 
 // reexport
 export type { Transaction, DeviceOwnedAddress }
-export { AddressType, CertificateType, RelayType, TxErrors, cardano, utils };
+export { AddressType, CertificateType, RelayType, InvalidDataReason as TxErrors, cardano, utils };
 export default Ada;

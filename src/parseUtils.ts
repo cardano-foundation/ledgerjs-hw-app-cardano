@@ -1,4 +1,5 @@
-import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString, _Uint64_num, _Uint64_bigint } from "./types/internal";
+import { InvalidData, InvalidDataReason } from "./errors";
+import type { _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
 
 export const MAX_UINT_64_STR = "18446744073709551615";
 
@@ -62,13 +63,12 @@ export const isUintStr = (data: unknown, constraints: { min?: string, max?: stri
         )
 }
 
-export function validate(cond: boolean, errMsg: string): asserts cond {
-    // TODO: Error
-    if (!cond) throw new Error(errMsg)
+export function validate(cond: boolean, errMsg: InvalidDataReason): asserts cond {
+    if (!cond) throw new InvalidData(errMsg)
 }
 
 
-export function parseAscii(str: unknown, err: string): VarlenAsciiString {
+export function parseAscii(str: unknown, err: InvalidDataReason): VarlenAsciiString {
     validate(isString(str), err);
     validate(
         str.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
@@ -78,17 +78,17 @@ export function parseAscii(str: unknown, err: string): VarlenAsciiString {
 }
 
 
-export function parseHexString(str: unknown, err: string): HexString {
+export function parseHexString(str: unknown, err: InvalidDataReason): HexString {
     validate(isHexString(str), err)
     return str
 }
 
-export function parseHexStringOfLength<L extends number>(str: unknown, length: L, err: string): FixlenHexString<L> {
+export function parseHexStringOfLength<L extends number>(str: unknown, length: L, err: InvalidDataReason): FixlenHexString<L> {
     validate(isHexStringOfLength(str, length), err)
     return str
 }
 
-export function parseUint64_str(val: unknown, constraints: { min?: string, max?: string }, err: string): Uint64_str {
+export function parseUint64_str(val: unknown, constraints: { min?: string, max?: string }, err: InvalidDataReason): Uint64_str {
     switch (typeof val) {
         case 'string':
             validate(isUint64str(val) && isUintStr(val, constraints), err)
@@ -104,28 +104,28 @@ export function parseUint64_str(val: unknown, constraints: { min?: string, max?:
     }
 }
 
-export function parseUint32_t(value: unknown, err: string): Uint32_t {
+export function parseUint32_t(value: unknown, err: InvalidDataReason): Uint32_t {
     validate(isUint32(value), err)
     return value
 }
 
-export function parseUint16_t(value: unknown, err: string): Uint16_t {
+export function parseUint16_t(value: unknown, err: InvalidDataReason): Uint16_t {
     validate(isUint16(value), err)
     return value
 }
 
-export function parseUint8_t(value: number, err: string): Uint8_t {
+export function parseUint8_t(value: number, err: InvalidDataReason): Uint8_t {
     validate(isUint8(value), err)
     return value
 }
 
-export function parseBIP32Path(value: unknown, err: string): ValidBIP32Path {
+export function parseBIP32Path(value: unknown, err: InvalidDataReason): ValidBIP32Path {
     validate(isValidPath(value), err)
     return value
 }
 
 
-export function parseIntFromStr(str: string, err: string): number {
+export function parseIntFromStr(str: string, err: InvalidDataReason): number {
     validate(isString(str), err)
     const i = parseInt(str);
     // Check that we parsed everything

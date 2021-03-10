@@ -1,10 +1,11 @@
 import basex from "base-x";
 import bech32 from "bech32";
 
-import { AddressType } from "./Ada";
-import cardano from "./cardano";
+import { HARDENED } from "./cardano";
+import { ErrorBase, InvalidDataReason } from "./errors";
 import { isArray, isBuffer, isInteger, isString, parseIntFromStr, validate } from "./parseUtils";
-import { buf_to_hex, hex_to_buf, path_to_buf, uint32_to_buf } from './serializeUtils'
+import { buf_to_hex, buf_to_uint16, hex_to_buf, path_to_buf, uint32_to_buf } from './serializeUtils'
+import { AddressType } from "./types/internal";
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -13,38 +14,32 @@ const bs58 = basex(BASE58_ALPHABET);
 const TESTNET_NETWORK_ID = 0x00;
 
 export function assert(cond: boolean, errMsg: string): asserts cond {
-  if (!cond) throw new Error('Assertion failed' + errMsg ? ': ' + errMsg : '')
+  if (!cond) throw new ErrorBase('Assertion failed' + errMsg ? ': ' + errMsg : '')
 }
 
 export function unreachable(_val: never): never {
   assert(false, 'Unreachable code hit')
 }
 
-// A function usable to enforce invariants in the code that are
-// recognized by Flow, relies on https://github.com/facebook/flow/issues/2617
-export function invariant(cond: boolean, errMsg: string = "Invariant failed"): asserts cond {
-  if (!cond) throw new Error(errMsg);
-}
-
-function parseBIP32Index(str: string, errMsg: string): number {
+function parseBIP32Index(str: string, errMsg: InvalidDataReason): number {
   let base = 0;
   if (str.endsWith("'")) {
     str = str.slice(0, -1);
-    base = cardano.HARDENED;
+    base = HARDENED;
   }
   const i = parseIntFromStr(str, errMsg);
   validate(i >= 0, errMsg);
-  validate(i < cardano.HARDENED, errMsg);
+  validate(i < HARDENED, errMsg);
   return base + i;
 }
 
 export function str_to_path(data: string): Array<number> {
-  const errMsg = "invalid bip32 path string ";
+  const errMsg = InvalidDataReason.INVALID_PATH
   validate(isString(data), errMsg);
   validate(data.length > 0, errMsg);
 
   return data.split("/").map(function (x: string): number {
-    return parseBIP32Index(x, errMsg + data + " because of " + x);
+    return parseBIP32Index(x, errMsg);
   });
 }
 
@@ -78,10 +73,8 @@ export function stripRetcodeFromResponse(response: Buffer): Buffer {
   assert(response.length >= 2, "response too short");
 
   const L = response.length - 2;
-  const retcode = response.slice(L, L + 2);
-
-  if (retcode.toString("hex") != "9000")
-    throw new Error(`Invalid retcode ${retcode.toString("hex")}`);
+  const retcode = buf_to_uint16(response.slice(L, L + 2));
+  assert(retcode === 0x9000, `Invalid retcode ${retcode}`)
   return response.slice(0, L);
 }
 
