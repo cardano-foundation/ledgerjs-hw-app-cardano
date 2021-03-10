@@ -167,12 +167,12 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         network,
         inputs,
         outputs,
-        ttl: ttl,
+        ttl,
         metadataHashHex,
         validityIntervalStart: validityIntervalStart,
         withdrawals,
         certificates,
-        fee: fee,
+        fee,
         isSigningPoolRegistrationAsOwner
     }
 }
@@ -252,8 +252,8 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
     return {
         keyHashHex,
         vrfHashHex,
-        pledge: pledge,
-        cost: cost,
+        pledge,
+        cost,
         margin,
         rewardAccountHex,
         owners,

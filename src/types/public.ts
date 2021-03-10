@@ -247,5 +247,5 @@ export type Transaction = {
     certificates: Array<Certificate>,
     withdrawals: Array<Withdrawal>,
     metadataHashHex?: string | null,
-    validityIntervalStart?: string | null
+    validityIntervalStart?: bigint_like | null
 }
