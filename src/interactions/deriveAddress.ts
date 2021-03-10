@@ -1,6 +1,6 @@
 import cardano from "../cardano";
 import type { ParsedAddressParams, Version } from "../types/internal";
-import type { DeriveAddressResponse, } from '../types/public'
+import type { DerivedAddress, } from '../types/public'
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
 
@@ -14,7 +14,7 @@ const send = (params: {
 export function* deriveAddress(
   _version: Version,
   addressParams: ParsedAddressParams,
-): Interaction<DeriveAddressResponse> {
+): Interaction<DerivedAddress> {
   const P1_RETURN = 0x01;
   const P2_UNUSED = 0x00;
 

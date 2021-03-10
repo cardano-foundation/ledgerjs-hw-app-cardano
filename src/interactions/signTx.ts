@@ -4,7 +4,7 @@ import cardano, { SignTxIncluded } from "../cardano";
 import { buf_to_hex, hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../serializeUtils";
 import type { HexString, ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
 import { CertificateType, PoolOwnerType } from "../types/internal";
-import type { SignTransactionResponse, } from '../types/public'
+import type { SignedTransactionData } from '../types/public'
 import utils, { assert, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
@@ -490,7 +490,7 @@ function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
   }
 }
 
-export function* signTransaction(version: Version, tx: ParsedTransaction): Interaction<SignTransactionResponse> {
+export function* signTransaction(version: Version, tx: ParsedTransaction): Interaction<SignedTransactionData> {
   const appHasStakePoolOwnerSupport = isLedgerAppVersionAtLeast(version, 2, 1);
   const appHasMultiassetSupport = isLedgerAppVersionAtLeast(version, 2, 2);
 

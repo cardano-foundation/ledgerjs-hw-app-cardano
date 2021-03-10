@@ -1,7 +1,7 @@
 import { serializeGetExtendedPublicKeyParams } from "../cardano";
 import { uint32_to_buf } from "../serializeUtils";
 import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal";
-import type { GetExtendedPublicKeyResponse } from "../types/public"
+import type { ExtendedPublicKey } from "../types/public"
 import { assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
@@ -20,7 +20,7 @@ const send = (params: {
 export function* getExtendedPublicKeys(
   version: Version,
   paths: Array<ValidBIP32Path>
-): Interaction<Array<GetExtendedPublicKeyResponse>> {
+): Interaction<Array<ExtendedPublicKey>> {
 
   if (paths.length > 1) {
     ensureLedgerAppVersionAtLeast(version, 2, 1);
