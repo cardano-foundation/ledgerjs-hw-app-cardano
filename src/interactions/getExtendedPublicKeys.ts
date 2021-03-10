@@ -6,7 +6,7 @@ import { assert } from "../utils";
 import utils from "../utils";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
-import { ensureLedgerAppVersionAtLeast } from "./getVersion";
+import { ensureLedgerAppVersionCompatible } from "./getVersion";
 
 
 const send = (params: {
@@ -21,10 +21,7 @@ export function* getExtendedPublicKeys(
   version: Version,
   paths: Array<ValidBIP32Path>
 ): Interaction<Array<ExtendedPublicKey>> {
-
-  if (paths.length > 1) {
-    ensureLedgerAppVersionAtLeast(version, 2, 1);
-  }
+  ensureLedgerAppVersionCompatible(version);
 
   const enum P1 {
     INIT = 0x00,

@@ -23,7 +23,11 @@ Major release. Switched from flow to TypeScript.
     - Device owned destination reuses existing `Address` param type
   - `Address` is now tagged enum across different address types (Byron, Base, Enterprise, Pointer, Reward). Reward address still uses `spendingPath` instead of `stakingPath` to denote that this key can be used to spend funds
 - All API call types now use `*Request`/`*Response` nomenclature
-- GetVersion call now returns `{version}` instead of `version`
+- GetVersion call now returns `{version, compability}` instead of `version` where `compatibility` describes overall set of features we support for the device. It should be responsibility of API users to check `compatibility.isCompatible` flag and urge users to upgrade device to `compatibility.recommendedVersion` if the device is not compatible.
+
+### Removed
+
+- Compatibility with pre-Mary (<2.2) App versions.
 
 ## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2020]
 

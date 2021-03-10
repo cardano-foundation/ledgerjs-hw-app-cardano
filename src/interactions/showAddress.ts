@@ -2,6 +2,7 @@ import { serializeAddressParams } from "../cardano";
 import type { ParsedAddressParams, Version } from "../types/internal";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
+import { ensureLedgerAppVersionCompatible } from "./getVersion";
 
 const send = (params: {
   p1: number,
@@ -12,9 +13,10 @@ const send = (params: {
 
 
 export function* showAddress(
-  _version: Version,
+  version: Version,
   addressParams: ParsedAddressParams,
 ): Interaction<void> {
+  ensureLedgerAppVersionCompatible(version)
   const P1_DISPLAY = 0x02;
   const P2_UNUSED = 0x00;
 

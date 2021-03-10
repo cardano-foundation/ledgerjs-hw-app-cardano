@@ -1,5 +1,3 @@
-import type { SendFn, } from "../Ada";
-import { Errors, } from "../Ada"
 import cardano, { SignTxIncluded } from "../cardano";
 import { buf_to_hex, hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../serializeUtils";
 import type { HexString, ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
@@ -8,7 +6,7 @@ import type { SignedTransactionData } from '../types/public'
 import utils, { assert, unreachable } from "../utils";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
-import { isLedgerAppVersionAtLeast } from "./getVersion";
+import { ensureLedgerAppVersionCompatible } from "./getVersion";
 
 const enum P1 {
   STAGE_INIT = 0x01,
@@ -22,9 +20,6 @@ const enum P1 {
   STAGE_VALIDITY_INTERVAL_START = 0x09,
   STAGE_CONFIRM = 0x0a,
   STAGE_WITNESSES = 0x0f,
-  // legacy
-  STAGE_CONFIRM_BEFORE_2_2 = 0x09,
-  STAGE_WITNESSES_BEFORE_2_2 = 0x0a
 }
 
 const send = (params: {
@@ -38,10 +33,6 @@ const send = (params: {
 function* signTx_init(
   tx: ParsedTransaction,
   wittnessPaths: ValidBIP32Path[],
-  flags: {
-    appHasStakePoolOwnerSupport: boolean,
-    appHasMultiassetSupport: boolean,
-  }
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
@@ -49,12 +40,6 @@ function* signTx_init(
   const _serializePoolRegistrationCode = (
     isSigningPoolRegistrationAsOwner: boolean
   ): Buffer => {
-    // backwards compatible way of serializing the flag to signalize pool registration
-    // transactions.
-    // TODO To be removed/refactored once Ledger app 2.1 or later is rolled out
-    if (!flags.appHasStakePoolOwnerSupport) {
-      return Buffer.from([]);
-    }
     const PoolRegistrationCodes = {
       SIGN_TX_POOL_REGISTRATION_NO: 3,
       SIGN_TX_POOL_REGISTRATION_YES: 4,
@@ -67,43 +52,20 @@ function* signTx_init(
     );
   };
 
-  const _serializeIncludeInTxData = (
-    hasMultiassetSupport: boolean
-  ): Buffer => {
-    // TODO remove after Ledger app 2.1 support is not needed anymore
-    if (!hasMultiassetSupport) {
-      return Buffer.concat([
-        uint8_to_buf(
-          (tx.metadataHashHex != null
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-        ),
-      ]);
-    } else {
-      return Buffer.concat([
-        uint8_to_buf(
-          (tx.ttl != null
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-        ),
-        uint8_to_buf(
-          (tx.metadataHashHex != null
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-        ),
-        uint8_to_buf(
-          (tx.validityIntervalStart != null
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-        ),
-      ]);
-    }
-  };
+  function _serializeOptionFlag(included: boolean) {
+    return uint8_to_buf(
+      (included
+        ? SignTxIncluded.SIGN_TX_INCLUDED_YES
+        : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
+    )
+  }
 
   const data = Buffer.concat([
     uint8_to_buf(tx.network.networkId),
     uint32_to_buf(tx.network.protocolMagic),
-    _serializeIncludeInTxData(flags.appHasMultiassetSupport),
+    _serializeOptionFlag(tx.ttl != null),
+    _serializeOptionFlag(tx.metadataHashHex != null),
+    _serializeOptionFlag(tx.validityIntervalStart != null),
     _serializePoolRegistrationCode(tx.isSigningPoolRegistrationAsOwner),
     uint32_to_buf(tx.inputs.length as Uint32_t),
     uint32_to_buf(tx.outputs.length as Uint32_t),
@@ -137,36 +99,9 @@ function* signTx_addInput(
   });
 }
 
-function* signTx_addOutputBefore_2_2(
-  output: ParsedOutput,
-): Interaction<void> {
-  const enum P2 {
-    UNUSED = 0x00,
-  }
-
-  const data = cardano.serializeOutputBasicParamsBefore_2_2(
-    output,
-  );
-
-  yield send({
-    p1: P1.STAGE_OUTPUTS,
-    p2: P2.UNUSED,
-    data,
-    expectedResponseLength: 0,
-  });
-
-}
-
 function* signTx_addOutput(
   output: ParsedOutput,
-  flags: {
-    appHasMultiassetSupport: boolean
-  }
 ): Interaction<void> {
-  if (!flags.appHasMultiassetSupport) {
-    return yield* signTx_addOutputBefore_2_2(output)
-  }
-
   const enum P2 {
     BASIC_DATA = 0x30,
     ASSET_GROUP = 0x31,
@@ -407,16 +342,13 @@ function* signTx_setValidityIntervalStart(
 }
 
 function* signTx_awaitConfirm(
-  flags: {
-    appHasMultiassetSupport: boolean
-  }
 ): Interaction<{ txHashHex: string; }> {
   const enum P2 {
     UNUSED = 0x00
   }
 
   const response = yield send({
-    p1: flags.appHasMultiassetSupport ? P1.STAGE_CONFIRM : P1.STAGE_CONFIRM_BEFORE_2_2,
+    p1: P1.STAGE_CONFIRM,
     p2: P2.UNUSED,
     data: Buffer.alloc(0),
     expectedResponseLength: cardano.TX_HASH_LENGTH,
@@ -428,9 +360,6 @@ function* signTx_awaitConfirm(
 
 function* signTx_getWitness(
   path: ValidBIP32Path,
-  flags: {
-    appHasMultiassetSupport: boolean
-  }
 ): Interaction<{
   path: ValidBIP32Path;
   witnessSignatureHex: string;
@@ -441,7 +370,7 @@ function* signTx_getWitness(
 
   const data = Buffer.concat([path_to_buf(path)]);
   const response = yield send({
-    p1: flags.appHasMultiassetSupport ? P1.STAGE_WITNESSES : P1.STAGE_WITNESSES_BEFORE_2_2,
+    p1: P1.STAGE_WITNESSES,
     p2: P2.UNUSED,
     data,
     expectedResponseLength: 64,
@@ -491,37 +420,13 @@ function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
 }
 
 export function* signTransaction(version: Version, tx: ParsedTransaction): Interaction<SignedTransactionData> {
-  const appHasStakePoolOwnerSupport = isLedgerAppVersionAtLeast(version, 2, 1);
-  const appHasMultiassetSupport = isLedgerAppVersionAtLeast(version, 2, 2);
-
-  // check capabilities
-  if (tx.isSigningPoolRegistrationAsOwner && !appHasStakePoolOwnerSupport) {
-    throw Error(Errors.INCORRECT_APP_VERSION);
-  }
-
-  if (tx.outputs.some((output) => output.tokenBundle.length > 0) && !appHasMultiassetSupport) {
-    throw Error(Errors.INCORRECT_APP_VERSION);
-  }
-
-  // for older app versions:
-  // multiasset outputs must not be given
-  // validity interval start must not be given
-  // ttl must be given
-  if (
-    !appHasMultiassetSupport && (
-      tx.validityIntervalStart != null ||
-      tx.ttl == null
-    )
-  ) {
-    throw Error(Errors.INCORRECT_APP_VERSION);
-  }
+  ensureLedgerAppVersionCompatible(version);
 
   const witnessPaths = generateWitnessPaths(tx)
 
   // init
   yield* signTx_init(
     tx, witnessPaths,
-    { appHasStakePoolOwnerSupport, appHasMultiassetSupport }
   );
 
   // inputs
@@ -531,7 +436,7 @@ export function* signTransaction(version: Version, tx: ParsedTransaction): Inter
 
   // outputs
   for (const output of tx.outputs) {
-    yield* signTx_addOutput(output, { appHasMultiassetSupport });
+    yield* signTx_addOutput(output);
   }
 
   // fee
@@ -563,12 +468,12 @@ export function* signTransaction(version: Version, tx: ParsedTransaction): Inter
   }
 
   // confirm
-  const { txHashHex } = yield* signTx_awaitConfirm({ appHasMultiassetSupport });
+  const { txHashHex } = yield* signTx_awaitConfirm();
 
   // witnesses
   const witnesses = [];
   for (const path of witnessPaths) {
-    const witness = yield* signTx_getWitness(path, { appHasMultiassetSupport });
+    const witness = yield* signTx_getWitness(path);
     witnesses.push(witness);
   }
 

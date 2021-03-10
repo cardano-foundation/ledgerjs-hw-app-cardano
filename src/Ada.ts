@@ -16,14 +16,14 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import type { BIP32Path, DerivedAddress, DeviceOwnedAddress, ExtendedPublicKey, GetSerialResponse, Network, SignedTransactionData, Transaction, Version } from 'types/public';
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, GetSerialResponse, Network, SignedTransactionData, Transaction, Version } from 'types/public';
 
 import cardano from './cardano'
 import type { Interaction, SendParams } from './interactions/common/types';
 import { deriveAddress } from "./interactions/deriveAddress";
 import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
 import { getSerial } from "./interactions/getSerial";
-import { getVersion } from "./interactions/getVersion";
+import { getCompatibility, getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
@@ -216,7 +216,7 @@ export class Ada {
    */
   async getVersion(): Promise<GetVersionResponse> {
     const version = await interact(this._getVersion(), this._send)
-    return { version }
+    return { version, compatibility: getCompatibility(version) }
   }
   // Just for consistency
   *_getVersion(): Interaction<Version> {
@@ -380,6 +380,7 @@ export class Ada {
 // version
 export type GetVersionResponse = {
   version: Version
+  compatibility: DeviceCompatibility
 }
 
 // get ext public keys

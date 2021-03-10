@@ -1,7 +1,7 @@
 import { hex_to_buf, path_to_buf, uint8_to_buf, uint16_to_buf, uint32_to_buf, uint64_to_buf } from "./serializeUtils";
 import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, Uint8_t, Uint32_t, ValidBIP32Path } from "./types/internal";
 import { AddressType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
-import { assert, unreachable } from "./utils";
+import { unreachable } from "./utils";
 
 const HARDENED = 0x80000000;
 
@@ -86,19 +86,6 @@ export function serializeOutputBasicParams(
     uint64_to_buf(output.amount),
     uint32_to_buf(output.tokenBundle.length as Uint32_t),
   ]);
-}
-
-// TODO remove after ledger app 2.2 is widespread
-export function serializeOutputBasicParamsBefore_2_2(
-  output: ParsedOutput,
-): Buffer {
-  assert(output.tokenBundle.length === 0, 'Invalid assets length')
-
-  return Buffer.concat([
-    // Note: different ordering from 2.2 version
-    uint64_to_buf(output.amount),
-    serializeOutputDestination(output.destination)
-  ])
 }
 
 export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
@@ -208,7 +195,6 @@ export default {
   serializeGetExtendedPublicKeyParams,
   serializeAddressParams,
   serializeOutputBasicParams,
-  serializeOutputBasicParamsBefore_2_2,
   serializePoolInitialParams,
   serializePoolOwner,
   serializePoolRelay,
