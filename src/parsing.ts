@@ -3,27 +3,31 @@ import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isValidPath,
 import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
 import { hex_to_buf } from "./serializeUtils";
 import { TxErrors } from "./txErrors";
-import type { ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
-import { AddressTypeNibble, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
+import type { OutputDestination, ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
+import { AddressType, ASSET_NAME_LENGTH_MAX, CertificateType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import type {
-    AddressParams,
     AssetGroup,
     BIP32Path,
+    BlockchainPointer,
     Certificate,
-    InputTypeUTxO,
-    MultiHostNameRelay,
+    DeviceOwnedAddress,
+    MultiHostNameRelayParams,
     Network,
     PoolMetadataParams,
     PoolOwnerParams,
-    PoolParams,
-    RelayParams,
-    SingleHostIPRelay,
-    SingleHostNameRelay,
+    PoolRegistrationParams,
+    Relay,
+    SingleHostIPRelayParams,
+    SingleHostNameRelayParams,
     Token,
+    Transaction,
+    TxInput,
     TxOutput,
-    TxOutputTypeAddress,
-    TxOutputTypeAddressParams,
-    Withdrawal,
+    TxOutputDestination,
+    Withdrawal
+} from "./types/public";
+import {
+    TxOutputDestinationType,
 } from "./types/public";
 
 export const MAX_LOVELACE_SUPPLY_STR = "45 000 000 000.000000".replace(/[ .]/, "");
@@ -39,23 +43,23 @@ function parseCertificate(cert: Certificate): ParsedCertificate {
     switch (cert.type) {
         case CertificateType.STAKE_REGISTRATION:
         case CertificateType.STAKE_DEREGISTRATION: {
-            validate(cert.poolKeyHashHex == null, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
+            validate((cert.params as any).poolKeyHashHex == null, TxErrors.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH);
             return {
                 type: cert.type,
-                path: parseBIP32Path(cert.path, TxErrors.CERTIFICATE_MISSING_PATH)
+                path: parseBIP32Path(cert.params.path, TxErrors.CERTIFICATE_MISSING_PATH)
             }
         }
         case CertificateType.STAKE_DELEGATION: {
             return {
                 type: cert.type,
-                path: parseBIP32Path(cert.path, TxErrors.CERTIFICATE_MISSING_PATH),
-                poolKeyHashHex: parseHexStringOfLength(cert.poolKeyHashHex!, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH)
+                path: parseBIP32Path(cert.params.path, TxErrors.CERTIFICATE_MISSING_PATH),
+                poolKeyHashHex: parseHexStringOfLength(cert.params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_MISSING_POOL_KEY_HASH)
             }
         }
         case CertificateType.STAKE_POOL_REGISTRATION: {
             return {
                 type: cert.type,
-                pool: parsePoolParams(cert.poolRegistrationParams!)
+                pool: parsePoolParams(cert.params)
             }
         }
 
@@ -85,10 +89,10 @@ function parseToken(token: Token): ParsedToken {
         TxErrors.OUTPUT_INVALID_ASSET_NAME
     );
 
-    const amountStr = parseUint64_str(token.amountStr, {}, TxErrors.OUTPUT_INVALID_AMOUNT)
+    const amount = parseUint64_str(token.amount, {}, TxErrors.OUTPUT_INVALID_AMOUNT)
     return {
         assetNameHex,
-        amountStr,
+        amount,
     }
 }
 
@@ -102,25 +106,8 @@ export function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 }
 
-// FIXME: extract to type files
-export type Transaction = {
-    network: Network,
-    inputs: Array<InputTypeUTxO>,
-    outputs: Array<TxOutputTypeAddress | TxOutputTypeAddressParams>,
-    feeStr: string,
-    ttlStr: string | null,
-    certificates: Array<Certificate>,
-    withdrawals: Array<Withdrawal>,
-    metadataHashHex?: string | null,
-    validityIntervalStartStr?: string | null
-}
-
 export function parseTransaction(tx: Transaction): ParsedTransaction {
-    const network: ParsedNetwork = {
-        protocolMagic: parseUint32_t(tx.network.protocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
-        networkId: parseUint8_t(tx.network.networkId, TxErrors.INVALID_NETWORK_ID)
-    }
-    validate(network.networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    const network = parseNetwork(tx.network)
 
     // inputs
     validate(isArray(tx.inputs), TxErrors.INPUTS_NOT_ARRAY);
@@ -131,12 +118,12 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     const outputs = tx.outputs.map(o => parseTxOutput(o, tx.network))
 
     // fee
-    const feeStr = parseUint64_str(tx.feeStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.FEE_INVALID);
+    const fee = parseUint64_str(tx.fee, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.FEE_INVALID);
 
     //  ttl
-    const ttlStr = tx.ttlStr == null
+    const ttl = tx.ttl == null
         ? null
-        : parseUint64_str(tx.ttlStr, { min: "1" }, TxErrors.TTL_INVALID)
+        : parseUint64_str(tx.ttl, { min: "1" }, TxErrors.TTL_INVALID)
 
     // certificates
     validate(isArray(tx.certificates), TxErrors.CERTIFICATES_NOT_ARRAY);
@@ -152,9 +139,9 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         : parseHexStringOfLength(tx.metadataHashHex, 32, TxErrors.METADATA_INVALID)
 
     // validity start
-    const validityIntervalStart = tx.validityIntervalStartStr == null
+    const validityIntervalStart = tx.validityIntervalStart == null
         ? null
-        : parseUint64_str(tx.validityIntervalStartStr, { min: "1" }, TxErrors.VALIDITY_INTERVAL_START_INVALID)
+        : parseUint64_str(tx.validityIntervalStart, { min: "1" }, TxErrors.VALIDITY_INTERVAL_START_INVALID)
 
     // Additional restrictions for signing pool registration as an owner
     const isSigningPoolRegistrationAsOwner = tx.certificates.some(
@@ -180,17 +167,17 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         network,
         inputs,
         outputs,
-        ttlStr,
+        ttl,
         metadataHashHex,
-        validityIntervalStartStr: validityIntervalStart,
+        validityIntervalStart: validityIntervalStart,
         withdrawals,
         certificates,
-        feeStr,
+        fee,
         isSigningPoolRegistrationAsOwner
     }
 }
 
-export function parseTxInput(input: InputTypeUTxO): ParsedInput {
+export function parseTxInput(input: TxInput): ParsedInput {
     const txHashHex = parseHexStringOfLength(input.txHashHex, TX_HASH_LENGTH, TxErrors.INPUT_INVALID_TX_HASH)
     const outputIndex = parseUint32_t(input.outputIndex, TxErrors.INPUT_INVALID_UTXO_INDEX)
     return {
@@ -202,7 +189,7 @@ export function parseTxInput(input: InputTypeUTxO): ParsedInput {
 
 export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     return {
-        amountStr: parseUint64_str(params.amountStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.WITHDRAWAL_INVALID_AMOUNT),
+        amount: parseUint64_str(params.amount, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.WITHDRAWAL_INVALID_AMOUNT),
         path: parseBIP32Path(params.path, TxErrors.WITHDRAWAL_INVALID_PATH)
     }
 }
@@ -213,34 +200,34 @@ export function parseBIP32Path(path: BIP32Path, err: string): ValidBIP32Path {
 }
 
 
-export function parseMargin(params: PoolParams['margin']): ParsedMargin {
+export function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
     const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
 
-    const marginDenominatorStr = parseUint64_str(
-        params.denominatorStr,
+    const marginDenominator = parseUint64_str(
+        params.denominator,
         { max: POOL_MARGIN_DENOMINATOR_MAX_STR },
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN_DENOMINATOR
     );
 
-    const marginNumeratorStr = parseUint64_str(
-        params.numeratorStr,
-        { max: marginDenominatorStr },
+    const marginNumerator = parseUint64_str(
+        params.numerator,
+        { max: marginDenominator },
         TxErrors.CERTIFICATE_POOL_INVALID_MARGIN
     );
 
     return {
-        numeratorStr: marginNumeratorStr as Uint64_str,
-        denominatorStr: marginDenominatorStr as Uint64_str,
+        numerator: marginNumerator as Uint64_str,
+        denominator: marginDenominator as Uint64_str,
     }
 }
 
 
 
-export function parsePoolParams(params: PoolParams): ParsedPoolParams {
+export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParams {
     const keyHashHex = parseHexStringOfLength(params.poolKeyHashHex, KEY_HASH_LENGTH, TxErrors.CERTIFICATE_POOL_INVALID_POOL_KEY_HASH)
     const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, 32, TxErrors.CERTIFICATE_POOL_INVALID_VRF_KEY_HASH)
-    const pledgeStr = parseUint64_str(params.pledgeStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
-    const costStr = parseUint64_str(params.costStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_COST)
+    const pledge = parseUint64_str(params.pledge, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_PLEDGE)
+    const cost = parseUint64_str(params.cost, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.CERTIFICATE_POOL_INVALID_COST)
     const margin = parseMargin(params.margin)
     const rewardAccountHex = parseHexStringOfLength(params.rewardAccountHex, 29, TxErrors.CERTIFICATE_POOL_INVALID_REWARD_ACCOUNT)
 
@@ -265,8 +252,8 @@ export function parsePoolParams(params: PoolParams): ParsedPoolParams {
     return {
         keyHashHex,
         vrfHashHex,
-        pledgeStr,
-        costStr,
+        pledge,
+        cost,
         margin,
         rewardAccountHex,
         owners,
@@ -345,10 +332,10 @@ function parseDnsName(dnsName: string, err: string): VarlenAsciiString {
     return dnsName as VarlenAsciiString
 }
 
-function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
+function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {
     switch (relayParams.type) {
         case RelayType.SingleHostAddr: {
-            const params = relayParams.params as SingleHostIPRelay
+            const params = relayParams.params as SingleHostIPRelayParams
             return {
                 type: RelayType.SingleHostAddr,
                 port: ('portNumber' in params && params.portNumber != null)
@@ -363,7 +350,7 @@ function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
             }
         }
         case RelayType.SingleHostName: {
-            const params = relayParams.params as SingleHostNameRelay
+            const params = relayParams.params as SingleHostNameRelayParams
 
             return {
                 type: RelayType.SingleHostName,
@@ -374,7 +361,7 @@ function parsePoolRelayParams(relayParams: RelayParams): ParsedPoolRelay {
             }
         }
         case RelayType.MultiHostName: {
-            const params = relayParams.params as MultiHostNameRelay
+            const params = relayParams.params as MultiHostNameRelayParams
             return {
                 type: RelayType.MultiHostName,
                 dnsName: parseDnsName(params.dnsName, TxErrors.CERTIFICATE_POOL_RELAY_INVALID_DNS)
@@ -404,28 +391,47 @@ export function parsePoolMetadataParams(params: PoolMetadataParams | null): Pars
     }
 }
 
-export function parseAddressParams(
-    params: AddressParams
+export function parseNetwork(network: Network): ParsedNetwork {
+    const parsed = {
+        protocolMagic: parseUint32_t(network.protocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
+        networkId: parseUint8_t(network.networkId, TxErrors.INVALID_NETWORK_ID)
+    }
+    validate(parsed.networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
+    return parsed
+}
+
+export function parseAddress(
+    network: Network,
+    address: DeviceOwnedAddress
 ): ParsedAddressParams {
-    if (params.addressTypeNibble === AddressTypeNibble.BYRON) {
+    const parsedNetwork = parseNetwork(network)
+
+    // Cast to union of all param fields
+    const params = address.params as {
+        stakingPath?: BIP32Path
+        stakingKeyHashHex?: string
+        stakingBlockchainPointer?: BlockchainPointer
+    }
+
+    if (address.type === AddressType.BYRON) {
         validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
         validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
         return {
-            type: params.addressTypeNibble,
-            protocolMagic: parseUint32_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_PROTOCOL_MAGIC),
-            spendingPath: parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH),
+            type: address.type,
+            protocolMagic: parsedNetwork.protocolMagic,
+            spendingPath: parseBIP32Path(address.params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH),
             stakingChoice: { type: StakingChoiceType.NO_STAKING }
         }
     }
 
-    const networkId = parseUint8_t(params.networkIdOrProtocolMagic, TxErrors.INVALID_NETWORK_ID)
-    validate(networkId <= 0b00001111, TxErrors.INVALID_NETWORK_ID)
-    const spendingPath = parseBIP32Path(params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
+    const networkId = parsedNetwork.networkId
+    const spendingPath = parseBIP32Path(address.params.spendingPath, TxErrors.OUTPUT_INVALID_SPENDING_PATH)
 
-    switch (params.addressTypeNibble) {
-        case AddressTypeNibble.BASE: {
+    switch (address.type) {
+        case AddressType.BASE: {
+
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             const _hash = params.stakingKeyHashHex != null ? 'hash' : ''
             const _path = params.stakingPath != null ? 'path' : ''
@@ -433,7 +439,7 @@ export function parseAddressParams(
                 case 'hash': {
                     const hashHex = parseHexStringOfLength(params.stakingKeyHashHex!, KEY_HASH_LENGTH, TxErrors.OUTPUT_INVALID_STAKING_KEY_HASH)
                     return {
-                        type: params.addressTypeNibble,
+                        type: address.type,
                         networkId,
                         spendingPath,
                         stakingChoice: {
@@ -447,7 +453,7 @@ export function parseAddressParams(
                     const path = parseBIP32Path(params.stakingPath!, TxErrors.OUTPUT_INVALID_STAKING_KEY_PATH)
 
                     return {
-                        type: params.addressTypeNibble,
+                        type: address.type,
                         networkId,
                         spendingPath,
                         stakingChoice: {
@@ -461,13 +467,13 @@ export function parseAddressParams(
                     throw new Error(TxErrors.OUTPUT_INVALID_STAKING_INFO)
             }
         }
-        case AddressTypeNibble.ENTERPRISE: {
+        case AddressType.ENTERPRISE: {
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
             return {
-                type: params.addressTypeNibble,
+                type: address.type,
                 networkId,
                 spendingPath,
                 stakingChoice: {
@@ -475,7 +481,7 @@ export function parseAddressParams(
                 }
             }
         }
-        case AddressTypeNibble.POINTER: {
+        case AddressType.POINTER: {
             validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
@@ -483,7 +489,7 @@ export function parseAddressParams(
             const pointer = params.stakingBlockchainPointer!
 
             return {
-                type: params.addressTypeNibble,
+                type: address.type,
                 networkId,
                 spendingPath,
                 stakingChoice: {
@@ -496,13 +502,13 @@ export function parseAddressParams(
                 }
             }
         }
-        case AddressTypeNibble.REWARD: {
+        case AddressType.REWARD: {
             validate(params.stakingBlockchainPointer == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingKeyHashHex == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, TxErrors.OUTPUT_INVALID_STAKING_INFO)
 
             return {
-                type: params.addressTypeNibble,
+                type: address.type,
                 networkId,
                 spendingPath,
                 stakingChoice: {
@@ -515,51 +521,47 @@ export function parseAddressParams(
     }
 }
 
+export function parseTxDestination(
+    network: Network,
+    destination: TxOutputDestination
+): OutputDestination {
+    switch (destination.type) {
+        case TxOutputDestinationType.ThirdParty: {
+            const params = destination.params
+            const addressHex = parseHexString(params.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS)
+            validate(params.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
+            return {
+                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES,
+                addressHex,
+            }
+        }
+        case TxOutputDestinationType.DeviceOwned: {
+            const params = destination.params
+
+            return {
+                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
+                addressParams: parseAddress(network, params)
+            }
+        }
+        default:
+            throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE)
+    }
+}
 
 export function parseTxOutput(
     output: TxOutput,
     network: Network,
 ): ParsedOutput {
-    const amountStr = parseUint64_str(output.amountStr, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.OUTPUT_INVALID_AMOUNT)
+    const amount = parseUint64_str(output.amount, { max: MAX_LOVELACE_SUPPLY_STR }, TxErrors.OUTPUT_INVALID_AMOUNT)
 
     validate(isArray(output.tokenBundle ?? []), TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE);
     validate((output.tokenBundle ?? []).length <= ASSET_GROUPS_MAX, TxErrors.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE);
     const tokenBundle = (output.tokenBundle ?? []).map((ag) => parseAssetGroup(ag))
 
-    const hasAddressHex = "addressHex" in output && output.addressHex != null
-    const hasAddressParams = "spendingPath" in output && output.spendingPath != null
-    if (hasAddressHex && !hasAddressParams) {
-        output = output as TxOutputTypeAddress
-        const addressHex = parseHexString(output.addressHex, TxErrors.OUTPUT_INVALID_ADDRESS)
-        validate(output.addressHex.length <= 128 * 2, TxErrors.OUTPUT_INVALID_ADDRESS);
-        return {
-            amountStr,
-            tokenBundle,
-            destination: {
-                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES,
-                addressHex,
-            }
-        }
-    } else if (!hasAddressHex && hasAddressParams) {
-        output = output as TxOutputTypeAddressParams
-        return {
-            amountStr,
-            tokenBundle,
-            destination: {
-                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
-                addressParams: parseAddressParams({
-                    addressTypeNibble: output.addressTypeNibble,
-                    networkIdOrProtocolMagic: output.addressTypeNibble === AddressTypeNibble.BYRON
-                        ? network.protocolMagic
-                        : network.networkId,
-                    spendingPath: output.spendingPath,
-                    stakingPath: output.stakingPath,
-                    stakingKeyHashHex: output.stakingKeyHashHex,
-                    stakingBlockchainPointer: output.stakingBlockchainPointer
-                })
-            }
-        }
-    } else {
-        throw new Error(TxErrors.OUTPUT_UNKNOWN_TYPE)
+    const destination = parseTxDestination(network, output.destination)
+    return {
+        amount,
+        tokenBundle,
+        destination
     }
 }

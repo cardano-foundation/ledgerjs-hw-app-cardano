@@ -15,9 +15,9 @@ describe("getVersion", async () => {
   });
 
   it("Should correctly get the semantic version of device", async () => {
-    const response = await ada.getVersion();
+    const { version } = await ada.getVersion();
 
-    expect(response.major).to.equal(2);
-    expect(response.minor).to.equal(2);
+    expect(version.major).to.equal(2);
+    expect(version.minor).to.equal(2);
   });
 });

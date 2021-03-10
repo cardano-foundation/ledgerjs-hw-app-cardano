@@ -1,6 +1,6 @@
 import { hex_to_buf, path_to_buf, uint8_to_buf, uint16_to_buf, uint32_to_buf, uint64_to_buf } from "./serializeUtils";
 import type { OutputDestination, ParsedAddressParams, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, StakingChoice, Uint8_t, Uint32_t, ValidBIP32Path } from "./types/internal";
-import { AddressTypeNibble, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
+import { AddressType, KEY_HASH_LENGTH, PoolOwnerType, RelayType, StakingChoiceType, TX_HASH_LENGTH, TxOutputType } from "./types/internal";
 import { assert, unreachable } from "./utils";
 
 const HARDENED = 0x80000000;
@@ -52,7 +52,7 @@ export function serializeAddressParams(
 ): Buffer {
   return Buffer.concat([
     uint8_to_buf(params.type as Uint8_t),
-    params.type === AddressTypeNibble.BYRON
+    params.type === AddressType.BYRON
       ? uint32_to_buf(params.protocolMagic)
       : uint8_to_buf(params.networkId),
     path_to_buf(params.spendingPath),
@@ -83,7 +83,7 @@ export function serializeOutputBasicParams(
 ): Buffer {
   return Buffer.concat([
     serializeOutputDestination(output.destination),
-    uint64_to_buf(output.amountStr),
+    uint64_to_buf(output.amount),
     uint32_to_buf(output.tokenBundle.length as Uint32_t),
   ]);
 }
@@ -96,7 +96,7 @@ export function serializeOutputBasicParamsBefore_2_2(
 
   return Buffer.concat([
     // Note: different ordering from 2.2 version
-    uint64_to_buf(output.amountStr),
+    uint64_to_buf(output.amount),
     serializeOutputDestination(output.destination)
   ])
 }
@@ -105,10 +105,10 @@ export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
     hex_to_buf(pool.keyHashHex),
     hex_to_buf(pool.vrfHashHex),
-    uint64_to_buf(pool.pledgeStr),
-    uint64_to_buf(pool.costStr),
-    uint64_to_buf(pool.margin.numeratorStr),
-    uint64_to_buf(pool.margin.denominatorStr),
+    uint64_to_buf(pool.pledge),
+    uint64_to_buf(pool.cost),
+    uint64_to_buf(pool.margin.numerator),
+    uint64_to_buf(pool.margin.denominator),
     hex_to_buf(pool.rewardAccountHex),
     uint32_to_buf(pool.owners.length as Uint32_t),
     uint32_to_buf(pool.relays.length as Uint32_t),
@@ -202,7 +202,6 @@ export function serializeGetExtendedPublicKeyParams(path: ValidBIP32Path): Buffe
 
 export default {
   HARDENED,
-  AddressTypeNibble,
   KEY_HASH_LENGTH,
   TX_HASH_LENGTH,
 

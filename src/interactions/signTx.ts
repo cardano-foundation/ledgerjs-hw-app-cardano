@@ -82,7 +82,7 @@ function* signTx_init(
     } else {
       return Buffer.concat([
         uint8_to_buf(
-          (tx.ttlStr != null
+          (tx.ttl != null
             ? SignTxIncluded.SIGN_TX_INCLUDED_YES
             : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
         ),
@@ -92,7 +92,7 @@ function* signTx_init(
             : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
         ),
         uint8_to_buf(
-          (tx.validityIntervalStartStr != null
+          (tx.validityIntervalStart != null
             ? SignTxIncluded.SIGN_TX_INCLUDED_YES
             : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
         ),
@@ -205,7 +205,7 @@ function* signTx_addOutput(
       const data = Buffer.concat([
         uint32_to_buf(token.assetNameHex.length / 2 as Uint32_t),
         hex_to_buf(token.assetNameHex),
-        uint64_to_buf(token.amountStr),
+        uint64_to_buf(token.amount),
       ]);
       yield send({
         p1: P1.STAGE_OUTPUTS,
@@ -335,7 +335,7 @@ function* signTx_addWithdrawal(
     UNUSED = 0x00
   }
   const data = Buffer.concat([
-    uint64_to_buf(withdrawal.amountStr),
+    uint64_to_buf(withdrawal.amount),
     path_to_buf(withdrawal.path),
   ]);
   yield send({
@@ -509,8 +509,8 @@ export function* signTransaction(version: Version, tx: ParsedTransaction): Inter
   // ttl must be given
   if (
     !appHasMultiassetSupport && (
-      tx.validityIntervalStartStr != null ||
-      tx.ttlStr == null
+      tx.validityIntervalStart != null ||
+      tx.ttl == null
     )
   ) {
     throw Error(Errors.INCORRECT_APP_VERSION);
@@ -535,11 +535,11 @@ export function* signTransaction(version: Version, tx: ParsedTransaction): Inter
   }
 
   // fee
-  yield* signTx_setFee(tx.feeStr);
+  yield* signTx_setFee(tx.fee);
 
   // ttl
-  if (tx.ttlStr != null) {
-    yield* signTx_setTtl(tx.ttlStr);
+  if (tx.ttl != null) {
+    yield* signTx_setTtl(tx.ttl);
   }
 
   // certificates
@@ -558,8 +558,8 @@ export function* signTransaction(version: Version, tx: ParsedTransaction): Inter
   }
 
   // validity start
-  if (tx.validityIntervalStartStr != null) {
-    yield* signTx_setValidityIntervalStart(tx.validityIntervalStartStr);
+  if (tx.validityIntervalStart != null) {
+    yield* signTx_setValidityIntervalStart(tx.validityIntervalStart);
   }
 
   // confirm

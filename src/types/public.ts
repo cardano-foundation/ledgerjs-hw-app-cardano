@@ -1,5 +1,5 @@
 // Blockchain-defined constants
-export enum AddressTypeNibble {
+export enum AddressType {
     BASE = 0b0000,
     POINTER = 0b0100,
     ENTERPRISE = 0b0110,
@@ -28,16 +28,48 @@ export type Network = {
     networkId: number
 }
 
-export type AddressParams = {
-    addressTypeNibble: number,
-    networkIdOrProtocolMagic: number,
-    spendingPath: BIP32Path,
-    stakingPath?: BIP32Path | null,
-    stakingKeyHashHex?: string | null,
-    stakingBlockchainPointer?: StakingBlockchainPointer | null
+export type DeviceOwnedAddress = {
+    type: AddressType.BYRON
+    params: AddressParamsByron
+} | {
+    type: AddressType.BASE
+    params: AddressParamsBase
+} | {
+    type: AddressType.ENTERPRISE
+    params: AddressParamsEnterprise
+} | {
+    type: AddressType.POINTER
+    params: AddressParamsPointer
+} | {
+    type: AddressType.REWARD
+    params: AddressParamsReward
 }
 
-export type InputTypeUTxO = {
+export type AddressParamsByron = {
+    spendingPath: BIP32Path
+}
+
+export type AddressParamsBase = {
+    spendingPath: BIP32Path
+} & ( // Not really worth the effort of disambiguation through additional tagged enum
+        | { stakingPath: BIP32Path }
+        | { stakingKeyHashHex: string }
+    )
+
+export type AddressParamsEnterprise = {
+    spendingPath: BIP32Path
+}
+
+export type AddressParamsPointer = {
+    spendingPath: BIP32Path
+    stakingBlockchainPointer: BlockchainPointer
+}
+
+export type AddressParamsReward = {
+    spendingPath: BIP32Path
+}
+
+export type TxInput = {
     txHashHex: string,
     outputIndex: number,
     path?: BIP32Path,
@@ -45,7 +77,7 @@ export type InputTypeUTxO = {
 
 export type Token = {
     assetNameHex: string,
-    amountStr: string,
+    amount: bigint_like,
 };
 
 export type AssetGroup = {
@@ -53,25 +85,30 @@ export type AssetGroup = {
     tokens: Array<Token>,
 };
 
-export type TxOutputTypeAddress = {
-    amountStr: string,
-    tokenBundle?: Array<AssetGroup> | null,
-    addressHex: string,
-};
+export type TxOutput = {
+    amount: bigint_like
+    tokenBundle?: Array<AssetGroup> | null
+    destination: TxOutputDestination
+}
 
-export type TxOutputTypeAddressParams = {
-    amountStr: string,
-    tokenBundle?: Array<AssetGroup> | null,
-    addressTypeNibble: AddressTypeNibble,
-    spendingPath: BIP32Path,
-    stakingPath?: BIP32Path | null,
-    stakingKeyHashHex?: string | null,
-    stakingBlockchainPointer?: StakingBlockchainPointer | null,
-};
+export enum TxOutputDestinationType {
+    ThirdParty = 'third_party',
+    DeviceOwned = 'device_owned',
+}
 
-export type TxOutput = TxOutputTypeAddress | TxOutputTypeAddressParams;
+export type ThirdPartyAddressParams = {
+    addressHex: string
+}
 
-export type StakingBlockchainPointer = {
+export type TxOutputDestination = {
+    type: TxOutputDestinationType.ThirdParty
+    params: ThirdPartyAddressParams
+} | {
+    type: TxOutputDestinationType.DeviceOwned
+    params: DeviceOwnedAddress
+}
+
+export type BlockchainPointer = {
     blockIndex: number,
     txIndex: number,
     certificateIndex: number,
@@ -82,25 +119,31 @@ export type PoolOwnerParams = {
     stakingKeyHashHex?: string,
 };
 
-export type SingleHostIPRelay = {
-    portNumber?: number,
-    ipv4?: string, // e.g. "192.168.0.1"
-    ipv6?: string, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+export type SingleHostIPRelayParams = {
+    portNumber?: number | null,
+    ipv4?: string | null, // e.g. "192.168.0.1"
+    ipv6?: string | null, // e.g. "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
 };
 
-export type SingleHostNameRelay = {
-    portNumber?: number,
+export type SingleHostNameRelayParams = {
+    portNumber?: number | null,
     dnsName: string,
 };
 
-export type MultiHostNameRelay = {
+export type MultiHostNameRelayParams = {
     dnsName: string,
 };
 
-export type RelayParams = {
-    type: number, // single host ip = 0, single hostname = 1, multi host name = 2
-    params: SingleHostIPRelay | SingleHostNameRelay | MultiHostNameRelay,
-};
+export type Relay = {
+    type: RelayType.SingleHostAddr
+    params: SingleHostIPRelayParams
+} | {
+    type: RelayType.SingleHostName
+    params: SingleHostNameRelayParams
+} | {
+    type: RelayType.MultiHostName
+    params: MultiHostNameRelayParams
+}
 
 export type PoolMetadataParams = {
     metadataUrl: string,
@@ -108,39 +151,59 @@ export type PoolMetadataParams = {
 };
 
 export type Margin = {
-    numeratorStr: string,
-    denominatorStr: string,
+    numerator: bigint_like,
+    denominator: bigint_like,
 };
 
-export type PoolParams = {
+export type PoolRegistrationParams = {
     poolKeyHashHex: string,
     vrfKeyHashHex: string,
-    pledgeStr: string,
-    costStr: string,
+    pledge: bigint_like,
+    cost: bigint_like,
     margin: Margin,
     rewardAccountHex: string,
     poolOwners: Array<PoolOwnerParams>,
-    relays: Array<RelayParams>,
+    relays: Array<Relay>,
     metadata: PoolMetadataParams,
 };
 
+export type StakeRegistrationParams = {
+    path: BIP32Path
+}
+
+export type StakeDeregistrationParams = {
+    path: BIP32Path
+}
+
+export type StakeDelegationParams = {
+    path: BIP32Path
+    poolKeyHashHex: string
+}
+
 export type Certificate = {
-    type: number,
-    path: BIP32Path,
-    poolKeyHashHex?: string,
-    poolRegistrationParams?: PoolParams,
-};
+    type: CertificateType.STAKE_REGISTRATION
+    params: StakeRegistrationParams
+} | {
+    type: CertificateType.STAKE_DEREGISTRATION
+    params: StakeDeregistrationParams
+} | {
+    type: CertificateType.STAKE_DELEGATION
+    params: StakeDelegationParams
+} | {
+    type: CertificateType.STAKE_POOL_REGISTRATION
+    params: PoolRegistrationParams
+}
 
 export type Withdrawal = {
     path: BIP32Path,
-    amountStr: string,
+    amount: bigint_like,
 };
 
 export type Flags = {
     isDebug: boolean,
 };
 
-export type GetVersionResponse = {
+export type Version = {
     major: number,
     minor: number,
     patch: number,
@@ -151,11 +214,11 @@ export type GetSerialResponse = {
     serial: string,
 };
 
-export type DeriveAddressResponse = {
+export type DerivedAddress = {
     addressHex: string,
 };
 
-export type GetExtendedPublicKeyResponse = {
+export type ExtendedPublicKey = {
     publicKeyHex: string,
     chainCodeHex: string,
 };
@@ -168,7 +231,21 @@ export type Witness = {
     witnessSignatureHex: string,
 };
 
-export type SignTransactionResponse = {
+export type SignedTransactionData = {
     txHashHex: string,
     witnesses: Array<Witness>,
 };
+
+export type bigint_like = number | bigint | string
+
+export type Transaction = {
+    network: Network,
+    inputs: Array<TxInput>,
+    outputs: Array<TxOutput>,
+    fee: bigint_like,
+    ttl: bigint_like | null,
+    certificates: Array<Certificate>,
+    withdrawals: Array<Withdrawal>,
+    metadataHashHex?: string | null,
+    validityIntervalStart?: bigint_like | null
+}
