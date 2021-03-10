@@ -203,7 +203,7 @@ export type Flags = {
     isDebug: boolean,
 };
 
-export type GetVersionResponse = {
+export type Version = {
     major: number,
     minor: number,
     patch: number,
@@ -214,11 +214,11 @@ export type GetSerialResponse = {
     serial: string,
 };
 
-export type DeriveAddressResponse = {
+export type DerivedAddress = {
     addressHex: string,
 };
 
-export type GetExtendedPublicKeyResponse = {
+export type ExtendedPublicKey = {
     publicKeyHex: string,
     chainCodeHex: string,
 };
@@ -231,7 +231,7 @@ export type Witness = {
     witnessSignatureHex: string,
 };
 
-export type SignTransactionResponse = {
+export type SignedTransactionData = {
     txHashHex: string,
     witnesses: Array<Witness>,
 };

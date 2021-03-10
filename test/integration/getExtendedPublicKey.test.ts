@@ -22,7 +22,7 @@ describe("getExtendedPublicKey", async () => {
       })!;
 
       const result = await ada.getExtendedPublicKey(
-        str_to_path(derivation.path)
+        { path: str_to_path(derivation.path) }
       );
 
       expect(result.publicKeyHex).to.equal(derivation.publicKey);
@@ -38,16 +38,16 @@ describe("getExtendedPublicKey", async () => {
   });
 
   it("Should successfully get several extended public keys, starting with a usual one", async () => {
-    const paths = ["44'/1815'/1'", "44'/1815'/1'/0/10'/1/2/3"];
+    const _paths = ["44'/1815'/1'", "44'/1815'/1'/0/10'/1/2/3"];
 
-    const inputs = [];
+    const paths = [];
     const expectedResults = [];
-    for (const path of paths) {
+    for (const path of _paths) {
       const derivation = getPathDerivationFixture({
         path,
       })!;
 
-      inputs.push(str_to_path(derivation.path));
+      paths.push(str_to_path(derivation.path));
 
       expectedResults.push({
         publicKeyHex: derivation.publicKey,
@@ -55,7 +55,7 @@ describe("getExtendedPublicKey", async () => {
       });
     }
 
-    const results = await ada.getExtendedPublicKeys(inputs);
+    const results = await ada.getExtendedPublicKeys({ paths });
     for (let i = 0; i < expectedResults.length; i++) {
       expect(results[i].publicKeyHex).to.equal(expectedResults[i].publicKeyHex);
       expect(results[i].chainCodeHex).to.equal(expectedResults[i].chainCodeHex);
@@ -63,7 +63,7 @@ describe("getExtendedPublicKey", async () => {
   });
 
   it("Should successfully get several extended public keys, starting with an unusual one", async () => {
-    const paths = [
+    const _paths = [
       "44'/1815'/1'/0/10'/1/2/3",
       "44'/1815'/1'",
       "44'/1815'/1'/0/12'",
@@ -71,14 +71,14 @@ describe("getExtendedPublicKey", async () => {
       "1852'/1815'/0'/2/0",
     ];
 
-    const inputs = [];
+    const paths = [];
     const expectedResults = [];
-    for (const path of paths) {
+    for (const path of _paths) {
       const derivation = getPathDerivationFixture({
         path,
       })!;
 
-      inputs.push(str_to_path(derivation.path));
+      paths.push(str_to_path(derivation.path));
 
       expectedResults.push({
         publicKeyHex: derivation.publicKey,
@@ -86,7 +86,7 @@ describe("getExtendedPublicKey", async () => {
       });
     }
 
-    const results = await ada.getExtendedPublicKeys(inputs);
+    const results = await ada.getExtendedPublicKeys({ paths });
     for (let i = 0; i < expectedResults.length; i++) {
       expect(results[i].publicKeyHex).to.equal(expectedResults[i].publicKeyHex);
       expect(results[i].chainCodeHex).to.equal(expectedResults[i].chainCodeHex);
@@ -96,8 +96,8 @@ describe("getExtendedPublicKey", async () => {
   it("Should return the same public key with the same path consistently", async () => {
     const path = str_to_path("44'/1815'/1'");
 
-    const res1 = await ada.getExtendedPublicKey(path);
-    const res2 = await ada.getExtendedPublicKey(path);
+    const res1 = await ada.getExtendedPublicKey({ path });
+    const res2 = await ada.getExtendedPublicKey({ path });
 
     expect(res1.publicKeyHex).to.equal(res2.publicKeyHex);
     expect(res1.chainCodeHex).to.equal(res2.chainCodeHex);
@@ -106,7 +106,7 @@ describe("getExtendedPublicKey", async () => {
   it("Should reject path shorter than 3 indexes", async () => {
     const SHOULD_HAVE_THROWN = "should have thrown earlier";
     try {
-      await ada.getExtendedPublicKey(str_to_path("44'/1815'"));
+      await ada.getExtendedPublicKey({ path: str_to_path("44'/1815'") });
 
       throw new Error(SHOULD_HAVE_THROWN);
     } catch (error) {

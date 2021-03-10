@@ -22,6 +22,8 @@ Major release. Switched from flow to TypeScript.
     - Destination is now explicitly of type `DestinationType.ThirdParty` or `DestinationType.DeviceOwned` to clarify what the device should sign
     - Device owned destination reuses existing `Address` param type
   - `Address` is now tagged enum across different address types (Byron, Base, Enterprise, Pointer, Reward). Reward address still uses `spendingPath` instead of `stakingPath` to denote that this key can be used to spend funds
+- All API call types now use `*Request`/`*Response` nomenclature
+- GetVersion call now returns `{version}` instead of `version`
 
 ## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2020]
 

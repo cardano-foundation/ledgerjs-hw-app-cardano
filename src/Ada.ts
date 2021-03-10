@@ -16,7 +16,7 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import type { BIP32Path, DeriveAddressResponse, DeviceOwnedAddress, GetExtendedPublicKeyResponse, GetSerialResponse, GetVersionResponse, Network, SignTransactionResponse, Transaction } from 'types/public';
+import type { BIP32Path, DerivedAddress, DeviceOwnedAddress, ExtendedPublicKey, GetSerialResponse, Network, SignedTransactionData, Transaction, Version } from 'types/public';
 
 import cardano from './cardano'
 import type { Interaction, SendParams } from './interactions/common/types';
@@ -38,7 +38,6 @@ import type {
   ParsedAddressParams,
   ParsedTransaction,
   ValidBIP32Path,
-  Version
 } from './types/internal';
 import { AddressType, CertificateType, RelayType } from "./types/public"
 import utils, { assert } from "./utils";
@@ -215,7 +214,8 @@ export class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    return interact(this._getVersion(), this._send)
+    const version = await interact(this._getVersion(), this._send)
+    return { version }
   }
   // Just for consistency
   *_getVersion(): Interaction<Version> {
@@ -267,8 +267,8 @@ export class Ada {
    *
    */
   async getExtendedPublicKeys(
-    paths: Array<BIP32Path>
-  ): Promise<Array<GetExtendedPublicKeyResponse>> {
+    { paths }: GetExtendedPublicKeysRequest
+  ): Promise<GetExtendedPublicKeysResponse> {
     // validate the input
     validate(isArray(paths), "TODO");
     for (const path of paths) {
@@ -297,9 +297,9 @@ export class Ada {
    *
    */
   async getExtendedPublicKey(
-    path: BIP32Path
+    { path }: GetExtendedPublicKeyRequest
   ): Promise<GetExtendedPublicKeyResponse> {
-    return (await this.getExtendedPublicKeys([path]))[0];
+    return (await this.getExtendedPublicKeys({ paths: [path] }))[0];
   }
 
   /**
@@ -335,25 +335,19 @@ export class Ada {
    * );
    *
    */
-  async deriveAddress({ network, address }: {
-    network: Network,
-    address: DeviceOwnedAddress
-  }): Promise<DeriveAddressResponse> {
+  async deriveAddress({ network, address }: DeriveAddressRequest): Promise<DeriveAddressResponse> {
     const parsedParams = parseAddress(network, address)
 
     return interact(this._deriveAddress(parsedParams), this._send);
   }
 
-  *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DeriveAddressResponse> {
+  *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DerivedAddress> {
     const version = yield* getVersion()
     return yield* deriveAddress(version, addressParams)
   }
 
 
-  async showAddress({ network, address }: {
-    network: Network,
-    address: DeviceOwnedAddress
-  }): Promise<void> {
+  async showAddress({ network, address }: ShowAddressRequest): Promise<void> {
     const parsedParams = parseAddress(network, address)
 
     return interact(this._showAddress(parsedParams), this._send);
@@ -365,8 +359,9 @@ export class Ada {
   }
 
 
+
   async signTransaction(
-    tx: Transaction
+    tx: SignTransactionRequest
   ): Promise<SignTransactionResponse> {
 
     const parsedTx = parseTransaction(tx)
@@ -375,13 +370,44 @@ export class Ada {
     return interact(this._signTx(parsedTx), this._send);
   }
 
-  * _signTx(tx: ParsedTransaction): Interaction<SignTransactionResponse> {
+  * _signTx(tx: ParsedTransaction): Interaction<SignedTransactionData> {
     const version = yield* getVersion()
     return yield* signTransaction(version, tx)
   }
 }
 
-export type { Transaction, SignTransactionResponse, DeviceOwnedAddress as AddressParams, DeriveAddressResponse, GetExtendedPublicKeyResponse }
+// version
+export type GetVersionResponse = {
+  version: Version
+}
+
+// get ext public keys
+export type GetExtendedPublicKeysRequest = {
+  paths: BIP32Path[]
+}
+export type GetExtendedPublicKeysResponse = Array<ExtendedPublicKey>
+
+// get ext public key
+export type GetExtendedPublicKeyRequest = {
+  path: BIP32Path
+}
+export type GetExtendedPublicKeyResponse = ExtendedPublicKey
+
+// derive address
+export type DeriveAddressRequest = {
+  network: Network,
+  address: DeviceOwnedAddress
+}
+export type DeriveAddressResponse = DerivedAddress
+
+// show address
+export type ShowAddressRequest = DeriveAddressRequest
+
+// sign tx
+export type SignTransactionRequest = Transaction
+export type SignTransactionResponse = SignedTransactionData
+
 // reexport
+export type { Transaction, DeviceOwnedAddress }
 export { AddressType, CertificateType, RelayType, TxErrors, cardano, utils };
 export default Ada;
