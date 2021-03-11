@@ -1,9 +1,8 @@
-import _ from "lodash";
-
 export type TestCase = {
   path: string,
   expected: { publicKey: string, chainCode: string, _privateKey?: string }
 }
+
 export const testsByron: TestCase[] = [
   // Byron
   {

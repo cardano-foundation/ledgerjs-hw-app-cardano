@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.base",
+  "compilerOptions": {
+    "lib": ["es2019"],
+    "outDir": "lib"
+  },
+  "include": ["./**/*.ts", "../src/**/*.ts"]
+}
