@@ -1,7 +1,7 @@
 import { InvalidData } from "./errors";
 import { InvalidDataReason } from "./errors/invalidDataReason";
-import { parseIntFromStr } from "./parseUtils";
-import { isArray, isHexStringOfLength, isString, isUint8, isUint16, isValidPath, validate } from "./parseUtils";
+import { parseBIP32Path, parseIntFromStr } from "./parseUtils";
+import { isArray, isHexStringOfLength, isString, isUint8, isUint16, validate } from "./parseUtils";
 import { parseAscii, parseHexString, parseHexStringOfLength, parseUint8_t, parseUint32_t, parseUint64_str } from "./parseUtils";
 import { hex_to_buf } from "./serializeUtils";
 import type { OutputDestination, ParsedAddressParams, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMargin, ParsedNetwork, ParsedOutput, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedToken, ParsedTransaction, ParsedWithdrawal, Uint16_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "./types/internal";
@@ -195,12 +195,6 @@ export function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     }
 }
 
-export function parseBIP32Path(path: BIP32Path, err: InvalidDataReason): ValidBIP32Path {
-    validate(isValidPath(path), err);
-    return path as ValidBIP32Path
-}
-
-
 export function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
     const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
 
@@ -292,43 +286,43 @@ export function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
 }
 
 
-function parsePort(portNumber: number, err: InvalidDataReason): Uint16_t {
-    validate(isUint16(portNumber), err)
+function parsePort(portNumber: number, errMsg: InvalidDataReason): Uint16_t {
+    validate(isUint16(portNumber), errMsg)
     return portNumber
 }
 
-function parseIPv4(ipv4: string, err: InvalidDataReason): Buffer {
-    validate(isString(ipv4), err);
+function parseIPv4(ipv4: string, errMsg: InvalidDataReason): Buffer {
+    validate(isString(ipv4), errMsg);
     const ipParts = ipv4.split(".");
-    validate(ipParts.length === 4, err)
+    validate(ipParts.length === 4, errMsg)
 
     const ipBytes = Buffer.alloc(4);
     for (let i = 0; i < 4; i++) {
         const ipPart = parseIntFromStr(ipParts[i], InvalidDataReason.RELAY_INVALID_IPV4);
-        validate(isUint8(ipPart), err)
+        validate(isUint8(ipPart), errMsg)
         ipBytes.writeUInt8(ipPart, i);
     }
     return ipBytes
 }
 
 // FIXME(ppershing): This is terrible and wrong implementation
-function parseIPv6(ipv6: string, err: InvalidDataReason): Buffer {
-    validate(isString(ipv6), err)
+function parseIPv6(ipv6: string, errMsg: InvalidDataReason): Buffer {
+    validate(isString(ipv6), errMsg)
     const ipHex = ipv6.split(":").join("");
-    validate(isHexStringOfLength(ipHex, 16), err)
+    validate(isHexStringOfLength(ipHex, 16), errMsg)
     return hex_to_buf(ipHex);
 }
 
-function parseDnsName(dnsName: string, err: InvalidDataReason): VarlenAsciiString {
-    validate(isString(dnsName), err);
-    validate(dnsName.length <= 64, err)
+function parseDnsName(dnsName: string, errMsg: InvalidDataReason): VarlenAsciiString {
+    validate(isString(dnsName), errMsg);
+    validate(dnsName.length <= 64, errMsg)
     // eslint-disable-next-line no-control-regex
-    validate(/^[\x00-\x7F]*$/.test(dnsName), err)
+    validate(/^[\x00-\x7F]*$/.test(dnsName), errMsg)
     validate(
         dnsName
             .split("")
             .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
-        err
+        errMsg
     );
     return dnsName as VarlenAsciiString
 }
