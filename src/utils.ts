@@ -1,11 +1,11 @@
 import basex from "base-x";
 import bech32 from "bech32";
 
-import { HARDENED } from "./cardano";
 import { ErrorBase, InvalidDataReason } from "./errors";
 import { isArray, isBuffer, isInteger, isString, parseIntFromStr, validate } from "./parseUtils";
 import { buf_to_hex, buf_to_uint16, hex_to_buf, path_to_buf, uint32_to_buf } from './serializeUtils'
 import { AddressType } from "./types/internal";
+import { HARDENED } from "./types/public";
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";

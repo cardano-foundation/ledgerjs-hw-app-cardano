@@ -20,6 +20,8 @@ export const enum RelayType {
     MultiHostName = 2,
 }
 
+export const HARDENED = 0x80000000;
+
 // Our types
 export type BIP32Path = Array<number>;
 

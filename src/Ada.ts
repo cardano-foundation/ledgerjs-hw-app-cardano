@@ -29,10 +29,9 @@ import { getCompatibility, getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
-import { isArray, validate } from './parseUtils';
+import { isArray, parseBIP32Path, validate, } from './parseUtils';
 import {
   parseAddress,
-  parseBIP32Path,
   parseTransaction,
 } from "./parsing";
 import type {
