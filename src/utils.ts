@@ -1,25 +1,18 @@
 import basex from "base-x";
 import bech32 from "bech32";
 
-import { ErrorBase, InvalidDataReason } from "./errors";
-import { isArray, isBuffer, isInteger, isString, parseIntFromStr, validate } from "./parseUtils";
-import { buf_to_hex, buf_to_uint16, hex_to_buf, path_to_buf, uint32_to_buf } from './serializeUtils'
+import { InvalidDataReason } from "./errors";
 import { AddressType } from "./types/internal";
 import { HARDENED } from "./types/public";
+import { assert } from "./utils/assert";
+import { isArray, isBuffer, isInteger, isString, parseIntFromStr, validate } from "./utils/parse";
+import { buf_to_hex, buf_to_uint16, hex_to_buf, path_to_buf, uint32_to_buf } from './utils/serialize'
 
 const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
 
 const TESTNET_NETWORK_ID = 0x00;
-
-export function assert(cond: boolean, errMsg: string): asserts cond {
-  if (!cond) throw new ErrorBase('Assertion failed' + errMsg ? ': ' + errMsg : '')
-}
-
-export function unreachable(_val: never): never {
-  assert(false, 'Unreachable code hit')
-}
 
 function parseBIP32Index(str: string, errMsg: InvalidDataReason): number {
   let base = 0;

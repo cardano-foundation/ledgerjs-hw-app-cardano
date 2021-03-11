@@ -1,7 +1,6 @@
-import { AddressType, utils } from "../../../src/Ada";
-import type { Certificate, TxOutput, Withdrawal } from "../../../src/types/public";
-import { CertificateType, TxOutputDestinationType } from "../../../src/types/public";
-import { str_to_path } from "../../test_utils";
+import type { Certificate, TxOutput, Withdrawal } from "../../../src/Ada";
+import { AddressType, CertificateType, TxOutputDestinationType, utils } from "../../../src/Ada";
+import { str_to_path } from "../../../src/utils/address";
 
 export const inputs = {
   utxoByron: {

@@ -18,7 +18,6 @@
 
 import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, GetSerialResponse, Network, SignedTransactionData, Transaction, Version } from 'types/public';
 
-import cardano from './cardano'
 import { DeviceStatusCodes, DeviceStatusError } from './errors';
 import { InvalidDataReason } from "./errors/invalidDataReason";
 import type { Interaction, SendParams } from './interactions/common/types';
@@ -29,28 +28,22 @@ import { getCompatibility, getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
-import { isArray, parseBIP32Path, validate, } from './parseUtils';
-import {
-  parseAddress,
-  parseTransaction,
-} from "./parsing";
+import { parseAddress } from './parsing/address'
+import { parseTransaction, } from "./parsing/transaction";
 import type {
   ParsedAddressParams,
   ParsedTransaction,
   ValidBIP32Path,
 } from './types/internal';
 import { AddressType, CertificateType, RelayType } from "./types/public"
-import utils, { assert } from "./utils";
+import utils from "./utils";
+import { assert } from './utils/assert'
+import { isArray, parseBIP32Path, validate, } from './utils/parse';
+
+export * from './errors'
+export * from './types/public'
 
 const CLA = 0xd7;
-
-export type KeyOf<T> = keyof T;
-export type ValueOf<T> = T[keyof T];
-
-
-export const GetKeyErrors = {
-  INVALID_PATH: "invalid key path",
-};
 
 function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
   // @ts-ignore
@@ -365,5 +358,16 @@ export type SignTransactionResponse = SignedTransactionData
 
 // reexport
 export type { Transaction, DeviceOwnedAddress }
-export { AddressType, CertificateType, RelayType, InvalidDataReason as TxErrors, cardano, utils };
+export { AddressType, CertificateType, RelayType, InvalidDataReason, utils };
 export default Ada;
+
+export const Networks = {
+  Mainnet: {
+    networkId: 0x01,
+    protocolMagic: 764824073,
+  },
+  Testnet: {
+    networkId: 0x00,
+    protocolMagic: 42,
+  },
+}

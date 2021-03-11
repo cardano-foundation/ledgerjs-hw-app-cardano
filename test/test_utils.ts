@@ -3,14 +3,7 @@ import "babel-polyfill";
 // @ts-ignore
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
-import Ada, { utils } from "../src/Ada";
-
-export { assert } from '../src/utils';
-
-export const str_to_path = utils.str_to_path;
-export const hex_to_buf = utils.hex_to_buf;
-export const pathToBuffer = (str: string) => utils.path_to_buf(str_to_path(str));
-export const uint32_to_buf = utils.uint32_to_buf;
+import Ada from "../src/Ada";
 
 export async function getTransport() {
   return await TransportNodeHid.create(1000);

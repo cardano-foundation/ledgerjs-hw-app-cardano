@@ -1,9 +1,8 @@
-import { serializeGetExtendedPublicKeyParams } from "../cardano";
-import { uint32_to_buf } from "../serializeUtils";
 import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal";
 import type { ExtendedPublicKey } from "../types/public"
-import { assert } from "../utils";
-import utils from "../utils";
+import { assert } from "../utils/assert";
+import { chunkBy } from "../utils/ioHelpers";
+import { path_to_buf, uint32_to_buf } from "../utils/serialize";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
 import { ensureLedgerAppVersionCompatible } from "./getVersion";
@@ -33,7 +32,9 @@ export function* getExtendedPublicKeys(
   const result = [];
 
   for (let i = 0; i < paths.length; i++) {
-    const pathData = serializeGetExtendedPublicKeyParams(paths[i]);
+    const pathData = Buffer.concat([
+      path_to_buf(paths[i]),
+    ]);
 
     let response: Buffer;
     if (i === 0) {
@@ -62,7 +63,7 @@ export function* getExtendedPublicKeys(
       });
     }
 
-    const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
+    const [publicKey, chainCode, rest] = chunkBy(response, [32, 32]);
     assert(rest.length === 0, "invalid response length");
 
     result.push({
