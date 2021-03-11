@@ -223,7 +223,7 @@ describe("signTxPoolRegistrationReject", async () => {
       metadataHashHex: null
     });
 
-    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATE_POOL_INVALID_MARGIN);
+    await expect(promise).to.be.rejectedWith(TxErrors.POOL_REGISTRATION_INVALID_MARGIN);
   });
 
   it("Should reject pool registration along with other certificates", async () => {

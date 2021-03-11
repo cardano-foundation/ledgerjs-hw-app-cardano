@@ -1,8 +1,11 @@
-import { expect } from "chai";
+import chai, { expect } from "chai";
+import chaiAsPromised from 'chai-as-promised';
 
 import type Ada from "../../src/Ada";
+import { DeviceStatusError } from "../../src/errors";
 import { getAda, str_to_path } from "../test_utils";
 import getPathDerivationFixture from "./__fixtures__/pathDerivations";
+chai.use(chaiAsPromised)
 
 describe("getExtendedPublicKey", async () => {
   let ada: Ada = {} as Ada;
@@ -29,16 +32,26 @@ describe("getExtendedPublicKey", async () => {
       expect(result.chainCodeHex).to.equal(derivation.chainCode);
     };
 
-    await test("44'/1815'/1'");
-    await test("44'/1815'/1'/0/12'");
-    await test("44'/1815'/1'/0/10'/1/2/3");
+    const _paths = [
+      // Byron
+      "44'/1815'/1'",
+      "44'/1815'/1'/0/12'",
+      "44'/1815'/1'/0/10'/1/2/3",
+      // Shelley
+      "1852'/1815'/0'/0/1",
+      "1852'/1815'/0'/2/0"
+    ]
 
-    await test("1852'/1815'/0'/0/1");
-    await test("1852'/1815'/0'/2/0");
+    for (const path of _paths) {
+      await test(path)
+    }
   });
 
   it("Should successfully get several extended public keys, starting with a usual one", async () => {
-    const _paths = ["44'/1815'/1'", "44'/1815'/1'/0/10'/1/2/3"];
+    const _paths = [
+      "44'/1815'/1'",
+      "44'/1815'/1'/0/10'/1/2/3"
+    ];
 
     const paths = [];
     const expectedResults = [];
@@ -104,13 +117,7 @@ describe("getExtendedPublicKey", async () => {
   });
 
   it("Should reject path shorter than 3 indexes", async () => {
-    const SHOULD_HAVE_THROWN = "should have thrown earlier";
-    try {
-      await ada.getExtendedPublicKey({ path: str_to_path("44'/1815'") });
-
-      throw new Error(SHOULD_HAVE_THROWN);
-    } catch (error) {
-      expect(error.message).not.to.have.string(SHOULD_HAVE_THROWN);
-    }
+    const promise = ada.getExtendedPublicKey({ path: str_to_path("44'/1815'") })
+    await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
   });
 });

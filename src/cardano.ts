@@ -187,8 +187,11 @@ export function serializeGetExtendedPublicKeyParams(path: ValidBIP32Path): Buffe
   ])
 }
 
+export {
+  HARDENED
+}
+
 export default {
-  HARDENED,
   KEY_HASH_LENGTH,
   TX_HASH_LENGTH,
 

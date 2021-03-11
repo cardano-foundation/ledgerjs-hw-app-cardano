@@ -1,4 +1,4 @@
-import { Errors } from '../Ada'
+import { DeviceVersionUnsupported } from "../errors";
 import type { DeviceCompatibility, Version } from "../types/internal";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
@@ -70,9 +70,9 @@ export function isLedgerAppVersionAtMost(
 export function ensureLedgerAppVersionCompatible(
   version: Version,
 ): void {
-  const isCompatible = getCompatibility(version).isCompatible
+  const { isCompatible, recommendedVersion } = getCompatibility(version)
 
   if (!isCompatible) {
-    throw new Error(Errors.INCORRECT_APP_VERSION);
+    throw new DeviceVersionUnsupported(`Device app version unsupported. Please upgrade to ${recommendedVersion}.`);
   }
 }

@@ -3,6 +3,7 @@ import chaiAsPromised from "chai-as-promised"
 
 import type { Ada } from "../../src/Ada";
 import { AddressType, utils } from "../../src/Ada";
+import { DeviceStatusError } from "../../src/errors";
 import type { DeviceOwnedAddress, Network } from "../../src/types/public";
 import {
   getAda,
@@ -208,7 +209,7 @@ describe("deriveAddress", async () => {
           }
         }
       })
-      await expect(promise).to.be.rejectedWith("Ledger device: Action rejected by Ledger's security policy");
+      await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy");
     };
 
     await test("44'/1815'/1'");

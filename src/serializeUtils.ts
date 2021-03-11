@@ -23,6 +23,12 @@ export function uint16_to_buf(value: Uint16_t | Uint8_t): Buffer {
     return data;
 }
 
+export function buf_to_uint16(data: Buffer): Uint16_t {
+    assert(data.length === 2, "invalid uint16 buffer");
+
+    return data.readUIntBE(0, 2) as Uint16_t;
+}
+
 export function uint32_to_buf(value: Uint32_t | Uint16_t | Uint8_t): Buffer {
     assert(isUint32(value), 'invalid uint32')
 
@@ -31,10 +37,10 @@ export function uint32_to_buf(value: Uint32_t | Uint16_t | Uint8_t): Buffer {
     return data;
 }
 
-export function buf_to_uint32(data: Buffer): number {
+export function buf_to_uint32(data: Buffer): Uint32_t {
     assert(data.length === 4, "invalid uint32 buffer");
 
-    return data.readUIntBE(0, 4);
+    return data.readUIntBE(0, 4) as Uint32_t;
 }
 
 export function uint64_to_buf(value: Uint64_str): Buffer {
