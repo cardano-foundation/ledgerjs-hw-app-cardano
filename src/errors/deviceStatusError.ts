@@ -5,20 +5,20 @@ import { ErrorBase } from "./errorBase";
  * @category Errors
  */
 export const DeviceStatusCodes = {
-    ERR_STILL_IN_CALL: 0x6e04, // internal
-    ERR_INVALID_DATA: 0x6e07,
-    ERR_INVALID_BIP_PATH: 0x6e08,
-    ERR_REJECTED_BY_USER: 0x6e09,
-    ERR_REJECTED_BY_POLICY: 0x6e10,
-    ERR_DEVICE_LOCKED: 0x6e11,
-    ERR_UNSUPPORTED_ADDRESS_TYPE: 0x6e12,
+    ERR_STILL_IN_CALL: 0x6e04 as const, // internal
+    ERR_INVALID_DATA: 0x6e07 as const,
+    ERR_INVALID_BIP_PATH: 0x6e08 as const,
+    ERR_REJECTED_BY_USER: 0x6e09 as const,
+    ERR_REJECTED_BY_POLICY: 0x6e10 as const,
+    ERR_DEVICE_LOCKED: 0x6e11 as const,
+    ERR_UNSUPPORTED_ADDRESS_TYPE: 0x6e12 as const,
 
     // Not thrown by ledger-app-cardano itself but other apps
-    ERR_CLA_NOT_SUPPORTED: 0x6e00,
+    ERR_CLA_NOT_SUPPORTED: 0x6e00 as const,
 };
 
 // Human-readable version of errors reported by APDU protocol
-const DeviceStatusMessages = {
+const DeviceStatusMessages: Record<number, string> = {
     [DeviceStatusCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
     [DeviceStatusCodes.ERR_INVALID_BIP_PATH]:
         "Invalid derivation path supplied to Ledger",
@@ -37,12 +37,13 @@ const getDeviceErrorDescription = (statusCode: number) => {
     const statusCodeHex = `0x${statusCode.toString(16)}`;
     const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_DEVICE_ERRORS_LINK}`;
 
-    return DeviceStatusMessages[statusCode] || defaultMsg;
+    return DeviceStatusMessages[statusCode] ?? defaultMsg;
 };
 
 /**
  * Error wrapping APDU device error codes with human-readable message.
  * Use [[code]] for accessing underlying status code.
+ * @category Errors
  */
 export class DeviceStatusError extends ErrorBase {
     public code: number

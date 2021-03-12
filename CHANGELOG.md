@@ -28,6 +28,7 @@ Major release. Switched from flow to TypeScript.
   - `InvalidData` - you passed some wrong data to the API. We will not even try to communicate with the device
   - `DeviceUnsupported` - thrown when trying to use API with unsopported Ledger app version (or when using features not yet available for the app version)
   - `DeviceStatusError` - thrown when device rejects operation for some reason. Common reasons are found in `DeviceStatusCodes` mapping.
+- There is new documentation available at (https://vacuumlabs.github.io/ledgerjs-cardano-shelley/index.html)
 
 ### Removed
 
