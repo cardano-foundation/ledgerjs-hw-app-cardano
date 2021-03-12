@@ -22,5 +22,5 @@ Note that for these tests it is advisable to install the developer build of the 
 
 ### Documentation
 
-* available calls documented in [docs folder](/docs)
-* [CHANGELOG](CHANGELOG.md)
+- available calls documented in [docs folder](/docs) or (https://vacuumlabs.github.io/ledgerjs-cardano-shelley/)
+- [CHANGELOG](CHANGELOG.md)

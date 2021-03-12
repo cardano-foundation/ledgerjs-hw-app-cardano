@@ -16,7 +16,7 @@
  ********************************************************************************/
 //import type Transport from "@ledgerhq/hw-transport";
 
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, GetSerialResponse, Network, SignedTransactionData, Transaction, Version } from 'types/public';
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, Transaction, Version } from 'types/public';
 
 import { DeviceStatusCodes, DeviceStatusError } from './errors';
 import { InvalidDataReason } from "./errors/invalidDataReason";
@@ -67,9 +67,10 @@ function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
  * const ada = new Ada(transport);
  */
 
-
+/** @ignore */
 export type SendFn = (params: SendParams) => Promise<Buffer>;
 
+/** @ignore */
 export type Transport = any
 
 // It can happen that we try to send a message to the device
@@ -120,6 +121,7 @@ async function interact<T>(
 
 export class Ada {
   transport: Transport;
+  /** @ignore */
   _send: SendFn;
 
   constructor(transport: Transport, scrambleKey: string = "ADA") {
@@ -169,7 +171,9 @@ export class Ada {
     const version = await interact(this._getVersion(), this._send)
     return { version, compatibility: getCompatibility(version) }
   }
+
   // Just for consistency
+  /** @ignore */
   *_getVersion(): Interaction<Version> {
     return yield* getVersion()
   }
@@ -188,6 +192,7 @@ export class Ada {
     return interact(this._getSerial(), this._send);
   }
 
+  /** @ignore */
   *_getSerial(): Interaction<GetSerialResponse> {
     const version = yield* getVersion()
     return yield* getSerial(version)
@@ -201,6 +206,7 @@ export class Ada {
     return interact(this._runTests(), this._send)
   }
 
+  /** @ignore */
   *_runTests(): Interaction<void> {
     const version = yield* getVersion()
     return yield* runTests(version)
@@ -208,15 +214,16 @@ export class Ada {
 
 
   /**
-   * @description Get several public keys; one for each of the specified BIP 32 paths.
+   * Get several public keys; one for each of the specified BIP 32 path.
    *
    * @param paths The paths. A path must begin with `44'/1815'/account'` or `1852'/1815'/account'`, and may be up to 10 indexes long.
    * @returns The extended public keys (i.e. with chaincode) for the given paths.
    *
    * @example
+   * ```
    * const [{ publicKey, chainCode }] = await ada.getExtendedPublicKeys([[ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]]);
    * console.log(publicKey);
-   *
+   * ```
    */
   async getExtendedPublicKeys(
     { paths }: GetExtendedPublicKeysRequest
@@ -228,20 +235,14 @@ export class Ada {
     return interact(this._getExtendedPublicKeys(parsed), this._send);
   }
 
+  /** @ignore */
   *_getExtendedPublicKeys(paths: ValidBIP32Path[]) {
     const version = yield* getVersion()
     return yield* getExtendedPublicKeys(version, paths)
   }
 
   /**
-   * @description Get a public key from the specified BIP 32 path.
-   *
-   * @param path BIP32 array. Path must start with `(44 or 1852)'/1815'/n'`, and may be up to 10 indexes long.
-   * @return The public key with chaincode for the given path.
-   *
-   * @example
-   * const { publicKey, chainCode } = await ada.getExtendedPublicKey([ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]);
-   * console.log(publicKey);
+   * Get a public key from the specified BIP 32 path.
    *
    */
   async getExtendedPublicKey(
@@ -251,37 +252,8 @@ export class Ada {
   }
 
   /**
-   * @description Gets an address from the specified BIP 32 path.
-   *
-   * @param addressParams The path indexes. Path must begin with `(44 or 1852)'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
-   * @return The address for the given path.
-   *
-   * @throws 5001 - The path provided does not have the first 3 indexes hardened or 4th index is not 0, 1 or 2
-   * @throws 5002 - The path provided is less than 5 indexes
-   * @throws 5003 - Some of the indexes is not a number
-   *
-   * TODO update error codes
-   *
-   * @example
-   * const { address } = await ada.deriveAddress(
-   *   0b1000, // byron address
-   *   764824073,
-   *   [ HARDENED | 44, HARDENED | 1815, HARDENED | 1, 0, 5 ],
-   *   null
-   *   null
-   *   null
-   * );
-   *
-   * @example
-   * const { address } = await ada.deriveAddress(
-   *   0b0000, // base address
-   *   0x00,
-   *   [ HARDENED | 1852, HARDENED | 1815, HARDENED | 0, 0, 5 ],
-   *   [ HARDENED | 1852, HARDENED | 1815, HARDENED | 0, 2, 0 ]
-   *   null
-   *   null
-   * );
-   *
+   * Derives an address for the specified BIP 32 path.
+   * Note that the address is returned in raw *hex* format without any bech32/base58 encoding
    */
   async deriveAddress({ network, address }: DeriveAddressRequest): Promise<DeriveAddressResponse> {
     const parsedParams = parseAddress(network, address)
@@ -289,18 +261,24 @@ export class Ada {
     return interact(this._deriveAddress(parsedParams), this._send);
   }
 
+  /** @ignore */
   *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DerivedAddress> {
     const version = yield* getVersion()
     return yield* deriveAddress(version, addressParams)
   }
 
 
+  /**
+   * Show address corresponding to a given derivation path on the device.
+   * This is useful for users to check whether the wallet does not try to scam the user.
+   */
   async showAddress({ network, address }: ShowAddressRequest): Promise<void> {
     const parsedParams = parseAddress(network, address)
 
     return interact(this._showAddress(parsedParams), this._send);
   }
 
+  /** @ignore */
   *_showAddress(addressParams: ParsedAddressParams): Interaction<void> {
     const version = yield* getVersion()
     return yield* showAddress(version, addressParams)
@@ -318,42 +296,96 @@ export class Ada {
     return interact(this._signTx(parsedTx), this._send);
   }
 
+  /** @ignore */
   * _signTx(tx: ParsedTransaction): Interaction<SignedTransactionData> {
     const version = yield* getVersion()
     return yield* signTransaction(version, tx)
   }
 }
 
-// version
+/**
+ * Response to [[Ada.getVersion]] call
+ * @category API request/response
+ */
 export type GetVersionResponse = {
   version: Version
   compatibility: DeviceCompatibility
 }
 
-// get ext public keys
+/**
+ * Get multiple public keys ([[Ada.getExtendedPublicKeys]]) request data
+ * @category API request/response
+ * @see [[GetExtendedPublicKeysResponse]]
+ */
 export type GetExtendedPublicKeysRequest = {
+  /** Paths to public keys which should be derived by the device */
   paths: BIP32Path[]
 }
+
+/**
+ * [[Ada.getExtendedPublicKeys]] response data
+ * @category API request/response
+ * @see [[GetExtendedPublicKeysRequest]]
+ */
 export type GetExtendedPublicKeysResponse = Array<ExtendedPublicKey>
 
-// get ext public key
+/**
+ * Get single public keys ([[Ada.getExtendedPublicKey]]) request data
+ * @category API request/response
+ * @see [[GetExtendedPublicKeysResponse]]
+ */
 export type GetExtendedPublicKeyRequest = {
+  /** Path to public key which should be derived */
   path: BIP32Path
 }
+/**
+ * Get single public key ([[Ada.getExtendedPublicKey]]) response data
+ * @category API request/response
+ * @see [[GetExtendedPublicKeysResponse]]
+ */
 export type GetExtendedPublicKeyResponse = ExtendedPublicKey
 
-// derive address
+/**
+ * Derive address ([[Ada.deriveAddress]]) request data
+ * @category API request/response
+ * @see [[DeriveAddressResponse]]
+ */
 export type DeriveAddressRequest = {
   network: Network,
   address: DeviceOwnedAddress
 }
+/**
+ * Derive address ([[Ada.deriveAddress]]) response data
+ * @category API request/response
+ * @see [[DeriveAddressRequest]]
+ */
 export type DeriveAddressResponse = DerivedAddress
 
-// show address
+/**
+ * Show address on derivce ([[Ada.showAddress]]) request data
+ * @category API request/response
+ */
 export type ShowAddressRequest = DeriveAddressRequest
 
-// sign tx
+/**
+ * Get device serial number ([[Ada.getSerial]]) response data
+ * @category API request/response
+ */
+export type GetSerialResponse = Serial
+
+
+/**
+ * Sign transaction ([[Ada.signTransaction]]) request data
+ * @category API request/response
+ * @see [[SignTransactionResponse]]
+ */
 export type SignTransactionRequest = Transaction
+
+/**
+ * Sign transaction ([[Ada.signTransaction]]) response data
+ * @category API request/response
+ * @see [[SignTransactionRequest]]
+ */
 export type SignTransactionResponse = SignedTransactionData
 
 // reexport
@@ -361,13 +393,18 @@ export type { Transaction, DeviceOwnedAddress }
 export { AddressType, CertificateType, RelayType, InvalidDataReason, utils };
 export default Ada;
 
+/**
+ * Default Cardano networks
+ * @category Basic types
+ * @see [[Network]]
+ */
 export const Networks = {
   Mainnet: {
     networkId: 0x01,
     protocolMagic: 764824073,
-  },
+  } as Network,
   Testnet: {
     networkId: 0x00,
     protocolMagic: 42,
-  },
+  } as Network,
 }

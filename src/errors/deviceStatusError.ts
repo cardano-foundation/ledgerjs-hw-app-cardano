@@ -1,6 +1,9 @@
 import { ErrorBase } from "./errorBase";
 
-// Raw error codes returned by APDU protocol
+/**
+ * Raw error codes returned by APDU protocol. Note that this is *not* an exhaustive list.
+ * @category Errors
+ */
 export const DeviceStatusCodes = {
     ERR_STILL_IN_CALL: 0x6e04, // internal
     ERR_INVALID_DATA: 0x6e07,
@@ -37,7 +40,10 @@ const getDeviceErrorDescription = (statusCode: number) => {
     return DeviceStatusMessages[statusCode] || defaultMsg;
 };
 
-// Error wrapping APDU device error codes
+/**
+ * Error wrapping APDU device error codes with human-readable message.
+ * Use [[code]] for accessing underlying status code.
+ */
 export class DeviceStatusError extends ErrorBase {
     public code: number
 
