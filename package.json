@@ -56,6 +56,7 @@
     "prettier": "^2.2.1",
     "prettier-eslint": "^12.0.0",
     "ts-node": "^9.1.1",
+    "typedoc": "git+ssh://git@github.com:ppershing/typedoc.git#do_not_sort_properties",
     "typescript": "^4.1.5"
   },
   "bugs": {
@@ -63,6 +64,7 @@
   },
   "homepage": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano",
   "scripts": {
+    "prepare": "cd node_modules/typedoc && yarn install && yarn build",
     "lint": "yarn eslint .",
     "flow": "flow",
     "clean": "bash ./script/clean.sh",
