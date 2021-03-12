@@ -72,7 +72,7 @@
     "clean": "bash ./script/clean.sh",
     "build": "bash ./script/build.sh",
     "watch": "bash ./script/watch.sh",
-    "gen-docs": "yarn typedoc --out docs_generated",
+    "gen-docs": "yarn typedoc",
     "prepublish": "yarn run clean && yarn run build",
     "run-example": "yarn ts-node -P example-node/tsconfig.json example-node/index.ts",
     "device-self-test": "mocha --timeout 3600000 -r ts-node/register test/device-self-test/**/*.test.ts",
