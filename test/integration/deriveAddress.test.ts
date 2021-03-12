@@ -2,13 +2,9 @@ import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised"
 
 import type { Ada } from "../../src/Ada";
-import { AddressType, utils } from "../../src/Ada";
-import { DeviceStatusError } from "../../src/errors";
-import {
-  getAda,
-  Networks,
-  str_to_path,
-} from "../test_utils";
+import { AddressType, DeviceStatusError, utils } from "../../src/Ada";
+import { str_to_path } from "../../src/utils/address";
+import { getAda, Networks, } from "../test_utils";
 import { byronTestcases, shelleyTestcases } from "./__fixtures__/deriveAddress";
 
 chai.use(chaiAsPromised)

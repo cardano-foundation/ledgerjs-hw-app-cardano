@@ -7,4 +7,3 @@ export class InvalidData extends ErrorBase {
         super(reason)
     }
 }
-

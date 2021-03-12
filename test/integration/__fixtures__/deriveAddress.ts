@@ -1,6 +1,7 @@
+import type { DeviceOwnedAddress, Network } from "../../../src/Ada";
 import { AddressType } from "../../../src/Ada";
-import type { DeviceOwnedAddress, Network } from "../../../src/types/public";
-import { Networks, str_to_path } from "../../test_utils";
+import { str_to_path } from "../../../src/utils/address";
+import { Networks, } from "../../test_utils";
 
 
 export const byronTestcases: Array<{ network: Network, path: string, address: string }> = [

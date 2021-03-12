@@ -1,12 +1,16 @@
-import cardano, { SignTxIncluded } from "../cardano";
-import { buf_to_hex, hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../serializeUtils";
-import type { HexString, ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
+import type { HexString, ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
 import { CertificateType, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
 import type { SignedTransactionData } from '../types/public'
-import utils, { assert, unreachable } from "../utils";
+import { assert } from "../utils/assert";
+import { buf_to_hex, } from "../utils/serialize";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
 import { ensureLedgerAppVersionCompatible } from "./getVersion";
+import { serializePoolInitialParams, serializePoolMetadata, serializePoolOwner, serializePoolRelay } from "./serialization/poolRegistrationCertificate";
+import { serializeTxCertificate } from "./serialization/txCertificate";
+import { serializeTxInit } from "./serialization/txInit";
+import { serializeTxFee, serializeTxInput, serializeTxMetadata, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther";
+import { serializeAssetGroup, serializeToken, serializeTxOutputBasicParams } from "./serialization/txOutput";
 
 const enum P1 {
   STAGE_INIT = 0x01,
@@ -37,46 +41,11 @@ function* signTx_init(
   const enum P2 {
     UNUSED = 0x00,
   }
-  const _serializePoolRegistrationCode = (
-    isSigningPoolRegistrationAsOwner: boolean
-  ): Buffer => {
-    const PoolRegistrationCodes = {
-      SIGN_TX_POOL_REGISTRATION_NO: 3,
-      SIGN_TX_POOL_REGISTRATION_YES: 4,
-    };
 
-    return uint8_to_buf(
-      (isSigningPoolRegistrationAsOwner
-        ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
-        : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO) as Uint8_t
-    );
-  };
-
-  function _serializeOptionFlag(included: boolean) {
-    return uint8_to_buf(
-      (included
-        ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-        : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-    )
-  }
-
-  const data = Buffer.concat([
-    uint8_to_buf(tx.network.networkId),
-    uint32_to_buf(tx.network.protocolMagic),
-    _serializeOptionFlag(tx.ttl != null),
-    _serializeOptionFlag(tx.metadataHashHex != null),
-    _serializeOptionFlag(tx.validityIntervalStart != null),
-    _serializePoolRegistrationCode(tx.isSigningPoolRegistrationAsOwner),
-    uint32_to_buf(tx.inputs.length as Uint32_t),
-    uint32_to_buf(tx.outputs.length as Uint32_t),
-    uint32_to_buf(tx.certificates.length as Uint32_t),
-    uint32_to_buf(tx.withdrawals.length as Uint32_t),
-    uint32_to_buf(wittnessPaths.length as Uint32_t),
-  ]);
   const _response = yield send({
     p1: P1.STAGE_INIT,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxInit(tx, wittnessPaths.length),
     expectedResponseLength: 0,
   });
 }
@@ -87,14 +56,11 @@ function* signTx_addInput(
   const enum P2 {
     UNUSED = 0x00,
   }
-  const data = Buffer.concat([
-    hex_to_buf(input.txHashHex),
-    uint32_to_buf(input.outputIndex),
-  ]);
+
   yield send({
     p1: P1.STAGE_INPUTS,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxInput(input),
     expectedResponseLength: 0,
   });
 }
@@ -111,41 +77,28 @@ function* signTx_addOutput(
 
   // Basic data
   {
-    const data = cardano.serializeOutputBasicParams(
-      output,
-    );
-
     yield send({
       p1: P1.STAGE_OUTPUTS,
       p2: P2.BASIC_DATA,
-      data: data,
+      data: serializeTxOutputBasicParams(output),
       expectedResponseLength: 0,
     });
   }
 
   // Assets
   for (const assetGroup of output.tokenBundle) {
-    const data = Buffer.concat([
-      hex_to_buf(assetGroup.policyIdHex),
-      uint32_to_buf(assetGroup.tokens.length as Uint32_t),
-    ]);
     yield send({
       p1: P1.STAGE_OUTPUTS,
       p2: P2.ASSET_GROUP,
-      data,
+      data: serializeAssetGroup(assetGroup),
       expectedResponseLength: 0,
     });
 
     for (const token of assetGroup.tokens) {
-      const data = Buffer.concat([
-        uint32_to_buf(token.assetNameHex.length / 2 as Uint32_t),
-        hex_to_buf(token.assetNameHex),
-        uint64_to_buf(token.amount),
-      ]);
       yield send({
         p1: P1.STAGE_OUTPUTS,
         p2: P2.TOKEN,
-        data,
+        data: serializeToken(token),
         expectedResponseLength: 0,
       });
     }
@@ -165,101 +118,62 @@ function* signTx_addCertificate(
   const enum P2 {
     UNUSED = 0x00
   }
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.UNUSED,
+    data: serializeTxCertificate(certificate),
+    expectedResponseLength: 0,
+  });
 
-  switch (certificate.type) {
-    case CertificateType.STAKE_REGISTRATION:
-    case CertificateType.STAKE_DEREGISTRATION: {
-      const data = Buffer.concat([
-        uint8_to_buf(certificate.type as Uint8_t),
-        path_to_buf(certificate.path)
-      ])
-      yield send({
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.UNUSED,
-        data,
-        expectedResponseLength: 0,
-      });
-      break
+  // additional data for pool certificate
+  if (certificate.type === CertificateType.STAKE_POOL_REGISTRATION) {
+    const enum P2 {
+      POOL_PARAMS = 0x30,
+      OWNERS = 0x31,
+      RELAYS = 0x32,
+      METADATA = 0x33,
+      CONFIRMATION = 0x34,
     }
-    case CertificateType.STAKE_DELEGATION: {
-      const data = Buffer.concat([
-        uint8_to_buf(certificate.type as Uint8_t),
-        path_to_buf(certificate.path),
-        hex_to_buf(certificate.poolKeyHashHex)
-      ])
+
+    const pool = certificate.pool
+    yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.POOL_PARAMS,
+      data: serializePoolInitialParams(pool),
+      expectedResponseLength: 0,
+    });
+
+    for (const owner of pool.owners) {
       yield send({
         p1: P1.STAGE_CERTIFICATES,
-        p2: P2.UNUSED,
-        data,
+        p2: P2.OWNERS,
+        data: serializePoolOwner(owner),
         expectedResponseLength: 0,
       });
-      break;
     }
-    case CertificateType.STAKE_POOL_REGISTRATION: {
-      // additional data for pool certificate
-      const enum P2 {
-        UNUSED = 0x00,
-        POOL_PARAMS = 0x30,
-        OWNERS = 0x31,
-        RELAYS = 0x32,
-        METADATA = 0x33,
-        CONFIRMATION = 0x34,
-      }
 
-      const data = Buffer.concat([
-        uint8_to_buf(certificate.type as Uint8_t),
-      ])
+    for (const relay of pool.relays) {
       yield send({
         p1: P1.STAGE_CERTIFICATES,
-        p2: P2.UNUSED,
-        data,
+        p2: P2.RELAYS,
+        data: serializePoolRelay(relay),
         expectedResponseLength: 0,
       });
-
-      const pool = certificate.pool
-      yield send({
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.POOL_PARAMS,
-        data: cardano.serializePoolInitialParams(pool),
-        expectedResponseLength: 0,
-      });
-
-      for (const owner of pool.owners) {
-        yield send({
-          p1: P1.STAGE_CERTIFICATES,
-          p2: P2.OWNERS,
-          data: cardano.serializePoolOwner(owner),
-          expectedResponseLength: 0,
-        });
-      }
-
-      for (const relay of pool.relays) {
-        yield send({
-          p1: P1.STAGE_CERTIFICATES,
-          p2: P2.RELAYS,
-          data: cardano.serializePoolRelay(relay),
-          expectedResponseLength: 0,
-        });
-      }
-
-      yield send({
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.METADATA,
-        data: cardano.serializePoolMetadata(pool.metadata),
-        expectedResponseLength: 0,
-      });
-
-      yield send({
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.CONFIRMATION,
-        data: Buffer.alloc(0),
-        expectedResponseLength: 0,
-      });
-
-      break;
     }
-    default:
-      unreachable(certificate)
+
+    yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.METADATA,
+      data: serializePoolMetadata(pool.metadata),
+      expectedResponseLength: 0,
+    });
+
+    yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.CONFIRMATION,
+      data: Buffer.alloc(0),
+      expectedResponseLength: 0,
+    });
   }
 }
 
@@ -269,44 +183,39 @@ function* signTx_addWithdrawal(
   const enum P2 {
     UNUSED = 0x00
   }
-  const data = Buffer.concat([
-    uint64_to_buf(withdrawal.amount),
-    path_to_buf(withdrawal.path),
-  ]);
+
   yield send({
     p1: P1.STAGE_WITHDRAWALS,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxWithdrawal(withdrawal),
     expectedResponseLength: 0,
   });
 }
 
 function* signTx_setFee(
-  feeStr: Uint64_str
+  fee: Uint64_str
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
-  const data = Buffer.concat([uint64_to_buf(feeStr)]);
   yield send({
     p1: P1.STAGE_FEE,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxFee(fee),
     expectedResponseLength: 0,
   });
 }
 
 function* signTx_setTtl(
-  ttlStr: Uint64_str
+  ttl: Uint64_str
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
-  const data = Buffer.concat([uint64_to_buf(ttlStr)]);
   yield send({
     p1: P1.STAGE_TTL,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxTtl(ttl),
     expectedResponseLength: 0,
   });
 }
@@ -317,12 +226,10 @@ function* signTx_setMetadata(
   const enum P2 {
     UNUSED = 0x00
   }
-  const data = utils.hex_to_buf(metadataHashHex);
-
   yield send({
     p1: P1.STAGE_METADATA,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxMetadata(metadataHashHex),
     expectedResponseLength: 0,
   });
 }
@@ -333,11 +240,10 @@ function* signTx_setValidityIntervalStart(
   const enum P2 {
     UNUSED = 0x00
   }
-  const data = Buffer.concat([uint64_to_buf(validityIntervalStartStr)]);
   yield send({
     p1: P1.STAGE_VALIDITY_INTERVAL_START,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxValidityStart(validityIntervalStartStr),
   });
 }
 
@@ -368,11 +274,10 @@ function* signTx_getWitness(
     UNUSED = 0x00
   }
 
-  const data = Buffer.concat([path_to_buf(path)]);
   const response = yield send({
     p1: P1.STAGE_WITNESSES,
     p2: P2.UNUSED,
-    data,
+    data: serializeTxWitnessRequest(path),
     expectedResponseLength: 64,
   });
   return {

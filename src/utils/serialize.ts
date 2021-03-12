@@ -1,9 +1,9 @@
 
 import basex from "base-x";
 
-import { isHexString, isUint8, isUint16, isUint32, isUint64str, isValidPath } from "./parseUtils";
-import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str } from "./types/internal";
-import { assert } from './utils'
+import type { FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str } from "../types/internal";
+import { assert } from './assert'
+import { isHexString, isUint8, isUint16, isUint32, isUint64str, isValidPath } from "./parse";
 
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");

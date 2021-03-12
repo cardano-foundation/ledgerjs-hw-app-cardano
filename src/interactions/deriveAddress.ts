@@ -1,8 +1,8 @@
-import cardano from "../cardano";
 import type { ParsedAddressParams, Version } from "../types/internal";
 import type { DerivedAddress, } from '../types/public'
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
+import { serializeAddressParams } from "./serialization/addressParams";
 
 const send = (params: {
   p1: number,
@@ -18,12 +18,10 @@ export function* deriveAddress(
   const P1_RETURN = 0x01;
   const P2_UNUSED = 0x00;
 
-  const data = cardano.serializeAddressParams(addressParams);
-
   const response = yield send({
     p1: P1_RETURN,
     p2: P2_UNUSED,
-    data: data,
+    data: serializeAddressParams(addressParams),
   });
 
   return {

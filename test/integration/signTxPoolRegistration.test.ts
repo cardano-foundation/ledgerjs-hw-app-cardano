@@ -2,7 +2,7 @@ import chai, { expect } from "chai"
 import chaiAsPromised from "chai-as-promised"
 
 import type Ada from "../../src/Ada";
-import { TxErrors } from "../../src/Ada";
+import { InvalidDataReason } from "../../src/Ada";
 import { getAda, Networks } from "../test_utils";
 import {
   certificates,
@@ -223,7 +223,7 @@ describe("signTxPoolRegistrationReject", async () => {
       metadataHashHex: null
     });
 
-    await expect(promise).to.be.rejectedWith(TxErrors.POOL_REGISTRATION_INVALID_MARGIN);
+    await expect(promise).to.be.rejectedWith(InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN);
   });
 
   it("Should reject pool registration along with other certificates", async () => {
@@ -242,7 +242,7 @@ describe("signTxPoolRegistrationReject", async () => {
       metadataHashHex: null
     });
 
-    await expect(promise).to.be.rejectedWith(TxErrors.CERTIFICATES_COMBINATION_FORBIDDEN);
+    await expect(promise).to.be.rejectedWith(InvalidDataReason.CERTIFICATES_COMBINATION_FORBIDDEN);
   });
 
   it("Should reject pool registration along with a withdrawal", async () => {
@@ -259,6 +259,6 @@ describe("signTxPoolRegistrationReject", async () => {
       metadataHashHex: null
     });
 
-    await expect(promise).to.be.rejectedWith(TxErrors.WITHDRAWALS_FORBIDDEN);
+    await expect(promise).to.be.rejectedWith(InvalidDataReason.WITHDRAWALS_FORBIDDEN);
   });
 });
