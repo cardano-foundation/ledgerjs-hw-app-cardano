@@ -1,3 +1,7 @@
+/**
+ * Reason for throwing [[InvalidData]] error.
+ * @category Errors
+ */
 export enum InvalidDataReason {
 
   GET_EXT_PUB_KEY_PATHS_NOT_ARRAY = "ext pub key paths not an array",
