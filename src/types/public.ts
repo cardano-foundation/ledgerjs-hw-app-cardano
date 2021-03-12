@@ -13,7 +13,8 @@ export type bigint_like = number | bigint | string
 
 /**
  *  Address type (as defined by the Cardano spec)
- *  @category Blockchain constants
+ *  @category Addresses
+ *  @see [[DeviceOwnedAddress]]
  */
 export enum AddressType {
     BASE = 0b0000,
@@ -25,7 +26,8 @@ export enum AddressType {
 
 /** 
  * Certificate type (as defined by the Cardano spec)
- * @category Blockchain constants
+ * @category Shelley
+ * @see [[Certificate]]
  */
 export enum CertificateType {
     STAKE_REGISTRATION = 0,
@@ -36,7 +38,8 @@ export enum CertificateType {
 
 /**
  * Relay type (as defined by the Cardano spec)
- * @category Blockchain constants
+ * @category Pool registration certificate
+ * @see [[Relay]]
  */
 export const enum RelayType {
     SingleHostAddr = 0,
@@ -53,7 +56,6 @@ export const enum RelayType {
  * ```
  * 
  * @see [[BIP32Path]]
- * @category Blockchain constants
  */
 export const HARDENED = 0x80000000;
 
@@ -241,17 +243,18 @@ export enum TxOutputDestinationType {
 
 /**
  * Address now owned by the device. Device will show it during transaction review
- * @category Basic types
+ * @category Addresses
  * @see [[TxOutputDestination]]
  */
 export type ThirdPartyAddressParams = {
-    /** Byron or shelley address, in raw hex format (without bech32/base58 encoding) */
+    /** Byron or Shelley address in raw hex format (without bech32/base58 encoding) */
     addressHex: string
 }
 
 /**
  * Represents output address.
  * @category Addresses
+ * @see [[TxOutputDestinationType]]
  * @see [[Transaction]]
  */
 export type TxOutputDestination = {
@@ -274,7 +277,8 @@ export type BlockchainPointer = {
 };
 
 /**
- * Represents pool owner. Note that for now this is not in tagged-enum format and the two options are incompatible
+ * Represents pool owner.
+ * Note that for now this is not in tagged-enum format and the two options are mutually exclusive.
  * @category Pool registration certificate
  * @see [[PoolRegistrationParams]]
  */
@@ -287,7 +291,7 @@ export type PoolOwnerParams = {
 
 /**
  * Represents pool relay.
- * Note that at least one of `ipv4` and `ipv4` must be supplied
+ * Note that at least one of `ipv4` and `ipv6` must be supplied
  * @category Pool registration certificate
  * @see [[Relay]]
  */
@@ -418,6 +422,7 @@ export type StakeDelegationParams = {
 /**
  * Certificate. Can be one of multiple options.
  * @category Shelley
+ * @see [[CertificateType]]
  * @see [[Transaction]]
  */
 export type Certificate = {
@@ -459,6 +464,7 @@ export type Flags = {
  * Device app version
  * @category Basic types
  * @see [[Ada.getVersion]]
+ * @see [[DeviceCompatibility]]
  * */
 export type Version = {
     major: number,
@@ -537,6 +543,7 @@ export type Witness = {
 
 /**
  * Result of signing a transaction.
+ * @category Basic types
  * @see [[Ada.signTransaction]]
  */
 export type SignedTransactionData = {

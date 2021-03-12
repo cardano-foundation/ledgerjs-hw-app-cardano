@@ -14,8 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//import type Transport from "@ledgerhq/hw-transport";
-
+import type Transport from "@ledgerhq/hw-transport";
 import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, Transaction, Version } from 'types/public';
 
 import { DeviceStatusCodes, DeviceStatusError } from './errors';
@@ -70,9 +69,6 @@ function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
 /** @ignore */
 export type SendFn = (params: SendParams) => Promise<Buffer>;
 
-/** @ignore */
-export type Transport = any
-
 // It can happen that we try to send a message to the device
 // when the device thinks it is still in a middle of previous ADPU stream.
 // This happens mostly if host does abort communication for some reason
@@ -118,8 +114,12 @@ async function interact<T>(
   return cursor.value;
 }
 
-
+/**
+ * Main API endpoint
+ * @category Main
+ */
 export class Ada {
+  /** @ignore */
   transport: Transport;
   /** @ignore */
   _send: SendFn;
@@ -305,7 +305,7 @@ export class Ada {
 
 /**
  * Response to [[Ada.getVersion]] call
- * @category API request/response
+ * @category Main
  */
 export type GetVersionResponse = {
   version: Version
@@ -314,7 +314,7 @@ export type GetVersionResponse = {
 
 /**
  * Get multiple public keys ([[Ada.getExtendedPublicKeys]]) request data
- * @category API request/response
+ * @category Main
  * @see [[GetExtendedPublicKeysResponse]]
  */
 export type GetExtendedPublicKeysRequest = {
@@ -324,14 +324,14 @@ export type GetExtendedPublicKeysRequest = {
 
 /**
  * [[Ada.getExtendedPublicKeys]] response data
- * @category API request/response
+ * @category Main
  * @see [[GetExtendedPublicKeysRequest]]
  */
 export type GetExtendedPublicKeysResponse = Array<ExtendedPublicKey>
 
 /**
  * Get single public keys ([[Ada.getExtendedPublicKey]]) request data
- * @category API request/response
+ * @category Main
  * @see [[GetExtendedPublicKeysResponse]]
  */
 export type GetExtendedPublicKeyRequest = {
@@ -340,14 +340,14 @@ export type GetExtendedPublicKeyRequest = {
 }
 /**
  * Get single public key ([[Ada.getExtendedPublicKey]]) response data
- * @category API request/response
+ * @category Main
  * @see [[GetExtendedPublicKeysResponse]]
  */
 export type GetExtendedPublicKeyResponse = ExtendedPublicKey
 
 /**
  * Derive address ([[Ada.deriveAddress]]) request data
- * @category API request/response
+ * @category Main
  * @see [[DeriveAddressResponse]]
  */
 export type DeriveAddressRequest = {
@@ -356,34 +356,34 @@ export type DeriveAddressRequest = {
 }
 /**
  * Derive address ([[Ada.deriveAddress]]) response data
- * @category API request/response
+ * @category Main
  * @see [[DeriveAddressRequest]]
  */
 export type DeriveAddressResponse = DerivedAddress
 
 /**
  * Show address on derivce ([[Ada.showAddress]]) request data
- * @category API request/response
+ * @category Main
  */
 export type ShowAddressRequest = DeriveAddressRequest
 
 /**
  * Get device serial number ([[Ada.getSerial]]) response data
- * @category API request/response
+ * @category Main
  */
 export type GetSerialResponse = Serial
 
 
 /**
  * Sign transaction ([[Ada.signTransaction]]) request data
- * @category API request/response
+ * @category Main
  * @see [[SignTransactionResponse]]
  */
 export type SignTransactionRequest = Transaction
 
 /**
  * Sign transaction ([[Ada.signTransaction]]) response data
- * @category API request/response
+ * @category Main
  * @see [[SignTransactionRequest]]
  */
 export type SignTransactionResponse = SignedTransactionData
@@ -395,7 +395,6 @@ export default Ada;
 
 /**
  * Default Cardano networks
- * @category Basic types
  * @see [[Network]]
  */
 export const Networks = {

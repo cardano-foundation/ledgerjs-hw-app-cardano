@@ -21,6 +21,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.12.0",
+    "@types/ledgerhq__hw-transport": "^4.21.3",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "base-x": "^3.0.5",
@@ -70,6 +71,7 @@
     "clean": "bash ./script/clean.sh",
     "build": "bash ./script/build.sh",
     "watch": "bash ./script/watch.sh",
+    "gen-docs": "yarn typedoc",
     "prepublish": "yarn run clean && yarn run build",
     "run-example": "yarn ts-node -P example-node/tsconfig.json example-node/index.ts",
     "device-self-test": "mocha --timeout 3600000 -r ts-node/register test/device-self-test/**/*.test.ts",
