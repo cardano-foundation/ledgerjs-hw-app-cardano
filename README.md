@@ -22,5 +22,6 @@ Note that for these tests it is advisable to install the developer build of the 
 
 ### Documentation
 
-- available calls documented in [docs folder](/docs) or (https://vacuumlabs.github.io/ledgerjs-cardano-shelley/index.html)
+- you can build the docs by running `yarn gen-docs` and then navigate to docs_generated/index.html
+- generated docs can also be found at (https://vacuumlabs.github.io/ledgerjs-cardano-shelley)
 - [CHANGELOG](CHANGELOG.md)

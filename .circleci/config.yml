@@ -7,9 +7,7 @@ jobs:
   build_and_test:
     docker:
       - image: cimg/node:12.13.0
-
     working_directory: ~/repo
-
     steps:
       - checkout
       - run:
@@ -36,8 +34,67 @@ jobs:
       - run:
           name: Audit dependencies
           command: yarn audit
+
+  update_docs:
+    docker:
+      - image: cimg/node:12.13.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install dependencies
+          command: yarn install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+
+      - run:
+          name: Build custom typedoc
+          command: yarn prepare
+      - run:
+          name: Get ledgerjs library version
+          command: |
+            LEDGERJS_PACKAGE_VERSION=$(cat package.json \
+            | grep version \
+            | head -1 \
+            | awk -F: '{ print $2 }' \
+            | sed 's/[",]//g')
+            echo $LEDGERJS_PACKAGE_VERSION > ledgerjs_version.tmp
+      - run:
+          name: Build docs
+          command: yarn typedoc --out docs_build/$(cat ledgerjs_version.tmp)
+
+      - run:
+          name: Generate redirect to current version of docs
+          command: echo '<!DOCTYPE html><html><head><meta http-equiv = "refresh" content = "1; url = ./'$(cat ledgerjs_version.tmp)'" /></head><body></body></html>' > docs_build/index.html
+
+      - add_ssh_keys:
+          fingerprints:
+            - 86:62:3c:0a:fb:47:d3:70:45:54:a7:99:58:b8:8e:32
+      - run:
+          name: Setup git
+          command: |
+            git config user.email "ci-build@vacuumlabs.com"
+            git config user.name "ci-build@vacuumlabs.com"
+      - run:
+          name: Deploy docs
+          command: yarn gh-pages --add --dist docs_build --message "[ci skip] Docs for v$(cat ledgerjs_version.tmp)"
+
+
 workflows:
   version: 2
   main_workflow:
     jobs:
       - build_and_test
+      - update_docs:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only:
+                - develop # TODO update to master once ts refactor is done
