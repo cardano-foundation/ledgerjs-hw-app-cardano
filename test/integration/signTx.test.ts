@@ -7,7 +7,6 @@ import {
   inputs,
   outputs,
   resultsAllegra,
-  resultsByron,
   resultsMary,
   resultsShelley,
   sampleBigIntStr,
@@ -15,6 +14,7 @@ import {
   sampleMetadataHashHex,
   sampleTtl,
   sampleValidityIntervalStartStr,
+  testsByron,
   withdrawals,
 } from "./__fixtures__/signTx";
 
@@ -34,41 +34,12 @@ describe("signTxOrdinaryByron", async () => {
     await (ada as any).t.close();
   });
 
-  const byronBase = {
-    inputs: [inputs.utxoByron],
-    fee: sampleFee,
-    ttl: sampleTtl,
-    certificates: [],
-    withdrawals: [],
-    metadataHashHex: null
+  for (const { testname, tx, result: expected } of testsByron) {
+    it(testname, async () => {
+      const response = await ada.signTransaction(tx)
+      expect(response).to.deep.equal(expected);
+    })
   }
-
-  it("Should correctly sign tx without change address with Byron mainnet output", async () => {
-    const response = await ada.signTransaction({
-      ...byronBase,
-      network: Networks.Mainnet,
-      outputs: [outputs.externalByronMainnet],
-    });
-    expect(response).to.deep.equal(resultsByron.noChangeByronMainnet);
-  });
-
-  it("Should correctly sign tx without change address with Byron Daedalus mainnet output", async () => {
-    const response = await ada.signTransaction({
-      ...byronBase,
-      network: Networks.Mainnet,
-      outputs: [outputs.externalByronDaedalusMainnet],
-    });
-    expect(response).to.deep.equal(resultsByron.noChangeByronDaedalusMainnet);
-  });
-
-  it("Should correctly sign tx without change address with Byron testnet output", async () => {
-    const response = await ada.signTransaction({
-      ...byronBase,
-      network: Networks.Testnet,
-      outputs: [outputs.externalByronTestnet],
-    });
-    expect(response).to.deep.equal(resultsByron.noChangeByronTestnet);
-  });
 });
 
 // ========================================   SHELLEY   ========================================

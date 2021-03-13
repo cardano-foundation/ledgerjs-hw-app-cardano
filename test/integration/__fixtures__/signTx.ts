@@ -1,4 +1,4 @@
-import type { Certificate, TxOutput, Withdrawal } from "../../../src/Ada";
+import { Certificate, Networks, SignedTransactionData, Transaction, TxOutput, Withdrawal } from "../../../src/Ada";
 import { AddressType, CertificateType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
@@ -23,16 +23,17 @@ export const inputs = {
   },
 };
 
+const base58_to_hex = (str: string): string => utils.buf_to_hex(utils.base58_decode(str))
+const bech32_to_hex = (str: string): string => utils.buf_to_hex(utils.bech32_decodeAddress(str))
+
 export const outputs: Record<string, TxOutput> = {
   externalByronMainnet: {
     amount: 3003112,
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.base58_decode(
-            "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
-          )
+        addressHex: base58_to_hex(
+          "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
         ),
       }
     }
@@ -43,10 +44,8 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.base58_decode(
-            "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
-          )
+        addressHex: base58_to_hex(
+          "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
         ),
       }
     }
@@ -56,10 +55,8 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.base58_decode(
-            "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
-          )
+        addressHex: base58_to_hex(
+          "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
         ),
       }
     }
@@ -69,11 +66,9 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.bech32_decodeAddress(
-            "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
-          )
-        ),
+        addressHex: bech32_to_hex(
+          "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
+        )
       }
     }
 
@@ -83,10 +78,8 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.bech32_decodeAddress(
-            "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
-          )
+        addressHex: bech32_to_hex(
+          "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
         ),
       }
     }
@@ -164,10 +157,8 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.bech32_decodeAddress(
-            "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
-          )
+        addressHex: bech32_to_hex(
+          "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
         ),
       }
     },
@@ -188,10 +179,8 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.bech32_decodeAddress(
-            "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
-          )
+        addressHex: bech32_to_hex(
+          "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
         ),
       }
     },
@@ -249,10 +238,8 @@ export const outputs: Record<string, TxOutput> = {
     destination: {
       type: TxOutputDestinationType.ThirdParty,
       params: {
-        addressHex: utils.buf_to_hex(
-          utils.bech32_decodeAddress(
-            "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
-          )
+        addressHex: bech32_to_hex(
+          "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
         ),
       }
     },
@@ -306,45 +293,84 @@ export const sampleTtl = 10;
 export const sampleValidityIntervalStartStr = "47";
 export const sampleBigIntStr = "24103998870869519";
 
-export const resultsByron = {
-  noChangeByronMainnet: {
-    /*
-     * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
-     */
-    txHashHex:
-      "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
-    witnesses: [
-      {
-        path: str_to_path("44'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "9c12b678a047bf3148e867d969fba4f9295042c4fff8410782425a356820c79e7549de" +
-          "798f930480ba83615a5e2a19389c795a3281a59077b7d37cd5a071a606",
-      },
-    ],
+const byronBase = {
+  inputs: [inputs.utxoByron],
+  fee: 42,
+  ttl: 10,
+  certificates: [],
+  withdrawals: [],
+  metadataHashHex: null
+}
+
+export type TestcaseByron = {
+  testname: string
+  tx: Transaction
+  result: SignedTransactionData
+}
+
+export const testsByron: TestcaseByron[] = [
+  {
+    testname: "Should correctly sign tx without change address with Byron mainnet output",
+    tx: {
+      ...byronBase,
+      network: Networks.Mainnet,
+      outputs: [outputs.externalByronMainnet],
+    },
+    result: {
+      /*
+       * txBody: a400818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a
+       */
+      txHashHex:
+        "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
+      witnesses: [
+        {
+          path: str_to_path("44'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "9c12b678a047bf3148e867d969fba4f9295042c4fff8410782425a356820c79e7549de" +
+            "798f930480ba83615a5e2a19389c795a3281a59077b7d37cd5a071a606",
+        },
+      ],
+    }
   },
-  noChangeByronDaedalusMainnet: {
-    txHashHex:
-      "3cf35b4d9bfa87b8eab5de659e0520bdac37b0de0b3840c1d8abd683330a9756",
-    witnesses: [
-      {
-        path: str_to_path("44'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "fdca7969a3e8bc091c9ee32c04732f79bb7c0091f1796fd2c0e1de8aa8547a00457d50d0576f4dd421baf754499cf0e77584e848e3547addd5d5b7167597a307",
-      },
-    ],
+  {
+    testname: "Should correctly sign tx without change address with Byron Daedalus mainnet output",
+    tx: {
+      ...byronBase,
+      network: Networks.Mainnet,
+      outputs: [outputs.externalByronDaedalusMainnet],
+    },
+    result: {
+      txHashHex:
+        "3cf35b4d9bfa87b8eab5de659e0520bdac37b0de0b3840c1d8abd683330a9756",
+      witnesses: [
+        {
+          path: str_to_path("44'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "fdca7969a3e8bc091c9ee32c04732f79bb7c0091f1796fd2c0e1de8aa8547a00457d50d0576f4dd421baf754499cf0e77584e848e3547addd5d5b7167597a307",
+        },
+      ],
+    }
   },
-  noChangeByronTestnet: {
-    txHashHex:
-      "e2319ee8317ac537af4c2c3322aaf9fb6c64a95e3921ad75ab91b4f5b5306963",
-    witnesses: [
-      {
-        path: str_to_path("44'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "224d103185f4709f7b749339ff7ba432d50ca5cb742678847f5e574858cf7dda7ed402399a9ddba81ecd731b6f939ba07a247cd570dcd543f83a9aeadc4f9603",
-      },
-    ],
-  },
-};
+  {
+    testname: "Should correctly sign tx without change address with Byron testnet output",
+    tx: {
+      ...byronBase,
+      network: Networks.Testnet,
+      outputs: [outputs.externalByronTestnet],
+    },
+    result: {
+      txHashHex:
+        "e2319ee8317ac537af4c2c3322aaf9fb6c64a95e3921ad75ab91b4f5b5306963",
+      witnesses: [
+        {
+          path: str_to_path("44'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "224d103185f4709f7b749339ff7ba432d50ca5cb742678847f5e574858cf7dda7ed402399a9ddba81ecd731b6f939ba07a247cd570dcd543f83a9aeadc4f9603",
+        },
+      ],
+    },
+  }
+]
 
 export const resultsShelley = {
   noChangeShelley: {
