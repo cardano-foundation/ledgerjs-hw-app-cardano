@@ -588,37 +588,66 @@ export const resultsShelley = {
   },
 };
 
-export const resultsAllegra = {
-  noTtlNoValidityIntervalStart: {
-    /*
-     * txbody: a300818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a
-     */
-    txHashHex:
-      "971dc8ccbc34fde78028b9642352ac84b6c8867cfd72ca9bc92d68203d7ed86f",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "6dc4da7a0bee07e4ecc687b0d1b9e73d772dfb6a09b2bf435fe1e3d481ed8214f8d751ceff0e9fa41ef0ad7318ea9ca561c9b773e5673adb8049569c380f5301",
-      },
-    ],
-  },
+const allegraBase = {
+  network: Networks.Mainnet,
+  inputs: [inputs.utxoShelley],
+  outputs: [outputs.externalShelley],
+  fee: sampleFee,
+  //ttl: null,
+  certificates: [],
+  withdrawals: [],
+  metadataHashHex: null,
+  //validityIntervalStart: null
+}
 
-  noTtlYesValidityIntervalStart: {
-    /*
-     * txbody: a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a08182f
-     */
-    txHashHex:
-      "bfe53d40c5eb0cd04b53d555b85be4474168adbc1d8f82cf5c9792854234cf70",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "b1bc7a4b110523f8b0a1a3aa0ae0f45a718faf7beb648a021d0d777755ab214ba1b079d79d8517a275ebb74c79aa244600f0877c611ca00383d67fc447074003",
-      },
-    ],
+export type TestcaseAllegra = {
+  testname: string
+  tx: Transaction
+  txBody: string,
+  result: SignedTransactionData
+}
+export const testsAllegra: TestcaseAllegra[] = [
+  {
+    testname: "Transaction with no ttl and no validity interval start",
+    tx: {
+      ...allegraBase,
+      ttl: null,
+      validityIntervalStart: null
+    },
+    txBody: "a300818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a",
+    result: {
+      txHashHex:
+        "971dc8ccbc34fde78028b9642352ac84b6c8867cfd72ca9bc92d68203d7ed86f",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "6dc4da7a0bee07e4ecc687b0d1b9e73d772dfb6a09b2bf435fe1e3d481ed8214f8d751ceff0e9fa41ef0ad7318ea9ca561c9b773e5673adb8049569c380f5301",
+        },
+      ],
+    }
   },
-};
+  {
+    testname: "Transaction with no ttl, but with validity interval start",
+    tx: {
+      ...allegraBase,
+      ttl: null,
+      validityIntervalStart: 47,
+    },
+    txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a08182f",
+    result: {
+      txHashHex:
+        "bfe53d40c5eb0cd04b53d555b85be4474168adbc1d8f82cf5c9792854234cf70",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "b1bc7a4b110523f8b0a1a3aa0ae0f45a718faf7beb648a021d0d777755ab214ba1b079d79d8517a275ebb74c79aa244600f0877c611ca00383d67fc447074003",
+        },
+      ],
+    },
+  }
+];
 
 export const resultsMary = {
   multiassetOneToken: {

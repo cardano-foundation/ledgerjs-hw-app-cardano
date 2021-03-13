@@ -6,7 +6,6 @@ import {
   certificates,
   inputs,
   outputs,
-  resultsAllegra,
   resultsMary,
   resultsShelley,
   sampleBigIntStr,
@@ -14,6 +13,7 @@ import {
   sampleMetadataHashHex,
   sampleTtl,
   sampleValidityIntervalStartStr,
+  testsAllegra,
   testsByron,
   withdrawals,
 } from "./__fixtures__/signTx";
@@ -201,37 +201,12 @@ describe("signTxOrdinaryAllegra", async () => {
     await (ada as any).t.close();
   });
 
-  const allegraBase = {
-    network: Networks.Mainnet,
-    inputs: [inputs.utxoShelley],
-    outputs: [outputs.externalShelley],
-    fee: sampleFee,
-    //ttl: null,
-    certificates: [],
-    withdrawals: [],
-    metadataHashHex: null,
-    //validityIntervalStart: null
+  for (const { testname, tx, result: expected } of testsAllegra) {
+    it(testname, async () => {
+      const response = await ada.signTransaction(tx)
+      expect(response).to.deep.equal(expected);
+    })
   }
-
-  it("Transaction with no ttl and no validity interval start", async () => {
-    const response = await ada.signTransaction({
-      ...allegraBase,
-      ttl: null,
-      validityIntervalStart: null
-    });
-    expect(response).to.deep.equal(resultsAllegra.noTtlNoValidityIntervalStart);
-  });
-
-  it("Transaction with no ttl, but with validity interval start", async () => {
-    const response = await ada.signTransaction({
-      ...allegraBase,
-      ttl: null,
-      validityIntervalStart: sampleValidityIntervalStartStr
-    });
-    expect(response).to.deep.equal(
-      resultsAllegra.noTtlYesValidityIntervalStart
-    );
-  });
 });
 
 // ========================================   MARY   ========================================
