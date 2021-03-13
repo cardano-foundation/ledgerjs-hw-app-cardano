@@ -1,19 +1,13 @@
 import { expect } from "chai";
 
 import type Ada from "../../src/Ada";
-import { getAda, Networks } from "../test_utils";
+import { getAda } from "../test_utils";
 import {
-  certificates,
-  inputs,
-  outputs,
-  resultsShelley,
-  sampleFee,
-  sampleMetadataHashHex,
-  sampleTtl,
   testsAllegra,
   testsByron,
   testsMary,
-  withdrawals,
+  testsShelleyOther,
+  testsShelleyOutputs,
 } from "./__fixtures__/signTx";
 
 // ========================================   BYRON   ========================================
@@ -53,133 +47,19 @@ describe("signTxOrdinaryShelley", async () => {
     await (ada as any).t.close();
   });
 
-  const shelleyBase = {
-    network: Networks.Mainnet,
-    inputs: [inputs.utxoShelley],
-    outputs: [outputs.externalByronMainnet],
-    fee: sampleFee,
-    ttl: sampleTtl,
-    certificates: [],
-    withdrawals: [],
-    metadataHashHex: null
+  for (const { testname, tx, result: expected } of testsShelleyOutputs) {
+    it(testname, async () => {
+      const response = await ada.signTransaction(tx)
+      expect(response).to.deep.equal(expected);
+    })
   }
 
-  it("Should correctly sign tx without outputs", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      outputs: [],
-    });
-    expect(response).to.deep.equal(resultsShelley.noOutputs);
-  });
-
-  it("Should correctly sign tx without change address", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      outputs: [outputs.externalShelley],
-    });
-    expect(response).to.deep.equal(resultsShelley.noChangeShelley);
-  });
-
-  it("Should correctly sign tx without change address with Shelley scripthash output", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      network: Networks.Testnet,
-      outputs: [outputs.externalShelleyScripthash],
-    });
-    expect(response).to.deep.equal(resultsShelley.noChangeShelleyScripthash);
-  });
-
-  it("Should correctly sign tx with change base address with staking path", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath as any],
-    });
-    expect(response).to.deep.equal(resultsShelley.changeBaseWithStakingPath);
-  });
-
-  it("Should correctly sign tx with change base address with staking key hash", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash as any],
-    });
-    expect(response).to.deep.equal(resultsShelley.changeBaseWithStakingKeyHash);
-  });
-
-  it("Should correctly sign tx with enterprise change address", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      outputs: [outputs.externalByronMainnet, outputs.internalEnterprise as any],
-    });
-    expect(response).to.deep.equal(resultsShelley.changeEnterprise);
-  });
-
-  it("Should correctly sign tx with pointer change address", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      outputs: [outputs.externalByronMainnet, outputs.internalPointer as any],
-    });
-    expect(response).to.deep.equal(resultsShelley.changePointer);
-  });
-
-  it("Should correctly sign tx with withdrawal", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      withdrawals: [withdrawals.withdrawal0],
-    });
-    expect(response).to.deep.equal(resultsShelley.withWithdrawal);
-  });
-
-  it("Should correctly sign tx with a stake registration certificate", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      certificates: [certificates.stakeRegistration],
-    });
-    expect(response).to.deep.equal(resultsShelley.withRegistrationCertificate);
-  });
-
-  it("Should correctly sign tx with a stake delegation certificate", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      certificates: [certificates.stakeDelegation],
-    });
-    expect(response).to.deep.equal(resultsShelley.withDelegationCertificate);
-  });
-
-  it("Should correctly sign tx with a stake deregistration certificate", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      certificates: [certificates.stakeDeregistration],
-    });
-    expect(response).to.deep.equal(
-      resultsShelley.withDeregistrationCertificate
-    );
-  });
-
-  it("Should correctly sign tx and filter out witnesses with duplicate paths", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      certificates: [certificates.stakeDeregistration, certificates.stakeDeregistration],
-    });
-    expect(response).to.deep.equal(resultsShelley.withDuplicateWitnessPaths);
-  });
-
-  it("Should correctly sign tx with nonempty metadata", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      metadataHashHex: sampleMetadataHashHex
-    });
-    expect(response).to.deep.equal(resultsShelley.withMetadata);
-  });
-
-  it("Should correctly sign tx with non-reasonable account and address", async () => {
-    const response = await ada.signTransaction({
-      ...shelleyBase,
-      inputs: [inputs.utxoNonReasonable],
-      outputs: [outputs.internalBaseWithStakingPathNonReasonable as any],
-      metadataHashHex: sampleMetadataHashHex
-    });
-    expect(response).to.deep.equal(resultsShelley.nonReasonable);
-  });
+  for (const { testname, tx, result: expected } of testsShelleyOther) {
+    it(testname, async () => {
+      const response = await ada.signTransaction(tx)
+      expect(response).to.deep.equal(expected);
+    })
+  }
 });
 
 // ========================================   ALLEGRA   ========================================
