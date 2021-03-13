@@ -6,15 +6,13 @@ import {
   certificates,
   inputs,
   outputs,
-  resultsMary,
   resultsShelley,
-  sampleBigIntStr,
   sampleFee,
   sampleMetadataHashHex,
   sampleTtl,
-  sampleValidityIntervalStartStr,
   testsAllegra,
   testsByron,
+  testsMary,
   withdrawals,
 } from "./__fixtures__/signTx";
 
@@ -225,50 +223,10 @@ describe("signTxOrdinaryMary", async () => {
     await (ada as any).t.close();
   });
 
-  const maryBase = {
-    network: Networks.Mainnet,
-    inputs: [inputs.utxoShelley],
-    //outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath as any],
-    fee: sampleFee,
-    ttl: sampleTtl,
-    certificates: [],
-    withdrawals: [],
-    metadataHashHex: null,
-    validityIntervalStart: sampleValidityIntervalStartStr
+  for (const { testname, tx, result: expected } of testsMary) {
+    it(testname, async () => {
+      const response = await ada.signTransaction(tx)
+      expect(response).to.deep.equal(expected);
+    })
   }
-
-  it("Mary era transaction with a multiasset output", async () => {
-    const response = await ada.signTransaction({
-      ...maryBase,
-      outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath as any],
-    });
-    expect(response).to.deep.equal(resultsMary.multiassetOneToken);
-  });
-
-  it("Mary era transaction with a complex multiasset output", async () => {
-    const response = await ada.signTransaction({
-      ...maryBase,
-      outputs: [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath as any],
-    });
-    expect(response).to.deep.equal(resultsMary.multiassetManyTokens);
-  });
-
-  it("Mary era transaction with big numbers", async () => {
-    const response = await ada.signTransaction({
-      ...maryBase,
-      outputs: [outputs.multiassetBigNumber as any],
-      fee: sampleBigIntStr,
-      ttl: sampleBigIntStr,
-      validityIntervalStart: sampleBigIntStr
-    });
-    expect(response).to.deep.equal(resultsMary.bigNumbersEverywhere);
-  });
-
-  it("Mary era transaction with a multiasset change output", async () => {
-    const response = await ada.signTransaction({
-      ...maryBase,
-      outputs: [outputs.externalShelley, outputs.multiassetChange as any],
-    });
-    expect(response).to.deep.equal(resultsMary.withMultiassetChange);
-  });
 });

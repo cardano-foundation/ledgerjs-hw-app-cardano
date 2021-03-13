@@ -649,64 +649,103 @@ export const testsAllegra: TestcaseAllegra[] = [
   }
 ];
 
-export const resultsMary = {
-  multiassetOneToken: {
-    /*
-     * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f
-     */
-    txHashHex:
-      "8502ab1a781627663e8bfcff54a58747e319da3bb592a3446fc35fa5d2f2fbe9",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "b48877586d90a249579a5f3994c3ad0c21c5f78960a04aadd182ca49c3b606f1d8a578edf17923188e4e0e40f191e019a5174081c092c458a82e9f0c1e1fae08",
-      },
-    ],
-  },
+const maryBase = {
+  network: Networks.Mainnet,
+  inputs: [inputs.utxoShelley],
+  //outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath as any],
+  fee: sampleFee,
+  ttl: sampleTtl,
+  certificates: [],
+  withdrawals: [],
+  metadataHashHex: null,
+  validityIntervalStart: sampleValidityIntervalStartStr
+}
 
-  multiassetManyTokens: {
-    /*
-     * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a00783862401904d2581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1487564247542686911182f8258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f
-     */
-    txHashHex:
-      "76e0af0eb9eb19b374d002b0eedbb9175eb3e5c5327db376be0ae94a4fcf4b84",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "562497549b44d34926598d8a6511c4b58da0cb8da77033b633983f2897dbd59f1d45a4bef987574d83ebe74a016ccab042d0462df813e86896db624d221a5207",
-      },
-    ],
-  },
+export type TestcaseMary = {
+  testname: string
+  tx: Transaction
+  txBody: string,
+  result: SignedTransactionData
+}
 
-  withMultiassetChange: {
-    /*
-     * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f3461114018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a08182f
-     */
-    txHashHex:
-      "75ef0b3ac08d56e8ca4a6d3a3de054ed028bad025b0fad3cbb351fc94e967bc5",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "f19c5f698d3d46dac99c83268d8b5154262c22f9599d38b5221b78d08cef8f5bb81de648a0c94d328b74e88c58d46535de289123f08a47a05a1c253980d6b80e",
-      },
-    ],
+export const testsMary: TestcaseMary[] = [
+  {
+    testname: "Mary era transaction with a multiasset output",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath],
+    },
+    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f",
+    result: {
+      txHashHex:
+        "8502ab1a781627663e8bfcff54a58747e319da3bb592a3446fc35fa5d2f2fbe9",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "b48877586d90a249579a5f3994c3ad0c21c5f78960a04aadd182ca49c3b606f1d8a578edf17923188e4e0e40f191e019a5174081c092c458a82e9f0c1e1fae08",
+        },
+      ],
+    },
   },
-
-  bigNumbersEverywhere: {
-    /*
-     * txbody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821b0055a275925d560fa1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1b0055a275925d560f021b0055a275925d560f031b0055a275925d560f081b0055a275925d560f
-     */
-    txHashHex:
-      "e60735a3cc71a8a3f89652797c3e650d6ed80059c0b59978c59858dcf6f8ca48",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/0/0"),
-        witnessSignatureHex:
-          "632cd935550a71c1e1869e6f5749ee4cb8c268cbe014138561fc2d1045b5b2be84526cfd5a6fea01de99bdf903fa17c79a58a832b5cdcb1c999bcbe995a56806",
-      },
-    ],
+  {
+    testname: "Mary era transaction with a complex multiasset output",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath],
+    },
+    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a00783862401904d2581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1487564247542686911182f8258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f",
+    result: {
+      txHashHex:
+        "76e0af0eb9eb19b374d002b0eedbb9175eb3e5c5327db376be0ae94a4fcf4b84",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "562497549b44d34926598d8a6511c4b58da0cb8da77033b633983f2897dbd59f1d45a4bef987574d83ebe74a016ccab042d0462df813e86896db624d221a5207",
+        },
+      ],
+    },
   },
-};
+  {
+    testname: "Mary era transaction with big numbers",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetBigNumber],
+      fee: sampleBigIntStr,
+      ttl: sampleBigIntStr,
+      validityIntervalStart: sampleBigIntStr
+    },
+    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821b0055a275925d560fa1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1b0055a275925d560f021b0055a275925d560f031b0055a275925d560f081b0055a275925d560f",
+    result: {
+      txHashHex:
+        "e60735a3cc71a8a3f89652797c3e650d6ed80059c0b59978c59858dcf6f8ca48",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "632cd935550a71c1e1869e6f5749ee4cb8c268cbe014138561fc2d1045b5b2be84526cfd5a6fea01de99bdf903fa17c79a58a832b5cdcb1c999bcbe995a56806",
+        },
+      ],
+    },
+  },
+  {
+    testname: "Mary era transaction with a multiasset change output",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.externalShelley, outputs.multiassetChange],
+    },
+    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f3461114018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a08182f",
+    result: {
+      txHashHex:
+        "75ef0b3ac08d56e8ca4a6d3a3de054ed028bad025b0fad3cbb351fc94e967bc5",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "f19c5f698d3d46dac99c83268d8b5154262c22f9599d38b5221b78d08cef8f5bb81de648a0c94d328b74e88c58d46535de289123f08a47a05a1c253980d6b80e",
+        },
+      ],
+    },
+  }
+]
