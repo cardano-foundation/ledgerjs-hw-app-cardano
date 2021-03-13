@@ -1,5 +1,5 @@
-import type { Certificate, MultiHostNameRelayParams, PoolMetadataParams, PoolOwnerParams, PoolRegistrationParams, Relay, SingleHostNameRelayParams, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
-import { CertificateType, InvalidDataReason, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
+import type { Certificate, MultiHostNameRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SingleHostNameRelayParams, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import { CertificateType, InvalidDataReason, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
 export const inputs: Record<string, TxInput> = {
@@ -86,27 +86,39 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
   }
 ]
 
-const stakingHashOwners: Record<string, PoolOwnerParams> = {
+const stakingHashOwners: Record<string, PoolOwner> = {
   owner0: {
-    stakingKeyHashHex:
-      "794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
+    type: PoolOwnerType.ThirdParty,
+    params: {
+      stakingKeyHashHex:
+        "794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
+    },
   },
   owner1: {
-    stakingKeyHashHex:
-      "0bd5d796f5e54866a14300ec2a18d706f7461b8f0502cc2a182bc88d",
+    type: PoolOwnerType.ThirdParty,
+    params: {
+      stakingKeyHashHex:
+        "0bd5d796f5e54866a14300ec2a18d706f7461b8f0502cc2a182bc88d",
+    }
   },
 };
 
-const stakingPathOwners: Record<string, PoolOwnerParams> = {
+const stakingPathOwners: Record<string, PoolOwner> = {
   owner0: {
-    stakingPath: str_to_path("1852'/1815'/0'/2/0"), // hash: 1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c
+    type: PoolOwnerType.DeviceOwned,
+    params: {
+      stakingPath: str_to_path("1852'/1815'/0'/2/0"), // hash: 1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c
+    }
   },
   owner1: {
-    stakingPath: str_to_path("1852'/1815'/0'/2/1"),
+    type: PoolOwnerType.DeviceOwned,
+    params: {
+      stakingPath: str_to_path("1852'/1815'/0'/2/1"),
+    }
   },
 };
 
-const poolOwnerVariationSet: Record<string, PoolOwnerParams[]> = {
+const poolOwnerVariationSet: Record<string, PoolOwner[]> = {
   noOwners: [],
   singleHashOwner: [stakingHashOwners.owner0],
   singlePathOwner: [stakingPathOwners.owner0],
