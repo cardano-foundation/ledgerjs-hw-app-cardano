@@ -276,7 +276,13 @@ export type BlockchainPointer = {
     certificateIndex: number,
 };
 
-
+/**
+ * Type of an owner in pool registration certificate.
+ * Ledger device needs to distinguish between owners which are third party
+ * and this device if one needs to sign pool registration certificate as an owner.
+ * @see [[PoolOwner]]
+ * @category Pool registration certificate
+ */
 export enum PoolOwnerType {
     ThirdParty = 'third_party',
     DeviceOwned = 'device_owned',
@@ -294,12 +300,22 @@ export type PoolOwner = {
     params: PoolOwnerDeviceOwnedParams
 }
 
-/** Pool owner is external party */
+/**
+ * Pool owner is external party
+ * @category Pool registration certificate
+ * @see [[PoolOwner]]
+ * @see [[PoolOwnerType]]
+ */
 export type PoolOwnerThirdPartyParams = {
     stakingKeyHashHex: string,
 }
 
-/** Pool owner is Ledger device. Supply staking key path which should sign the certificate */
+/**
+ * Pool owner is Ledger device. Supply staking key path which should sign the certificate
+ * @category Pool registration certificate
+ * @see [[PoolOwner]]
+ * @see [[PoolOwnerType]]
+ */
 export type PoolOwnerDeviceOwnedParams = {
     stakingPath: BIP32Path,
 };
