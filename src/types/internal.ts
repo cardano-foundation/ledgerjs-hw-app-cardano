@@ -102,24 +102,24 @@ export type ParsedPoolParams = {
 
 
 export type ParsedPoolOwner = {
-    type: PoolOwnerType.DeviceOwned,
+    type: PoolOwnerType.DEVICE_OWNED,
     path: ValidBIP32Path
 } | {
-    type: PoolOwnerType.ThirdParty
+    type: PoolOwnerType.THIRD_PARTY
     hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
 }
 
 export type ParsedPoolRelay = {
-    type: RelayType.SingleHostAddr,
+    type: RelayType.SINGLE_HOST_IP_ADDR,
     port: Uint16_t | null,
     ipv4: Buffer | null,
     ipv6: Buffer | null,
 } | {
-    type: RelayType.SingleHostName,
+    type: RelayType.SINGLE_HOST_HOSTNAME,
     port: Uint16_t | null,
     dnsName: VarlenAsciiString,
 } | {
-    type: RelayType.MultiHostName,
+    type: RelayType.MULTI_HOST,
     dnsName: VarlenAsciiString
 }
 

@@ -133,7 +133,7 @@ const signTransaction = async (appAda: Ada) => {
   const outputs: TxOutput[] = [
     {
       destination: {
-        type: TxOutputDestinationType.ThirdParty,
+        type: TxOutputDestinationType.THIRD_PARTY,
         params: {
           addressHex:
             "82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561",
@@ -143,7 +143,7 @@ const signTransaction = async (appAda: Ada) => {
     },
     {
       destination: {
-        type: TxOutputDestinationType.ThirdParty,
+        type: TxOutputDestinationType.THIRD_PARTY,
         params: {
           addressHex:
             "82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561",
@@ -179,7 +179,7 @@ const signTransaction = async (appAda: Ada) => {
     },
     {
       destination: {
-        type: TxOutputDestinationType.DeviceOwned,
+        type: TxOutputDestinationType.DEVICE_OWNED,
         params: {
           type: AddressType.BASE,
           params: {

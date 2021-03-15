@@ -1,4 +1,4 @@
-import type { Certificate, MultiHostNameRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, SingleHostNameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import type { Certificate, MultiHostRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
 import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
@@ -15,7 +15,7 @@ export const outputs: Record<string, TxOutput> = {
   external: {
     amount: "1",
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: utils.buf_to_hex(
           utils.bech32_decodeAddress(
@@ -96,14 +96,14 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
 
 const stakingHashOwners: Record<string, PoolOwner> = {
   owner0: {
-    type: PoolOwnerType.ThirdParty,
+    type: PoolOwnerType.THIRD_PARTY,
     params: {
       stakingKeyHashHex:
         "794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
     },
   },
   owner1: {
-    type: PoolOwnerType.ThirdParty,
+    type: PoolOwnerType.THIRD_PARTY,
     params: {
       stakingKeyHashHex:
         "0bd5d796f5e54866a14300ec2a18d706f7461b8f0502cc2a182bc88d",
@@ -113,13 +113,13 @@ const stakingHashOwners: Record<string, PoolOwner> = {
 
 const stakingPathOwners: Record<string, PoolOwner> = {
   owner0: {
-    type: PoolOwnerType.DeviceOwned,
+    type: PoolOwnerType.DEVICE_OWNED,
     params: {
       stakingPath: str_to_path("1852'/1815'/0'/2/0"), // hash: 1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c
     }
   },
   owner1: {
-    type: PoolOwnerType.DeviceOwned,
+    type: PoolOwnerType.DEVICE_OWNED,
     params: {
       stakingPath: str_to_path("1852'/1815'/0'/2/1"),
     }
@@ -137,7 +137,7 @@ const poolOwnerVariationSet: Record<string, PoolOwner[]> = {
 
 const relays: Record<string, Relay> = {
   singleHostIPV4Relay0: {
-    type: RelayType.SingleHostAddr,
+    type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
       portNumber: 3000,
       ipv4: "54.228.75.154", // "36e44b9a"
@@ -145,7 +145,7 @@ const relays: Record<string, Relay> = {
     },
   },
   singleHostIPV4Relay1: {
-    type: RelayType.SingleHostAddr,
+    type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
       portNumber: 4000,
       ipv4: "54.228.75.154", // "36e44b9a"
@@ -153,7 +153,7 @@ const relays: Record<string, Relay> = {
     },
   },
   singleHostIPV4RelayMissingPort: {
-    type: RelayType.SingleHostAddr,
+    type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
       portNumber: null,
       ipv4: "54.228.75.154", // "36e44b9a"
@@ -161,7 +161,7 @@ const relays: Record<string, Relay> = {
     },
   },
   singleHostIPV4RelayMissingIpv4: {
-    type: RelayType.SingleHostAddr,
+    type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
       portNumber: 3000,
       ipv4: null,
@@ -169,7 +169,7 @@ const relays: Record<string, Relay> = {
     },
   },
   singleHostIPV6Relay: {
-    type: RelayType.SingleHostAddr,
+    type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
       portNumber: 3000,
       ipv4: "54.228.75.155", // "36e44b9b"
@@ -177,37 +177,37 @@ const relays: Record<string, Relay> = {
     },
   },
   singleHostNameRelay: {
-    type: RelayType.SingleHostName,
+    type: RelayType.SINGLE_HOST_HOSTNAME,
     params: {
       portNumber: 3000,
       dnsName: "aaaa.bbbb.com",
     },
   },
   singleHostNameRelayMissingPort: {
-    type: RelayType.SingleHostName,
+    type: RelayType.SINGLE_HOST_HOSTNAME,
     params: {
       portNumber: null,
       dnsName: "aaaa.bbbb.com",
     },
   },
   singleHostNameRelayMissingDns: {
-    type: RelayType.SingleHostName,
+    type: RelayType.SINGLE_HOST_HOSTNAME,
     params: {
       portNumber: 3000,
       dnsName: null,
-    } as any as SingleHostNameRelayParams,
+    } as any as SingleHostHostnameRelayParams,
   },
   multiHostNameRelay: {
-    type: RelayType.MultiHostName,
+    type: RelayType.MULTI_HOST,
     params: {
       dnsName: "aaaa.bbbc.com",
     },
   },
   multiHostNameRelayMissingDns: {
-    type: RelayType.MultiHostName,
+    type: RelayType.MULTI_HOST,
     params: {
       dnsName: null,
-    } as any as MultiHostNameRelayParams,
+    } as any as MultiHostRelayParams,
   },
 };
 

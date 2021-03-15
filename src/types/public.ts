@@ -42,9 +42,9 @@ export enum CertificateType {
  * @see [[Relay]]
  */
 export const enum RelayType {
-    SingleHostAddr = 0,
-    SingleHostName = 1,
-    MultiHostName = 2,
+    SINGLE_HOST_IP_ADDR = 0,
+    SINGLE_HOST_HOSTNAME = 1,
+    MULTI_HOST = 2,
 }
 
 /**
@@ -236,9 +236,9 @@ export type TxOutput = {
  */
 export enum TxOutputDestinationType {
     /** For addresses not owned by the device */
-    ThirdParty = 'third_party',
+    THIRD_PARTY = 'third_party',
     /** For address owned by the device. Device will not show the address (unles it seems fishy) */
-    DeviceOwned = 'device_owned',
+    DEVICE_OWNED = 'device_owned',
 }
 
 /**
@@ -258,10 +258,10 @@ export type ThirdPartyAddressParams = {
  * @see [[Transaction]]
  */
 export type TxOutputDestination = {
-    type: TxOutputDestinationType.ThirdParty
+    type: TxOutputDestinationType.THIRD_PARTY
     params: ThirdPartyAddressParams
 } | {
-    type: TxOutputDestinationType.DeviceOwned
+    type: TxOutputDestinationType.DEVICE_OWNED
     params: DeviceOwnedAddress
 }
 
@@ -284,8 +284,8 @@ export type BlockchainPointer = {
  * @category Pool registration certificate
  */
 export enum PoolOwnerType {
-    ThirdParty = 'third_party',
-    DeviceOwned = 'device_owned',
+    THIRD_PARTY = 'third_party',
+    DEVICE_OWNED = 'device_owned',
 }
 /**
  * Represents pool owner.
@@ -293,10 +293,10 @@ export enum PoolOwnerType {
  * @see [[PoolRegistrationParams]]
  */
 export type PoolOwner = {
-    type: PoolOwnerType.ThirdParty
+    type: PoolOwnerType.THIRD_PARTY
     params: PoolOwnerThirdPartyParams
 } | {
-    type: PoolOwnerType.DeviceOwned
+    type: PoolOwnerType.DEVICE_OWNED
     params: PoolOwnerDeviceOwnedParams
 }
 
@@ -326,7 +326,7 @@ export type PoolOwnerDeviceOwnedParams = {
  * @category Pool registration certificate
  * @see [[Relay]]
  */
-export type SingleHostIPRelayParams = {
+export type SingleHostIpAddrRelayParams = {
     /** TCP port of the relay. Should be 0..65535 */
     portNumber?: number | null,
     /**
@@ -344,7 +344,7 @@ export type SingleHostIPRelayParams = {
  * @category Pool registration certificate
  * @see [[Relay]]
  */
-export type SingleHostNameRelayParams = {
+export type SingleHostHostnameRelayParams = {
     portNumber?: number | null,
     dnsName: string,
 };
@@ -353,7 +353,7 @@ export type SingleHostNameRelayParams = {
  * @category Pool registration certificate
  * @see [[Relay]]
  */
-export type MultiHostNameRelayParams = {
+export type MultiHostRelayParams = {
     dnsName: string,
 };
 
@@ -363,14 +363,14 @@ export type MultiHostNameRelayParams = {
  * @see [[PoolRegistrationParams]]
  */
 export type Relay = {
-    type: RelayType.SingleHostAddr
-    params: SingleHostIPRelayParams
+    type: RelayType.SINGLE_HOST_IP_ADDR
+    params: SingleHostIpAddrRelayParams
 } | {
-    type: RelayType.SingleHostName
-    params: SingleHostNameRelayParams
+    type: RelayType.SINGLE_HOST_HOSTNAME
+    params: SingleHostHostnameRelayParams
 } | {
-    type: RelayType.MultiHostName
-    params: MultiHostNameRelayParams
+    type: RelayType.MULTI_HOST
+    params: MultiHostRelayParams
 }
 
 /**

@@ -26,17 +26,17 @@ export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
 
 export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
     const typeHeader: Record<PoolOwnerType, Uint8_t> = {
-        [PoolOwnerType.DeviceOwned]: 1 as Uint8_t,
-        [PoolOwnerType.ThirdParty]: 2 as Uint8_t,
+        [PoolOwnerType.DEVICE_OWNED]: 1 as Uint8_t,
+        [PoolOwnerType.THIRD_PARTY]: 2 as Uint8_t,
     }
     switch (owner.type) {
-        case PoolOwnerType.DeviceOwned: {
+        case PoolOwnerType.DEVICE_OWNED: {
             return Buffer.concat([
                 uint8_to_buf(typeHeader[owner.type]),
                 path_to_buf(owner.path)
             ])
         }
-        case PoolOwnerType.ThirdParty: {
+        case PoolOwnerType.THIRD_PARTY: {
             return Buffer.concat([
                 uint8_to_buf(typeHeader[owner.type]),
                 hex_to_buf(owner.hashHex)
@@ -65,7 +65,7 @@ export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
     }
 
     switch (relay.type) {
-        case RelayType.SingleHostAddr: {
+        case RelayType.SINGLE_HOST_IP_ADDR: {
             return Buffer.concat([
                 uint8_to_buf(relay.type as Uint8_t),
                 serializeOptional(relay.port, port => uint16_to_buf(port)),
@@ -73,14 +73,14 @@ export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
                 serializeOptional(relay.ipv6, ipv6 => ipv6)
             ])
         }
-        case RelayType.SingleHostName: {
+        case RelayType.SINGLE_HOST_HOSTNAME: {
             return Buffer.concat([
                 uint8_to_buf(relay.type as Uint8_t),
                 serializeOptional(relay.port, port => uint16_to_buf(port)),
                 Buffer.from(relay.dnsName, "ascii")
             ])
         }
-        case RelayType.MultiHostName: {
+        case RelayType.MULTI_HOST: {
             return Buffer.concat([
                 uint8_to_buf(relay.type as Uint8_t),
                 Buffer.from(relay.dnsName, "ascii")

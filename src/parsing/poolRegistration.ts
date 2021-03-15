@@ -3,13 +3,13 @@ import { InvalidDataReason } from "../errors/invalidDataReason";
 import type { ParsedMargin, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, Uint16_t, Uint64_str, VarlenAsciiString } from "../types/internal";
 import { KEY_HASH_LENGTH, RelayType } from "../types/internal";
 import type {
-    MultiHostNameRelayParams,
+    MultiHostRelayParams,
     PoolMetadataParams,
     PoolOwner,
     PoolRegistrationParams,
     Relay,
-    SingleHostIPRelayParams,
-    SingleHostNameRelayParams
+    SingleHostHostnameRelayParams,
+    SingleHostIpAddrRelayParams
 } from "../types/public";
 import {
     PoolOwnerType
@@ -63,7 +63,7 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
         InvalidDataReason.POOL_REGISTRATION_RELAYS_TOO_MANY
     );
     validate(
-        owners.filter(o => o.type === PoolOwnerType.DeviceOwned).length === 1,
+        owners.filter(o => o.type === PoolOwnerType.DEVICE_OWNED).length === 1,
         InvalidDataReason.POOL_REGISTRATION_OWNERS_SINGLE_PATH
     )
 
@@ -83,16 +83,16 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
 
 function parsePoolOwnerParams(poolOwner: PoolOwner): ParsedPoolOwner {
     switch (poolOwner.type) {
-        case PoolOwnerType.DeviceOwned: {
+        case PoolOwnerType.DEVICE_OWNED: {
             const params = poolOwner.params
             const path = parseBIP32Path(params.stakingPath, InvalidDataReason.POOL_OWNER_INVALID_PATH);
 
             return {
-                type: PoolOwnerType.DeviceOwned,
+                type: PoolOwnerType.DEVICE_OWNED,
                 path,
             }
         }
-        case PoolOwnerType.ThirdParty: {
+        case PoolOwnerType.THIRD_PARTY: {
             const params = poolOwner.params
             const hashHex = parseHexStringOfLength(
                 params.stakingKeyHashHex,
@@ -101,7 +101,7 @@ function parsePoolOwnerParams(poolOwner: PoolOwner): ParsedPoolOwner {
             );
 
             return {
-                type: PoolOwnerType.ThirdParty,
+                type: PoolOwnerType.THIRD_PARTY,
                 hashHex
             }
         }
@@ -154,10 +154,10 @@ function parseDnsName(dnsName: string, errMsg: InvalidDataReason): VarlenAsciiSt
 
 function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {
     switch (relayParams.type) {
-        case RelayType.SingleHostAddr: {
-            const params = relayParams.params as SingleHostIPRelayParams
+        case RelayType.SINGLE_HOST_IP_ADDR: {
+            const params = relayParams.params as SingleHostIpAddrRelayParams
             return {
-                type: RelayType.SingleHostAddr,
+                type: RelayType.SINGLE_HOST_IP_ADDR,
                 port: ('portNumber' in params && params.portNumber != null)
                     ? parsePort(params.portNumber, InvalidDataReason.RELAY_INVALID_PORT)
                     : null,
@@ -169,21 +169,21 @@ function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {
                     : null,
             }
         }
-        case RelayType.SingleHostName: {
-            const params = relayParams.params as SingleHostNameRelayParams
+        case RelayType.SINGLE_HOST_HOSTNAME: {
+            const params = relayParams.params as SingleHostHostnameRelayParams
 
             return {
-                type: RelayType.SingleHostName,
+                type: RelayType.SINGLE_HOST_HOSTNAME,
                 port: ('portNumber' in params && params.portNumber != null)
                     ? parsePort(params.portNumber, InvalidDataReason.RELAY_INVALID_PORT)
                     : null,
                 dnsName: parseDnsName(params.dnsName, InvalidDataReason.RELAY_INVALID_DNS)
             }
         }
-        case RelayType.MultiHostName: {
-            const params = relayParams.params as MultiHostNameRelayParams
+        case RelayType.MULTI_HOST: {
+            const params = relayParams.params as MultiHostRelayParams
             return {
-                type: RelayType.MultiHostName,
+                type: RelayType.MULTI_HOST,
                 dnsName: parseDnsName(params.dnsName, InvalidDataReason.RELAY_INVALID_DNS)
             }
         }
