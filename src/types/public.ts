@@ -276,17 +276,32 @@ export type BlockchainPointer = {
     certificateIndex: number,
 };
 
+
+export enum PoolOwnerType {
+    ThirdParty = 'third_party',
+    DeviceOwned = 'device_owned',
+}
 /**
  * Represents pool owner.
- * Note that for now this is not in tagged-enum format and the two options are mutually exclusive.
  * @category Pool registration certificate
  * @see [[PoolRegistrationParams]]
  */
-export type PoolOwnerParams = {
-    /** Pool owner is Ledger device. Supply staking key path which should sign the certificate */
-    stakingPath?: BIP32Path,
-    /** Pool owner is external party */
-    stakingKeyHashHex?: string,
+export type PoolOwner = {
+    type: PoolOwnerType.ThirdParty
+    params: PoolOwnerThirdPartyParams
+} | {
+    type: PoolOwnerType.DeviceOwned
+    params: PoolOwnerDeviceOwnedParams
+}
+
+/** Pool owner is external party */
+export type PoolOwnerThirdPartyParams = {
+    stakingKeyHashHex: string,
+}
+
+/** Pool owner is Ledger device. Supply staking key path which should sign the certificate */
+export type PoolOwnerDeviceOwnedParams = {
+    stakingPath: BIP32Path,
 };
 
 /**
@@ -382,7 +397,7 @@ export type PoolRegistrationParams = {
     margin: Margin,
     /** Pool rewards account */
     rewardAccountHex: string,
-    poolOwners: Array<PoolOwnerParams>,
+    poolOwners: Array<PoolOwner>,
     relays: Array<Relay>,
     metadata: PoolMetadataParams,
 };

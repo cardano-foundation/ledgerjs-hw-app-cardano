@@ -81,8 +81,8 @@ export enum InvalidDataReason {
   "too many owners in a pool registration certificate",
   POOL_REGISTRATION_OWNERS_SINGLE_PATH =
   "there should be exactly one owner given by path in a pool registration certificate",
-  POOL_OWNER_INCOMPLETE =
-  "incomplete owner params in a pool registration certificate",
+  POOL_OWNER_INVALID_TYPE =
+  "invalid owner type",
   POOL_OWNER_INVALID_PATH =
   "invalid owner path in a pool registration certificate",
   POOL_OWNER_INVALID_KEY_HASH =

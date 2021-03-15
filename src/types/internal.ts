@@ -1,4 +1,4 @@
-import { AddressType, CertificateType, RelayType } from './public'
+import { AddressType, CertificateType, PoolOwnerType, RelayType } from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -15,7 +15,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, RelayType }
+export { AddressType, CertificateType, RelayType, PoolOwnerType }
 export { Version, DeviceCompatibility } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
@@ -101,16 +101,11 @@ export type ParsedPoolParams = {
 }
 
 
-export const enum PoolOwnerType {
-    PATH = 1,
-    KEY_HASH = 2,
-}
-
 export type ParsedPoolOwner = {
-    type: PoolOwnerType.PATH,
+    type: PoolOwnerType.DeviceOwned,
     path: ValidBIP32Path
 } | {
-    type: PoolOwnerType.KEY_HASH
+    type: PoolOwnerType.ThirdParty
     hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
 }
 

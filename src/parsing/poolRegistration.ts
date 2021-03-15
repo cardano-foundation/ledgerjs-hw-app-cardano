@@ -1,15 +1,18 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
 import type { ParsedMargin, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, Uint16_t, Uint64_str, VarlenAsciiString } from "../types/internal";
-import { KEY_HASH_LENGTH, PoolOwnerType, RelayType } from "../types/internal";
+import { KEY_HASH_LENGTH, RelayType } from "../types/internal";
 import type {
     MultiHostNameRelayParams,
     PoolMetadataParams,
-    PoolOwnerParams,
+    PoolOwner,
     PoolRegistrationParams,
     Relay,
     SingleHostIPRelayParams,
-    SingleHostNameRelayParams,
+    SingleHostNameRelayParams
+} from "../types/public";
+import {
+    PoolOwnerType
 } from "../types/public";
 import { isHexStringOfLength, isString, isUint8, isUint16, parseAscii, parseBIP32Path, parseHexStringOfLength, parseIntFromStr, parseUint64_str, validate } from "../utils/parse";
 import { hex_to_buf } from "../utils/serialize";
@@ -60,7 +63,7 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
         InvalidDataReason.POOL_REGISTRATION_RELAYS_TOO_MANY
     );
     validate(
-        owners.filter(o => o.type === PoolOwnerType.PATH).length === 1,
+        owners.filter(o => o.type === PoolOwnerType.DeviceOwned).length === 1,
         InvalidDataReason.POOL_REGISTRATION_OWNERS_SINGLE_PATH
     )
 
@@ -78,31 +81,33 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
 
 }
 
-function parsePoolOwnerParams(params: PoolOwnerParams): ParsedPoolOwner {
-    // TODO: should we check if mutually exclusive?
-    if (params.stakingPath) {
-        const path = parseBIP32Path(params.stakingPath, InvalidDataReason.POOL_OWNER_INVALID_PATH);
+function parsePoolOwnerParams(poolOwner: PoolOwner): ParsedPoolOwner {
+    switch (poolOwner.type) {
+        case PoolOwnerType.DeviceOwned: {
+            const params = poolOwner.params
+            const path = parseBIP32Path(params.stakingPath, InvalidDataReason.POOL_OWNER_INVALID_PATH);
 
-        return {
-            type: PoolOwnerType.PATH,
-            path,
+            return {
+                type: PoolOwnerType.DeviceOwned,
+                path,
+            }
         }
-    }
+        case PoolOwnerType.ThirdParty: {
+            const params = poolOwner.params
+            const hashHex = parseHexStringOfLength(
+                params.stakingKeyHashHex,
+                KEY_HASH_LENGTH,
+                InvalidDataReason.POOL_OWNER_INVALID_KEY_HASH
+            );
 
-    if (params.stakingKeyHashHex) {
-        const hashHex = parseHexStringOfLength(
-            params.stakingKeyHashHex,
-            KEY_HASH_LENGTH,
-            InvalidDataReason.POOL_OWNER_INVALID_KEY_HASH
-        );
-
-        return {
-            type: PoolOwnerType.KEY_HASH,
-            hashHex
+            return {
+                type: PoolOwnerType.ThirdParty,
+                hashHex
+            }
         }
+        default:
+            throw new InvalidData(InvalidDataReason.POOL_OWNER_INVALID_TYPE);
     }
-
-    throw new InvalidData(InvalidDataReason.POOL_OWNER_INCOMPLETE);
 }
 
 

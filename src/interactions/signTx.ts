@@ -294,9 +294,9 @@ function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
     const cert = tx.certificates[0]
     assert(cert.type === CertificateType.STAKE_POOL_REGISTRATION, "bad certificate type");
 
-    const witnessOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.PATH);
+    const witnessOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DeviceOwned);
     assert(witnessOwner != null, "missing witness owner");
-    assert(witnessOwner.type === PoolOwnerType.PATH, "bad witness owner type")
+    assert(witnessOwner.type === PoolOwnerType.DeviceOwned, "bad witness owner type")
     return [witnessOwner.path]
   } else {
     // we collect required witnesses for inputs, certificates and withdrawals

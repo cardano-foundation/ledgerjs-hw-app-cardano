@@ -25,16 +25,20 @@ export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
 }
 
 export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
+    const typeHeader: Record<PoolOwnerType, Uint8_t> = {
+        [PoolOwnerType.DeviceOwned]: 1 as Uint8_t,
+        [PoolOwnerType.ThirdParty]: 2 as Uint8_t,
+    }
     switch (owner.type) {
-        case PoolOwnerType.PATH: {
+        case PoolOwnerType.DeviceOwned: {
             return Buffer.concat([
-                uint8_to_buf(owner.type as Uint8_t),
+                uint8_to_buf(typeHeader[owner.type]),
                 path_to_buf(owner.path)
             ])
         }
-        case PoolOwnerType.KEY_HASH: {
+        case PoolOwnerType.ThirdParty: {
             return Buffer.concat([
-                uint8_to_buf(owner.type as Uint8_t),
+                uint8_to_buf(typeHeader[owner.type]),
                 hex_to_buf(owner.hashHex)
             ])
         }
