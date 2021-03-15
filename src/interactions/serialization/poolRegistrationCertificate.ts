@@ -50,15 +50,15 @@ export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
 export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
     function serializeOptional<T>(x: T | null, cb: (t: T) => Buffer): Buffer {
         const enum Optional {
-            None = 1,
-            Some = 2
+            NONE = 1,
+            SOME = 2
         }
 
         if (x == null) {
-            return uint8_to_buf(Optional.None as Uint8_t)
+            return uint8_to_buf(Optional.NONE as Uint8_t)
         } else {
             return Buffer.concat([
-                uint8_to_buf(Optional.Some as Uint8_t),
+                uint8_to_buf(Optional.SOME as Uint8_t),
                 cb(x)
             ])
         }
