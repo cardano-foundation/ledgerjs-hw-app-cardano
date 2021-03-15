@@ -276,7 +276,13 @@ export type BlockchainPointer = {
     certificateIndex: number,
 };
 
-
+/**
+ * Type of an owner in pool registration certificate.
+ * Ledger device needs to distinguish between owners which are third party
+ * and this device if one needs to sign pool registration certificate as an owner.
+ * @see [[PoolOwner]]
+ * @category Pool registration certificate
+ */
 export enum PoolOwnerType {
     ThirdParty = 'third_party',
     DeviceOwned = 'device_owned',
@@ -294,12 +300,22 @@ export type PoolOwner = {
     params: PoolOwnerDeviceOwnedParams
 }
 
-/** Pool owner is external party */
+/**
+ * Pool owner is external party
+ * @category Pool registration certificate
+ * @see [[PoolOwner]]
+ * @see [[PoolOwnerType]]
+ */
 export type PoolOwnerThirdPartyParams = {
     stakingKeyHashHex: string,
 }
 
-/** Pool owner is Ledger device. Supply staking key path which should sign the certificate */
+/**
+ * Pool owner is Ledger device. Supply staking key path which should sign the certificate
+ * @category Pool registration certificate
+ * @see [[PoolOwner]]
+ * @see [[PoolOwnerType]]
+ */
 export type PoolOwnerDeviceOwnedParams = {
     stakingPath: BIP32Path,
 };
@@ -578,13 +594,44 @@ export type SignedTransactionData = {
  * @see [[Ada.signTransaction]]
  */
 export type Transaction = {
+    /**
+     * Cardano network the transaction is supposed to be submitted to.
+     */
     network: Network,
+    /**
+     * Transaction inputs (UTxOs)
+     */
     inputs: Array<TxInput>,
+    /**
+     * Transaction outputs
+     */
     outputs: Array<TxOutput>,
+    /**
+     * Transaction fee (in Lovelace).
+     * Note that transaction is valid only if inputs + fee == outputs.
+     */
     fee: bigint_like,
-    ttl: bigint_like | null,
-    certificates: Array<Certificate>,
-    withdrawals: Array<Withdrawal>,
+    /**
+     * "Time-to-live" (block height).
+     * Transaction will become invalid at this block height.
+     */
+    ttl?: bigint_like | null,
+    /**
+     * Transaction certificates (if any).
+     */
+    certificates?: Array<Certificate> | null,
+    /**
+     * Withdrawals (if any) from rewards accounts
+     */
+    withdrawals?: Array<Withdrawal> | null,
+    /**
+     * Hash of transaction metadata (if any).
+     * Note that Ledger cannot display full transaction metadata, it can only display their hash.
+     */
     metadataHashHex?: string | null,
+    /**
+     * Validity start (block height) if any.
+     * Transaction becomes valid only starting from this block height.
+     */
     validityIntervalStart?: bigint_like | null
 }

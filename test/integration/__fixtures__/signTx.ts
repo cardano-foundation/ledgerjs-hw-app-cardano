@@ -287,19 +287,10 @@ export const withdrawals: Record<string, Withdrawal> = {
   },
 };
 
-export const sampleMetadataHashHex = "deadbeef".repeat(8);
-export const sampleFee = 42;
-export const sampleTtl = 10;
-export const sampleValidityIntervalStartStr = "47";
-export const sampleBigIntStr = "24103998870869519";
-
 const byronBase = {
   inputs: [inputs.utxoByron],
   fee: 42,
   ttl: 10,
-  certificates: [],
-  withdrawals: [],
-  metadataHashHex: null
 }
 
 export type TestcaseByron = {
@@ -377,11 +368,8 @@ const shelleyBase = {
   network: Networks.Mainnet,
   inputs: [inputs.utxoShelley],
   outputs: [outputs.externalByronMainnet],
-  fee: sampleFee,
-  ttl: sampleTtl,
-  certificates: [],
-  withdrawals: [],
-  metadataHashHex: null
+  fee: 42,
+  ttl: 10,
 }
 
 export type TestcaseShelley = {
@@ -659,7 +647,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx with nonempty metadata",
     tx: {
       ...shelleyBase,
-      metadataHashHex: sampleMetadataHashHex
+      metadataHashHex: "deadbeef".repeat(8)
     },
     txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
       "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
@@ -683,7 +671,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
       ...shelleyBase,
       inputs: [inputs.utxoNonReasonable],
       outputs: [outputs.internalBaseWithStakingPathNonReasonable],
-      metadataHashHex: sampleMetadataHashHex
+      metadataHashHex: "deadbeef".repeat(8)
     },
     result: {
       txHashHex:
@@ -703,12 +691,7 @@ const allegraBase = {
   network: Networks.Mainnet,
   inputs: [inputs.utxoShelley],
   outputs: [outputs.externalShelley],
-  fee: sampleFee,
-  //ttl: null,
-  certificates: [],
-  withdrawals: [],
-  metadataHashHex: null,
-  //validityIntervalStart: null
+  fee: 42,
 }
 
 export type TestcaseAllegra = {
@@ -763,13 +746,10 @@ export const testsAllegra: TestcaseAllegra[] = [
 const maryBase = {
   network: Networks.Mainnet,
   inputs: [inputs.utxoShelley],
-  //outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath as any],
-  fee: sampleFee,
-  ttl: sampleTtl,
-  certificates: [],
-  withdrawals: [],
-  metadataHashHex: null,
-  validityIntervalStart: sampleValidityIntervalStartStr
+  fee: 42,
+  ttl: 10,
+  // FIXME: this is quite unreasonable as validity start is after ttl
+  validityIntervalStart: 47
 }
 
 export type TestcaseMary = {
@@ -823,9 +803,9 @@ export const testsMary: TestcaseMary[] = [
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetBigNumber],
-      fee: sampleBigIntStr,
-      ttl: sampleBigIntStr,
-      validityIntervalStart: sampleBigIntStr
+      fee: "24103998870869519",
+      ttl: "24103998870869519",
+      validityIntervalStart: "24103998870869519"
     },
     txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821b0055a275925d560fa1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1b0055a275925d560f021b0055a275925d560f031b0055a275925d560f081b0055a275925d560f",
     result: {
