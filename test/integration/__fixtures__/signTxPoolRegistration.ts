@@ -1,8 +1,8 @@
-import type { Certificate, MultiHostRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import type { Certificate, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
 import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
-export const inputs: Record<string, TxInput> = {
+export const inputs: Record<'utxo', TxInput> = {
   utxo: {
     txHashHex:
       "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
@@ -11,7 +11,7 @@ export const inputs: Record<string, TxInput> = {
   },
 };
 
-export const outputs: Record<string, TxOutput> = {
+export const outputs: Record<'external', TxOutput> = {
   external: {
     amount: "1",
     destination: {
@@ -28,23 +28,13 @@ export const outputs: Record<string, TxOutput> = {
 };
 
 
-const txBase: Omit<Transaction, 'certificates'> = {
+const txBase: Transaction = {
   network: Networks.Mainnet,
   inputs: [inputs.utxo],
   outputs: [outputs.external],
   fee: 42,
   ttl: 10,
 }
-
-
-
-const poolMetadataVariations: Record<string, PoolMetadataParams> = {
-  poolMetadataDefault: {
-    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
-    metadataHashHex:
-      "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
-  },
-};
 
 export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: PoolMetadataParams, rejectReason: string }> = [
   // Invalid url
@@ -94,7 +84,11 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
   }
 ]
 
-const stakingHashOwners: Record<string, PoolOwner> = {
+const stakingHashOwners: Record<
+  | 'owner0'
+  | 'owner1'
+  , PoolOwner
+> = {
   owner0: {
     type: PoolOwnerType.THIRD_PARTY,
     params: {
@@ -111,7 +105,11 @@ const stakingHashOwners: Record<string, PoolOwner> = {
   },
 };
 
-const stakingPathOwners: Record<string, PoolOwner> = {
+const stakingPathOwners: Record<
+  | 'owner0'
+  | 'owner1'
+  , PoolOwner
+> = {
   owner0: {
     type: PoolOwnerType.DEVICE_OWNED,
     params: {
@@ -126,8 +124,9 @@ const stakingPathOwners: Record<string, PoolOwner> = {
   },
 };
 
-const poolOwnerVariationSet: Record<string, PoolOwner[]> = {
-  noOwners: [],
+// No need for explicit type
+const poolOwnerVariationSet = {
+  noOwners: [] as PoolOwner[],
   singleHashOwner: [stakingHashOwners.owner0],
   singlePathOwner: [stakingPathOwners.owner0],
   twoHashOwners: [stakingHashOwners.owner0, stakingHashOwners.owner1],
@@ -135,7 +134,20 @@ const poolOwnerVariationSet: Record<string, PoolOwner[]> = {
   twoCombinedOwners: [stakingPathOwners.owner0, stakingHashOwners.owner0],
 };
 
-const relays: Record<string, Relay> = {
+// FIXME: When did the tests for unused relays disappear?
+const relays: Record<
+  | 'singleHostIPV4Relay0'
+  | 'singleHostIPV4Relay1'
+  // | 'singleHostIPV4RelayMissingPort'
+  // | 'singleHostIPV4RelayMissingIpv4'
+  | 'singleHostIPV6Relay'
+  | 'singleHostNameRelay'
+  // | 'singleHostNameRelayMissingPort'
+  // | 'singleHostNameRelayMissingDns'
+  | 'multiHostNameRelay'
+  // | 'multiHostNameRelayMissingDns'
+  , Relay
+> = {
   singleHostIPV4Relay0: {
     type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
@@ -152,6 +164,7 @@ const relays: Record<string, Relay> = {
       ipv6: null,
     },
   },
+  /*
   singleHostIPV4RelayMissingPort: {
     type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
@@ -160,14 +173,17 @@ const relays: Record<string, Relay> = {
       ipv6: null,
     },
   },
-  singleHostIPV4RelayMissingIpv4: {
-    type: RelayType.SINGLE_HOST_IP_ADDR,
-    params: {
-      portNumber: 3000,
-      ipv4: null,
-      ipv6: null,
-    },
-  },
+  */
+  /*
+   singleHostIPV4RelayMissingIpv4: {
+     type: RelayType.SINGLE_HOST_IP_ADDR,
+     params: {
+       portNumber: 3000,
+       ipv4: null,
+       ipv6: null,
+     },
+   },
+   */
   singleHostIPV6Relay: {
     type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
@@ -183,6 +199,7 @@ const relays: Record<string, Relay> = {
       dnsName: "aaaa.bbbb.com",
     },
   },
+  /*
   singleHostNameRelayMissingPort: {
     type: RelayType.SINGLE_HOST_HOSTNAME,
     params: {
@@ -190,29 +207,35 @@ const relays: Record<string, Relay> = {
       dnsName: "aaaa.bbbb.com",
     },
   },
-  singleHostNameRelayMissingDns: {
-    type: RelayType.SINGLE_HOST_HOSTNAME,
-    params: {
-      portNumber: 3000,
-      dnsName: null,
-    } as any as SingleHostHostnameRelayParams,
-  },
+  */
+  /*
+   singleHostNameRelayMissingDns: {
+     type: RelayType.SINGLE_HOST_HOSTNAME,
+     params: {
+       portNumber: 3000,
+       dnsName: null,
+     } as any as SingleHostHostnameRelayParams,
+   },
+   */
   multiHostNameRelay: {
     type: RelayType.MULTI_HOST,
     params: {
       dnsName: "aaaa.bbbc.com",
     },
   },
+  /*
   multiHostNameRelayMissingDns: {
     type: RelayType.MULTI_HOST,
     params: {
       dnsName: null,
     } as any as MultiHostRelayParams,
   },
-};
+  */
+}
 
-const relayVariationSet: Record<string, Relay[]> = {
-  noRelays: [],
+// No need for explicit type
+const relayVariationSet = {
+  noRelays: [] as Relay[],
   singleHostIPV4Relay: [relays.singleHostIPV4Relay0],
   singleHostIPV6Relay: [relays.singleHostIPV6Relay],
   singleHostNameRelay: [relays.singleHostNameRelay],
@@ -241,29 +264,33 @@ const defaultPoolRegistration: PoolRegistrationParams = {
   pledge: "50000000000",
   cost: "340000000",
   margin: {
-    numerator: "3",
-    denominator: "100",
+    numerator: 3,
+    denominator: 100,
   },
   rewardAccountHex:
     "e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
   poolOwners: poolOwnerVariationSet.singlePathOwner,
   relays: relayVariationSet.singleHostIPV4Relay,
-  metadata: poolMetadataVariations.poolMetadataDefault,
+  metadata: {
+    metadataUrl: "https://www.vacuumlabs.com/sampleUrl.json",
+    metadataHashHex:
+      "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
+  },
 };
 
-export const certificates: Record<string, Certificate> = {
-  stakeRegistration: {
-    type: CertificateType.STAKE_REGISTRATION,
-    params: {
-      path: str_to_path("1852'/1815'/0'/2/0"),
-    }
-  },
-  stakeDeregistration: {
-    type: CertificateType.STAKE_DEREGISTRATION,
-    params: {
-      path: str_to_path("1852'/1815'/0'/2/0"),
-    }
-  },
+export const certificates: Record<
+  | 'stakeDelegation'
+  | 'poolRegistrationDefault'
+  | 'poolRegistrationMixedOwners'
+  | 'poolRegistrationMixedOwnersAllRelays'
+  | 'poolRegistrationMixedOwnersIpv4SingleHostRelays'
+  | 'poolRegistrationMixedOwnersIpv4Ipv6Relays'
+  | 'poolRegistrationNoRelays'
+  | 'poolRegistrationNoMetadata'
+  | 'poolRegistrationWrongMargin'
+  , Certificate
+> = {
+  // for negative tests 
   stakeDelegation: {
     type: CertificateType.STAKE_DELEGATION,
     params: {
@@ -317,7 +344,7 @@ export const certificates: Record<string, Certificate> = {
     type: CertificateType.STAKE_POOL_REGISTRATION,
     params: {
       ...defaultPoolRegistration,
-      metadata: poolMetadataVariations.poolMetadataNone,
+      metadata: null,
     },
   },
   poolRegistrationWrongMargin: {
@@ -368,7 +395,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
   }
 ]
 
-export const withdrawals: Record<string, Withdrawal> = {
+export const withdrawals: Record<'withdrawal0', Withdrawal> = {
   withdrawal0: {
     path: str_to_path("1852'/1815'/0'/2/0"),
     amount: "111",
