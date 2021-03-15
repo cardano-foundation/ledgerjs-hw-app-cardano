@@ -82,12 +82,12 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         : parseUint64_str(tx.ttl, { min: "1" }, InvalidDataReason.TTL_INVALID)
 
     // certificates
-    validate(isArray(tx.certificates), InvalidDataReason.CERTIFICATES_NOT_ARRAY);
-    const certificates = parseCertificates(tx.certificates);
+    validate(isArray(tx.certificates ?? []), InvalidDataReason.CERTIFICATES_NOT_ARRAY);
+    const certificates = parseCertificates(tx.certificates ?? []);
 
     // withdrawals
-    validate(isArray(tx.withdrawals), InvalidDataReason.WITHDRAWALS_NOT_ARRAY);
-    const withdrawals = tx.withdrawals.map(w => parseWithdrawal(w))
+    validate(isArray(tx.withdrawals ?? []), InvalidDataReason.WITHDRAWALS_NOT_ARRAY);
+    const withdrawals = (tx.withdrawals ?? []).map(w => parseWithdrawal(w))
 
     // metadata
     const metadataHashHex = tx.metadataHashHex == null
@@ -100,7 +100,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         : parseUint64_str(tx.validityIntervalStart, { min: "1" }, InvalidDataReason.VALIDITY_INTERVAL_START_INVALID)
 
     // Additional restrictions for signing pool registration as an owner
-    const isSigningPoolRegistrationAsOwner = tx.certificates.some(
+    const isSigningPoolRegistrationAsOwner = certificates.some(
         (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
     );
     if (isSigningPoolRegistrationAsOwner) {
