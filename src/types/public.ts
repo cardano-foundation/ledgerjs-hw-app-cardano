@@ -578,13 +578,44 @@ export type SignedTransactionData = {
  * @see [[Ada.signTransaction]]
  */
 export type Transaction = {
+    /**
+     * Cardano network the transaction is supposed to be submitted to.
+     */
     network: Network,
+    /**
+     * Transaction inputs (UTxOs)
+     */
     inputs: Array<TxInput>,
+    /**
+     * Transaction outputs
+     */
     outputs: Array<TxOutput>,
+    /**
+     * Transaction fee (in Lovelace).
+     * Note that transaction is valid only if inputs + fee == outputs.
+     */
     fee: bigint_like,
-    ttl: bigint_like | null,
-    certificates: Array<Certificate>,
-    withdrawals: Array<Withdrawal>,
+    /**
+     * "Time-to-live" (block height).
+     * Transaction will become invalid at this block height.
+     */
+    ttl?: bigint_like | null,
+    /**
+     * Transaction certificates (if any).
+     */
+    certificates?: Array<Certificate> | null,
+    /**
+     * Withdrawals (if any) from rewards accounts
+     */
+    withdrawals?: Array<Withdrawal> | null,
+    /**
+     * Hash of transaction metadata (if any).
+     * Note that Ledger cannot display full transaction metadata, it can only display their hash.
+     */
     metadataHashHex?: string | null,
+    /**
+     * Validity start (block height) if any.
+     * Transaction becomes valid only starting from this block height.
+     */
     validityIntervalStart?: bigint_like | null
 }

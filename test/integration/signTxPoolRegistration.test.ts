@@ -54,8 +54,6 @@ describe("signTxPoolRegistrationReject", async () => {
     outputs: [outputs.external],
     fee: 42,
     ttl: 10,
-    withdrawals: [],
-    metadataHashHex: null
   }
 
   for (const { testName, poolRegistrationCertificate, expectedReject } of invalidCertificates) {
