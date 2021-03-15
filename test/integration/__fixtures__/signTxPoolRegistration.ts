@@ -1,5 +1,5 @@
-import type { Certificate, MultiHostNameRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SingleHostNameRelayParams, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
-import { CertificateType, InvalidDataReason, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
+import type { Certificate, MultiHostNameRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, SingleHostNameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
 export const inputs: Record<string, TxInput> = {
@@ -27,8 +27,19 @@ export const outputs: Record<string, TxOutput> = {
   },
 };
 
-export const sampleFeeStr = "42";
-export const sampleTtlStr = "10";
+
+const txBase: Omit<Transaction, 'certificates'> = {
+  network: Networks.Mainnet,
+  inputs: [inputs.utxo],
+  outputs: [outputs.external],
+  fee: 42,
+  ttl: 10,
+  withdrawals: [],
+  metadataHashHex: null,
+  validityIntervalStart: null,
+}
+
+
 
 const poolMetadataVariations: Record<string, PoolMetadataParams> = {
   poolMetadataDefault: {
@@ -367,104 +378,168 @@ export const withdrawals: Record<string, Withdrawal> = {
   },
 };
 
-export const results = {
-  allRelaysHashAndPathOwners: {
-    // computed by cardano-cli
-    /*
-     * txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb
-     */
-    txHashHex:
-      "bc678441767b195382f00f9f4c4bddc046f73e6116fa789035105ecddfdee949",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "61fc06451462426b14fa3a31008a5f7d32b2f1793022060c02939bd0004b07f2bd737d542c2db6cef6dad912b9bdca1829a5dc2b45bab3c72afe374cef59cc04",
-      },
-    ],
+type Testcase = {
+  testname: string
+  tx: Transaction
+  result: SignedTransactionData
+}
+
+export const poolRegistrationTestcases: Testcase[] = [
+  {
+    testname: "Should correctly witness valid multiple mixed owners all relays pool registration",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
+    },
+    result: {
+      // computed by cardano-cli
+      /*
+       * txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb
+       */
+      txHashHex:
+        "bc678441767b195382f00f9f4c4bddc046f73e6116fa789035105ecddfdee949",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "61fc06451462426b14fa3a31008a5f7d32b2f1793022060c02939bd0004b07f2bd737d542c2db6cef6dad912b9bdca1829a5dc2b45bab3c72afe374cef59cc04",
+        },
+      ],
+    },
   },
-  poolRegistrationDefault: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "4ea6c33b8f9714996080700d0e8480b2ab1136641ea8c3b08572be189c9825ab",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "f03947901bcfc96ac8e359825091db88900a470947c60220fcd3892683ec7fe949ef4e28a446d78a883f034cd77cbca669529a9da3f2316b762eb97033797a07",
-      },
-    ],
+  {
+    testname: "Should correctly witness valid single path owner ipv4 relay pool registration",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationDefault],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "4ea6c33b8f9714996080700d0e8480b2ab1136641ea8c3b08572be189c9825ab",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "f03947901bcfc96ac8e359825091db88900a470947c60220fcd3892683ec7fe949ef4e28a446d78a883f034cd77cbca669529a9da3f2316b762eb97033797a07",
+        },
+      ],
+    },
   },
-  poolRegistrationMixedOwners: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "322872680d2f13e2d50c806572b28a95e12bbea2e8e27db44e369e5d304929df",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "c1b454f3cf868007d2850084ff404bc4b91d9b541a78af9014288504143bd6b4f12df2163b7efb1817636eb625a62967fb66281ecae4d1b461770deafb65ba0f",
-      },
-    ],
+  {
+    testname: "Should correctly witness valid multiple mixed owners ipv4 relay pool registration",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationMixedOwners],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "322872680d2f13e2d50c806572b28a95e12bbea2e8e27db44e369e5d304929df",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "c1b454f3cf868007d2850084ff404bc4b91d9b541a78af9014288504143bd6b4f12df2163b7efb1817636eb625a62967fb66281ecae4d1b461770deafb65ba0f",
+        },
+      ],
+    },
   },
-  poolRegistrationMixedOwnersIpv4SingleHostRelays: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "a41a6e4e00ad04824455773302f95a179c03f583f969862a479d4805b53a708f",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "8bb8c10b390ac92f617ba6895e3b138f43dc741e3589a9548166d1eda995becf4a229e9e95f6300336f7e92345b244c5dc78cfe0cc12cac6ff6fbb5731671c0e",
-      },
-    ],
+  {
+    testname: "Should correctly witness valid multiple mixed owners mixed ipv4, single host relays pool registration",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationMixedOwnersIpv4SingleHostRelays]
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "a41a6e4e00ad04824455773302f95a179c03f583f969862a479d4805b53a708f",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "8bb8c10b390ac92f617ba6895e3b138f43dc741e3589a9548166d1eda995becf4a229e9e95f6300336f7e92345b244c5dc78cfe0cc12cac6ff6fbb5731671c0e",
+        },
+      ],
+    },
   },
-  poolRegistrationMixedOwnersIpv4Ipv6Relays: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "ab64050759a4221d4a8568badf06c444b42dae05fb2d22b0dff5749a49e5d332",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "b0e6796ca5f97a0776c798e602afd0f6541996d431a3cbec8e3fe77eb49416cd812dcf6084672e40c9ae2b8cc8a5513d1b1a6c3ad408864d4a771e315c50d808",
-      },
-    ],
+  {
+    testname: "Should correctly witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationMixedOwnersIpv4Ipv6Relays],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "ab64050759a4221d4a8568badf06c444b42dae05fb2d22b0dff5749a49e5d332",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "b0e6796ca5f97a0776c798e602afd0f6541996d431a3cbec8e3fe77eb49416cd812dcf6084672e40c9ae2b8cc8a5513d1b1a6c3ad408864d4a771e315c50d808",
+        },
+      ],
+    },
   },
-  noRelaysSinglePathOwner: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "fc4778c13fadb8b69249b4cd98ef45f42145e1ce081c5466170a670829dc2184",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "adc06e34dc66f01b16496b04fc4ce5058e3be7290398cf2728f8463dda15c87866314449bdb309d0cdc22f3ca9bee310458f2769df6a1486f1b470a3227a030b",
-      },
-    ],
+  {
+    testname: "Should correctly witness valid single path owner no relays pool registration",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationNoRelays],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "fc4778c13fadb8b69249b4cd98ef45f42145e1ce081c5466170a670829dc2184",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "adc06e34dc66f01b16496b04fc4ce5058e3be7290398cf2728f8463dda15c87866314449bdb309d0cdc22f3ca9bee310458f2769df6a1486f1b470a3227a030b",
+        },
+      ],
+    },
   },
-  noMetadata: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "a97b2258962537e0ad3cbcb1fbf9d454f55bc9b7feb2bea0da23f82c1e956f67",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "06e66f6a2d510a8a5446597c59c79cbf4f9e7af9073da0651ea59bbdc2340dc933ed292aa282e6ea7068bed9f6bcb44228573e661c211e6dc61f4dd73ff41f04",
-      },
-    ],
+  {
+    // works as a private pool not visible in yoroi, daedalus, etc.
+    testname: "Should correctly witness pool registration with no metadata",
+    tx: {
+      ...txBase,
+      certificates: [certificates.poolRegistrationNoMetadata],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "a97b2258962537e0ad3cbcb1fbf9d454f55bc9b7feb2bea0da23f82c1e956f67",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "06e66f6a2d510a8a5446597c59c79cbf4f9e7af9073da0651ea59bbdc2340dc933ed292aa282e6ea7068bed9f6bcb44228573e661c211e6dc61f4dd73ff41f04",
+        },
+      ],
+    },
   },
-  noOutputs: {
-    // WARNING: only as computed by ledger, not verified with cardano-cli
-    txHashHex:
-      "600114fd1c50a7e857fdcaaea73d94f7435c9fce63cfde597f7c48b8dda3b0ba",
-    witnesses: [
-      {
-        path: str_to_path("1852'/1815'/0'/2/0"),
-        witnessSignatureHex:
-          "91c09ad95d5d0f87f61a62e2f5e2dda4245eb4011887a04a53bdf085282002ccc712718e855e36a30cfcf7ecd43bcdc795aa87647be9c716b65e7fcf376e0503",
-      },
-    ],
-  },
-};
+  {
+    testname: "Should correctly witness pool registration without outputs",
+    tx: {
+      ...txBase,
+      outputs: [],
+      certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "600114fd1c50a7e857fdcaaea73d94f7435c9fce63cfde597f7c48b8dda3b0ba",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "91c09ad95d5d0f87f61a62e2f5e2dda4245eb4011887a04a53bdf085282002ccc712718e855e36a30cfcf7ecd43bcdc795aa87647be9c716b65e7fcf376e0503",
+        },
+      ],
+    },
+  }
+]
