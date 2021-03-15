@@ -415,7 +415,7 @@ export type PoolRegistrationParams = {
     rewardAccountHex: string,
     poolOwners: Array<PoolOwner>,
     relays: Array<Relay>,
-    metadata: PoolMetadataParams,
+    metadata?: PoolMetadataParams | null,
 };
 
 /**

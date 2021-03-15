@@ -51,7 +51,7 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
 
     const owners = params.poolOwners.map(owner => parsePoolOwnerParams(owner))
     const relays = params.relays.map(relay => parsePoolRelayParams(relay))
-    const metadata = parsePoolMetadataParams(params.metadata)
+    const metadata = params.metadata == null ? null : parsePoolMetadataParams(params.metadata)
 
     // Additional checks
     validate(
@@ -192,9 +192,7 @@ function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {
     }
 }
 
-function parsePoolMetadataParams(params: PoolMetadataParams | null): ParsedPoolMetadata | null {
-    if (params == null) return null
-
+function parsePoolMetadataParams(params: PoolMetadataParams): ParsedPoolMetadata {
     const url = parseAscii(params.metadataUrl, InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL);
     // Additional length check
     validate(
