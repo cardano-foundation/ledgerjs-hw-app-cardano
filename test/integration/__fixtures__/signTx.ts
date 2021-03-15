@@ -30,7 +30,7 @@ export const outputs: Record<string, TxOutput> = {
   externalByronMainnet: {
     amount: 3003112,
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: base58_to_hex(
           "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
@@ -42,7 +42,7 @@ export const outputs: Record<string, TxOutput> = {
   externalByronDaedalusMainnet: {
     amount: 3003112,
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: base58_to_hex(
           "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
@@ -53,7 +53,7 @@ export const outputs: Record<string, TxOutput> = {
   externalByronTestnet: {
     amount: 3003112,
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: base58_to_hex(
           "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
@@ -64,7 +64,7 @@ export const outputs: Record<string, TxOutput> = {
   externalShelley: {
     amount: 1,
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: bech32_to_hex(
           "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
@@ -76,7 +76,7 @@ export const outputs: Record<string, TxOutput> = {
   externalShelleyScripthash: {
     amount: 1,
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: bech32_to_hex(
           "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
@@ -87,7 +87,7 @@ export const outputs: Record<string, TxOutput> = {
   internalBaseWithStakingKeyHash: {
     amount: 7120787,
     destination: {
-      type: TxOutputDestinationType.DeviceOwned,
+      type: TxOutputDestinationType.DEVICE_OWNED,
       params: {
         type: AddressType.BASE,
         params: {
@@ -100,7 +100,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   internalBaseWithStakingPath: {
     destination: {
-      type: TxOutputDestinationType.DeviceOwned,
+      type: TxOutputDestinationType.DEVICE_OWNED,
       params: {
         type: AddressType.BASE,
         params: {
@@ -113,7 +113,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   internalBaseWithStakingPathNonReasonable: {
     destination: {
-      type: TxOutputDestinationType.DeviceOwned,
+      type: TxOutputDestinationType.DEVICE_OWNED,
       params: {
         type: AddressType.BASE,
         params: {
@@ -126,7 +126,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   internalEnterprise: {
     destination: {
-      type: TxOutputDestinationType.DeviceOwned,
+      type: TxOutputDestinationType.DEVICE_OWNED,
       params: {
         type: AddressType.ENTERPRISE,
         params: {
@@ -138,7 +138,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   internalPointer: {
     destination: {
-      type: TxOutputDestinationType.DeviceOwned,
+      type: TxOutputDestinationType.DEVICE_OWNED,
       params: {
         type: AddressType.POINTER,
         params: {
@@ -155,7 +155,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   multiassetOneToken: {
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: bech32_to_hex(
           "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
@@ -177,7 +177,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   multiassetManyTokens: {
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: bech32_to_hex(
           "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
@@ -212,7 +212,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   multiassetChange: {
     destination: {
-      type: TxOutputDestinationType.DeviceOwned,
+      type: TxOutputDestinationType.DEVICE_OWNED,
       params: {
         type: AddressType.BASE,
         params: {
@@ -236,7 +236,7 @@ export const outputs: Record<string, TxOutput> = {
   },
   multiassetBigNumber: {
     destination: {
-      type: TxOutputDestinationType.ThirdParty,
+      type: TxOutputDestinationType.THIRD_PARTY,
       params: {
         addressHex: bech32_to_hex(
           "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"

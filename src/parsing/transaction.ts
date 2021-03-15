@@ -155,7 +155,7 @@ function parseTxDestination(
     destination: TxOutputDestination
 ): OutputDestination {
     switch (destination.type) {
-        case TxOutputDestinationType.ThirdParty: {
+        case TxOutputDestinationType.THIRD_PARTY: {
             const params = destination.params
             const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
             validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS);
@@ -164,7 +164,7 @@ function parseTxDestination(
                 addressHex,
             }
         }
-        case TxOutputDestinationType.DeviceOwned: {
+        case TxOutputDestinationType.DEVICE_OWNED: {
             const params = destination.params
 
             return {
