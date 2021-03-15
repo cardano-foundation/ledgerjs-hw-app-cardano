@@ -34,9 +34,6 @@ const txBase: Omit<Transaction, 'certificates'> = {
   outputs: [outputs.external],
   fee: 42,
   ttl: 10,
-  withdrawals: [],
-  metadataHashHex: null,
-  validityIntervalStart: null,
 }
 
 
