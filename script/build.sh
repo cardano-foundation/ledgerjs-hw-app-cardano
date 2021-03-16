@@ -2,7 +2,4 @@
 
 set -e
 
-#cd ../..
-#PATH=$(yarn bin):$PATH
-#cd -
-yarn tsc
+yarn tsc -p src/tsconfig.json

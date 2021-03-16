@@ -2,10 +2,10 @@
   "name": "@cardano-foundation/ledgerjs-hw-app-cardano",
   "version": "3.0.0",
   "files": [
-    "lib"
+    "dist"
   ],
   "description": "Ledger Hardware Wallet Cardano ADA API",
-  "main": "lib/Ada.js",
+  "main": "dist/Ada.js",
   "repository": "github:cardano-foundation/ledgerjs-hw-app-cardano",
   "keywords": [
     "Ledger",
