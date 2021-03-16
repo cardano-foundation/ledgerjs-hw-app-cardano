@@ -1,4 +1,4 @@
-import type { Certificate, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import type { Certificate, MultiHostRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
 import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
@@ -134,18 +134,12 @@ const poolOwnerVariationSet = {
   twoCombinedOwners: [stakingPathOwners.owner0, stakingHashOwners.owner0],
 };
 
-// FIXME: When did the tests for unused relays disappear?
 const relays: Record<
   | 'singleHostIPV4Relay0'
   | 'singleHostIPV4Relay1'
-  // | 'singleHostIPV4RelayMissingPort'
-  // | 'singleHostIPV4RelayMissingIpv4'
   | 'singleHostIPV6Relay'
   | 'singleHostNameRelay'
-  // | 'singleHostNameRelayMissingPort'
-  // | 'singleHostNameRelayMissingDns'
   | 'multiHostNameRelay'
-  // | 'multiHostNameRelayMissingDns'
   , Relay
 > = {
   singleHostIPV4Relay0: {
@@ -164,26 +158,6 @@ const relays: Record<
       ipv6: null,
     },
   },
-  /*
-  singleHostIPV4RelayMissingPort: {
-    type: RelayType.SINGLE_HOST_IP_ADDR,
-    params: {
-      portNumber: null,
-      ipv4: "54.228.75.154", // "36e44b9a"
-      ipv6: null,
-    },
-  },
-  */
-  /*
-   singleHostIPV4RelayMissingIpv4: {
-     type: RelayType.SINGLE_HOST_IP_ADDR,
-     params: {
-       portNumber: 3000,
-       ipv4: null,
-       ipv6: null,
-     },
-   },
-   */
   singleHostIPV6Relay: {
     type: RelayType.SINGLE_HOST_IP_ADDR,
     params: {
@@ -199,39 +173,77 @@ const relays: Record<
       dnsName: "aaaa.bbbb.com",
     },
   },
-  /*
-  singleHostNameRelayMissingPort: {
-    type: RelayType.SINGLE_HOST_HOSTNAME,
-    params: {
-      portNumber: null,
-      dnsName: "aaaa.bbbb.com",
-    },
-  },
-  */
-  /*
-   singleHostNameRelayMissingDns: {
-     type: RelayType.SINGLE_HOST_HOSTNAME,
-     params: {
-       portNumber: 3000,
-       dnsName: null,
-     } as any as SingleHostHostnameRelayParams,
-   },
-   */
   multiHostNameRelay: {
     type: RelayType.MULTI_HOST,
     params: {
       dnsName: "aaaa.bbbc.com",
     },
   },
+}
+
+
+type InvalidRelayTestcase = {
+  testname: string,
+  relay: Relay,
+  rejectReason: InvalidDataReason
+}
+export const invalidRelayTestcases: InvalidRelayTestcase[] = [
   /*
-  multiHostNameRelayMissingDns: {
-    type: RelayType.MULTI_HOST,
-    params: {
-      dnsName: null,
-    } as any as MultiHostRelayParams,
+  {
+    testname: "SingleHostIpAddr missing port",
+    relay: {
+      type: RelayType.SINGLE_HOST_IP_ADDR,
+      params: {
+        portNumber: null,
+        ipv4: "54.228.75.154", // "36e44b9a"
+        ipv6: null,
+      },
+    },
+  },
+  {
+    testname: "SingleHostIpAddr missing both ipv4 & ipv6",
+    relay: {
+      type: RelayType.SINGLE_HOST_IP_ADDR,
+      params: {
+        portNumber: 3000,
+        ipv4: null,
+        ipv6: null,
+      },
+    },
+  },
+  {
+    testname: "SingleHostHostname missing port",
+    relay: {
+      type: RelayType.SINGLE_HOST_HOSTNAME,
+      params: {
+        portNumber: null,
+        dnsName: "aaaa.bbbb.com",
+      },
+    },
   },
   */
-}
+  {
+    testname: "SingleHostHostname missing dns",
+    relay: {
+      type: RelayType.SINGLE_HOST_HOSTNAME,
+      params: {
+        portNumber: 3000,
+        dnsName: null,
+      } as any as SingleHostHostnameRelayParams,
+    },
+    rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
+  },
+  {
+    testname: "MultiHost missing dns",
+    relay: {
+      type: RelayType.MULTI_HOST,
+      params: {
+        dnsName: null,
+      } as any as MultiHostRelayParams,
+    },
+    rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
+  }
+]
 
 // No need for explicit type
 const relayVariationSet = {
@@ -257,7 +269,7 @@ const relayVariationSet = {
   ],
 };
 
-const defaultPoolRegistration: PoolRegistrationParams = {
+export const defaultPoolRegistration: PoolRegistrationParams = {
   poolKeyHashHex: "13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad",
   vrfKeyHashHex:
     "07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450",
