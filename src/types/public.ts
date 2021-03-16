@@ -1,5 +1,5 @@
 /**
- * @description Type for 64-bit integers.
+ * Type for 64-bit integers.
  * 
  * We accept either
  * - `Number` (if it is less than Number.MAX_SAFE_INTEGER)
@@ -17,10 +17,30 @@ export type bigint_like = number | bigint | string
  *  @see [[DeviceOwnedAddress]]
  */
 export enum AddressType {
+    /**
+     * Shelley base address
+     * @see [[AddressParamsBase]]
+     */
     BASE = 0b0000,
+    /**
+     * Shelley pointer address
+     * @see [[AddressParamsPointer]]
+     */
     POINTER = 0b0100,
+    /**
+     * Shelley enterprise address
+     * @see [[AddressParamsEnterprise]]
+     */
     ENTERPRISE = 0b0110,
+    /**
+     * Byron address
+     * @see [[AddressParamsByron]]
+     */
     BYRON = 0b1000,
+    /**
+     * Shelley staking rewards address
+     * @see [[AddressParamsReward]]
+     */
     REWARD = 0b1110,
 }
 
@@ -30,9 +50,25 @@ export enum AddressType {
  * @see [[Certificate]]
  */
 export enum CertificateType {
+    /**
+     * Staking key registration certificate.
+     * @see [[StakeRegistrationParams]]
+     */
     STAKE_REGISTRATION = 0,
+    /**
+     * Staking key deregistration certificate
+     * @see [[StakeDeregistrationParams]]
+     */
     STAKE_DEREGISTRATION = 1,
+    /**
+     * Stake delegation certificate
+     * @see [[StakeDelegationParams]]
+     */
     STAKE_DELEGATION = 2,
+    /**
+     * Stake pool registration certificate
+     * @see [[PoolRegistrationParams]]
+     */
     STAKE_POOL_REGISTRATION = 3,
 }
 
@@ -42,8 +78,20 @@ export enum CertificateType {
  * @see [[Relay]]
  */
 export const enum RelayType {
+    /**
+     * Relay is a single host specified with IPv4 or IPv6
+     * @see [[SingleHostIpAddrRelayParams]]
+     */
     SINGLE_HOST_IP_ADDR = 0,
+    /**
+     * Relay is a single host specified as dns name
+     * @see [[SingleHostHostnameRelayParams]]
+     */
     SINGLE_HOST_HOSTNAME = 1,
+    /**
+     * Relay is multiple hosts reachable under dns name
+     * @see [[MultiHostRelayParams]]
+     */
     MULTI_HOST = 2,
 }
 
@@ -178,9 +226,13 @@ export type AddressParamsReward = {
  * @see [[Transaction]]
  */
 export type TxInput = {
-    /** UTxO hash */
+    /**
+     * UTxO's hash of the transaction
+     */
     txHashHex: string,
-    /** UTxO output number */
+    /**
+     * UTxO's transaction output index
+     */
     outputIndex: number,
     /**
      * Describes path used for witnessing this UTxO. The API will sign transaction with this path.
@@ -221,11 +273,18 @@ export type AssetGroup = {
  * @see [[Transaction]]
  */
 export type TxOutput = {
-    /** amount in Lovelace */
+    /**
+     * Output amount.
+     * Specified in Lovelace
+     */
     amount: bigint_like
-    /** additional assets sent to the output */
+    /**
+     * Additional assets sent to the output
+     */
     tokenBundle?: Array<AssetGroup> | null
-    /** destination of the output */
+    /**
+     * Destination address of the output
+     */
     destination: TxOutputDestination
 }
 
@@ -235,9 +294,17 @@ export type TxOutput = {
  * @see [[TxOutputDestination]]
  */
 export enum TxOutputDestinationType {
-    /** For addresses not owned by the device */
+    /**
+     * Destination is an address not owned by the device.
+     * Device will show this address in the review screen.
+     * @see [[ThirdPartyAddressParams]]
+     */
     THIRD_PARTY = 'third_party',
-    /** For address owned by the device. Device will not show the address (unles it seems fishy) */
+    /**
+     * Destination is an address owned by the device.
+     * Device will not show the address (unles it seems fishy)
+     * @see [[DeviceOwnedAddress]]
+     */
     DEVICE_OWNED = 'device_owned',
 }
 
@@ -247,7 +314,9 @@ export enum TxOutputDestinationType {
  * @see [[TxOutputDestination]]
  */
 export type ThirdPartyAddressParams = {
-    /** Byron or Shelley address in raw hex format (without bech32/base58 encoding) */
+    /**
+     * Byron or Shelley address in raw hex format (without bech32/base58 encoding)
+     */
     addressHex: string
 }
 
@@ -284,7 +353,15 @@ export type BlockchainPointer = {
  * @category Pool registration certificate
  */
 export enum PoolOwnerType {
+    /**
+     * Pool owner is third party
+     * @see [[PoolOwnerThirdPartyParams]]
+     */
     THIRD_PARTY = 'third_party',
+    /**
+     * Pool owner is this device
+     * @see [[PoolOwnerDeviceOwnedParams]]
+     */
     DEVICE_OWNED = 'device_owned',
 }
 /**
@@ -327,15 +404,19 @@ export type PoolOwnerDeviceOwnedParams = {
  * @see [[Relay]]
  */
 export type SingleHostIpAddrRelayParams = {
-    /** TCP port of the relay. Should be 0..65535 */
+    /**
+     * TCP port of the relay.
+     * Should be 0..65535
+     */
     portNumber?: number | null,
     /**
-     * IPv4 address of the relay. Should be in string format, e.g. `"192.168.0.1"`
+     * IPv4 address of the relay.
+     * Should be in string format, e.g. `"192.168.0.1"`
      * */
     ipv4?: string | null,
     /**
-     * IPv6 address of the relay. Should be in *fully expanded* string format, e.g. 
-     * `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"`
+     * IPv6 address of the relay.
+     * Should be in *fully expanded* string format, e.g. `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"`
      * */
     ipv6?: string | null,
 };
@@ -391,8 +472,15 @@ export type PoolMetadataParams = {
  * @see [[PoolRegistrationParams]]
  */
 export type Margin = {
+    /**
+     * Numerator
+     * Must be <= denominator
+     */
     numerator: bigint_like,
-    /** Limited to maximum value of TODO */
+    /**
+     * Denominator.
+     * Limited to maximum value of 1e18
+     */
     denominator: bigint_like,
 };
 
@@ -434,7 +522,9 @@ export type StakeRegistrationParams = {
  * @see [[Certificate]]
  */
 export type StakeDeregistrationParams = {
-    /** Path to the staking key being deregistered */
+    /**
+     * Path to the staking key being deregistered
+     */
     path: BIP32Path
 }
 
@@ -444,9 +534,13 @@ export type StakeDeregistrationParams = {
  * @see [[Certificate]]
  * */
 export type StakeDelegationParams = {
-    /** Path to the staking key that wants to delegate */
+    /**
+     * Path to the staking key / reward account that wants to delegate
+     */
     path: BIP32Path
-    /** Pool ID we want to delegate to */
+    /**
+     * Pool ID user wants to delegate to
+     */
     poolKeyHashHex: string
 }
 
@@ -476,9 +570,14 @@ export type Certificate = {
  * @see [[Transaction]]
  */
 export type Withdrawal = {
-    /** Path to rewards account being withdrawn */
+    /**
+     * Path to rewards account being withdrawn
+     */
     path: BIP32Path,
-    /** Amount (in Lovelace) being withdrawn. FIXME(is this true?): Must be all of accumulated rewards */
+    /**
+     * Amount (in Lovelace) being withdrawn.
+     * Note that Amount *must* be all accumulated rewards.
+     */
     amount: bigint_like,
 };
 
@@ -486,7 +585,7 @@ export type Withdrawal = {
  * Device app flags
  * @category Basic types
  * @see [[Version]]
- * */
+ */
 export type Flags = {
     isDebug: boolean,
 };
@@ -496,7 +595,7 @@ export type Flags = {
  * @category Basic types
  * @see [[Ada.getVersion]]
  * @see [[DeviceCompatibility]]
- * */
+ */
 export type Version = {
     major: number,
     minor: number,
@@ -508,7 +607,7 @@ export type Version = {
  * Describes compatibility of device with current SDK
  * @category Basic types
  * @see [[Ada.getVersion]]
- * */
+ */
 export type DeviceCompatibility = {
     /** Overall compatibility.
      * - true if SDK somewhat supports device
@@ -531,7 +630,10 @@ export type DeviceCompatibility = {
  * @category Basic types
  */
 export type Serial = {
-    /** Serial number of the device. TODO: is this ascii? hex? */
+    /**
+     * Serial is a Ledger device identifier.
+     * It is 7 bytes long, which is represented here as 14-character hex string
+     */
     serial: string,
 };
 
@@ -584,12 +686,12 @@ export type SignedTransactionData = {
     txHashHex: string,
     /**
      * List of witnesses. Caller should assemble full transaction to be submitted to the network.
-     * */
+     */
     witnesses: Array<Witness>,
 };
 
 /**
- * @description Represents transaction to be signed by the device.
+ * Represents transaction to be signed by the device.
  * @category Basic types
  * @see [[Ada.signTransaction]]
  */
