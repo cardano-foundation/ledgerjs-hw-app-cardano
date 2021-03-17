@@ -1,8 +1,13 @@
-import type { Certificate, SignedTransactionData, Transaction, TxOutput, Withdrawal } from "../../../src/Ada";
+import type { SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada";
 import { AddressType, CertificateType, Networks, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
-export const inputs = {
+export const inputs: Record<
+  | 'utxoByron'
+  | 'utxoShelley'
+  | 'utxoNonReasonable'
+  , TxInput
+> = {
   utxoByron: {
     txHashHex:
       "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
@@ -26,142 +31,183 @@ export const inputs = {
 const base58_to_hex = (str: string): string => utils.buf_to_hex(utils.base58_decode(str))
 const bech32_to_hex = (str: string): string => utils.buf_to_hex(utils.bech32_decodeAddress(str))
 
-export const outputs: Record<string, TxOutput> = {
+const destinations: Record<
+  | 'externalByronMainnet'
+  | 'externalByronDaedalusMainnet'
+  | 'externalByronTestnet'
+  | 'externalShelley'
+  | 'externalShelleyScripthash'
+  | 'internalBaseWithStakingKeyHash'
+  | 'internalBaseWithStakingPath'
+  | 'internalBaseWithStakingPathNonReasonable'
+  | 'internalEnterprise'
+  | 'internalPointer'
+  | 'multiassetThirdParty'
+  , TxOutputDestination
+> = {
   externalByronMainnet: {
-    amount: 3003112,
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: base58_to_hex(
-          "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
-        ),
-      }
+    type: TxOutputDestinationType.THIRD_PARTY,
+    params: {
+      addressHex: base58_to_hex(
+        "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
+      ),
     }
-
   },
   externalByronDaedalusMainnet: {
-    amount: 3003112,
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: base58_to_hex(
-          "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
-        ),
-      }
+    type: TxOutputDestinationType.THIRD_PARTY,
+    params: {
+      addressHex: base58_to_hex(
+        "DdzFFzCqrht7HGoJ87gznLktJGywK1LbAJT2sbd4txmgS7FcYLMQFhawb18ojS9Hx55mrbsHPr7PTraKh14TSQbGBPJHbDZ9QVh6Z6Di"
+      ),
     }
   },
   externalByronTestnet: {
-    amount: 3003112,
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: base58_to_hex(
-          "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
-        ),
-      }
+    type: TxOutputDestinationType.THIRD_PARTY,
+    params: {
+      addressHex: base58_to_hex(
+        "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
+      ),
     }
   },
   externalShelley: {
-    amount: 1,
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: bech32_to_hex(
-          "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
-        )
-      }
+    type: TxOutputDestinationType.THIRD_PARTY,
+    params: {
+      addressHex: bech32_to_hex(
+        "addr1q97tqh7wzy8mnx0sr2a57c4ug40zzl222877jz06nt49g4zr43fuq3k0dfpqjh3uvqcsl2qzwuwsvuhclck3scgn3vya5cw5yhe5vyg5x20akz"
+      )
     }
-
   },
   externalShelleyScripthash: {
-    amount: 1,
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: bech32_to_hex(
-          "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
-        ),
-      }
+    type: TxOutputDestinationType.THIRD_PARTY,
+    params: {
+      addressHex: bech32_to_hex(
+        "addr_test1zp0z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304rfw6j2jxnwq6enuzvt0lp89wgcsufj7mvcnxpzgkd4hz70z3h2pnc8lhq8r"
+      ),
     }
   },
   internalBaseWithStakingKeyHash: {
-    amount: 7120787,
-    destination: {
-      type: TxOutputDestinationType.DEVICE_OWNED,
+    type: TxOutputDestinationType.DEVICE_OWNED,
+    params: {
+      type: AddressType.BASE,
       params: {
-        type: AddressType.BASE,
-        params: {
-          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-          stakingKeyHashHex:
-            "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
-        }
+        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+        stakingKeyHashHex:
+          "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
       }
     }
   },
   internalBaseWithStakingPath: {
-    destination: {
-      type: TxOutputDestinationType.DEVICE_OWNED,
+    type: TxOutputDestinationType.DEVICE_OWNED,
+    params: {
+      type: AddressType.BASE,
       params: {
-        type: AddressType.BASE,
-        params: {
-          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
-        }
+        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+        stakingPath: str_to_path("1852'/1815'/0'/2/0"),
       }
-    },
+    }
+  },
+  internalBaseWithStakingPathNonReasonable: {
+    type: TxOutputDestinationType.DEVICE_OWNED,
+    params: {
+      type: AddressType.BASE,
+      params: {
+        spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
+        stakingPath: str_to_path("1852'/1815'/456'/2/0"),
+      }
+    }
+  },
+  internalEnterprise: {
+    type: TxOutputDestinationType.DEVICE_OWNED,
+    params: {
+      type: AddressType.ENTERPRISE,
+      params: {
+        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+      }
+    }
+  },
+  internalPointer: {
+    type: TxOutputDestinationType.DEVICE_OWNED,
+    params: {
+      type: AddressType.POINTER,
+      params: {
+        spendingPath: str_to_path("1852'/1815'/0'/0/0"),
+        stakingBlockchainPointer: {
+          blockIndex: 1,
+          txIndex: 2,
+          certificateIndex: 3,
+        },
+      }
+    }
+  },
+  multiassetThirdParty: {
+    type: TxOutputDestinationType.THIRD_PARTY,
+    params: {
+      addressHex: bech32_to_hex(
+        "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
+      ),
+    }
+  },
+}
+
+export const outputs: Record<
+  | 'externalByronMainnet'
+  | 'externalByronDaedalusMainnet'
+  | 'externalByronTestnet'
+  | 'externalShelley'
+  | 'externalShelleyScripthash'
+  | 'internalBaseWithStakingKeyHash'
+  | 'internalBaseWithStakingPath'
+  | 'internalBaseWithStakingPathNonReasonable'
+  | 'internalEnterprise'
+  | 'internalPointer'
+  | 'multiassetOneToken'
+  | 'multiassetManyTokens'
+  | 'multiassetChange'
+  | 'multiassetBigNumber'
+  , TxOutput
+> = {
+  externalByronMainnet: {
+    amount: 3003112,
+    destination: destinations.externalByronMainnet
+  },
+  externalByronDaedalusMainnet: {
+    amount: 3003112,
+    destination: destinations.externalByronDaedalusMainnet
+  },
+  externalByronTestnet: {
+    amount: 3003112,
+    destination: destinations.externalByronTestnet
+  },
+  externalShelley: {
+    amount: 1,
+    destination: destinations.externalShelley
+  },
+  externalShelleyScripthash: {
+    amount: 1,
+    destination: destinations.externalShelleyScripthash
+  },
+  internalBaseWithStakingKeyHash: {
+    amount: 7120787,
+    destination: destinations.internalBaseWithStakingKeyHash
+  },
+  internalBaseWithStakingPath: {
+    destination: destinations.internalBaseWithStakingPath,
     amount: 7120787,
   },
   internalBaseWithStakingPathNonReasonable: {
-    destination: {
-      type: TxOutputDestinationType.DEVICE_OWNED,
-      params: {
-        type: AddressType.BASE,
-        params: {
-          spendingPath: str_to_path("1852'/1815'/456'/0/5000000"),
-          stakingPath: str_to_path("1852'/1815'/456'/2/0"),
-        }
-      }
-    },
-    amount: "7120787",
+    destination: destinations.internalBaseWithStakingPathNonReasonable,
+    amount: 7120787,
   },
   internalEnterprise: {
-    destination: {
-      type: TxOutputDestinationType.DEVICE_OWNED,
-      params: {
-        type: AddressType.ENTERPRISE,
-        params: {
-          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-        }
-      }
-    },
-    amount: "7120787",
+    destination: destinations.internalEnterprise,
+    amount: 7120787,
   },
   internalPointer: {
-    destination: {
-      type: TxOutputDestinationType.DEVICE_OWNED,
-      params: {
-        type: AddressType.POINTER,
-        params: {
-          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-          stakingBlockchainPointer: {
-            blockIndex: 1,
-            txIndex: 2,
-            certificateIndex: 3,
-          },
-        }
-      }
-    },
+    destination: destinations.internalPointer,
     amount: 7120787,
   },
   multiassetOneToken: {
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: bech32_to_hex(
-          "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
-        ),
-      }
-    },
+    destination: destinations.multiassetThirdParty,
     amount: 1234,
     tokenBundle: [
       {
@@ -176,14 +222,7 @@ export const outputs: Record<string, TxOutput> = {
     ],
   },
   multiassetManyTokens: {
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: bech32_to_hex(
-          "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
-        ),
-      }
-    },
+    destination: destinations.multiassetThirdParty,
     amount: "1234",
     tokenBundle: [
       {
@@ -211,16 +250,7 @@ export const outputs: Record<string, TxOutput> = {
     ],
   },
   multiassetChange: {
-    destination: {
-      type: TxOutputDestinationType.DEVICE_OWNED,
-      params: {
-        type: AddressType.BASE,
-        params: {
-          spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
-        }
-      }
-    },
+    destination: destinations.internalBaseWithStakingPath,
     amount: "1234",
     tokenBundle: [
       {
@@ -235,14 +265,7 @@ export const outputs: Record<string, TxOutput> = {
     ],
   },
   multiassetBigNumber: {
-    destination: {
-      type: TxOutputDestinationType.THIRD_PARTY,
-      params: {
-        addressHex: bech32_to_hex(
-          "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
-        ),
-      }
-    },
+    destination: destinations.multiassetThirdParty,
     amount: "24103998870869519",
     tokenBundle: [
       {
@@ -255,35 +278,6 @@ export const outputs: Record<string, TxOutput> = {
         ],
       },
     ],
-  },
-};
-
-export const certificates: Record<string, Certificate> = {
-  stakeRegistration: {
-    type: CertificateType.STAKE_REGISTRATION,
-    params: {
-      path: str_to_path("1852'/1815'/0'/2/0"),
-    }
-  },
-  stakeDeregistration: {
-    type: CertificateType.STAKE_DEREGISTRATION,
-    params: {
-      path: str_to_path("1852'/1815'/0'/2/0"),
-    }
-  },
-  stakeDelegation: {
-    type: CertificateType.STAKE_DELEGATION,
-    params: {
-      path: str_to_path("1852'/1815'/0'/2/0"),
-      poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
-    }
-  },
-};
-
-export const withdrawals: Record<string, Withdrawal> = {
-  withdrawal0: {
-    path: str_to_path("1852'/1815'/0'/2/0"),
-    amount: "111",
   },
 };
 
@@ -515,7 +509,12 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx with withdrawal",
     tx: {
       ...shelleyBase,
-      withdrawals: [withdrawals.withdrawal0],
+      withdrawals: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          amount: 111,
+        },
+      ],
     },
     txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aa" +
       "d1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1" +
@@ -542,7 +541,14 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx with a stake registration certificate",
     tx: {
       ...shelleyBase,
-      certificates: [certificates.stakeRegistration],
+      certificates: [
+        {
+          type: CertificateType.STAKE_REGISTRATION,
+          params: {
+            path: str_to_path("1852'/1815'/0'/2/0"),
+          }
+        }
+      ],
     },
     txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
       "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
@@ -569,7 +575,15 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx with a stake delegation certificate",
     tx: {
       ...shelleyBase,
-      certificates: [certificates.stakeDelegation],
+      certificates: [
+        {
+          type: CertificateType.STAKE_DELEGATION,
+          params: {
+            path: str_to_path("1852'/1815'/0'/2/0"),
+            poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
+          }
+        }
+      ],
     },
     txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
       "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
@@ -597,7 +611,14 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx with a stake deregistration certificate",
     tx: {
       ...shelleyBase,
-      certificates: [certificates.stakeDeregistration],
+      certificates: [
+        {
+          type: CertificateType.STAKE_DEREGISTRATION,
+          params: {
+            path: str_to_path("1852'/1815'/0'/2/0"),
+          }
+        }
+      ],
     },
     txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
       "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
@@ -624,7 +645,20 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx and filter out witnesses with duplicate paths",
     tx: {
       ...shelleyBase,
-      certificates: [certificates.stakeDeregistration, certificates.stakeDeregistration],
+      certificates: [
+        {
+          type: CertificateType.STAKE_DEREGISTRATION,
+          params: {
+            path: str_to_path("1852'/1815'/0'/2/0"),
+          }
+        },
+        {
+          type: CertificateType.STAKE_DEREGISTRATION,
+          params: {
+            path: str_to_path("1852'/1815'/0'/2/0"),
+          }
+        }
+      ],
     },
     result: {
       txHashHex:

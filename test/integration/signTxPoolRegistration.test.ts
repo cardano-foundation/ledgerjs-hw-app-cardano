@@ -1,15 +1,17 @@
 import chai, { expect } from "chai"
 import chaiAsPromised from "chai-as-promised"
 
+import type { Certificate, Transaction } from "../../src/Ada";
 import type Ada from "../../src/Ada";
-import type { Transaction } from "../../src/Ada";
-import { InvalidDataReason } from "../../src/Ada";
+import { CertificateType, InvalidDataReason } from "../../src/Ada";
 import { getAda, Networks } from "../test_utils";
 import {
   certificates,
+  defaultPoolRegistration,
   inputs,
   invalidCertificates,
   invalidPoolMetadataTestcases,
+  invalidRelayTestcases,
   outputs,
   poolRegistrationTestcases,
   withdrawals,
@@ -68,21 +70,41 @@ describe("signTxPoolRegistrationReject", async () => {
 
   for (const { testName, metadata, rejectReason } of invalidPoolMetadataTestcases) {
     it(`Should reject ${testName}`, async () => {
-      const cert = {
-        ...certificates.poolRegistrationDefault,
+      const cert: Certificate = {
+        type: CertificateType.STAKE_POOL_REGISTRATION,
         params: {
-          ...certificates.poolRegistrationDefault.params,
+          ...defaultPoolRegistration,
           metadata,
         },
       };
 
       const promise = ada.signTransaction({
         ...txBase,
-        certificates: [cert as any],
+        certificates: [cert],
       });
       await expect(promise).to.be.rejectedWith(rejectReason);
     });
   }
+
+  describe("Should reject pool registration with invalid relays", async () => {
+    for (const { testname, relay, rejectReason } of invalidRelayTestcases) {
+      it(testname, async () => {
+        const cert: Certificate = {
+          type: CertificateType.STAKE_POOL_REGISTRATION,
+          params: {
+            ...defaultPoolRegistration,
+            relays: [relay],
+          }
+        }
+        const promise = ada.signTransaction({
+          ...txBase,
+          certificates: [cert]
+        }
+        );
+        await expect(promise).to.be.rejectedWith(rejectReason)
+      })
+    }
+  });
 
 
   it("Should reject pool registration with numerator bigger than denominator", async () => {
