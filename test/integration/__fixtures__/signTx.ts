@@ -1,5 +1,5 @@
 import type { SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada";
-import { AddressType, CertificateType, Networks, TxOutputDestinationType, utils } from "../../../src/Ada";
+import { AddressType, CertificateType, Networks, TransactionMetadataType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
 export const inputs: Record<
@@ -681,7 +681,12 @@ export const testsShelleyOther: TestcaseShelley[] = [
     testname: "Should correctly sign tx with nonempty metadata",
     tx: {
       ...shelleyBase,
-      metadataHashHex: "deadbeef".repeat(8)
+      metadata: {
+        type: TransactionMetadataType.ARBITRARY_HASH,
+        params: {
+          metadataHashHex: "deadbeef".repeat(8)
+        }
+      }
     },
     txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
       "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
@@ -705,7 +710,12 @@ export const testsShelleyOther: TestcaseShelley[] = [
       ...shelleyBase,
       inputs: [inputs.utxoNonReasonable],
       outputs: [outputs.internalBaseWithStakingPathNonReasonable],
-      metadataHashHex: "deadbeef".repeat(8)
+      metadata: {
+        type: TransactionMetadataType.ARBITRARY_HASH,
+        params: {
+          metadataHashHex: "deadbeef".repeat(8)
+        },
+      }
     },
     result: {
       txHashHex:

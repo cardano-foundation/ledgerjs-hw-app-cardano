@@ -691,6 +691,39 @@ export type SignedTransactionData = {
 };
 
 /**
+ * Kind of transaction metatada supplied to Ledger
+ * @category Basic types
+ * @see [[TransactionMetadata]]
+ */
+export enum TransactionMetadataType {
+    /** Metadata is supplied as raw hash value */
+    ARBITRARY_HASH = 'arbitrary_hash',
+
+    // CatalystVoting = 'catalyst_voting'
+}
+
+/**
+ * Specifies transaction metadata.
+ * Metadata can be supplied to Ledger in multiple forms.
+ * @category Basic types
+ * @see [[TransactionMetadataType]]
+ */
+export type TransactionMetadata =
+    {
+        type: TransactionMetadataType.ARBITRARY_HASH
+        params: MetadataArbitraryHashParams
+    }
+
+/**
+ * Metadata is supplied as raw hash. Ledger will just display this hash to the user
+ * @see [[TransactionMetadata]]
+ */
+export type MetadataArbitraryHashParams = {
+    /** Hash of the transaction metadata */
+    metadataHashHex: string
+}
+
+/**
  * Represents transaction to be signed by the device.
  * @category Basic types
  * @see [[Ada.signTransaction]]
@@ -727,10 +760,9 @@ export type Transaction = {
      */
     withdrawals?: Array<Withdrawal> | null,
     /**
-     * Hash of transaction metadata (if any).
-     * Note that Ledger cannot display full transaction metadata, it can only display their hash.
+     * Transaction metadata (if any)
      */
-    metadataHashHex?: string | null,
+    metadata?: TransactionMetadata | null,
     /**
      * Validity start (block height) if any.
      * Transaction becomes valid only starting from this block height.

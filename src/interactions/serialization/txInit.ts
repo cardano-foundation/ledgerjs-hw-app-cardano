@@ -30,7 +30,7 @@ export function serializeTxInit(tx: ParsedTransaction, numWitnesses: number) {
         uint8_to_buf(tx.network.networkId),
         uint32_to_buf(tx.network.protocolMagic),
         _serializeOptionFlag(tx.ttl != null),
-        _serializeOptionFlag(tx.metadataHashHex != null),
+        _serializeOptionFlag(tx.metadata != null),
         _serializeOptionFlag(tx.validityIntervalStart != null),
         _serializePoolRegistrationCode(tx.isSigningPoolRegistrationAsOwner),
         uint32_to_buf(tx.inputs.length as Uint32_t),
