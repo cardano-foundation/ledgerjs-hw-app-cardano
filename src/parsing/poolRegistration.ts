@@ -19,7 +19,7 @@ import { hex_to_buf } from "../utils/serialize";
 import { MAX_LOVELACE_SUPPLY_STR, POOL_REGISTRATION_OWNERS_MAX, POOL_REGISTRATION_RELAYS_MAX } from "./constants";
 
 function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
-    const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000.000000".replace(/[ .]/, "")
+    const POOL_MARGIN_DENOMINATOR_MAX_STR = "1 000 000 000 000 000 000".replace(/[ ]/, "")
 
     const marginDenominator = parseUint64_str(
         params.denominator,
