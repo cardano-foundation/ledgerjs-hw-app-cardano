@@ -1,3 +1,4 @@
+import type { TransactionMetadataType } from './public';
 import { AddressType, CertificateType, PoolOwnerType, RelayType } from './public'
 
 // Basic primitives
@@ -15,7 +16,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, RelayType, PoolOwnerType }
+export { AddressType, CertificateType, RelayType, PoolOwnerType, TransactionMetadataType }
 export { Version, DeviceCompatibility } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
@@ -55,6 +56,11 @@ export type ParsedNetwork = {
     networkId: Uint8_t
 }
 
+export type ParsedMetadata = {
+    type: TransactionMetadataType.ARBITRARY_HASH
+    metadataHashHex: FixlenHexString<32>
+}
+
 export type ParsedTransaction = {
     network: ParsedNetwork
     inputs: ParsedInput[]
@@ -63,7 +69,7 @@ export type ParsedTransaction = {
     ttl: Uint64_str | null
     certificates: ParsedCertificate[]
     withdrawals: ParsedWithdrawal[]
-    metadataHashHex: FixlenHexString<32> | null
+    metadata: ParsedMetadata | null
     validityIntervalStart: Uint64_str | null
     isSigningPoolRegistrationAsOwner: boolean
 }

@@ -1,6 +1,6 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
-import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
+import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
 import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "../types/internal";
 import type {
     AssetGroup,
@@ -8,13 +8,15 @@ import type {
     Network,
     Token,
     Transaction,
+    TransactionMetadata,
     TxInput,
     TxOutput,
     TxOutputDestination,
     Withdrawal
 } from "../types/public";
 import {
-    TxOutputDestinationType,
+    TransactionMetadataType,
+    TxOutputDestinationType
 } from "../types/public";
 import { parseBIP32Path } from "../utils/parse";
 import { isArray, validate } from "../utils/parse";
@@ -62,6 +64,19 @@ function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 }
 
+function parseTxMetadata(metadata: TransactionMetadata): ParsedMetadata {
+    switch (metadata.type) {
+        case TransactionMetadataType.ARBITRARY_HASH: {
+            return {
+                type: TransactionMetadataType.ARBITRARY_HASH,
+                metadataHashHex: parseHexStringOfLength(metadata.params.metadataHashHex, 32, InvalidDataReason.METADATA_INVALID_HASH)
+            }
+        }
+        default:
+            throw new InvalidData(InvalidDataReason.METADATA_UNKNOWN_TYPE)
+    }
+}
+
 export function parseTransaction(tx: Transaction): ParsedTransaction {
     const network = parseNetwork(tx.network)
 
@@ -90,9 +105,9 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     const withdrawals = (tx.withdrawals ?? []).map(w => parseWithdrawal(w))
 
     // metadata
-    const metadataHashHex = tx.metadataHashHex == null
+    const metadata = tx.metadata == null
         ? null
-        : parseHexStringOfLength(tx.metadataHashHex, 32, InvalidDataReason.METADATA_INVALID)
+        : parseTxMetadata(tx.metadata)
 
     // validity start
     const validityIntervalStart = tx.validityIntervalStart == null
@@ -124,7 +139,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         inputs,
         outputs,
         ttl,
-        metadataHashHex,
+        metadata,
         validityIntervalStart: validityIntervalStart,
         withdrawals,
         certificates,

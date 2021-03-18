@@ -1,6 +1,7 @@
-import type { HexString, ParsedCertificate, ParsedInput, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
+import type { ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
 import { CertificateType, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
-import type { SignedTransactionData } from '../types/public'
+import type { SignedTransactionData } from '../types/public';
+import { TransactionMetadataType } from '../types/public'
 import { assert } from "../utils/assert";
 import { buf_to_hex, } from "../utils/serialize";
 import { INS } from "./common/ins";
@@ -221,15 +222,16 @@ function* signTx_setTtl(
 }
 
 function* signTx_setMetadata(
-  metadataHashHex: HexString
+  metadata: ParsedMetadata
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
+  assert(metadata.type === TransactionMetadataType.ARBITRARY_HASH, 'Metadata type not implemented')
   yield send({
     p1: P1.STAGE_METADATA,
     p2: P2.UNUSED,
-    data: serializeTxMetadata(metadataHashHex),
+    data: serializeTxMetadata(metadata.metadataHashHex),
     expectedResponseLength: 0,
   });
 }
@@ -363,8 +365,8 @@ export function* signTransaction(version: Version, tx: ParsedTransaction): Inter
   }
 
   // metadata
-  if (tx.metadataHashHex != null) {
-    yield* signTx_setMetadata(tx.metadataHashHex);
+  if (tx.metadata != null) {
+    yield* signTx_setMetadata(tx.metadata);
   }
 
   // validity start
