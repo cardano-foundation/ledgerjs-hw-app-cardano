@@ -7,8 +7,6 @@ export enum InvalidDataReason {
   GET_EXT_PUB_KEY_PATHS_NOT_ARRAY = "ext pub key paths not an array",
   INVALID_PATH = "invalid path",
 
-  ADDRESS_INVALID_TYPE = "invalid address type nibble",
-
   NETWORK_INVALID_PROTOCOL_MAGIC = "invalid protocol magic",
   NETWORK_INVALID_NETWORK_ID = "invalid network id",
 
@@ -36,11 +34,11 @@ export enum InvalidDataReason {
   OUTPUT_WITH_PATH =
   "outputs given by path are not allowed for stake pool registration transactions",
 
-  ADDRESS_UNKNOWN_TYPE = "unknown output type",
-  ADDRESS_INVALID_SPENDING_PATH = "invalid spending path in an output",
-  ADDRESS_INVALID_BLOCKCHAIN_POINTER = "invalid blockchain pointer in an output",
-  ADDRESS_INVALID_STAKING_KEY_PATH = "invalid staking key path in an output",
-  ADDRESS_INVALID_STAKING_KEY_HASH = "invalid staking key hash in an output",
+  ADDRESS_UNKNOWN_TYPE = "unknown address type",
+  ADDRESS_INVALID_SPENDING_PATH = "invalid address spending path",
+  ADDRESS_INVALID_BLOCKCHAIN_POINTER = "invalid address blockchain pointer",
+  ADDRESS_INVALID_STAKING_KEY_PATH = "invalid address staking key path",
+  ADDRESS_INVALID_STAKING_KEY_HASH = "invalid address staking key hash",
   ADDRESS_INVALID_STAKING_INFO = "Invalid staking info in an output",
 
   FEE_INVALID = "invalid fee",
@@ -51,15 +49,10 @@ export enum InvalidDataReason {
   CERTIFICATES_COMBINATION_FORBIDDEN =
   "pool registration must not be combined with other certificates",
   CERTIFICATE_MISSING_PATH = "path is required for one of the certificates",
-  CERTIFICATE_SUPERFLUOUS_PATH = "superfluous path in a certificate",
   CERTIFICATE_MISSING_POOL_KEY_HASH = "pool key hash missing in a certificate",
   CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH =
   "superfluous pool key hash in a certificate",
-  CERTIFICATE_INVALID_POOL_KEY_HASH = "invalid pool key hash in a certificate",
   CERTIFICATE_INVALID = "invalid certificate",
-
-  CERTIFICATE_POOL_MISSING_POOL_PARAMS =
-  "missing stake pool params in a pool registration certificate",
 
   POOL_REGISTRATION_INVALID_POOL_KEY_HASH =
   "invalid pool key hash in a pool registration certificate",
@@ -75,8 +68,6 @@ export enum InvalidDataReason {
   "pool margin denominator must be a value between 1 and 10^15",
   POOL_REGISTRATION_INVALID_REWARD_ACCOUNT =
   "invalid reward account in a pool registration certificate",
-  POOL_REGISTRATION_OWNERS_NOT_ARRAY =
-  "owners not an array in a pool registration certificate",
   POOL_REGISTRATION_OWNERS_TOO_MANY =
   "too many owners in a pool registration certificate",
   POOL_REGISTRATION_OWNERS_SINGLE_PATH =
@@ -87,8 +78,6 @@ export enum InvalidDataReason {
   "invalid owner path in a pool registration certificate",
   POOL_OWNER_INVALID_KEY_HASH =
   "invalid owner key hash in a pool registration certificate",
-  POOL_REGISTRATION_RELAYS_NOT_ARRAY =
-  "relays not an array in a pool registration certificate",
   POOL_REGISTRATION_RELAYS_TOO_MANY =
   "too many pool relays in a pool registration certificate",
 
