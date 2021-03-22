@@ -15,7 +15,6 @@
  *  limitations under the License.
  ********************************************************************************/
 import type Transport from "@ledgerhq/hw-transport";
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, Transaction, Version } from 'types/public';
 
 import { DeviceStatusCodes, DeviceStatusError } from './errors';
 import { InvalidDataReason } from "./errors/invalidDataReason";
@@ -34,6 +33,7 @@ import type {
   ParsedTransaction,
   ValidBIP32Path,
 } from './types/internal';
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, Transaction, Version } from './types/public';
 import { AddressType, CertificateType, RelayType } from "./types/public"
 import utils from "./utils";
 import { assert } from './utils/assert'
