@@ -4,6 +4,7 @@
   "files": [
     "dist"
   ],
+  "types": "./dist/Ada.d.ts",
   "description": "Ledger Hardware Wallet Cardano ADA API",
   "main": "dist/Ada.js",
   "repository": "github:cardano-foundation/ledgerjs-hw-app-cardano",
