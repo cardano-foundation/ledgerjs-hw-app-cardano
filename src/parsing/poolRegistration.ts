@@ -62,10 +62,6 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
         relays.length <= POOL_REGISTRATION_RELAYS_MAX,
         InvalidDataReason.POOL_REGISTRATION_RELAYS_TOO_MANY
     );
-    validate(
-        owners.filter(o => o.type === PoolOwnerType.DEVICE_OWNED).length === 1,
-        InvalidDataReason.POOL_REGISTRATION_OWNERS_SINGLE_PATH
-    )
 
     return {
         keyHashHex,

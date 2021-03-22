@@ -725,6 +725,8 @@ export type MetadataArbitraryHashParams = {
 
 /**
  * Represents transaction to be signed by the device.
+ * Note that this represents a *superset* of what Ledger can sign due to certain hardware app/security limitations.
+ * @see [[TransactionSigningMode]] for a details on further restrictions
  * @category Basic types
  * @see [[Ada.signTransaction]]
  */
@@ -769,3 +771,71 @@ export type Transaction = {
      */
     validityIntervalStart?: bigint_like | null
 }
+
+/**
+ * Mode in which we want to sign the transaction.
+ * Ledger hardware app has certain limitations and it cannot sign arbitrary combination of all transaction features.
+ * The mode specifies which use-case the user wants to use and triggers additional validation on `tx` field.
+ * @see [[Transaction]]
+ * @see [[SigningRequest]]
+ * @category Basic types
+ */
+export enum TransactionSigningMode {
+    /**
+     * Represents an ordinary user transaction transferring funds.
+     * 
+     * The transaction
+     * - *should* have valid `path` property on all `inputs`
+     * - *must not* contain a pool registration certificate
+     * 
+     * The API witnesses
+     * - all non-null [[TxInput.path]] on `inputs`
+     * - all [[Withdrawal.path]] on `withdrawals`
+     * - all `path` properties on `certificates` for Stake registering/deregistering/delegating certificate.
+     */
+    ORDINARY_TRANSACTION = 'ordinary_transaction',
+
+    /**
+     * Represents pool registration from the perspective of pool owner.
+     * 
+     * The transaction
+     * - *must* have `path=null` on all `inputs` (i.e., we are not witnessing any UTxO)
+     * - *must* have single Pool registration certificate
+     * - *must* have single owner of type [[PoolOwnerType.DEVICE_OWNED]] on that certificate
+     * - *must not* have withdrawals
+     * 
+     * These restrictions are in place due to a possibility of maliciously signing *another* part of
+     * the transaction with the pool owner path as we are not displaying device-owned paths on the device screen.
+     * 
+     * The API witnesses
+     * - the single [[PoolOwnerDeviceOwnedParams.stakingPath]] found in pool registration
+     */
+    POOL_REGISTRATION_AS_OWNER = 'pool_registration_as_owner',
+
+    /**
+     * Reserved for future use
+     */
+    __RESEVED_POOL_REGISTRATION_AS_OPERATOR = '__pool_registration_as_operator'
+
+}
+
+/**
+ * Transaction signing request.
+ * This represents the transaction user wants to sign.
+ * Due to certain Ledger limitation, we also require user to specify a "mode" in which he/she wants to sign the transaction.
+ * @category Basic types
+ */
+export type SignTransactionRequest = {
+    /**
+     * Mode in which we want to sign the transaction.
+     * Ledger has certain limitations (see [[TransactionSigningMode]] in detail) due to which
+     * it cannot sign arbitrary combination of all transaction features.
+     * The mode specifies which use-case the user want to use and triggers additional validation on `tx` field. 
+     */
+    signingMode: TransactionSigningMode
+    /**
+     * Transaction to be signed
+     */
+    tx: Transaction
+}
+

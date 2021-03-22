@@ -11,8 +11,6 @@ export enum InvalidDataReason {
   NETWORK_INVALID_NETWORK_ID = "invalid network id",
 
   INPUTS_NOT_ARRAY = "inputs not an array",
-  INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER =
-  "inputs should not contain the witness path if signing stake pool certificate as an owner",
 
   INPUT_INVALID_TX_HASH = "invalid tx hash in an input",
   INPUT_INVALID_PATH = "invalid input path",
@@ -31,8 +29,6 @@ export enum InvalidDataReason {
 
 
   OUTPUT_INVALID_ADDRESS = "invalid address in an output",
-  OUTPUT_WITH_PATH =
-  "outputs given by path are not allowed for stake pool registration transactions",
 
   ADDRESS_UNKNOWN_TYPE = "unknown address type",
   ADDRESS_INVALID_SPENDING_PATH = "invalid address spending path",
@@ -46,13 +42,12 @@ export enum InvalidDataReason {
   TTL_INVALID = "invalid ttl",
 
   CERTIFICATES_NOT_ARRAY = "certificates not an array",
-  CERTIFICATES_COMBINATION_FORBIDDEN =
-  "pool registration must not be combined with other certificates",
+
   CERTIFICATE_MISSING_PATH = "path is required for one of the certificates",
   CERTIFICATE_MISSING_POOL_KEY_HASH = "pool key hash missing in a certificate",
   CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH =
   "superfluous pool key hash in a certificate",
-  CERTIFICATE_INVALID = "invalid certificate",
+  CERTIFICATE_INVALID_TYPE = "invalid certificate type",
 
   POOL_REGISTRATION_INVALID_POOL_KEY_HASH =
   "invalid pool key hash in a pool registration certificate",
@@ -70,8 +65,7 @@ export enum InvalidDataReason {
   "invalid reward account in a pool registration certificate",
   POOL_REGISTRATION_OWNERS_TOO_MANY =
   "too many owners in a pool registration certificate",
-  POOL_REGISTRATION_OWNERS_SINGLE_PATH =
-  "there should be exactly one owner given by path in a pool registration certificate",
+
   POOL_OWNER_INVALID_TYPE =
   "invalid owner type",
   POOL_OWNER_INVALID_PATH =
@@ -98,8 +92,6 @@ export enum InvalidDataReason {
   "invalid metadata in a pool registration certificate= invalid hash",
 
   WITHDRAWALS_NOT_ARRAY = "withdrawals not an array",
-  WITHDRAWALS_FORBIDDEN =
-  "no withdrawals allowed for transactions registering stake pools",
 
   WITHDRAWAL_INVALID_AMOUNT = "invalid withdrawal amount",
   WITHDRAWAL_INVALID_PATH = "invalid withdrawal path",
@@ -108,4 +100,18 @@ export enum InvalidDataReason {
   METADATA_INVALID_HASH = "invalid metadata hash",
 
   VALIDITY_INTERVAL_START_INVALID = "invalid validity interval start",
+
+  SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED =
+  "pool registration is not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+
+  SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
+  "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__INPUT_WITH_PATH_NOT_ALLOWED =
+  "inputs with path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED =
+  "single pool registration certificate is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED =
+  "single device-owned pool owner is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED =
+  "no withdrawals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
 }

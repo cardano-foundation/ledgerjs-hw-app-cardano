@@ -27,14 +27,14 @@ import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
 import { signTransaction } from "./interactions/signTx";
 import { parseAddress } from './parsing/address'
-import { parseTransaction, } from "./parsing/transaction";
+import { parseSignTransactionRequest } from "./parsing/transaction";
 import type {
   ParsedAddressParams,
-  ParsedTransaction,
+  ParsedSigningRequest,
   ValidBIP32Path,
 } from './types/internal';
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, Transaction, Version } from './types/public';
-import { AddressType, CertificateType, RelayType } from "./types/public"
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public';
+import { AddressType, CertificateType, RelayType, TransactionSigningMode } from "./types/public"
 import utils from "./utils";
 import { assert } from './utils/assert'
 import { isArray, parseBIP32Path, validate, } from './utils/parse';
@@ -287,19 +287,18 @@ export class Ada {
 
 
   async signTransaction(
-    tx: SignTransactionRequest
+    request: SignTransactionRequest
   ): Promise<SignTransactionResponse> {
 
-    const parsedTx = parseTransaction(tx)
+    const parsedRequest = parseSignTransactionRequest(request)
 
-
-    return interact(this._signTx(parsedTx), this._send);
+    return interact(this._signTx(parsedRequest), this._send);
   }
 
   /** @ignore */
-  * _signTx(tx: ParsedTransaction): Interaction<SignedTransactionData> {
+  * _signTx(request: ParsedSigningRequest): Interaction<SignedTransactionData> {
     const version = yield* getVersion()
-    return yield* signTransaction(version, tx)
+    return yield* signTransaction(version, request)
   }
 }
 
@@ -373,14 +372,6 @@ export type ShowAddressRequest = DeriveAddressRequest
  */
 export type GetSerialResponse = Serial
 
-
-/**
- * Sign transaction ([[Ada.signTransaction]]) request data
- * @category Main
- * @see [[SignTransactionResponse]]
- */
-export type SignTransactionRequest = Transaction
-
 /**
  * Sign transaction ([[Ada.signTransaction]]) response data
  * @category Main
@@ -390,7 +381,7 @@ export type SignTransactionResponse = SignedTransactionData
 
 // reexport
 export type { Transaction, DeviceOwnedAddress }
-export { AddressType, CertificateType, RelayType, InvalidDataReason, utils };
+export { AddressType, CertificateType, RelayType, InvalidDataReason, TransactionSigningMode, utils };
 export default Ada;
 
 /**

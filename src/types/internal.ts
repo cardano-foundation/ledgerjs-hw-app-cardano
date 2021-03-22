@@ -1,5 +1,4 @@
-import type { TransactionMetadataType } from './public';
-import { AddressType, CertificateType, PoolOwnerType, RelayType } from './public'
+import { AddressType, CertificateType, PoolOwnerType, RelayType, TransactionMetadataType, TransactionSigningMode } from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -16,7 +15,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, RelayType, PoolOwnerType, TransactionMetadataType }
+export { AddressType, CertificateType, RelayType, PoolOwnerType, TransactionMetadataType, TransactionSigningMode }
 export { Version, DeviceCompatibility } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
@@ -71,7 +70,11 @@ export type ParsedTransaction = {
     withdrawals: ParsedWithdrawal[]
     metadata: ParsedMetadata | null
     validityIntervalStart: Uint64_str | null
-    isSigningPoolRegistrationAsOwner: boolean
+}
+
+export type ParsedSigningRequest = {
+    tx: ParsedTransaction
+    signingMode: TransactionSigningMode
 }
 
 
