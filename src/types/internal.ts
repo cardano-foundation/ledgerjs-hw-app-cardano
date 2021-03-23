@@ -1,4 +1,4 @@
-import { AddressType, CertificateType, PoolOwnerType, RelayType, TransactionMetadataType, TransactionSigningMode } from './public'
+import { AddressType, CertificateType, PoolOwnerType, RelayType, TransactionMetadataType, TransactionSigningMode, TxOutputDestinationType } from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -15,7 +15,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, RelayType, PoolOwnerType, TransactionMetadataType, TransactionSigningMode }
+export { AddressType, CertificateType, RelayType, PoolOwnerType, TransactionMetadataType, TransactionSigningMode, TxOutputDestinationType }
 export { Version, DeviceCompatibility } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
@@ -200,16 +200,11 @@ type ShelleyAddressParams = {
 
 export type ParsedAddressParams = ByronAddressParams | ShelleyAddressParams
 
-export const enum TxOutputType {
-    SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES = 1,
-    SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS = 2,
-}
-
 export type OutputDestination = {
-    type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES
+    type: TxOutputDestinationType.THIRD_PARTY
     addressHex: HexString
 } | {
-    type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS
+    type: TxOutputDestinationType.DEVICE_OWNED
     addressParams: ParsedAddressParams
 }
 
