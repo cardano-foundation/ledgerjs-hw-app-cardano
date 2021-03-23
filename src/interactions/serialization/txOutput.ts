@@ -4,12 +4,6 @@ import { unreachable } from "../../utils/assert";
 import { hex_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../../utils/serialize";
 import { serializeAddressParams } from "./addressParams";
 
-
-export const SignTxIncluded = Object.freeze({
-  SIGN_TX_INCLUDED_NO: 1,
-  SIGN_TX_INCLUDED_YES: 2,
-});
-
 function serializeTxOutputDestination(destination: OutputDestination) {
   switch (destination.type) {
     case TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES:
