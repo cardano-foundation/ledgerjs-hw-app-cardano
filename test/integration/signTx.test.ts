@@ -1,6 +1,7 @@
 import { expect } from "chai";
 
 import type Ada from "../../src/Ada";
+import { TransactionSigningMode } from "../../src/Ada";
 import { getAda } from "../test_utils";
 import {
   testsAllegra,
@@ -28,7 +29,7 @@ describe("signTxOrdinaryByron", async () => {
 
   for (const { testname, tx, result: expected } of testsByron) {
     it(testname, async () => {
-      const response = await ada.signTransaction(tx)
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
     })
   }
@@ -49,14 +50,14 @@ describe("signTxOrdinaryShelley", async () => {
 
   for (const { testname, tx, result: expected } of testsShelleyOutputs) {
     it(testname, async () => {
-      const response = await ada.signTransaction(tx)
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
     })
   }
 
   for (const { testname, tx, result: expected } of testsShelleyOther) {
     it(testname, async () => {
-      const response = await ada.signTransaction(tx)
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
     })
   }
@@ -81,7 +82,7 @@ describe("signTxOrdinaryAllegra", async () => {
 
   for (const { testname, tx, result: expected } of testsAllegra) {
     it(testname, async () => {
-      const response = await ada.signTransaction(tx)
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
     })
   }
@@ -105,7 +106,7 @@ describe("signTxOrdinaryMary", async () => {
 
   for (const { testname, tx, result: expected } of testsMary) {
     it(testname, async () => {
-      const response = await ada.signTransaction(tx)
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
     })
   }

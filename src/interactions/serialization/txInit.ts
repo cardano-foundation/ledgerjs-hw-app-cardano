@@ -1,20 +1,21 @@
 import type { ParsedTransaction, Uint8_t, Uint32_t } from "../../types/internal";
+import { TransactionSigningMode } from "../../types/internal";
+import { assert } from "../../utils/assert";
 import { uint8_to_buf, uint32_to_buf } from "../../utils/serialize";
 import { SignTxIncluded } from "./txOutput";
 
-const _serializePoolRegistrationCode = (
-    isSigningPoolRegistrationAsOwner: boolean
+const _serializeSigningMode = (
+    mode: TransactionSigningMode
 ): Buffer => {
-    const PoolRegistrationCodes = {
-        SIGN_TX_POOL_REGISTRATION_NO: 3,
-        SIGN_TX_POOL_REGISTRATION_YES: 4,
-    };
+    const value = {
+        [TransactionSigningMode.ORDINARY_TRANSACTION]: 3 as Uint8_t,
+        [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: 4 as Uint8_t,
+        [TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
+    }[mode];
 
-    return uint8_to_buf(
-        (isSigningPoolRegistrationAsOwner
-            ? PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_YES
-            : PoolRegistrationCodes.SIGN_TX_POOL_REGISTRATION_NO) as Uint8_t
-    );
+    assert(value !== undefined, 'Invalid signing mode')
+
+    return uint8_to_buf(value)
 };
 
 function _serializeOptionFlag(included: boolean) {
@@ -25,14 +26,14 @@ function _serializeOptionFlag(included: boolean) {
     )
 }
 
-export function serializeTxInit(tx: ParsedTransaction, numWitnesses: number) {
+export function serializeTxInit(tx: ParsedTransaction, signingMode: TransactionSigningMode, numWitnesses: number) {
     return Buffer.concat([
         uint8_to_buf(tx.network.networkId),
         uint32_to_buf(tx.network.protocolMagic),
         _serializeOptionFlag(tx.ttl != null),
         _serializeOptionFlag(tx.metadata != null),
         _serializeOptionFlag(tx.validityIntervalStart != null),
-        _serializePoolRegistrationCode(tx.isSigningPoolRegistrationAsOwner),
+        _serializeSigningMode(signingMode),
         uint32_to_buf(tx.inputs.length as Uint32_t),
         uint32_to_buf(tx.outputs.length as Uint32_t),
         uint32_to_buf(tx.certificates.length as Uint32_t),

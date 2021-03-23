@@ -1,7 +1,7 @@
-import type { ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
+import type { ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
 import { CertificateType, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
 import type { SignedTransactionData } from '../types/public';
-import { TransactionMetadataType } from '../types/public'
+import { TransactionMetadataType, TransactionSigningMode } from '../types/public';
 import { assert } from "../utils/assert";
 import { buf_to_hex, } from "../utils/serialize";
 import { INS } from "./common/ins";
@@ -37,6 +37,7 @@ const send = (params: {
 
 function* signTx_init(
   tx: ParsedTransaction,
+  signingMode: TransactionSigningMode,
   wittnessPaths: ValidBIP32Path[],
 ): Interaction<void> {
   const enum P2 {
@@ -46,7 +47,7 @@ function* signTx_init(
   const _response = yield send({
     p1: P1.STAGE_INIT,
     p2: P2.UNUSED,
-    data: serializeTxInit(tx, wittnessPaths.length),
+    data: serializeTxInit(tx, signingMode, wittnessPaths.length),
     expectedResponseLength: 0,
   });
 }
@@ -289,51 +290,58 @@ function* signTx_getWitness(
 }
 
 
-function generateWitnessPaths(tx: ParsedTransaction): ValidBIP32Path[] {
-  if (tx.isSigningPoolRegistrationAsOwner) {
-    // there should be exactly one owner given by path which will be used for the witness
-    assert(tx.certificates.length == 1, "bad certificates length");
-    const cert = tx.certificates[0]
-    assert(cert.type === CertificateType.STAKE_POOL_REGISTRATION, "bad certificate type");
+function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
+  const { tx, signingMode } = request
+  switch (signingMode) {
+    case TransactionSigningMode.ORDINARY_TRANSACTION: {
+      // we collect required witnesses for inputs, certificates and withdrawals
+      // each path is included only once
+      const witnessPaths: Record<string, ValidBIP32Path> = {}
+      // eslint-disable-next-line no-inner-declarations
+      function _insert(path: ValidBIP32Path) {
+        const pathKey = JSON.stringify(path);
+        witnessPaths[pathKey] = path
+      }
 
-    const witnessOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED);
-    assert(witnessOwner != null, "missing witness owner");
-    assert(witnessOwner.type === PoolOwnerType.DEVICE_OWNED, "bad witness owner type")
-    return [witnessOwner.path]
-  } else {
-    // we collect required witnesses for inputs, certificates and withdrawals
-    // each path is included only once
-    const witnessPaths: Record<string, ValidBIP32Path> = {}
-    // eslint-disable-next-line no-inner-declarations
-    function _insert(path: ValidBIP32Path) {
-      const pathKey = JSON.stringify(path);
-      witnessPaths[pathKey] = path
-    }
+      for (const input of tx.inputs) {
+        assert(input.path != null, "input missing path")
+        _insert(input.path)
+      }
+      for (const cert of tx.certificates) {
+        assert(cert.type !== CertificateType.STAKE_POOL_REGISTRATION, "wrong cert type")
+        _insert(cert.path)
+      }
+      for (const withdrawal of tx.withdrawals) {
+        _insert(withdrawal.path)
+      }
 
-    for (const input of tx.inputs) {
-      assert(input.path != null, "input missing path")
-      _insert(input.path)
+      return Object.values(witnessPaths)
     }
-    for (const cert of tx.certificates) {
-      assert(cert.type !== CertificateType.STAKE_POOL_REGISTRATION, "wrong cert type")
-      _insert(cert.path)
-    }
-    for (const withdrawal of tx.withdrawals) {
-      _insert(withdrawal.path)
-    }
+    case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER: {
+      // there should be exactly one owner given by path which will be used for the witness
+      assert(tx.certificates.length == 1, "bad certificates length");
+      const cert = tx.certificates[0]
+      assert(cert.type === CertificateType.STAKE_POOL_REGISTRATION, "bad certificate type");
 
-    return Object.values(witnessPaths)
+      const witnessOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED);
+      assert(witnessOwner != null, "missing witness owner");
+      assert(witnessOwner.type === PoolOwnerType.DEVICE_OWNED, "bad witness owner type")
+      return [witnessOwner.path]
+    }
+    default: {
+      assert(false, 'Bad signing mode')
+    }
   }
 }
 
-export function* signTransaction(version: Version, tx: ParsedTransaction): Interaction<SignedTransactionData> {
+export function* signTransaction(version: Version, request: ParsedSigningRequest): Interaction<SignedTransactionData> {
   ensureLedgerAppVersionCompatible(version);
 
-  const witnessPaths = generateWitnessPaths(tx)
-
+  const witnessPaths = generateWitnessPaths(request)
+  const { tx, signingMode } = request
   // init
   yield* signTx_init(
-    tx, witnessPaths,
+    tx, signingMode, witnessPaths,
   );
 
   // inputs

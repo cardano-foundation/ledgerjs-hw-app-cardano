@@ -381,7 +381,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
         poolOwners: poolOwnerVariationSet.twoPathOwners,
       },
     },
-    expectedReject: InvalidDataReason.POOL_REGISTRATION_OWNERS_SINGLE_PATH
+    expectedReject: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED
   },
   {
     testName: "pool registration with only hash owners",
@@ -392,7 +392,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
         poolOwners: poolOwnerVariationSet.twoHashOwners,
       },
     },
-    expectedReject: InvalidDataReason.POOL_REGISTRATION_OWNERS_SINGLE_PATH
+    expectedReject: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED
   },
   {
     testName: "pool registration with no owners",
@@ -403,7 +403,7 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
         poolOwners: poolOwnerVariationSet.noOwners,
       },
     },
-    expectedReject: InvalidDataReason.POOL_REGISTRATION_OWNERS_SINGLE_PATH
+    expectedReject: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED
   }
 ]
 

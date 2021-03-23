@@ -31,6 +31,6 @@ export function parseCertificate(cert: Certificate): ParsedCertificate {
         }
 
         default:
-            throw new InvalidData(InvalidDataReason.CERTIFICATE_INVALID);
+            throw new InvalidData(InvalidDataReason.CERTIFICATE_INVALID_TYPE);
     }
 }

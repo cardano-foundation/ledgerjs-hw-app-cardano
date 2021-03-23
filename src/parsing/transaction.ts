@@ -1,11 +1,12 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
-import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
+import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
 import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "../types/internal";
 import type {
     AssetGroup,
     Certificate,
     Network,
+    SignTransactionRequest,
     Token,
     Transaction,
     TransactionMetadata,
@@ -15,11 +16,13 @@ import type {
     Withdrawal
 } from "../types/public";
 import {
+    PoolOwnerType,
     TransactionMetadataType,
+    TransactionSigningMode,
     TxOutputDestinationType
 } from "../types/public";
-import { parseBIP32Path } from "../utils/parse";
-import { isArray, validate } from "../utils/parse";
+import { assert, unreachable } from "../utils/assert";
+import { isArray, parseBIP32Path, validate } from "../utils/parse";
 import { parseHexString, parseHexStringOfLength, parseUint32_t, parseUint64_str } from "../utils/parse";
 import { parseAddress } from "./address";
 import { parseCertificate } from "./certificate";
@@ -31,11 +34,6 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
 
     const parsed = certificates.map(cert => parseCertificate(cert))
 
-    // Pool registration certificate is not allowed to be combined with anything else
-    validate(
-        parsed.every((cert) => cert.type !== CertificateType.STAKE_POOL_REGISTRATION) || parsed.length === 1,
-        InvalidDataReason.CERTIFICATES_COMBINATION_FORBIDDEN
-    );
     return parsed
 }
 
@@ -79,7 +77,6 @@ function parseTxMetadata(metadata: TransactionMetadata): ParsedMetadata {
 
 export function parseTransaction(tx: Transaction): ParsedTransaction {
     const network = parseNetwork(tx.network)
-
     // inputs
     validate(isArray(tx.inputs), InvalidDataReason.INPUTS_NOT_ARRAY);
     const inputs = tx.inputs.map(inp => parseTxInput(inp))
@@ -114,37 +111,16 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseUint64_str(tx.validityIntervalStart, { min: "1" }, InvalidDataReason.VALIDITY_INTERVAL_START_INVALID)
 
-    // Additional restrictions for signing pool registration as an owner
-    const isSigningPoolRegistrationAsOwner = certificates.some(
-        (cert) => cert.type === CertificateType.STAKE_POOL_REGISTRATION
-    );
-    if (isSigningPoolRegistrationAsOwner) {
-        // input should not be given with a path
-        // the path is not used, but we check just to avoid potential confusion of developers using this
-        validate(
-            inputs.every(inp => inp.path == null),
-            InvalidDataReason.INPUT_WITH_PATH_WHEN_SIGNING_AS_POOL_OWNER
-        );
-        // cannot have our output in the tx
-        validate(
-            outputs.every(out => out.destination.type === TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
-            InvalidDataReason.OUTPUT_WITH_PATH
-        )
-        // cannot have withdrawal in the tx
-        validate(withdrawals.length === 0, InvalidDataReason.WITHDRAWALS_FORBIDDEN)
-    }
-
     return {
         network,
         inputs,
         outputs,
         ttl,
         metadata,
-        validityIntervalStart: validityIntervalStart,
+        validityIntervalStart,
         withdrawals,
         certificates,
         fee,
-        isSigningPoolRegistrationAsOwner
     }
 }
 
@@ -208,4 +184,76 @@ function parseTxOutput(
         tokenBundle,
         destination
     }
+}
+
+export function parseSigningMode(mode: TransactionSigningMode): TransactionSigningMode {
+    switch (mode) {
+        case TransactionSigningMode.ORDINARY_TRANSACTION:
+        case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
+            return mode
+        default:
+            throw new Error('TODO')
+    }
+}
+
+export function parseSignTransactionRequest(request: SignTransactionRequest): ParsedSigningRequest {
+    const tx = parseTransaction(request.tx)
+    const signingMode = parseSigningMode(request.signingMode)
+
+    // Additional restrictions based on signing mode
+    switch (signingMode) {
+        case TransactionSigningMode.ORDINARY_TRANSACTION: {
+            validate(
+                tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_REGISTRATION),
+                InvalidDataReason.SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED,
+            )
+            break
+        }
+        case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER: {
+            // all these restictions are due to fact that pool owner signature *might* accidentally/maliciously sign another part of tx
+            // but we are not showing these parts to the user
+
+            // input should not be given with a path
+            // the path is not used, but we check just to avoid potential confusion of developers using this
+            validate(
+                tx.inputs.every(inp => inp.path == null),
+                InvalidDataReason.SIGN_MODE_POOL_OWNER__INPUT_WITH_PATH_NOT_ALLOWED
+            );
+            // cannot have our output in the tx
+            validate(
+                tx.outputs.every(out => out.destination.type === TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
+                InvalidDataReason.SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED
+            )
+
+            validate(
+                tx.certificates.length === 1,
+                InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
+            )
+            tx.certificates.forEach(certificate => {
+                validate(
+                    certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
+                    InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
+                )
+                validate(
+                    certificate.pool.owners.filter(o => o.type === PoolOwnerType.DEVICE_OWNED).length === 1,
+                    InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED
+                )
+            })
+
+            // cannot have withdrawal in the tx
+            validate(
+                tx.withdrawals.length === 0,
+                InvalidDataReason.SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED
+            )
+            break
+        }
+        case TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR: {
+            assert(false, "Not implemented")
+            break
+        }
+        default:
+            unreachable(signingMode)
+    }
+
+    return { tx, signingMode }
 }

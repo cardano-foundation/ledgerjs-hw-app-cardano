@@ -1,9 +1,9 @@
 import chai, { expect } from "chai"
 import chaiAsPromised from "chai-as-promised"
 
-import type { Certificate, Transaction } from "../../src/Ada";
 import type Ada from "../../src/Ada";
-import { CertificateType, InvalidDataReason } from "../../src/Ada";
+import type { Certificate, Transaction } from "../../src/Ada";
+import { CertificateType, InvalidDataReason, TransactionSigningMode } from "../../src/Ada";
 import { getAda, Networks } from "../test_utils";
 import {
   certificates,
@@ -31,7 +31,7 @@ describe("signTxPoolRegistrationOK", async () => {
 
   for (const { testname, tx, result: expectedResult } of poolRegistrationTestcases) {
     it(testname, async () => {
-      const response = await ada.signTransaction(tx);
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
       expect(response).to.deep.equal(expectedResult);
     })
   }
@@ -60,10 +60,12 @@ describe("signTxPoolRegistrationReject", async () => {
 
   for (const { testName, poolRegistrationCertificate, expectedReject } of invalidCertificates) {
     it(`Should reject ${testName}`, async () => {
-      const promise = ada.signTransaction({
+      const tx: Transaction = {
         ...txBase,
         certificates: [poolRegistrationCertificate],
-      });
+      }
+      const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
+
       await expect(promise).to.be.rejectedWith(expectedReject);
     });
   }
@@ -78,10 +80,11 @@ describe("signTxPoolRegistrationReject", async () => {
         },
       };
 
-      const promise = ada.signTransaction({
+      const tx: Transaction = {
         ...txBase,
         certificates: [cert],
-      });
+      }
+      const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
       await expect(promise).to.be.rejectedWith(rejectReason);
     });
   }
@@ -96,11 +99,12 @@ describe("signTxPoolRegistrationReject", async () => {
             relays: [relay],
           }
         }
-        const promise = ada.signTransaction({
+
+        const tx: Transaction = {
           ...txBase,
           certificates: [cert]
         }
-        );
+        const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
         await expect(promise).to.be.rejectedWith(rejectReason)
       })
     }
@@ -108,33 +112,36 @@ describe("signTxPoolRegistrationReject", async () => {
 
 
   it("Should reject pool registration with numerator bigger than denominator", async () => {
-    const promise = ada.signTransaction({
+    const tx: Transaction = {
       ...txBase,
       certificates: [certificates.poolRegistrationWrongMargin],
-    });
+    }
+    const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
 
     await expect(promise).to.be.rejectedWith(InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN);
   });
 
   it("Should reject pool registration along with other certificates", async () => {
-    const promise = ada.signTransaction({
+    const tx: Transaction = {
       ...txBase,
       certificates: [
         certificates.poolRegistrationDefault,
         certificates.stakeDelegation,
       ]
-    });
+    }
+    const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
 
-    await expect(promise).to.be.rejectedWith(InvalidDataReason.CERTIFICATES_COMBINATION_FORBIDDEN);
+    await expect(promise).to.be.rejectedWith(InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED);
   });
 
   it("Should reject pool registration along with a withdrawal", async () => {
-    const promise = ada.signTransaction({
+    const tx: Transaction = {
       ...txBase,
       certificates: [certificates.poolRegistrationDefault],
       withdrawals: [withdrawals.withdrawal0],
-    });
+    }
+    const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
 
-    await expect(promise).to.be.rejectedWith(InvalidDataReason.WITHDRAWALS_FORBIDDEN);
+    await expect(promise).to.be.rejectedWith(InvalidDataReason.SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED);
   });
 });
