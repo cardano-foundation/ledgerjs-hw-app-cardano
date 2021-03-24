@@ -1,7 +1,7 @@
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
 import type { Certificate, TxInput, TxOutput, Withdrawal } from "../src/Ada";
-import { Ada, AddressType, CertificateType, HARDENED, Networks, TransactionSigningMode,TxOutputDestinationType } from "../src/Ada";
+import { Ada, AddressType, CertificateType, HARDENED, Networks, TransactionSigningMode, TxOutputDestinationType } from "../src/Ada";
 import { base58_encode, bech32_encodeAddress, str_to_path } from "../src/utils/address";
 
 const getVersion = async (appAda: Ada) => {

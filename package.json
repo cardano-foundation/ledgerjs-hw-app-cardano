@@ -61,9 +61,8 @@
   "scripts": {
     "prepare": "cd node_modules/typedoc && yarn install && yarn build",
     "lint": "yarn eslint .",
-    "flow": "flow",
-    "clean": "bash ./script/clean.sh",
-    "build": "bash ./script/build.sh",
+    "clean": "rm -rf dist/",
+    "build": "yarn tsc -p src/tsconfig.json",
     "gen-docs": "yarn typedoc",
     "prepublish": "yarn run clean && yarn run build",
     "run-example": "yarn ts-node -P example-node/tsconfig.json example-node/index.ts",
