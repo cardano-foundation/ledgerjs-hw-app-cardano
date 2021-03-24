@@ -2,7 +2,6 @@ import type { ParsedTransaction, Uint8_t, Uint32_t } from "../../types/internal"
 import { TransactionSigningMode } from "../../types/internal";
 import { assert } from "../../utils/assert";
 import { uint8_to_buf, uint32_to_buf } from "../../utils/serialize";
-import { SignTxIncluded } from "./txOutput";
 
 const _serializeSigningMode = (
     mode: TransactionSigningMode
@@ -19,11 +18,16 @@ const _serializeSigningMode = (
 };
 
 function _serializeOptionFlag(included: boolean) {
-    return uint8_to_buf(
-        (included
-            ? SignTxIncluded.SIGN_TX_INCLUDED_YES
-            : SignTxIncluded.SIGN_TX_INCLUDED_NO) as Uint8_t
-    )
+    const SignTxIncluded = {
+        NO: 1 as Uint8_t,
+        YES: 2 as Uint8_t,
+    };
+
+    const value = included
+        ? SignTxIncluded.YES
+        : SignTxIncluded.NO
+
+    return uint8_to_buf(value)
 }
 
 export function serializeTxInit(tx: ParsedTransaction, signingMode: TransactionSigningMode, numWitnesses: number) {

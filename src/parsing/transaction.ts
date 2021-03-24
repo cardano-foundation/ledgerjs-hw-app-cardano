@@ -1,7 +1,7 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
 import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
-import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH, TxOutputType } from "../types/internal";
+import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal";
 import type {
     AssetGroup,
     Certificate,
@@ -151,7 +151,7 @@ function parseTxDestination(
             const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
             validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS);
             return {
-                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES,
+                type: TxOutputDestinationType.THIRD_PARTY,
                 addressHex,
             }
         }
@@ -159,7 +159,7 @@ function parseTxDestination(
             const params = destination.params
 
             return {
-                type: TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_PARAMS,
+                type: TxOutputDestinationType.DEVICE_OWNED,
                 addressParams: parseAddress(network, params)
             }
         }
@@ -221,7 +221,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             );
             // cannot have our output in the tx
             validate(
-                tx.outputs.every(out => out.destination.type === TxOutputType.SIGN_TX_OUTPUT_TYPE_ADDRESS_BYTES),
+                tx.outputs.every(out => out.destination.type === TxOutputDestinationType.THIRD_PARTY),
                 InvalidDataReason.SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED
             )
 
