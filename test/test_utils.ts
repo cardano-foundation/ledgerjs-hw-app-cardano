@@ -1,5 +1,3 @@
-import "babel-polyfill";
-
 // @ts-ignore
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 

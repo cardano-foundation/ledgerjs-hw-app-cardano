@@ -35,6 +35,9 @@ jobs:
           name: Audit dependencies
           command: yarn audit
       - run:
+          name: Try building the example
+          command: yarn tsc -p example-node/tsconfig.json
+      - run:
           name: Try generating the docs
           command: yarn typedoc
 
