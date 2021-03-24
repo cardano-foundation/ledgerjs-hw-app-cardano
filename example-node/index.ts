@@ -1,7 +1,7 @@
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
 import type { Certificate, TxInput, TxOutput, Withdrawal } from "../src/Ada";
-import { Ada, AddressType, CertificateType, HARDENED, Networks, TxOutputDestinationType } from "../src/Ada";
+import { Ada, AddressType, CertificateType, HARDENED, Networks, TransactionSigningMode,TxOutputDestinationType } from "../src/Ada";
 import { base58_encode, bech32_encodeAddress, str_to_path } from "../src/utils/address";
 
 const getVersion = async (appAda: Ada) => {
@@ -217,14 +217,17 @@ const signTransaction = async (appAda: Ada) => {
 
   console.log(
     await appAda.signTransaction({
-      network,
-      inputs,
-      outputs,
-      certificates,
-      withdrawals,
-      fee: 42,
-      ttl: 10,
-      validityIntervalStart: 7,
+      signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+      tx: {
+        network,
+        inputs,
+        outputs,
+        certificates,
+        withdrawals,
+        fee: 42,
+        ttl: 10,
+        validityIntervalStart: 7,
+      }
     })
   );
   /*
