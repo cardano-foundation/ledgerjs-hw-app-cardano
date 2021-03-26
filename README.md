@@ -7,9 +7,8 @@ This library is compatible with the [Cardano ADA Ledger Application](https://git
 
 ### Example code
 
-Example code interacting with `hw-app-cardano` is provided in `example_node` directory.
-To compile run `yarn build-example`.
-Run example by `node example-node/lib/index.js`.
+Example code interacting with `hw-app-cardano` is provided in `example-node` directory.
+You can execute it with the `yarn run-example` command.
 
 ### Tests
 
