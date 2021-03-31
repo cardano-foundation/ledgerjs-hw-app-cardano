@@ -691,36 +691,36 @@ export type SignedTransactionData = {
 };
 
 /**
- * Kind of transaction metatada supplied to Ledger
+ * Kind of transaction auxiliary data supplied to Ledger
  * @category Basic types
- * @see [[TransactionMetadata]]
+ * @see [[TxAuxiliaryData]]
  */
-export enum TransactionMetadataType {
-    /** Metadata is supplied as raw hash value */
+export enum TxAuxiliaryDataType {
+    /** Auxiliary data is supplied as raw hash value */
     ARBITRARY_HASH = 'arbitrary_hash',
 
     // CatalystVoting = 'catalyst_voting'
 }
 
 /**
- * Specifies transaction metadata.
- * Metadata can be supplied to Ledger in multiple forms.
+ * Specifies transaction auxiliary data.
+ * Auxiliary data can be supplied to Ledger possibly in multiple forms.
  * @category Basic types
- * @see [[TransactionMetadataType]]
+ * @see [[TxAuxiliaryDataType]]
  */
-export type TransactionMetadata =
+export type TxAuxiliaryData =
     {
-        type: TransactionMetadataType.ARBITRARY_HASH
-        params: MetadataArbitraryHashParams
+        type: TxAuxiliaryDataType.ARBITRARY_HASH
+        params: TxAuxiliaryDataArbitraryHashParams
     }
 
 /**
- * Metadata is supplied as raw hash. Ledger will just display this hash to the user
- * @see [[TransactionMetadata]]
+ * Auxiliary data is supplied as raw hash. Ledger will just display this hash to the user
+ * @see [[TxAuxiliaryData]]
  */
-export type MetadataArbitraryHashParams = {
+export type TxAuxiliaryDataArbitraryHashParams = {
     /** Hash of the transaction metadata */
-    metadataHashHex: string
+    hashHex: string
 }
 
 /**
@@ -762,9 +762,9 @@ export type Transaction = {
      */
     withdrawals?: Array<Withdrawal> | null,
     /**
-     * Transaction metadata (if any)
+     * Transaction auxiliary data (if any)
      */
-    metadata?: TransactionMetadata | null,
+    auxiliaryData?: TxAuxiliaryData | null,
     /**
      * Validity start (block height) if any.
      * Transaction becomes valid only starting from this block height.

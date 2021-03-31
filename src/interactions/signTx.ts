@@ -1,7 +1,7 @@
-import type { ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
+import type {  ParsedTxAuxiliaryData, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
 import { CertificateType, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
 import type { SignedTransactionData } from '../types/public';
-import { TransactionMetadataType, TransactionSigningMode } from '../types/public';
+import { TransactionSigningMode,TxAuxiliaryDataType } from '../types/public';
 import { assert } from "../utils/assert";
 import { buf_to_hex, } from "../utils/serialize";
 import { INS } from "./common/ins";
@@ -10,7 +10,7 @@ import { ensureLedgerAppVersionCompatible } from "./getVersion";
 import { serializePoolInitialParams, serializePoolMetadata, serializePoolOwner, serializePoolRelay } from "./serialization/poolRegistrationCertificate";
 import { serializeTxCertificate } from "./serialization/txCertificate";
 import { serializeTxInit } from "./serialization/txInit";
-import { serializeTxFee, serializeTxInput, serializeTxMetadata, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther";
+import { serializeTxAuxiliaryData, serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther";
 import { serializeAssetGroup, serializeToken, serializeTxOutputBasicParams } from "./serialization/txOutput";
 
 const enum P1 {
@@ -222,17 +222,17 @@ function* signTx_setTtl(
   });
 }
 
-function* signTx_setMetadata(
-  metadata: ParsedMetadata
+function* signTx_setAuxiliaryData(
+  auxiliaryData:  ParsedTxAuxiliaryData
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00
   }
-  assert(metadata.type === TransactionMetadataType.ARBITRARY_HASH, 'Metadata type not implemented')
+  assert(auxiliaryData.type === TxAuxiliaryDataType.ARBITRARY_HASH, 'Auxiliary data type not implemented')
   yield send({
     p1: P1.STAGE_METADATA,
     p2: P2.UNUSED,
-    data: serializeTxMetadata(metadata.metadataHashHex),
+    data: serializeTxAuxiliaryData(auxiliaryData.hashHex),
     expectedResponseLength: 0,
   });
 }
@@ -373,8 +373,8 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
   }
 
   // metadata
-  if (tx.metadata != null) {
-    yield* signTx_setMetadata(tx.metadata);
+  if (tx.auxiliaryData != null) {
+    yield* signTx_setAuxiliaryData(tx.auxiliaryData);
   }
 
   // validity start

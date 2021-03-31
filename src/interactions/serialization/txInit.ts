@@ -35,7 +35,7 @@ export function serializeTxInit(tx: ParsedTransaction, signingMode: TransactionS
         uint8_to_buf(tx.network.networkId),
         uint32_to_buf(tx.network.protocolMagic),
         _serializeOptionFlag(tx.ttl != null),
-        _serializeOptionFlag(tx.metadata != null),
+        _serializeOptionFlag(tx.auxiliaryData != null),
         _serializeOptionFlag(tx.validityIntervalStart != null),
         _serializeSigningMode(signingMode),
         uint32_to_buf(tx.inputs.length as Uint32_t),

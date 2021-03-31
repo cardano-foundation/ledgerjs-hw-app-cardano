@@ -35,11 +35,11 @@ export function serializeTxTtl(
     ]);
 }
 
-export function serializeTxMetadata(
-    metadataHashHex: HexString
+export function serializeTxAuxiliaryData(
+    auxiliaryDataHashHex: HexString
 ) {
     return Buffer.concat([
-        hex_to_buf(metadataHashHex)
+        hex_to_buf(auxiliaryDataHashHex)
     ])
 }
 

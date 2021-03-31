@@ -1,6 +1,6 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
-import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedMetadata, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
+import type { OutputDestination, ParsedAssetGroup,  ParsedTxAuxiliaryData, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
 import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal";
 import type {
     AssetGroup,
@@ -9,7 +9,7 @@ import type {
     SignTransactionRequest,
     Token,
     Transaction,
-    TransactionMetadata,
+    TxAuxiliaryData,
     TxInput,
     TxOutput,
     TxOutputDestination,
@@ -17,8 +17,8 @@ import type {
 } from "../types/public";
 import {
     PoolOwnerType,
-    TransactionMetadataType,
     TransactionSigningMode,
+    TxAuxiliaryDataType,
     TxOutputDestinationType
 } from "../types/public";
 import { assert, unreachable } from "../utils/assert";
@@ -62,16 +62,16 @@ function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 }
 
-function parseTxMetadata(metadata: TransactionMetadata): ParsedMetadata {
-    switch (metadata.type) {
-        case TransactionMetadataType.ARBITRARY_HASH: {
+function parseAuxiliaryData(auxiliaryData: TxAuxiliaryData):  ParsedTxAuxiliaryData {
+    switch (auxiliaryData.type) {
+        case TxAuxiliaryDataType.ARBITRARY_HASH: {
             return {
-                type: TransactionMetadataType.ARBITRARY_HASH,
-                metadataHashHex: parseHexStringOfLength(metadata.params.metadataHashHex, 32, InvalidDataReason.METADATA_INVALID_HASH)
+                type: TxAuxiliaryDataType.ARBITRARY_HASH,
+                hashHex: parseHexStringOfLength(auxiliaryData.params.hashHex, 32, InvalidDataReason.AUXILIARY_DATA_INVALID_HASH)
             }
         }
         default:
-            throw new InvalidData(InvalidDataReason.METADATA_UNKNOWN_TYPE)
+            throw new InvalidData(InvalidDataReason.AUXILIARY_DATA_UNKNOWN_TYPE)
     }
 }
 
@@ -101,10 +101,10 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     validate(isArray(tx.withdrawals ?? []), InvalidDataReason.WITHDRAWALS_NOT_ARRAY);
     const withdrawals = (tx.withdrawals ?? []).map(w => parseWithdrawal(w))
 
-    // metadata
-    const metadata = tx.metadata == null
+    // auxiliary data
+    const auxiliaryData = tx.auxiliaryData == null
         ? null
-        : parseTxMetadata(tx.metadata)
+        : parseAuxiliaryData(tx.auxiliaryData)
 
     // validity start
     const validityIntervalStart = tx.validityIntervalStart == null
@@ -116,7 +116,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         inputs,
         outputs,
         ttl,
-        metadata,
+        auxiliaryData,
         validityIntervalStart,
         withdrawals,
         certificates,

@@ -1,4 +1,4 @@
-import { AddressType, CertificateType, PoolOwnerType, RelayType, TransactionMetadataType, TransactionSigningMode, TxOutputDestinationType } from './public'
+import { AddressType, CertificateType, PoolOwnerType, RelayType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType } from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -15,7 +15,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, RelayType, PoolOwnerType, TransactionMetadataType, TransactionSigningMode, TxOutputDestinationType }
+export { AddressType, CertificateType, RelayType, PoolOwnerType, TxAuxiliaryDataType, TransactionSigningMode, TxOutputDestinationType }
 export { Version, DeviceCompatibility } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
@@ -55,9 +55,9 @@ export type ParsedNetwork = {
     networkId: Uint8_t
 }
 
-export type ParsedMetadata = {
-    type: TransactionMetadataType.ARBITRARY_HASH
-    metadataHashHex: FixlenHexString<32>
+export type  ParsedTxAuxiliaryData = {
+    type: TxAuxiliaryDataType.ARBITRARY_HASH
+    hashHex: FixlenHexString<32>
 }
 
 export type ParsedTransaction = {
@@ -68,7 +68,7 @@ export type ParsedTransaction = {
     ttl: Uint64_str | null
     certificates: ParsedCertificate[]
     withdrawals: ParsedWithdrawal[]
-    metadata: ParsedMetadata | null
+    auxiliaryData:  ParsedTxAuxiliaryData | null
     validityIntervalStart: Uint64_str | null
 }
 

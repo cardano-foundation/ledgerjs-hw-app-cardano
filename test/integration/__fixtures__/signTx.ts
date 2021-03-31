@@ -1,5 +1,5 @@
 import type { SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada";
-import { AddressType, CertificateType, Networks, TransactionMetadataType, TxOutputDestinationType, utils } from "../../../src/Ada";
+import { AddressType, CertificateType, Networks, TxAuxiliaryDataType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
 export const inputs: Record<
@@ -678,13 +678,13 @@ export const testsShelleyOther: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with nonempty metadata",
+    testname: "Should correctly sign tx with nonempty auxiliary data",
     tx: {
       ...shelleyBase,
-      metadata: {
-        type: TransactionMetadataType.ARBITRARY_HASH,
+      auxiliaryData: {
+        type: TxAuxiliaryDataType.ARBITRARY_HASH,
         params: {
-          metadataHashHex: "deadbeef".repeat(8)
+          hashHex: "deadbeef".repeat(8)
         }
       }
     },
@@ -710,10 +710,10 @@ export const testsShelleyOther: TestcaseShelley[] = [
       ...shelleyBase,
       inputs: [inputs.utxoNonReasonable],
       outputs: [outputs.internalBaseWithStakingPathNonReasonable],
-      metadata: {
-        type: TransactionMetadataType.ARBITRARY_HASH,
+      auxiliaryData: {
+        type: TxAuxiliaryDataType.ARBITRARY_HASH,
         params: {
-          metadataHashHex: "deadbeef".repeat(8)
+          hashHex: "deadbeef".repeat(8)
         },
       }
     },

@@ -96,8 +96,8 @@ export enum InvalidDataReason {
   WITHDRAWAL_INVALID_AMOUNT = "invalid withdrawal amount",
   WITHDRAWAL_INVALID_PATH = "invalid withdrawal path",
 
-  METADATA_UNKNOWN_TYPE = "unknown metadata type",
-  METADATA_INVALID_HASH = "invalid metadata hash",
+  AUXILIARY_DATA_UNKNOWN_TYPE = "unknown auxiliary data type",
+  AUXILIARY_DATA_INVALID_HASH = "invalid auxiliary data hash",
 
   VALIDITY_INTERVAL_START_INVALID = "invalid validity interval start",
 
