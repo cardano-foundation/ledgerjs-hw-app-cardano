@@ -38,12 +38,14 @@ export function* getVersion(): Interaction<Version> {
 export function getCompatibility(version: Version): DeviceCompatibility {
   // We restrict forward compatibility only to backward-compatible semver changes
   const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 2, Infinity)
+  const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 2, Infinity)
 
   return {
     isCompatible: v2_2,
-    recommendedVersion: v2_2 ? null : '2.2.0',
+    recommendedVersion: v2_2 ? null : '2.3.1',
     supportsMary: v2_2,
-    // supportsCatalyst: TODO
+    supportsCatalystRegistration: v2_3,
+    supportsZeroTtl: v2_3,
   }
 }
 

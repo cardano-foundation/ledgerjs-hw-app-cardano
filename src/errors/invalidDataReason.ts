@@ -99,6 +99,13 @@ export enum InvalidDataReason {
   AUXILIARY_DATA_UNKNOWN_TYPE = "unknown auxiliary data type",
   AUXILIARY_DATA_INVALID_HASH = "invalid auxiliary data hash",
 
+  METADATA_UNKNOWN_TYPE = "unknown metadata type",
+
+  CATALYST_REGISTRATION_INVALID_VOTING_KEY = "invalid Catalyst registration voting key",
+  CATALYST_REGISTRATION_INVALID_STAKING_KEY_PATH = "invalid Catalyst registration staking key path",
+  CATALYST_REGISTRATION_INVALID_REWARDS_DESTINATION_BYRON = "Catalyst registration rewards destination cannot be a Byron-era address",
+  CATALYST_REGISTRATION_INVALID_NONCE = "invalid Catalyst registration nonce",
+
   VALIDITY_INTERVAL_START_INVALID = "invalid validity interval start",
 
   SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED =

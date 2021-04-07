@@ -6,6 +6,7 @@ import { getAda } from "../test_utils";
 import {
   testsAllegra,
   testsByron,
+  testsCatalystRegistration,
   testsMary,
   testsShelleyOther,
   testsShelleyOutputs,
@@ -105,6 +106,13 @@ describe("signTxOrdinaryMary", async () => {
   });
 
   for (const { testname, tx, result: expected } of testsMary) {
+    it(testname, async () => {
+      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
+      expect(response).to.deep.equal(expected);
+    })
+  }
+
+  for (const { testname, tx, result: expected } of testsCatalystRegistration) {
     it(testname, async () => {
       const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);

@@ -1,6 +1,6 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
-import type { OutputDestination, ParsedAssetGroup,  ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal } from "../types/internal";
+import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal";
 import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal";
 import type {
     AssetGroup,
@@ -9,7 +9,6 @@ import type {
     SignTransactionRequest,
     Token,
     Transaction,
-    TxAuxiliaryData,
     TxInput,
     TxOutput,
     TxOutputDestination,
@@ -18,7 +17,6 @@ import type {
 import {
     PoolOwnerType,
     TransactionSigningMode,
-    TxAuxiliaryDataType,
     TxOutputDestinationType
 } from "../types/public";
 import { assert, unreachable } from "../utils/assert";
@@ -28,6 +26,7 @@ import { parseAddress } from "./address";
 import { parseCertificate } from "./certificate";
 import { ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX } from "./constants";
 import { parseNetwork } from "./network";
+import { parseTxAuxiliaryData } from "./txAuxiliaryData";
 
 function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertificate> {
     validate(isArray(certificates), InvalidDataReason.CERTIFICATES_NOT_ARRAY);
@@ -62,19 +61,6 @@ function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 }
 
-function parseAuxiliaryData(auxiliaryData: TxAuxiliaryData):  ParsedTxAuxiliaryData {
-    switch (auxiliaryData.type) {
-        case TxAuxiliaryDataType.ARBITRARY_HASH: {
-            return {
-                type: TxAuxiliaryDataType.ARBITRARY_HASH,
-                hashHex: parseHexStringOfLength(auxiliaryData.params.hashHex, 32, InvalidDataReason.AUXILIARY_DATA_INVALID_HASH)
-            }
-        }
-        default:
-            throw new InvalidData(InvalidDataReason.AUXILIARY_DATA_UNKNOWN_TYPE)
-    }
-}
-
 export function parseTransaction(tx: Transaction): ParsedTransaction {
     const network = parseNetwork(tx.network)
     // inputs
@@ -91,7 +77,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     //  ttl
     const ttl = tx.ttl == null
         ? null
-        : parseUint64_str(tx.ttl, { min: "1" }, InvalidDataReason.TTL_INVALID)
+        : parseUint64_str(tx.ttl, {}, InvalidDataReason.TTL_INVALID)
 
     // certificates
     validate(isArray(tx.certificates ?? []), InvalidDataReason.CERTIFICATES_NOT_ARRAY);
@@ -99,17 +85,17 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
 
     // withdrawals
     validate(isArray(tx.withdrawals ?? []), InvalidDataReason.WITHDRAWALS_NOT_ARRAY);
-    const withdrawals = (tx.withdrawals ?? []).map(w => parseWithdrawal(w))
+    const withdrawals = (tx.withdrawals ?? []).map(w => parseWithdrawal(w));
 
     // auxiliary data
     const auxiliaryData = tx.auxiliaryData == null
         ? null
-        : parseAuxiliaryData(tx.auxiliaryData)
+        : parseTxAuxiliaryData(network, tx.auxiliaryData);
 
     // validity start
     const validityIntervalStart = tx.validityIntervalStart == null
         ? null
-        : parseUint64_str(tx.validityIntervalStart, { min: "1" }, InvalidDataReason.VALIDITY_INTERVAL_START_INVALID)
+        : parseUint64_str(tx.validityIntervalStart, {}, InvalidDataReason.VALIDITY_INTERVAL_START_INVALID);
 
     return {
         network,

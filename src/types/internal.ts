@@ -20,6 +20,7 @@ export { Version, DeviceCompatibility } from './public'
 // Our types
 export const KEY_HASH_LENGTH = 28;
 export const TX_HASH_LENGTH = 32;
+export const AUXILIARY_DATA_HASH_LENGTH = 32;
 
 export type ParsedCertificate = {
     type: CertificateType.STAKE_REGISTRATION
@@ -55,9 +56,24 @@ export type ParsedNetwork = {
     networkId: Uint8_t
 }
 
+export const CATALYST_VOTING_PUBLIC_KEY_LENGTH = 32;
+
+export type CatalystVotingPublicKey = FixlenHexString<typeof CATALYST_VOTING_PUBLIC_KEY_LENGTH>
+
 export type  ParsedTxAuxiliaryData = {
     type: TxAuxiliaryDataType.ARBITRARY_HASH
-    hashHex: FixlenHexString<32>
+    hashHex: FixlenHexString<typeof AUXILIARY_DATA_HASH_LENGTH>
+} | {
+    type: TxAuxiliaryDataType.CATALYST_REGISTRATION
+    params: ParsedCatalystRegistrationParams
+}
+
+export type ParsedCatalystRegistrationParams = {
+    type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
+    votingPublicKey: CatalystVotingPublicKey
+    stakingPath: ValidBIP32Path
+    rewardsDestination: ShelleyAddressParams
+    nonce: Uint64_str
 }
 
 export type ParsedTransaction = {
@@ -171,14 +187,14 @@ type StakingChoicePointer = {
 
 export type StakingChoice = StakingChoiceNone | StakingChoicePath | StakingChoiceHash | StakingChoicePointer
 
-type ByronAddressParams = {
+export type ByronAddressParams = {
     type: AddressType.BYRON,
     protocolMagic: Uint32_t
     spendingPath: ValidBIP32Path,
     stakingChoice: StakingChoiceNone,
 }
 
-type ShelleyAddressParams = {
+export type ShelleyAddressParams = {
     type: AddressType.BASE | AddressType.ENTERPRISE | AddressType.POINTER | AddressType.REWARD,
     networkId: Uint8_t,
     spendingPath: ValidBIP32Path

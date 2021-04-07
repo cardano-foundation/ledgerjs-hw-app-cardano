@@ -55,7 +55,9 @@ export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {
         }
 
         if (x == null) {
-            return uint8_to_buf(Optional.NONE as Uint8_t)
+            return Buffer.concat([
+                uint8_to_buf(Optional.NONE as Uint8_t),
+            ])
         } else {
             return Buffer.concat([
                 uint8_to_buf(Optional.SOME as Uint8_t),

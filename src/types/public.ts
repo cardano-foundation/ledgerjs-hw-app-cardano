@@ -610,7 +610,8 @@ export type Version = {
  */
 export type DeviceCompatibility = {
     /** Overall compatibility.
-     * - true if SDK somewhat supports device
+     * - true if SDK supports the device with given firmware version (to the
+     *   extent of the features supported by the firmware itself)
      * - false if SDK refuses to communicate with current device version
      */
     isCompatible: boolean
@@ -623,6 +624,15 @@ export type DeviceCompatibility = {
      * Whether we support Mary features
      */
     supportsMary: boolean
+    /**
+     * Whether we support Catalyst registration
+     */
+    supportsCatalystRegistration: boolean
+    /**
+     * Whether we support transactions with zero TTL
+     * (useful for dummy transactions to ensure invalidity)
+     */
+    supportsZeroTtl: boolean
 }
 
 /**
@@ -675,6 +685,33 @@ export type Witness = {
 };
 
 /**
+ * Kind of auxiliary data supplementary information
+ * @category Basic types
+ * @see [[TxAuxiliaryDataSupplement]]
+ * @see [[TxAuxiliaryDataType]]
+ */
+export enum TxAuxiliaryDataSupplementType {
+    /** Supplementary information for the caller to assemble the Catalyst voting registration
+     * they sent to be signed.
+     */
+    CATALYST_REGISTRATION = 'catalyst_registration',
+}
+
+/**
+ * Transaction auxiliary data supplementary information.
+ * @category Basic types
+ * @see [[TxAuxiliaryDataSupplementType]]
+ * @see [[SignedTransactionData]]
+ */
+export type TxAuxiliaryDataSupplement = {
+    type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
+    /** Hash of the auxiliary data including the Catalyst registration */
+    auxiliaryDataHashHex: string,
+    /** Signature of the Catalyst registration payload by the staking key that was supplied */
+    catalystRegistrationSignatureHex: string,
+};
+
+/**
  * Result of signing a transaction.
  * @category Basic types
  * @see [[Ada.signTransaction]]
@@ -688,6 +725,11 @@ export type SignedTransactionData = {
      * List of witnesses. Caller should assemble full transaction to be submitted to the network.
      */
     witnesses: Array<Witness>,
+    /**
+     * Additional information about auxiliary data serialized into the transaction, providing
+     * the caller with information needed to assemble the transation containing these auxiliary data.
+     */
+    auxiliaryDataSupplement: TxAuxiliaryDataSupplement | null,
 };
 
 /**
@@ -698,8 +740,11 @@ export type SignedTransactionData = {
 export enum TxAuxiliaryDataType {
     /** Auxiliary data is supplied as raw hash value */
     ARBITRARY_HASH = 'arbitrary_hash',
-
-    // CatalystVoting = 'catalyst_voting'
+    /**
+     * Auxiliary data representing a Catalyst registration. Ledger serializes the auxiliary data
+     * as `[<catalyst registration metadata>, []]` (a.k.a. Mary-era format)
+     */
+    CATALYST_REGISTRATION = 'catalyst_registration'
 }
 
 /**
@@ -710,8 +755,11 @@ export enum TxAuxiliaryDataType {
  */
 export type TxAuxiliaryData =
     {
-        type: TxAuxiliaryDataType.ARBITRARY_HASH
+        type: TxAuxiliaryDataType.ARBITRARY_HASH,
         params: TxAuxiliaryDataArbitraryHashParams
+    } | {
+        type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
+        params: CatalystRegistrationParams
     }
 
 /**
@@ -719,8 +767,35 @@ export type TxAuxiliaryData =
  * @see [[TxAuxiliaryData]]
  */
 export type TxAuxiliaryDataArbitraryHashParams = {
-    /** Hash of the transaction metadata */
+    /** Hash of the transaction auxiliary data */
     hashHex: string
+}
+
+/**
+ * Parameters needed for Ledger to assemble and sign the Catalyst voting registration metadata.
+ * Ledger will display the voting registration parameters and overall metadata hash.
+ * @see [[TxAuxiliaryData]]
+ */
+export type CatalystRegistrationParams = {
+    /**
+     * Voting key to be registered given in hex
+     */
+    votingPublicKeyHex: string,
+
+    /**
+     * Path to the staking key to which voting rights would be associated
+     */
+    stakingPath: BIP32Path,
+
+    /**
+     * Address for receiving voting rewards, Byron-era addresses not supported
+     */
+    rewardsDestination: DeviceOwnedAddress,
+
+    /**
+     * Nonce value
+     */
+    nonce: bigint_like,
 }
 
 /**

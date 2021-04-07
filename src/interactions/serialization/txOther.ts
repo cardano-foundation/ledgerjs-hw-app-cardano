@@ -1,4 +1,4 @@
-import type { HexString, ParsedInput, ParsedWithdrawal, Uint64_str, ValidBIP32Path } from "../../types/internal";
+import type { ParsedInput, ParsedWithdrawal, Uint64_str, ValidBIP32Path } from "../../types/internal";
 import { hex_to_buf, path_to_buf, uint32_to_buf, uint64_to_buf } from "../../utils/serialize";
 
 export function serializeTxInput(
@@ -33,14 +33,6 @@ export function serializeTxTtl(
     return Buffer.concat([
         uint64_to_buf(ttl)
     ]);
-}
-
-export function serializeTxAuxiliaryData(
-    auxiliaryDataHashHex: HexString
-) {
-    return Buffer.concat([
-        hex_to_buf(auxiliaryDataHashHex)
-    ])
 }
 
 export function serializeTxValidityStart(

@@ -1,27 +1,31 @@
+import { DeviceVersionUnsupported } from '../errors';
 import type {  ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
 import { CertificateType, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
-import type { SignedTransactionData } from '../types/public';
-import { TransactionSigningMode,TxAuxiliaryDataType } from '../types/public';
+import type { SignedTransactionData, TxAuxiliaryDataSupplement} from '../types/public';
+import { TxAuxiliaryDataSupplementType} from '../types/public';
+import { TransactionSigningMode, TxAuxiliaryDataType } from '../types/public';
 import { assert } from "../utils/assert";
-import { buf_to_hex, } from "../utils/serialize";
+import { buf_to_hex, hex_to_buf } from "../utils/serialize";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
-import { ensureLedgerAppVersionCompatible } from "./getVersion";
+import { ensureLedgerAppVersionCompatible, getCompatibility } from "./getVersion";
+import { serializeCatalystRegistrationNonce, serializeCatalystRegistrationRewardsDestination, serializeCatalystRegistrationStakingPath,serializeCatalystRegistrationVotingKey } from "./serialization/catalystRegistration"
 import { serializePoolInitialParams, serializePoolMetadata, serializePoolOwner, serializePoolRelay } from "./serialization/poolRegistrationCertificate";
+import { serializeTxAuxiliaryData } from "./serialization/txAuxiliaryData";
 import { serializeTxCertificate } from "./serialization/txCertificate";
 import { serializeTxInit } from "./serialization/txInit";
-import { serializeTxAuxiliaryData, serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther";
+import { serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther";
 import { serializeAssetGroup, serializeToken, serializeTxOutputBasicParams } from "./serialization/txOutput";
 
 const enum P1 {
   STAGE_INIT = 0x01,
+  STAGE_AUX_DATA = 0x08,
   STAGE_INPUTS = 0x02,
   STAGE_OUTPUTS = 0x03,
   STAGE_FEE = 0x04,
   STAGE_TTL = 0x05,
   STAGE_CERTIFICATES = 0x06,
   STAGE_WITHDRAWALS = 0x07,
-  STAGE_METADATA = 0x08,
   STAGE_VALIDITY_INTERVAL_START = 0x09,
   STAGE_CONFIRM = 0x0a,
   STAGE_WITNESSES = 0x0f,
@@ -224,17 +228,98 @@ function* signTx_setTtl(
 
 function* signTx_setAuxiliaryData(
   auxiliaryData:  ParsedTxAuxiliaryData
-): Interaction<void> {
+): Interaction<TxAuxiliaryDataSupplement | null> {
   const enum P2 {
     UNUSED = 0x00
   }
-  assert(auxiliaryData.type === TxAuxiliaryDataType.ARBITRARY_HASH, 'Auxiliary data type not implemented')
+
+  const supportedAuxiliaryDataTypes = [
+    TxAuxiliaryDataType.ARBITRARY_HASH,
+    TxAuxiliaryDataType.CATALYST_REGISTRATION,
+  ];
+
+  assert(supportedAuxiliaryDataTypes.includes(auxiliaryData.type), 'Auxiliary data type not implemented');
+
   yield send({
-    p1: P1.STAGE_METADATA,
+    p1: P1.STAGE_AUX_DATA,
     p2: P2.UNUSED,
-    data: serializeTxAuxiliaryData(auxiliaryData.hashHex),
+    data: serializeTxAuxiliaryData(auxiliaryData),
     expectedResponseLength: 0,
   });
+
+  if (auxiliaryData.type === TxAuxiliaryDataType.CATALYST_REGISTRATION) {
+    const params = auxiliaryData.params;
+
+    const enum P2 {
+      VOTING_KEY = 0x30,
+      STAKING_KEY = 0x31,
+      VOTING_REWARDS_ADDRESS = 0x32,
+      NONCE = 0x33,
+      CONFIRM = 0x34
+    }
+
+    yield send({
+      p1: P1.STAGE_AUX_DATA,
+      p2: P2.VOTING_KEY,
+      data: serializeCatalystRegistrationVotingKey(params.votingPublicKey), 
+      expectedResponseLength: 0,
+    });
+
+    yield send({
+      p1: P1.STAGE_AUX_DATA,
+      p2: P2.STAKING_KEY,
+      data: serializeCatalystRegistrationStakingPath(params.stakingPath),
+      expectedResponseLength: 0,
+    });
+
+    yield send({
+      p1: P1.STAGE_AUX_DATA,
+      p2: P2.VOTING_REWARDS_ADDRESS,
+      data: serializeCatalystRegistrationRewardsDestination(params.rewardsDestination),
+      expectedResponseLength: 0,
+    });
+
+    yield send({
+      p1: P1.STAGE_AUX_DATA,
+      p2: P2.NONCE,
+      data: serializeCatalystRegistrationNonce(params.nonce),
+      expectedResponseLength: 0,
+    });
+
+    const response = yield send({
+      p1: P1.STAGE_AUX_DATA,
+      p2: P2.CONFIRM,
+      data: Buffer.alloc(0),
+      expectedResponseLength: 96,
+    });
+
+    return {
+      type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
+      auxiliaryDataHashHex: response.slice(0, 32).toString('hex'),
+      catalystRegistrationSignatureHex: response.slice(32, 96).toString('hex'),
+    };
+  }
+
+  return null;
+}
+
+function* signTx_setAuxiliaryData_before_v2_3(
+  auxiliaryData:  ParsedTxAuxiliaryData
+): Interaction<null> {
+  const enum P2 {
+    UNUSED = 0x00
+  }
+
+  assert(auxiliaryData.type === TxAuxiliaryDataType.ARBITRARY_HASH, 'Auxiliary data type not implemented');
+
+  yield send({
+    p1: P1.STAGE_AUX_DATA,
+    p2: P2.UNUSED,
+    data: hex_to_buf(auxiliaryData.hashHex),
+    expectedResponseLength: 0,
+  });
+
+  return null;
 }
 
 function* signTx_setValidityIntervalStart(
@@ -334,8 +419,24 @@ function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
   }
 }
 
+function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
+  const auxiliaryData = request?.tx?.auxiliaryData;
+  const hasCatalystRegistration = auxiliaryData?.type == TxAuxiliaryDataType.CATALYST_REGISTRATION;
+
+  if (hasCatalystRegistration && !getCompatibility(version).supportsCatalystRegistration) {
+    throw new DeviceVersionUnsupported(`Catalyst registration not supported by Ledger app version ${version}.`);
+  }
+
+  if (request?.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
+    throw new DeviceVersionUnsupported(`Zero TTL not supported by Ledger app version ${version}.`);
+  }
+}
+
 export function* signTransaction(version: Version, request: ParsedSigningRequest): Interaction<SignedTransactionData> {
   ensureLedgerAppVersionCompatible(version);
+  ensureRequestSupportedByAppVersion(version, request);
+
+  const isCatalystRegistrationSupported = getCompatibility(version).supportsCatalystRegistration;
 
   const witnessPaths = generateWitnessPaths(request)
   const { tx, signingMode } = request
@@ -343,6 +444,12 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
   yield* signTx_init(
     tx, signingMode, witnessPaths,
   );
+
+  // auxiliary data
+  let auxiliaryDataSupplement = null;
+  if (isCatalystRegistrationSupported && tx.auxiliaryData != null) {
+    auxiliaryDataSupplement = yield* signTx_setAuxiliaryData(tx.auxiliaryData);
+  }
 
   // inputs
   for (const input of tx.inputs) {
@@ -372,9 +479,9 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     yield* signTx_addWithdrawal(withdrawal);
   }
 
-  // metadata
-  if (tx.auxiliaryData != null) {
-    yield* signTx_setAuxiliaryData(tx.auxiliaryData);
+  // auxiliary data before Ledger app version 2.3.x
+  if (!isCatalystRegistrationSupported && tx.auxiliaryData != null) {
+    auxiliaryDataSupplement = yield* signTx_setAuxiliaryData_before_v2_3(tx.auxiliaryData);
   }
 
   // validity start
@@ -395,5 +502,6 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
   return {
     txHashHex,
     witnesses,
+    auxiliaryDataSupplement,
   };
 }

@@ -1,4 +1,5 @@
-import type { SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada";
+import type { DeviceOwnedAddress, SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada";
+import { TxAuxiliaryDataSupplementType } from "../../../src/Ada";
 import { AddressType, CertificateType, Networks, TxAuxiliaryDataType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
@@ -315,6 +316,7 @@ export const testsByron: TestcaseByron[] = [
             "798f930480ba83615a5e2a19389c795a3281a59077b7d37cd5a071a606",
         },
       ],
+      auxiliaryDataSupplement: null,
     }
   },
   {
@@ -334,6 +336,7 @@ export const testsByron: TestcaseByron[] = [
             "fdca7969a3e8bc091c9ee32c04732f79bb7c0091f1796fd2c0e1de8aa8547a00457d50d0576f4dd421baf754499cf0e77584e848e3547addd5d5b7167597a307",
         },
       ],
+      auxiliaryDataSupplement: null,
     }
   },
   {
@@ -353,6 +356,7 @@ export const testsByron: TestcaseByron[] = [
             "224d103185f4709f7b749339ff7ba432d50ca5cb742678847f5e574858cf7dda7ed402399a9ddba81ecd731b6f939ba07a247cd570dcd543f83a9aeadc4f9603",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   }
 ]
@@ -370,6 +374,7 @@ export type TestcaseShelley = {
   testname: string
   tx: Transaction
   txBody?: string,
+  txAuxiliaryData?: string,
   result: SignedTransactionData
 }
 
@@ -390,6 +395,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "190dcee0cc7125fd0ec104cf685674f1ad77f3e439a4a249e596a3306f9eb110ced8fb8ec59da15b721203c8973bd341d88e6a60b85c1e9f2623152fee8dc00a",
         },
       ],
+      auxiliaryDataSupplement: null,
     }
   },
   {
@@ -409,6 +415,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "5137e748df308525b46deaef18e61e04994f6658c32ada286b06d32b99d6676aef94f36895a51b9025d94b2ab0776749eedc7451ac1f0e61bef8b9cf5ec0240e",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -428,6 +435,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "cbf9a954367715f15e5f0e68638b362676c5590c29498734af1c9ef59e7ec5ed7c3d1453d931e5d166cebab2bd3126a26acb39b5f1da43d2fbb73b6c2aeb1a03",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -446,6 +454,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "ce028294627e27e8d80c5902f7dae91da851bf530df8b12efef44f7afa316b613cdb2b404e39df2a47f7fa64818a66b2b34d4b45ca3a04bf519c24c7a4ac3f00",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -464,6 +473,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "4ac5017c014886406a38a45417a165156280be63ca6975a5acffcabc0cc842ca603248b8a7ebfa729d7affce34518f4ca94fe797420a4d7aa0ef8c2b0ddfba0b",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -482,6 +492,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "70559415746a9646dc492b7758e18cb367c005ab0479558b3d540be2310eb1bb1dd0839081e22c0b4727e8bd8e163cfbfe9def99a8506fb4a6787a200862e00f",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -500,6 +511,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
             "1838884e08cf6966ebe6b3e775191c4f08d90834723421779efd6aa96e52ffc91a24e5073abe6db94c74fe080d008258b3d989c159d9b87a9c778a51404abc08",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   }
 ]
@@ -535,6 +547,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "04b995979c2072b469c1e0ace5331c3d188e3e65d5a6f06aa4e608fb18a3588621370ee1b5d39d55afe0744aa4906785baa07210dc4cb49594eba507f7215102",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -569,6 +582,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "a2a22faa4ac4ba4b5a89c770dd7b2afe877ba8c86f0205df8c01a2184275aaafada9b6be4640aa573cafbbca26ac2eccd98f804065b39b10a0559c7dc441fa0a",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -605,6 +619,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "035b4e6ae6f7a8089f2a302ddcb60bc56d48bcf267fdcb071844da5ce3086d51e816777a6fb5eabfcb326a32b830674ac0de40ee1b2360a69adba4b64c662404",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -639,6 +654,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "77210ce6533a76db3673af1076bf3933747a8d81cabda80c8bc9c852c78685f8a42c9372721bdfe9b47611039364afb3391031211b5c427cfec0c5c505cfec0c",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -675,6 +691,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "7b53ba805658d801baa39546777b611ed071c89938daea50c2c3275358abec2c1d67c8062b24fc4778e09af13e58ea33dd7d0627e221574386716aaa25e1f20b",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -702,6 +719,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "953c5243ba09570dd4e52642236834c138ad4abbbb21796a90540a11e8dc96e47043401d370cdaed70ebc332dd4db80c9b167fd7f20971c4f142875cea57200c",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -727,6 +745,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
             "bb1a035acf4a7b5dd68914f0007dfc4d1cc7b4d88748c0ad24326fd06597542ce0352075ed861b3ae012ab976cacd3dbbc58802cdf82409917ebf9a8bb182e04",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   }
 ]
@@ -763,6 +782,7 @@ export const testsAllegra: TestcaseAllegra[] = [
             "6dc4da7a0bee07e4ecc687b0d1b9e73d772dfb6a09b2bf435fe1e3d481ed8214f8d751ceff0e9fa41ef0ad7318ea9ca561c9b773e5673adb8049569c380f5301",
         },
       ],
+      auxiliaryDataSupplement: null,
     }
   },
   {
@@ -783,6 +803,7 @@ export const testsAllegra: TestcaseAllegra[] = [
             "b1bc7a4b110523f8b0a1a3aa0ae0f45a718faf7beb648a021d0d777755ab214ba1b079d79d8517a275ebb74c79aa244600f0877c611ca00383d67fc447074003",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   }
 ];
@@ -800,6 +821,7 @@ export type TestcaseMary = {
   testname: string
   tx: Transaction
   txBody: string,
+  txAuxiliaryData?: string,
   result: SignedTransactionData
 }
 
@@ -821,6 +843,7 @@ export const testsMary: TestcaseMary[] = [
             "b48877586d90a249579a5f3994c3ad0c21c5f78960a04aadd182ca49c3b606f1d8a578edf17923188e4e0e40f191e019a5174081c092c458a82e9f0c1e1fae08",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -840,6 +863,7 @@ export const testsMary: TestcaseMary[] = [
             "562497549b44d34926598d8a6511c4b58da0cb8da77033b633983f2897dbd59f1d45a4bef987574d83ebe74a016ccab042d0462df813e86896db624d221a5207",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -862,6 +886,7 @@ export const testsMary: TestcaseMary[] = [
             "632cd935550a71c1e1869e6f5749ee4cb8c268cbe014138561fc2d1045b5b2be84526cfd5a6fea01de99bdf903fa17c79a58a832b5cdcb1c999bcbe995a56806",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -881,6 +906,75 @@ export const testsMary: TestcaseMary[] = [
             "f19c5f698d3d46dac99c83268d8b5154262c22f9599d38b5221b78d08cef8f5bb81de648a0c94d328b74e88c58d46535de289123f08a47a05a1c253980d6b80e",
         },
       ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testname: "Mary era transaction with zero fee, TTL and validity interval start",
+    tx: {
+      ...maryBase,
+      fee: 0,
+      ttl: 0,
+      validityIntervalStart: 0,
+      outputs: [outputs.internalBaseWithStakingPath],
+    },
+    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca793020003000800",
+    result: {
+      txHashHex:
+        "acc997f583c78f36529ee29134e2cfb7a4550493727f565a502ab40544827311",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "e5ee59942fba139b5547e5e1dae1389ed9edd6e7bd7f057b988973c2451b5e3e41901c1d9a0fa74d34dae356a064ee783205d731fee01105c904702826b66b04",
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const testsCatalystRegistration: TestcaseMary[] = [
+  {
+    testname: "Should correctly sign tx with Catalyst voting key registration metadata",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.internalBaseWithStakingPath],
+      auxiliaryData: {
+        type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
+        params: {
+          votingPublicKeyHex: "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+          nonce: 1454448,
+          rewardsDestination: destinations.internalBaseWithStakingPath.params as DeviceOwnedAddress
+        }
+      }
+    },
+    txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad" +
+      "1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d" +
+      "227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075" +
+      "820e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec92608182f",
+    txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47" +
+      "a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67" +
+      "bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11" +
+      "241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a" +
+      "10158400ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af24063" +
+      "0eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e80",
+    result: {
+      txHashHex:
+        "ffb0c7daf1bcb661cdab8b452a6e6664a9fd9da289405a4234c356c75ce5be66",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "b4e2bd2985668b6cbce395700545f3773b72ca1e86cc9470cb5340e5b266d05feb968cf09a1febe852d180f5ba93113f13e5d56fe8cf7bbfb31b3ccaa45fb800",
+        },
+      ],
+      auxiliaryDataSupplement: {
+        type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
+        auxiliaryDataHashHex: "e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec926",
+        catalystRegistrationSignatureHex: "0ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af240630eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e"
+      }
     },
   }
 ]

@@ -53,7 +53,7 @@ export const isUintStr = (data: unknown, constraints: { min?: string, max?: stri
         && data.length > 0
         && data.length <= max.length
         // Leading zeros
-        && (data.length === 0 || data[0] !== "0")
+        && (data.length === 1 || data[0] !== "0")
         // less or equal than max value
         && (data.length < max.length ||
             // Note: this is string comparison!

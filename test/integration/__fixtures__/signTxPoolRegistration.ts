@@ -441,6 +441,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "61fc06451462426b14fa3a31008a5f7d32b2f1793022060c02939bd0004b07f2bd737d542c2db6cef6dad912b9bdca1829a5dc2b45bab3c72afe374cef59cc04",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -460,6 +461,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "f03947901bcfc96ac8e359825091db88900a470947c60220fcd3892683ec7fe949ef4e28a446d78a883f034cd77cbca669529a9da3f2316b762eb97033797a07",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -479,6 +481,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "c1b454f3cf868007d2850084ff404bc4b91d9b541a78af9014288504143bd6b4f12df2163b7efb1817636eb625a62967fb66281ecae4d1b461770deafb65ba0f",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -498,6 +501,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "8bb8c10b390ac92f617ba6895e3b138f43dc741e3589a9548166d1eda995becf4a229e9e95f6300336f7e92345b244c5dc78cfe0cc12cac6ff6fbb5731671c0e",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -517,6 +521,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "b0e6796ca5f97a0776c798e602afd0f6541996d431a3cbec8e3fe77eb49416cd812dcf6084672e40c9ae2b8cc8a5513d1b1a6c3ad408864d4a771e315c50d808",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -536,6 +541,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "adc06e34dc66f01b16496b04fc4ce5058e3be7290398cf2728f8463dda15c87866314449bdb309d0cdc22f3ca9bee310458f2769df6a1486f1b470a3227a030b",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -556,6 +562,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "06e66f6a2d510a8a5446597c59c79cbf4f9e7af9073da0651ea59bbdc2340dc933ed292aa282e6ea7068bed9f6bcb44228573e661c211e6dc61f4dd73ff41f04",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   },
   {
@@ -576,6 +583,7 @@ export const poolRegistrationTestcases: Testcase[] = [
             "91c09ad95d5d0f87f61a62e2f5e2dda4245eb4011887a04a53bdf085282002ccc712718e855e36a30cfcf7ecd43bcdc795aa87647be9c716b65e7fcf376e0503",
         },
       ],
+      auxiliaryDataSupplement: null,
     },
   }
 ]
