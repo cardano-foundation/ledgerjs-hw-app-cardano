@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [?.?.?]
+## [3.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.1...v3.0.0) - [April 12th 2020]
 
 Major release. Switched from flow to TypeScript.
 
@@ -34,7 +34,7 @@ Major release. Switched from flow to TypeScript.
 
 - Compatibility with pre-Mary (<2.2) App versions.
 
-## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2020]
+## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2021]
 
 Patch release with a minor fix in signTransaction() call's parameters validation
 
@@ -46,7 +46,7 @@ Patch release with a minor fix in signTransaction() call's parameters validation
 
 - relax the tokenBundle feature check to allow an empty array https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/pull/17
 
-## [2.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.1.0...v2.2.0) - [February 8th 2020]
+## [2.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.1.0...v2.2.0) - [February 8th 2021]
 
 Works with Ledger Cardano app 2.2.0 and is backwards compatible with older versions down to 2.0.4/2.0.5\*. Older versions of this js library do not support Ledger Cardano app 2.2.0, hence an update to this version of the library is required before Ledger Cardano app 2.2.0 is released.
 
