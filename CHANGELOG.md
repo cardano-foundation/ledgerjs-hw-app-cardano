@@ -23,7 +23,7 @@ Major release. Switched from flow to TypeScript.
     - Device owned destination reuses existing `Address` param type
   - `Address` is now tagged enum across different address types (Byron, Base, Enterprise, Pointer, Reward). Reward address still uses `spendingPath` instead of `stakingPath` to denote that this key can be used to spend funds
 - All API call types now use `*Request`/`*Response` nomenclature
-- GetVersion call now returns `{version, compability}` instead of `version` where `compatibility` describes overall set of features we support for the device. It should be responsibility of API users to check `compatibility.isCompatible` flag and urge users to upgrade device to `compatibility.recommendedVersion` if the device is not compatible.
+- GetVersion call now returns `{version, compatibility}` instead of `version` where `compatibility` describes overall set of features we support for the device. It should be responsibility of API users to check `compatibility.isCompatible` flag and urge users to upgrade device to `compatibility.recommendedVersion` if the device is not compatible.
 - All (expected) errors thrown by the API are now descendants of `ErrorBase` from `errors` subpackage. API now distinguishes between these error types
   - `InvalidData` - you passed some wrong data to the API. We will not even try to communicate with the device
   - `DeviceUnsupported` - thrown when trying to use API with unsopported Ledger app version (or when using features not yet available for the app version)
