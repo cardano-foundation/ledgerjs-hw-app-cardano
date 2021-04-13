@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.1...v3.0.0) - [April 12th 2020]
+## [3.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.1...v3.0.0) - [April 13th 2020]
 
 Major release. Switched from flow to TypeScript.
 
