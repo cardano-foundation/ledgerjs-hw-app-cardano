@@ -103,4 +103,4 @@ workflows:
           filters:
             branches:
               only:
-                - develop # TODO update to master once ts refactor is done
+                - master
