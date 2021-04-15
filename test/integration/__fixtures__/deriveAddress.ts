@@ -213,12 +213,12 @@ export const InvalidPathTestcases: InvalidPathTestcase[] = [
         errMsg: "Action rejected by Ledger's security policy"
     },
     {
-        testname: "too long",
+        testname: "invalid path",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BYRON,
             params: {
-                spendingPath: str_to_path("44'/1815'/1'/5/10'/1/2/3")
+                spendingPath: str_to_path("44'/1815'/1'/5/10'")
             }
         },
         errCls: DeviceStatusError,

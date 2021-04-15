@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.1.0...v3.2.0) - [?]
+
+Added support for signing pool registration certificates as operator, support for pool retirement certificates within the `signTransaction()` call and added a new call for operational ceritificate signing - `signOperationalCertificate()`.
+
+### Added
+
+- `TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR` to allow signing pool registration as operator
+- `CertificateType.STAKE_POOL_RETIREMENT`
+- `signOperationalCertificate()` call
+
+### Changed
+
+- `PoolRegistrationParams.poolKey` has been changed from a `string` to `PoolKey` in order to support pool operator signing - `poolKey` can now also be sent as a path
+- `PoolRegistrationParams.rewardAccount` has been changeed from a `string` to `PoolRewardAccount` in order to support pool operator signing - `rewardAccount` can now also be sent as path
 
 ## [3.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.0.0...v3.1.0) - [May 11th 2021]
 

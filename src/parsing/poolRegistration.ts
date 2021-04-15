@@ -1,18 +1,22 @@
 import { InvalidData } from "../errors";
 import { InvalidDataReason } from "../errors/invalidDataReason";
-import type { ParsedMargin, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, Uint16_t, Uint64_str, VarlenAsciiString } from "../types/internal";
-import { KEY_HASH_LENGTH, RelayType } from "../types/internal";
+import type { ParsedMargin, ParsedPoolKey, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedPoolRewardAccount, Uint16_t, Uint64_str, VarlenAsciiString } from "../types/internal";
+import { KEY_HASH_LENGTH, RelayType, REWARD_ACCOUNT_HEX_LENGTH, VRF_KEY_HASH_LENGTH } from "../types/internal";
 import type {
     MultiHostRelayParams,
+    PoolKey,
     PoolMetadataParams,
     PoolOwner,
     PoolRegistrationParams,
+    PoolRewardAccount,
     Relay,
     SingleHostHostnameRelayParams,
     SingleHostIpAddrRelayParams
 } from "../types/public";
 import {
-    PoolOwnerType
+    PoolKeyType,
+    PoolOwnerType,
+    PoolRewardAccountType,
 } from "../types/public";
 import { isHexStringOfLength, isString, isUint8, isUint16, parseAscii, parseBIP32Path, parseHexStringOfLength, parseIntFromStr, parseUint64_str, validate } from "../utils/parse";
 import { hex_to_buf } from "../utils/serialize";
@@ -24,7 +28,7 @@ function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
     const marginDenominator = parseUint64_str(
         params.denominator,
         { max: POOL_MARGIN_DENOMINATOR_MAX_STR },
-        InvalidDataReason.POOL_MARGIN_INVALID_MARGIN_DENOMINATOR
+        InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN_DENOMINATOR
     );
 
     const marginNumerator = parseUint64_str(
@@ -39,15 +43,13 @@ function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
     }
 }
 
-
-
 export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParams {
-    const keyHashHex = parseHexStringOfLength(params.poolKeyHashHex, KEY_HASH_LENGTH, InvalidDataReason.POOL_REGISTRATION_INVALID_POOL_KEY_HASH)
-    const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, 32, InvalidDataReason.POOL_REGISTRATION_INVALID_VRF_KEY_HASH)
+    const poolKey = parsePoolKey(params.poolKey)
+    const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, VRF_KEY_HASH_LENGTH, InvalidDataReason.POOL_REGISTRATION_INVALID_VRF_KEY_HASH)
     const pledge = parseUint64_str(params.pledge, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.POOL_REGISTRATION_INVALID_PLEDGE)
     const cost = parseUint64_str(params.cost, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.POOL_REGISTRATION_INVALID_COST)
     const margin = parseMargin(params.margin)
-    const rewardAccountHex = parseHexStringOfLength(params.rewardAccountHex, 29, InvalidDataReason.POOL_REGISTRATION_INVALID_REWARD_ACCOUNT)
+    const rewardAccount = parseRewardAccount(params.rewardAccount)
 
     const owners = params.poolOwners.map(owner => parsePoolOwnerParams(owner))
     const relays = params.relays.map(relay => parsePoolRelayParams(relay))
@@ -64,17 +66,46 @@ export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParam
     );
 
     return {
-        keyHashHex,
+        poolKey,
         vrfHashHex,
         pledge,
         cost,
         margin,
-        rewardAccountHex,
+        rewardAccount,
         owners,
         relays,
         metadata
     }
 
+}
+
+function parsePoolKey(poolKey: PoolKey): ParsedPoolKey {
+    switch (poolKey.type) {
+        case PoolKeyType.DEVICE_OWNED: {
+            const params = poolKey.params
+            const path = parseBIP32Path(params.path, InvalidDataReason.POOL_KEY_INVALID_PATH);
+
+            return {
+                type: PoolKeyType.DEVICE_OWNED,
+                path,
+            }
+        }
+        case PoolKeyType.THIRD_PARTY: {
+            const params = poolKey.params
+            const hashHex = parseHexStringOfLength(
+                params.keyHashHex,
+                KEY_HASH_LENGTH,
+                InvalidDataReason.POOL_KEY_INVALID_KEY_HASH
+            );
+
+            return {
+                type: PoolKeyType.THIRD_PARTY,
+                hashHex
+            }
+        }
+        default:
+            throw new InvalidData(InvalidDataReason.POOL_KEY_INVALID_TYPE);
+    }
 }
 
 function parsePoolOwnerParams(poolOwner: PoolOwner): ParsedPoolOwner {
@@ -106,6 +137,34 @@ function parsePoolOwnerParams(poolOwner: PoolOwner): ParsedPoolOwner {
     }
 }
 
+function parseRewardAccount(poolRewardAccount: PoolRewardAccount): ParsedPoolRewardAccount {
+    switch (poolRewardAccount.type) {
+        case PoolRewardAccountType.DEVICE_OWNED: {
+            const params = poolRewardAccount.params
+            const path = parseBIP32Path(params.path, InvalidDataReason.POOL_REWARD_ACCOUNT_INVALID_PATH);
+
+            return {
+                type: PoolRewardAccountType.DEVICE_OWNED,
+                path,
+            }
+        }
+        case PoolRewardAccountType.THIRD_PARTY: {
+            const params = poolRewardAccount.params
+            const rewardAccountHex = parseHexStringOfLength(
+                params.rewardAccountHex,
+                REWARD_ACCOUNT_HEX_LENGTH,
+                InvalidDataReason.POOL_REWARD_ACCOUNT_INVALID_HEX
+            );
+
+            return {
+                type: PoolRewardAccountType.THIRD_PARTY,
+                rewardAccountHex
+            }
+        }
+        default:
+            throw new InvalidData(InvalidDataReason.POOL_REWARD_ACCOUNT_INVALID_TYPE);
+    }
+}
 
 function parsePort(portNumber: number, errMsg: InvalidDataReason): Uint16_t {
     validate(isUint16(portNumber), errMsg)

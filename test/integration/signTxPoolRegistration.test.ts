@@ -5,6 +5,7 @@ import type Ada from "../../src/Ada";
 import type { Certificate, Transaction } from "../../src/Ada";
 import { CertificateType, InvalidDataReason, TransactionSigningMode } from "../../src/Ada";
 import { getAda, Networks } from "../test_utils";
+import type { Testcase } from "./__fixtures__/signTxPoolRegistration";
 import {
   certificates,
   defaultPoolRegistration,
@@ -13,7 +14,9 @@ import {
   invalidPoolMetadataTestcases,
   invalidRelayTestcases,
   outputs,
-  poolRegistrationTestcases,
+  poolRegistrationOperatorTestcases,
+  poolRegistrationOwnerTestcases,
+  poolRetirementTestCases,
   withdrawals,
 } from "./__fixtures__/signTxPoolRegistration";
 chai.use(chaiAsPromised)
@@ -29,12 +32,18 @@ describe("signTxPoolRegistrationOK", async () => {
     await (ada as any).t.close();
   });
 
-  for (const { testname, tx, result: expectedResult } of poolRegistrationTestcases) {
-    it(testname, async () => {
-      const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER });
-      expect(response).to.deep.equal(expectedResult);
-    })
+  const test = (testcases: Testcase[], signingMode: TransactionSigningMode) => {
+    for (const { testname, tx, result: expectedResult } of testcases) {
+      it(testname, async () => {
+        const response = await ada.signTransaction({ tx, signingMode });
+        expect(response).to.deep.equal(expectedResult);
+      })
+    }
   }
+
+  test(poolRegistrationOwnerTestcases, TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+  test(poolRegistrationOperatorTestcases, TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR)
+  test(poolRetirementTestCases, TransactionSigningMode.ORDINARY_TRANSACTION)
 });
 
 // ======================================== negative tests (tx should be rejected) ===============================
@@ -52,7 +61,7 @@ describe("signTxPoolRegistrationReject", async () => {
 
   const txBase: Omit<Transaction, 'certificates'> = {
     network: Networks.Mainnet,
-    inputs: [inputs.utxo],
+    inputs: [inputs.utxoNoPath],
     outputs: [outputs.external],
     fee: 42,
     ttl: 10,

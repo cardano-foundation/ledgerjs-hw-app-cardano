@@ -1,16 +1,15 @@
-import { DeviceVersionUnsupported } from '../errors';
-import type {  ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
-import { CertificateType, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
-import type { SignedTransactionData, TxAuxiliaryDataSupplement} from '../types/public';
-import { TxAuxiliaryDataSupplementType} from '../types/public';
-import { TransactionSigningMode, TxAuxiliaryDataType } from '../types/public';
+import { DeviceVersionUnsupported } from "../errors";
+import type { ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal";
+import { CertificateType, ED25519_SIGNATURE_LENGTH, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal";
+import type { SignedTransactionData, TxAuxiliaryDataSupplement } from "../types/public";
+import { PoolKeyType, TransactionSigningMode, TxAuxiliaryDataSupplementType, TxAuxiliaryDataType } from "../types/public";
 import { assert } from "../utils/assert";
 import { buf_to_hex, hex_to_buf } from "../utils/serialize";
 import { INS } from "./common/ins";
 import type { Interaction, SendParams } from "./common/types";
 import { ensureLedgerAppVersionCompatible, getCompatibility } from "./getVersion";
-import { serializeCatalystRegistrationNonce, serializeCatalystRegistrationRewardsDestination, serializeCatalystRegistrationStakingPath,serializeCatalystRegistrationVotingKey } from "./serialization/catalystRegistration"
-import { serializePoolInitialParams, serializePoolMetadata, serializePoolOwner, serializePoolRelay } from "./serialization/poolRegistrationCertificate";
+import { serializeCatalystRegistrationNonce, serializeCatalystRegistrationRewardsDestination, serializeCatalystRegistrationStakingPath, serializeCatalystRegistrationVotingKey } from "./serialization/catalystRegistration"
+import { serializeFinancials, serializePoolInitialParams, serializePoolInitialParamsLegacy, serializePoolKey, serializePoolMetadata, serializePoolOwner, serializePoolRelay, serializePoolRewardAccount } from "./serialization/poolRegistrationCertificate";
 import { serializeTxAuxiliaryData } from "./serialization/txAuxiliaryData";
 import { serializeTxCertificate } from "./serialization/txCertificate";
 import { serializeTxInit } from "./serialization/txInit";
@@ -119,6 +118,7 @@ function* signTx_addOutput(
 }
 
 function* signTx_addCertificate(
+  version: Version,
   certificate: ParsedCertificate,
 ): Interaction<void> {
   const enum P2 {
@@ -133,54 +133,152 @@ function* signTx_addCertificate(
 
   // additional data for pool certificate
   if (certificate.type === CertificateType.STAKE_POOL_REGISTRATION) {
-    const enum P2 {
-      POOL_PARAMS = 0x30,
-      OWNERS = 0x31,
-      RELAYS = 0x32,
-      METADATA = 0x33,
-      CONFIRMATION = 0x34,
+    if (getCompatibility(version).supportsPoolRegistrationAsOperator) {
+      yield* signTx_addStakePoolRegistrationCertificate(certificate)
+    } else {
+      yield* signTx_addStakePoolRegistrationCertificateLegacy(certificate)
     }
+  }
+}
 
-    const pool = certificate.pool
+function* signTx_addStakePoolRegistrationCertificate(
+  certificate: ParsedCertificate
+): Interaction<void> {
+  assert(certificate.type === CertificateType.STAKE_POOL_REGISTRATION, "invalid certificate type")
+
+  const enum P2 {
+    INIT = 0x30,
+    POOL_KEY = 0x31,
+    VRF_KEY = 0x32,
+    FINANCIALS = 0x33,
+    REWARD_ACCOUNT = 0x34,
+    OWNERS = 0x35,
+    RELAYS = 0x36,
+    METADATA = 0x37,
+    CONFIRMATION = 0x38,
+  }
+
+  const pool = certificate.pool
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.INIT,
+    data: serializePoolInitialParams(pool),
+    expectedResponseLength: 0,
+  });
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.POOL_KEY,
+    data: serializePoolKey(pool.poolKey),
+    expectedResponseLength: 0,
+  });
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.VRF_KEY,
+    data: hex_to_buf(pool.vrfHashHex),
+    expectedResponseLength: 0,
+  });
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.FINANCIALS,
+    data: serializeFinancials(pool),
+    expectedResponseLength: 0,
+  });
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.REWARD_ACCOUNT,
+    data: serializePoolRewardAccount(pool.rewardAccount),
+    expectedResponseLength: 0,
+  });
+
+  for (const owner of pool.owners) {
     yield send({
       p1: P1.STAGE_CERTIFICATES,
-      p2: P2.POOL_PARAMS,
-      data: serializePoolInitialParams(pool),
-      expectedResponseLength: 0,
-    });
-
-    for (const owner of pool.owners) {
-      yield send({
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.OWNERS,
-        data: serializePoolOwner(owner),
-        expectedResponseLength: 0,
-      });
-    }
-
-    for (const relay of pool.relays) {
-      yield send({
-        p1: P1.STAGE_CERTIFICATES,
-        p2: P2.RELAYS,
-        data: serializePoolRelay(relay),
-        expectedResponseLength: 0,
-      });
-    }
-
-    yield send({
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.METADATA,
-      data: serializePoolMetadata(pool.metadata),
-      expectedResponseLength: 0,
-    });
-
-    yield send({
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.CONFIRMATION,
-      data: Buffer.alloc(0),
+      p2: P2.OWNERS,
+      data: serializePoolOwner(owner),
       expectedResponseLength: 0,
     });
   }
+
+  for (const relay of pool.relays) {
+    yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.RELAYS,
+      data: serializePoolRelay(relay),
+      expectedResponseLength: 0,
+    });
+  }
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.METADATA,
+    data: serializePoolMetadata(pool.metadata),
+    expectedResponseLength: 0,
+  });
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.CONFIRMATION,
+    data: Buffer.alloc(0),
+    expectedResponseLength: 0,
+  });
+}
+
+function* signTx_addStakePoolRegistrationCertificateLegacy(
+  certificate: ParsedCertificate
+): Interaction<void> {
+  assert(certificate.type === CertificateType.STAKE_POOL_REGISTRATION, "invalid certificate type")
+
+  const enum P2 {
+    POOL_PARAMS = 0x30,
+    OWNERS = 0x31,
+    RELAYS = 0x32,
+    METADATA = 0x33,
+    CONFIRMATION = 0x34,
+  }
+
+  const pool = certificate.pool
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.POOL_PARAMS,
+    data: serializePoolInitialParamsLegacy(pool),
+    expectedResponseLength: 0,
+  });
+
+  for (const owner of pool.owners) {
+    yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.OWNERS,
+      data: serializePoolOwner(owner),
+      expectedResponseLength: 0,
+    });
+  }
+
+  for (const relay of pool.relays) {
+    yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.RELAYS,
+      data: serializePoolRelay(relay),
+      expectedResponseLength: 0,
+    });
+  }
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.METADATA,
+    data: serializePoolMetadata(pool.metadata),
+    expectedResponseLength: 0,
+  });
+
+  yield send({
+    p1: P1.STAGE_CERTIFICATES,
+    p2: P2.CONFIRMATION,
+    data: Buffer.alloc(0),
+    expectedResponseLength: 0,
+  });
 }
 
 function* signTx_addWithdrawal(
@@ -227,7 +325,7 @@ function* signTx_setTtl(
 }
 
 function* signTx_setAuxiliaryData(
-  auxiliaryData:  ParsedTxAuxiliaryData
+  auxiliaryData: ParsedTxAuxiliaryData
 ): Interaction<TxAuxiliaryDataSupplement | null> {
   const enum P2 {
     UNUSED = 0x00
@@ -261,7 +359,7 @@ function* signTx_setAuxiliaryData(
     yield send({
       p1: P1.STAGE_AUX_DATA,
       p2: P2.VOTING_KEY,
-      data: serializeCatalystRegistrationVotingKey(params.votingPublicKey), 
+      data: serializeCatalystRegistrationVotingKey(params.votingPublicKey),
       expectedResponseLength: 0,
     });
 
@@ -304,7 +402,7 @@ function* signTx_setAuxiliaryData(
 }
 
 function* signTx_setAuxiliaryData_before_v2_3(
-  auxiliaryData:  ParsedTxAuxiliaryData
+  auxiliaryData: ParsedTxAuxiliaryData
 ): Interaction<null> {
   const enum P2 {
     UNUSED = 0x00
@@ -366,7 +464,7 @@ function* signTx_getWitness(
     p1: P1.STAGE_WITNESSES,
     p2: P2.UNUSED,
     data: serializeTxWitnessRequest(path),
-    expectedResponseLength: 64,
+    expectedResponseLength: ED25519_SIGNATURE_LENGTH,
   });
   return {
     path: path,
@@ -376,47 +474,42 @@ function* signTx_getWitness(
 
 
 function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
-  const { tx, signingMode } = request
-  switch (signingMode) {
-    case TransactionSigningMode.ORDINARY_TRANSACTION: {
-      // we collect required witnesses for inputs, certificates and withdrawals
-      // each path is included only once
-      const witnessPaths: Record<string, ValidBIP32Path> = {}
-      // eslint-disable-next-line no-inner-declarations
-      function _insert(path: ValidBIP32Path) {
-        const pathKey = JSON.stringify(path);
-        witnessPaths[pathKey] = path
-      }
+  const { tx } = request
+  
+  const witnessPaths: Record<string, ValidBIP32Path> = {}
+  // eslint-disable-next-line no-inner-declarations
+  function _insert(path: ValidBIP32Path) {
+    const pathKey = JSON.stringify(path)
+    witnessPaths[pathKey] = path
+  }
 
-      for (const input of tx.inputs) {
-        assert(input.path != null, "input missing path")
-        _insert(input.path)
-      }
-      for (const cert of tx.certificates) {
-        assert(cert.type !== CertificateType.STAKE_POOL_REGISTRATION, "wrong cert type")
-        _insert(cert.path)
-      }
-      for (const withdrawal of tx.withdrawals) {
-        _insert(withdrawal.path)
-      }
-
-      return Object.values(witnessPaths)
-    }
-    case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER: {
-      // there should be exactly one owner given by path which will be used for the witness
-      assert(tx.certificates.length == 1, "bad certificates length");
-      const cert = tx.certificates[0]
-      assert(cert.type === CertificateType.STAKE_POOL_REGISTRATION, "bad certificate type");
-
-      const witnessOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED);
-      assert(witnessOwner != null, "missing witness owner");
-      assert(witnessOwner.type === PoolOwnerType.DEVICE_OWNED, "bad witness owner type")
-      return [witnessOwner.path]
-    }
-    default: {
-      assert(false, 'Bad signing mode')
+  for (const input of tx.inputs) {
+    if (input.path != null) {
+      _insert(input.path)
     }
   }
+
+  for (const cert of tx.certificates) {
+    if (cert.type === CertificateType.STAKE_POOL_REGISTRATION) {
+      const deviceOwnedPoolOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED);
+      if (deviceOwnedPoolOwner != null) {
+        assert(deviceOwnedPoolOwner.type === PoolOwnerType.DEVICE_OWNED, "bad witness owner type")
+        _insert(deviceOwnedPoolOwner.path)
+      }
+
+      if (cert.pool.poolKey.type === PoolKeyType.DEVICE_OWNED) {
+        _insert(cert.pool.poolKey.path)
+      }
+    } else {
+      _insert(cert.path)
+    }
+  }
+  
+  for (const withdrawal of tx.withdrawals) {
+    _insert(withdrawal.path)
+  }
+
+  return Object.values(witnessPaths)
 }
 
 function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
@@ -429,6 +522,17 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
 
   if (request?.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
     throw new DeviceVersionUnsupported(`Zero TTL not supported by Ledger app version ${version}.`);
+  }
+
+  if (request?.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR && !getCompatibility(version).supportsPoolRegistrationAsOperator) {
+    throw new DeviceVersionUnsupported(`Pool registration as operator not supported by Ledger app version ${version}.`);
+  }
+
+  const certificates = request?.tx?.certificates
+  const hasPoolRetirement = certificates && certificates.some(c => c.type === CertificateType.STAKE_POOL_RETIREMENT);
+
+  if (hasPoolRetirement && !getCompatibility(version).supportsPoolRetirement) {
+    throw new DeviceVersionUnsupported(`Pool retirement certificate not supported by Ledger app version ${version}.`);
   }
 }
 
@@ -471,7 +575,7 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
 
   // certificates
   for (const certificate of tx.certificates) {
-    yield* signTx_addCertificate(certificate);
+    yield* signTx_addCertificate(version, certificate);
   }
 
   // withdrawals

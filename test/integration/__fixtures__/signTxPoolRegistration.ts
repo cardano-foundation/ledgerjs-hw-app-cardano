@@ -1,13 +1,29 @@
-import type { Certificate, MultiHostRelayParams, PoolMetadataParams, PoolOwner, PoolRegistrationParams, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import type { Certificate, MultiHostRelayParams, PoolKey, PoolMetadataParams, PoolOwner, PoolRegistrationParams, PoolRewardAccount, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada";
+import { PoolKeyType, PoolRewardAccountType } from "../../../src/Ada";
 import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
-export const inputs: Record<'utxo', TxInput> = {
-  utxo: {
+export const inputs: Record<
+  | 'utxoNoPath'
+  | 'utxoWithPath0'
+  | 'utxoWithPath1'
+  , TxInput
+> = {
+  utxoNoPath: {
     txHashHex:
       "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     outputIndex: 0,
     path: null,
+  },
+  utxoWithPath0: {
+    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    outputIndex: 0,
+    path: str_to_path("1852'/1815'/0'/0/0"),
+  },
+  utxoWithPath1: {
+    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    outputIndex: 0,
+    path: str_to_path("1852'/1815'/0'/0/1"),
   },
 };
 
@@ -30,7 +46,7 @@ export const outputs: Record<'external', TxOutput> = {
 
 const txBase: Transaction = {
   network: Networks.Mainnet,
-  inputs: [inputs.utxo],
+  inputs: [inputs.utxoNoPath],
   outputs: [outputs.external],
   fee: 42,
   ttl: 10,
@@ -84,6 +100,25 @@ export const invalidPoolMetadataTestcases: Array<{ testName: string, metadata: P
   }
 ]
 
+const poolKeys: Record<
+  | 'poolKeyPath'
+  | 'poolKeyHash'
+  , PoolKey
+> = {
+  poolKeyPath: {
+    type: PoolKeyType.DEVICE_OWNED,
+    params: {
+      path: str_to_path("1853'/1815'/0'/0'"),
+    }
+  },
+  poolKeyHash: {
+    type: PoolKeyType.THIRD_PARTY,
+    params: {
+      keyHashHex: "13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad"
+    }
+  }
+}
+
 const stakingHashOwners: Record<
   | 'owner0'
   | 'owner1'
@@ -133,6 +168,25 @@ const poolOwnerVariationSet = {
   twoPathOwners: [stakingPathOwners.owner0, stakingPathOwners.owner1],
   twoCombinedOwners: [stakingPathOwners.owner0, stakingHashOwners.owner0],
 };
+
+const poolRewardAccounts: Record<
+  | 'poolRewardAccountPath'
+  | 'poolRewardAccountHash'
+  , PoolRewardAccount
+> = {
+  poolRewardAccountPath: {
+    type: PoolRewardAccountType.DEVICE_OWNED,
+    params: {
+      path: str_to_path("1852'/1815'/3'/2/0"),
+    }
+  },
+  poolRewardAccountHash: {
+    type: PoolRewardAccountType.THIRD_PARTY,
+    params: {
+      rewardAccountHex: "e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad"
+    }
+  }
+}
 
 const relays: Record<
   | 'singleHostIPV4Relay0'
@@ -270,7 +324,7 @@ const relayVariationSet = {
 };
 
 export const defaultPoolRegistration: PoolRegistrationParams = {
-  poolKeyHashHex: "13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad",
+  poolKey: poolKeys.poolKeyHash,
   vrfKeyHashHex:
     "07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450",
   pledge: "50000000000",
@@ -279,8 +333,7 @@ export const defaultPoolRegistration: PoolRegistrationParams = {
     numerator: 3,
     denominator: 100,
   },
-  rewardAccountHex:
-    "e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
+  rewardAccount: poolRewardAccounts.poolRewardAccountHash,
   poolOwners: poolOwnerVariationSet.singlePathOwner,
   relays: relayVariationSet.singleHostIPV4Relay,
   metadata: {
@@ -292,6 +345,7 @@ export const defaultPoolRegistration: PoolRegistrationParams = {
 
 export const certificates: Record<
   | 'stakeDelegation'
+  | 'stakeRegistration'
   | 'poolRegistrationDefault'
   | 'poolRegistrationMixedOwners'
   | 'poolRegistrationMixedOwnersAllRelays'
@@ -300,6 +354,10 @@ export const certificates: Record<
   | 'poolRegistrationNoRelays'
   | 'poolRegistrationNoMetadata'
   | 'poolRegistrationWrongMargin'
+  | 'poolRegistrationOperatorNoOwnersNoRelays'
+  | 'poolRegistrationOperatorMultipleOwnersAllRelays'
+  | 'poolRegistrationOperatorOneOwnerOperatorNoRelays'
+  | 'poolRetirement'
   , Certificate
 > = {
   // for negative tests 
@@ -309,6 +367,12 @@ export const certificates: Record<
       path: str_to_path("1852'/1815'/0'/2/0"),
       poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
     }
+  },
+  stakeRegistration: {
+    type: 0,
+    params: {
+      path: str_to_path("1852'/1815'/0'/2/0"),
+    },
   },
   poolRegistrationDefault: {
     type: CertificateType.STAKE_POOL_REGISTRATION,
@@ -369,6 +433,41 @@ export const certificates: Record<
       },
     },
   },
+  poolRegistrationOperatorNoOwnersNoRelays: {
+    type: CertificateType.STAKE_POOL_REGISTRATION,
+    params: {
+      ...defaultPoolRegistration,
+      poolKey: poolKeys.poolKeyPath,
+      poolOwners: poolOwnerVariationSet.noOwners,
+      relays: relayVariationSet.noRelays,
+    },
+  },
+  poolRegistrationOperatorOneOwnerOperatorNoRelays: {
+    type: CertificateType.STAKE_POOL_REGISTRATION,
+    params: {
+      ...defaultPoolRegistration,
+      poolKey: poolKeys.poolKeyPath,
+      rewardAccount: poolRewardAccounts.poolRewardAccountPath,
+      poolOwners: poolOwnerVariationSet.singleHashOwner,
+      relays: relayVariationSet.noRelays,
+    },
+  },
+  poolRegistrationOperatorMultipleOwnersAllRelays: {
+    type: CertificateType.STAKE_POOL_REGISTRATION,
+    params: {
+      ...defaultPoolRegistration,
+      poolKey: poolKeys.poolKeyPath,
+      poolOwners: poolOwnerVariationSet.twoHashOwners,
+      relays: relayVariationSet.allRelays,
+    },
+  },
+  poolRetirement: {
+    type: CertificateType.STAKE_POOL_RETIREMENT,
+    params: {
+      poolKeyPath: str_to_path("1853'/1815'/0'/0'"),
+      retirementEpoch: "10",
+    }
+  },
 };
 
 export const invalidCertificates: Array<{ testName: string, poolRegistrationCertificate: Certificate, expectedReject: string }> = [
@@ -404,23 +503,26 @@ export const invalidCertificates: Array<{ testName: string, poolRegistrationCert
       },
     },
     expectedReject: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED
-  }
+  },
 ]
 
-export const withdrawals: Record<'withdrawal0', Withdrawal> = {
+export const withdrawals: Record<
+  | 'withdrawal0'
+  , Withdrawal
+> = {
   withdrawal0: {
     path: str_to_path("1852'/1815'/0'/2/0"),
     amount: "111",
-  },
+  }
 };
 
-type Testcase = {
+export type Testcase = {
   testname: string
   tx: Transaction
   result: SignedTransactionData
 }
 
-export const poolRegistrationTestcases: Testcase[] = [
+export const poolRegistrationOwnerTestcases: Testcase[] = [
   {
     testname: "Should correctly witness valid multiple mixed owners all relays pool registration",
     tx: {
@@ -581,6 +683,120 @@ export const poolRegistrationTestcases: Testcase[] = [
           path: str_to_path("1852'/1815'/0'/2/0"),
           witnessSignatureHex:
             "91c09ad95d5d0f87f61a62e2f5e2dda4245eb4011887a04a53bdf085282002ccc712718e855e36a30cfcf7ecd43bcdc795aa87647be9c716b65e7fcf376e0503",
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const poolRegistrationOperatorTestcases: Testcase[] = [
+  {
+    testname: "Should correctly witness pool registration as operator with no owners and no relays",
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [certificates.poolRegistrationOperatorNoOwnersNoRelays],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "75a57a27893443eb7bb6e4746b6d52ba74c401ece0d2a2570322d6b7d07c29a7",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "2bff91cbd14ae53a2d476bd27306a7117d705c4fb58248af4f9b86c770991ea9785a39924d824a75b9ee0632b52c4267e6afec41e206a03b4753c5a397275807"
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            "a92f621f48c785103b1dab862715beef0f0dc2408d0668422286a1dbc268db9a32cacd3b689a0c6af32ab2ac5057caac13910f09363e2d2db0dde4a27b2b5a09"
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testname: "Should correctly witness pool registration as operator with one owner and no relays",
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [certificates.poolRegistrationOperatorOneOwnerOperatorNoRelays],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "486d70234b174592fffb1e750fe9580e4d88a39cd7668514b244a885251e5344",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "12776e69a6ea50ad42cdf0e164afc5a8b4fab612868ab990ead677ba4ced3ea2ad25b27ef5b27296add22c7378689a8572eb10ce24483b2ab8140b8aa5b1f70c"
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            "d8851757cf6dc978fc4b3db42111124e83e99d58739a21ecf23c6b5de316a8fe6d03767df45e62ad7b64872a73a68427ce83f6a856ebd196897e4d96c3173d06"
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testname: "Should correctly witness pool registration as operator with multiple owners and all relays",
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [certificates.poolRegistrationOperatorMultipleOwnersAllRelays],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        "7ece5d431b09770f2e24c190e96c3884866ba4c9cd3292d4b42d286af5f3f872",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "9f6da51173411ba82e76695ccf7c222f1df7444b0bbc1af354800acf244a4eaf72e95853406918e3ef461569fe99b39e33164ab440510f75df06e4ff89ca9107"
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            "8957a7768bc9389cd7ab6fa3b3e2fa089785715a5298f9cb38abf99a6e0da5bef734c4862ca7948fb69575ccb9ed8ae1d92cc971742f674632f6f03e22c5b103"
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const poolRetirementTestCases: Testcase[] = [
+  {
+    testname: "Should correctly witness pool retirement combined with another certifciate",
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [certificates.poolRetirement, certificates.stakeRegistration],
+    },
+    result: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex: "da65ca8c5a9e4e1a8dd3c7f623e7e0e13c4f23d7ef2ae7bdd9e5edd654ec5656",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "1238a6c4baf2dd0732c4b377db24ce3169196bcf64bd058a41cb0bfb4eefa4269384501645e8fc40be6d3bcc0272a51d1f36d7f06a9f0a55bfc2797bff573f0c"
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            "ce19e55d2a6f00ed7627e164f7c4df5686e60e0f26e51280b7459e149ff520cb9adbbccb846d3852d30e492ffccdb40f9315966917e939c7621fbbc80ab3cc02"
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "09e73628850d3b69e19ba3b95009ab389a6def0b19d6d4b8db84033cd989676384b1cf73dbe65bf1b2e373346e8159a2dc5c92f2c86f6b56827edf541604f30c"
         },
       ],
       auxiliaryDataSupplement: null,

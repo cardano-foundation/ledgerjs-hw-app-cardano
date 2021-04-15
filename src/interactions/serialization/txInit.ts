@@ -9,7 +9,7 @@ const _serializeSigningMode = (
     const value = {
         [TransactionSigningMode.ORDINARY_TRANSACTION]: 3 as Uint8_t,
         [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: 4 as Uint8_t,
-        [TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
+        [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
     }[mode];
 
     assert(value !== undefined, 'Invalid signing mode')

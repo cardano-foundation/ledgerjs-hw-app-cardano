@@ -32,7 +32,7 @@ export const isHexStringOfLength = <L extends number>(data: unknown, expectedByt
     isHexString(data) && data.length === expectedByteLength * 2
 
 export const isValidPath = (data: unknown): data is ValidBIP32Path =>
-    isArray(data) && data.every(x => isUint32(x)) && data.length < 10
+    isArray(data) && data.every(x => isUint32(x)) && data.length <= 5
 
 export const isUint64str = (data: unknown): data is Uint64_str =>
     isUintStr(data, {})

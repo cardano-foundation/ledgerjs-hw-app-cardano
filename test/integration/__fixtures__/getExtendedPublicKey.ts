@@ -40,34 +40,8 @@ export const testsByron: TestCase[] = [
   },
 ]
 
-export const testsByronUnusual: TestCase[] = [
-  {
-    path: "44'/1815'/1'/0/10'/1/2/3",
-    expected: {
-      publicKey:
-        "8e54bc03fd01db1c2fa21e87780eb810838d2df024d33f1ea5e8507e7d4cf010",
-      chainCode:
-        "872301244debde31fe4d95df10cec5bda73e241683c5b958b53d19cf5a4c1286",
-      _privateKey:
-        "80e897e1a3903a34f28769c606f09ba97dabece097026fac26b975aa33e69d4128e357f2334d6f19f680469a7fa0cea0dfc1f5681ebdb6dcf125833814150b89",
-    },
-  },
-  {
-    path: "44'/1815'/1'/0/10'/1/2'/3",
-    expected: {
-      publicKey:
-        "be50763c781f6685a30872ff5471be5447793894b24d5ed6d95a62a17c5e0be1",
-      chainCode:
-        "edbc393fd9ad97665ab1e29f1523c2843e24639ec8a76778385a077e5153ecd0",
-      _privateKey:
-        "1843fa0d93d219fe32f828dcb0b099371efd76ad61835b882520b0b430e69d419478ef007b937df52bafdd6f00e3750649edf47ee9323d81cf128c1c2faa84d2",
-    },
-  },
-]
-
 export const testsShelley: TestCase[] = [
   // Shelley
-  // TODO supply missing values for deadbeefs?
   {
     path: "1852'/1815'/0'/0/1",
     expected: {
@@ -84,6 +58,30 @@ export const testsShelley: TestCase[] = [
         "66610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8",
       chainCode:
         "e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58",
-    }
+    },
   },
 ];
+
+export const testsShelleyUnusual: TestCase[] = [
+  {
+    path: "1852'/1815'/150'/0/10'",
+    expected: {
+      publicKey:
+        "cfd898d89110dae7c762e77cf8f58b02ab0ac6cd142781c7bb6bbf62df0c53ac",
+      chainCode:
+        "964fd2c6038d5e5b1aef40b25ad673e8169b7a55ba29845c17e3c4df7af72cee",
+    },
+  },
+]
+
+export const testsColdKeys: TestCase[] = [
+  {
+    path: "1853'/1815'/0'/0'",
+    expected: {
+      publicKey:
+        "3d7e84dca8b4bc322401a2cc814af7c84d2992a22f99554fe340d7df7910768d",
+      chainCode:
+        "1e2a47754207da3069f90241fbf3b8742c367e9028e5f3f85ae3660330b4f5b7",
+    },
+  },
+]

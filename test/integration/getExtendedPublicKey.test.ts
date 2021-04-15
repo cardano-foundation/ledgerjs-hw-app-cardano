@@ -6,7 +6,7 @@ import { DeviceStatusError } from "../../src/Ada";
 import { str_to_path } from "../../src/utils/address";
 import { getAda } from "../test_utils";
 import type { TestCase } from "./__fixtures__/getExtendedPublicKey";
-import { testsByron, testsByronUnusual, testsShelley } from "./__fixtures__/getExtendedPublicKey";
+import { testsByron, testsColdKeys, testsShelley, testsShelleyUnusual } from "./__fixtures__/getExtendedPublicKey";
 chai.use(chaiAsPromised)
 
 describe("getExtendedPublicKey", async () => {
@@ -35,13 +35,15 @@ describe("getExtendedPublicKey", async () => {
     it('byron', async () => {
       await test(testsByron)
     })
-    it('byron unusual', async () => {
-      await test(testsByronUnusual)
-    })
     it('shelley', async () => {
       await test(testsShelley)
     })
-
+    it('shelley unusual', async () => {
+      await test(testsShelleyUnusual)
+    })
+    it('cold keys', async () => {
+      await test(testsColdKeys)
+    })
   });
 
   describe("Should successfully get several extended public keys", async () => {
@@ -58,17 +60,22 @@ describe("getExtendedPublicKey", async () => {
     }
 
     it('starting with a usual one', async () => {
-      await test([...testsByron, ...testsShelley])
+      await test([...testsByron, ...testsShelley, ...testsColdKeys])
     })
 
-    it('starting with unusual one', async () => {
-      await test([...testsByronUnusual, ...testsByron, ...testsShelley])
+    it('starting with an unusual one', async () => {
+      await test([...testsShelleyUnusual, ...testsByron, ...testsColdKeys, ...testsShelley])
     })
   })
 
   describe("Should reject invalid paths", () => {
     it('path shorter than 3 indexes', async () => {
       const promise = ada.getExtendedPublicKey({ path: str_to_path("44'/1815'") })
+      await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
+    })
+
+    it('path not matching cold key structure', async () => {
+      const promise = ada.getExtendedPublicKey({ path: str_to_path("1853'/1900'/0'/0/0") })
       await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
     })
   });

@@ -15,11 +15,14 @@ import type {
     Withdrawal
 } from "../types/public";
 import {
+    PoolKeyType
+} from "../types/public";
+import {
     PoolOwnerType,
     TransactionSigningMode,
     TxOutputDestinationType
 } from "../types/public";
-import { assert, unreachable } from "../utils/assert";
+import { unreachable } from "../utils/assert";
 import { isArray, parseBIP32Path, validate } from "../utils/parse";
 import { parseHexString, parseHexStringOfLength, parseUint32_t, parseUint64_str } from "../utils/parse";
 import { parseAddress } from "./address";
@@ -176,9 +179,10 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
     switch (mode) {
         case TransactionSigningMode.ORDINARY_TRANSACTION:
         case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
+        case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
             return mode
         default:
-            throw new Error('TODO')
+            throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
     }
 }
 
@@ -233,8 +237,36 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             )
             break
         }
-        case TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR: {
-            assert(false, "Not implemented")
+        case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR: {
+            // Most of these restrictions are necessary in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER, 
+            // and since pool owner signatures will be added to the same tx body, we need the restrictions here, too 
+            // (we don't want to let operator sign a tx that pool owners will not be able to sign).
+
+            validate(
+                tx.certificates.length === 1,
+                InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
+            )
+
+            tx.certificates.forEach(certificate => {
+                validate(
+                    certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
+                    InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
+                )
+                validate(
+                    certificate.pool.poolKey.type === PoolKeyType.DEVICE_OWNED,
+                    InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_KEY_REQUIRED
+                )
+                validate(
+                    certificate.pool.owners.filter(o => o.type === PoolOwnerType.DEVICE_OWNED).length === 0,
+                    InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_OWNER_NOT_ALLOWED
+                )
+            })
+
+            // cannot have withdrawal in the tx
+            validate(
+                tx.withdrawals.length === 0,
+                InvalidDataReason.SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED
+            )
             break
         }
         default:

@@ -18,13 +18,15 @@ describe("getVersion", async () => {
     const { version, compatibility } = await ada.getVersion();
 
     expect(version.major).to.equal(2);
-    expect(version.minor).to.equal(3);
+    expect(version.minor).to.equal(4);
     expect(compatibility).to.deep.equal({
       isCompatible: true,
       recommendedVersion: null,
       supportsMary: true,
       supportsCatalystRegistration: true,
       supportsZeroTtl: true,
+      supportsPoolRegistrationAsOperator: true,
+      supportsPoolRetirement: true,
     })
   });
 });

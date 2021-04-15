@@ -25,15 +25,18 @@ import { getSerial } from "./interactions/getSerial";
 import { getCompatibility, getVersion } from "./interactions/getVersion";
 import { runTests } from "./interactions/runTests";
 import { showAddress } from "./interactions/showAddress";
+import { signOperationalCertificate } from "./interactions/signOperationalCertificate";
 import { signTransaction } from "./interactions/signTx";
 import { parseAddress } from './parsing/address'
+import { parseOperationalCertificate } from "./parsing/operationalCertificate";
 import { parseSignTransactionRequest } from "./parsing/transaction";
 import type {
   ParsedAddressParams,
+  ParsedOperationalCertificate,
   ParsedSigningRequest,
   ValidBIP32Path,
 } from './types/internal';
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, Serial, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public';
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public';
 import { AddressType, CertificateType, RelayType, TransactionSigningMode } from "./types/public"
 import utils from "./utils";
 import { assert } from './utils/assert'
@@ -300,6 +303,21 @@ export class Ada {
     const version = yield* getVersion()
     return yield* signTransaction(version, request)
   }
+
+
+
+  async signOperationalCertificate(
+    request: SignOperationalCertificateRequest
+  ): Promise<SignOperationalCertificateResponse> {
+    const parsedOperationalCertificate = parseOperationalCertificate(request)
+
+    return interact(this._signOperationalCertificate(parsedOperationalCertificate), this._send)
+  }
+
+  * _signOperationalCertificate(request: ParsedOperationalCertificate): Interaction<OperationalCertificateSignature> {
+    const version = yield* getVersion()
+    return yield* signOperationalCertificate(version, request)
+  }
 }
 
 /**
@@ -378,6 +396,19 @@ export type GetSerialResponse = Serial
  * @see [[SignTransactionRequest]]
  */
 export type SignTransactionResponse = SignedTransactionData
+
+/**
+ * Sign operational certificate ([[Ada.signOperationalCertificate]]) request data
+ * @category Main
+ * @see [[SignOperationalCertificateResponse]]
+ */
+export type SignOperationalCertificateRequest = OperationalCertificate
+/**
+ * Sign operational certificate ([[Ada.signOperationalCertificate]]) response data
+ * @category Main
+ * @see [[SignOperationalCertificateRequest]]
+ */
+export type SignOperationalCertificateResponse = OperationalCertificateSignature
 
 // reexport
 export type { Transaction, DeviceOwnedAddress }

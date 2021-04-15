@@ -1,5 +1,6 @@
 import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal";
-import type { ExtendedPublicKey } from "../types/public"
+import { EXTENDED_PUBLIC_KEY_LENGTH } from "../types/internal";
+import type { ExtendedPublicKey } from "../types/public";
 import { assert } from "../utils/assert";
 import { chunkBy } from "../utils/ioHelpers";
 import { path_to_buf, uint32_to_buf } from "../utils/serialize";
@@ -51,7 +52,7 @@ export function* getExtendedPublicKeys(
         p1: P1.INIT,
         p2: P2.UNUSED,
         data: Buffer.concat([pathData, remainingKeysData]),
-        expectedResponseLength: 64,
+        expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
       });
     } else {
       // next key APDU
@@ -59,7 +60,7 @@ export function* getExtendedPublicKeys(
         p1: P1.NEXT_KEY,
         p2: P2.UNUSED,
         data: pathData,
-        expectedResponseLength: 64,
+        expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
       });
     }
 
