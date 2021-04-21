@@ -2987,9 +2987,9 @@ typedoc-default-themes@^0.12.8:
   resolved "https://registry.yarnpkg.com/typedoc-default-themes/-/typedoc-default-themes-0.12.8.tgz#a04dfc4c01545bc52d2ee6c6ed98a381f2b7249f"
   integrity sha512-tyjyDTKy/JLnBSwvhoqd99VIjrP33SdOtwcMD32b+OqnrjZWe8HmZECbfBoacqoxjHd58gfeNw6wA7uvqWFa4w==
 
-"typedoc@git+https://github.com/ppershing/typedoc.git":
+"typedoc@git+https://github.com/ppershing/typedoc.git#do_not_sort_properties":
   version "0.20.30"
-  resolved "git+https://github.com/ppershing/typedoc.git#49eb74efcabf81edaa5ff1a47d28073f22dc5e54"
+  resolved "git+https://github.com/ppershing/typedoc.git#f32157ca3f0a0f64cda95ca3c622bbbfa59dfc14"
   dependencies:
     colors "^1.4.0"
     fs-extra "^9.1.0"
