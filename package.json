@@ -52,7 +52,7 @@
     "prettier": "^2.2.1",
     "prettier-eslint": "^12.0.0",
     "ts-node": "^9.1.1",
-    "typedoc": "git+https://github.com/ppershing/typedoc.git",
+    "typedoc": "git+https://github.com/ppershing/typedoc.git#do_not_sort_properties",
     "typescript": "^4.1.5"
   },
   "bugs": {
