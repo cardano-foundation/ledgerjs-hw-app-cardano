@@ -120,11 +120,11 @@ async function interact<T>(
  */
 export class Ada {
   /** @ignore */
-  transport: Transport;
+  transport: Transport<string>;
   /** @ignore */
   _send: SendFn;
 
-  constructor(transport: Transport, scrambleKey: string = "ADA") {
+  constructor(transport: Transport<string>, scrambleKey: string = "ADA") {
     this.transport = transport;
     // Note: this is list of methods that should "lock" the transport to avoid concurrent use
     const methods = [
