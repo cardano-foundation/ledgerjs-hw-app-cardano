@@ -36,13 +36,13 @@ jobs:
           command: yarn audit
       - run:
           name: Try building the example
-          command: yarn tsc -p example-node/tsconfig.json
+          command: yarn tsc -p example-node/tsconfig.json --noEmit
       - run:
           name: Try generating the docs
           command: yarn typedoc
       - run:
           name: Try generating and checking flow types
-          command: yarn build && yarn build:flowtypes && yarn flow
+          command: yarn build:flowtypes && yarn run flow
 
   update_docs:
     docker:
