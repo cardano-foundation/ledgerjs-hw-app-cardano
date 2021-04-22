@@ -62,8 +62,8 @@
   "homepage": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano",
   "scripts": {
     "prepare": "cd node_modules/typedoc && yarn install && yarn build",
-    "prepack": "yarn build:flowtypes && npm run flow",
-    "lint": "yarn eslint .",
+    "prepack": "yarn build:flowtypes && yarn flow",
+    "lint": "yarn eslint . --max-warnings=0",
     "clean": "rm -rf dist/",
     "build": "yarn tsc -p src/tsconfig.json",
     "build:flowtypes": "find . -type f -not -path './node_modules/*' -name '*.d.ts' -exec sh -c 'yarn flowgen --add-flow-header --no-inexact $1 -o ${1%.*.*}.js.flow' _ '{}' \\;",

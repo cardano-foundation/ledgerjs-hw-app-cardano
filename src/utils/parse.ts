@@ -1,5 +1,5 @@
-import type { InvalidDataReason } from "../errors/index";
 import { InvalidData } from "../errors";
+import type { InvalidDataReason } from "../errors/index";
 import type { _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "../types/internal";
 
 export const MAX_UINT_64_STR = "18446744073709551615";

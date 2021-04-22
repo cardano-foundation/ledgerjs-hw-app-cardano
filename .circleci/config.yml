@@ -40,6 +40,9 @@ jobs:
       - run:
           name: Try generating the docs
           command: yarn typedoc
+      - run:
+          name: Try generating and checking flow types
+          command: yarn build && yarn build:flowtypes && yarn flow
 
   update_docs:
     docker:
