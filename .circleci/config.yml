@@ -6,24 +6,23 @@ version: 2.1
 jobs:
   build_and_test:
     docker:
-      - image: cimg/node:12.13.0
+      - image: cimg/node:14.16
     working_directory: ~/repo
     steps:
       - checkout
       - run:
           name: Install system dependencies
-          command: apt-get update && apt-get install -y libusb-1.0-0
+          command: sudo apt-get update && sudo apt-get install -y libusb-1.0-0-dev libudev-dev
 
       - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "yarn.lock" }}
+          key: v2-dependencies-{{ checksum "yarn.lock" }}
       - run:
           name: Install dependencies
           command: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          key: v2-dependencies-{{ checksum "yarn.lock" }}
 
       - run:
           name: Build
@@ -42,7 +41,12 @@ jobs:
           command: yarn typedoc
       - run:
           name: Try generating and checking flow types
-          command: yarn build:flowtypes && yarn run flow
+          # piping output to cat to bypass process.stdout.columns being 0
+          # which causes flowgen console logging to crash
+          # see https://github.com/aws/aws-cdk/issues/2253
+          command: |
+            yarn build:flowtypes | cat
+            yarn run flow
 
   update_docs:
     docker:
