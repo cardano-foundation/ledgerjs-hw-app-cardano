@@ -172,7 +172,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         addressParams: {
             type: AddressType.REWARD,
             params: {
-                spendingPath: str_to_path("1852'/1815'/0'/2/0"),
+                stakingPath: str_to_path("1852'/1815'/0'/2/0"),
             }
         },
         result: "stake_test1uqwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8q8mmqwc",
@@ -183,7 +183,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         addressParams: {
             type: AddressType.REWARD,
             params: {
-                spendingPath: str_to_path("1852'/1815'/0'/2/0"),
+                stakingPath: str_to_path("1852'/1815'/0'/2/0"),
             }
         },
         result: "stake1uvwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8qqucf2t",

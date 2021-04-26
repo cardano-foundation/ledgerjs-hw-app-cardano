@@ -14,6 +14,7 @@ export function parseAddress(
 
     // Cast to union of all param fields
     const params = address.params as {
+        spendingPath?: BIP32Path,
         stakingPath?: BIP32Path
         stakingKeyHashHex?: string
         stakingBlockchainPointer?: BlockchainPointer
@@ -27,20 +28,23 @@ export function parseAddress(
         return {
             type: address.type,
             protocolMagic: parsedNetwork.protocolMagic,
-            spendingPath: parseBIP32Path(address.params.spendingPath, InvalidDataReason.ADDRESS_INVALID_SPENDING_PATH),
+            spendingPath: parseBIP32Path(params.spendingPath, InvalidDataReason.ADDRESS_INVALID_SPENDING_PATH),
             stakingChoice: { type: StakingChoiceType.NO_STAKING }
         }
     }
 
     const networkId = parsedNetwork.networkId
-    const spendingPath = parseBIP32Path(address.params.spendingPath, InvalidDataReason.ADDRESS_INVALID_SPENDING_PATH)
 
     switch (address.type) {
         case AddressType.BASE: {
 
             validate(params.stakingBlockchainPointer == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+
+            const spendingPath = parseBIP32Path(params.spendingPath, InvalidDataReason.ADDRESS_INVALID_SPENDING_PATH)
+
             const _hash = params.stakingKeyHashHex != null ? 'hash' : ''
             const _path = params.stakingPath != null ? 'path' : ''
+
             switch (_hash + _path) {
                 case 'hash': {
                     const hashHex = parseHexStringOfLength(params.stakingKeyHashHex!, KEY_HASH_LENGTH, InvalidDataReason.ADDRESS_INVALID_STAKING_KEY_HASH)
@@ -78,6 +82,8 @@ export function parseAddress(
             validate(params.stakingKeyHashHex == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
             validate(params.stakingPath == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
 
+            const spendingPath = parseBIP32Path(params.spendingPath, InvalidDataReason.ADDRESS_INVALID_SPENDING_PATH)
+
             return {
                 type: address.type,
                 networkId,
@@ -93,6 +99,8 @@ export function parseAddress(
 
             validate(params.stakingBlockchainPointer != null, InvalidDataReason.ADDRESS_INVALID_BLOCKCHAIN_POINTER)
             const pointer = params.stakingBlockchainPointer!
+
+            const spendingPath = parseBIP32Path(params.spendingPath, InvalidDataReason.ADDRESS_INVALID_SPENDING_PATH)
 
             return {
                 type: address.type,
@@ -111,12 +119,15 @@ export function parseAddress(
         case AddressType.REWARD: {
             validate(params.stakingBlockchainPointer == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
             validate(params.stakingKeyHashHex == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
-            validate(params.stakingPath == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+            validate(params.spendingPath == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+
+            const stakingPath = parseBIP32Path(params.stakingPath, InvalidDataReason.ADDRESS_INVALID_STAKING_KEY_PATH);
 
             return {
                 type: address.type,
                 networkId,
-                spendingPath,
+                // this is intentional, reward address staking path is actually passed as a spending path at APDU level
+                spendingPath: stakingPath,
                 stakingChoice: {
                     type: StakingChoiceType.NO_STAKING
                 }

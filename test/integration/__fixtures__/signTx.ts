@@ -44,6 +44,7 @@ const destinations: Record<
   | 'internalEnterprise'
   | 'internalPointer'
   | 'multiassetThirdParty'
+  | 'rewardsInternal'
   , TxOutputDestination
 > = {
   externalByronMainnet: {
@@ -146,6 +147,15 @@ const destinations: Record<
       addressHex: bech32_to_hex(
         "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"
       ),
+    }
+  },
+  rewardsInternal: {
+    type: TxOutputDestinationType.DEVICE_OWNED,
+    params: {
+      type: AddressType.REWARD,
+      params: {
+        stakingPath: str_to_path("1852'/1815'/0'/2/0")
+      }
     }
   },
 }
@@ -936,7 +946,7 @@ export const testsMary: TestcaseMary[] = [
 
 export const testsCatalystRegistration: TestcaseMary[] = [
   {
-    testname: "Should correctly sign tx with Catalyst voting key registration metadata",
+    testname: "Should correctly sign tx with Catalyst voting key registration metadata with base address",
     tx: {
       ...maryBase,
       outputs: [outputs.internalBaseWithStakingPath],
@@ -974,6 +984,48 @@ export const testsCatalystRegistration: TestcaseMary[] = [
         type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
         auxiliaryDataHashHex: "e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec926",
         catalystRegistrationSignatureHex: "0ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af240630eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e"
+      }
+    },
+  },
+  {
+    testname: "Should correctly sign tx with Catalyst voting key registration metadata with stake address",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.internalBaseWithStakingPath],
+      auxiliaryData: {
+        type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
+        params: {
+          votingPublicKeyHex: "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+          nonce: 1454448,
+          rewardsDestination: destinations.rewardsInternal.params as DeviceOwnedAddress
+        }
+      }
+    },
+    txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3a" +
+      "ad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124" +
+      "1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a0" +
+      "75820d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb08182f",
+    txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47" +
+      "a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67" +
+      "bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def6" +
+      "1c041a0016317019ef65a10158401514b6bbc582b33edcf5fa30ec04dcaa62128de8755c78676" +
+      "8ae5922132c2aa50b9ba17be28072de979f45b0f429c7f5d489c549a1e22bc8e7d0b2445c1036" +
+      "0980",
+    result: {
+      txHashHex:
+        "83deb3ed2f37df4cb6c7a4d81399cd29f88505e4f3d053342ada4f630fb23ae1",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "a344a5e466eb333e0bf417edefce2dec8a5fc4ddd6458b5fbb349bf2b42bf7b302a3d052d44b82e799a5de9d2c3442a5761d6baa77ec2051244b8184b5f35902",
+        },
+      ],
+      auxiliaryDataSupplement: {
+        type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
+        auxiliaryDataHashHex: "d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb",
+        catalystRegistrationSignatureHex: "1514b6bbc582b33edcf5fa30ec04dcaa62128de8755c786768ae5922132c2aa50b9ba17be28072de979f45b0f429c7f5d489c549a1e22bc8e7d0b2445c103609"
       }
     },
   }

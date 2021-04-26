@@ -214,10 +214,7 @@ export type AddressParamsPointer = {
  * @see [[DeviceOwnedAddress]]
  */
 export type AddressParamsReward = {
-    /**
-     * Note that we use "spending" path instead of "staking" path even though this represents "staking" address.
-     */
-    spendingPath: BIP32Path
+    stakingPath: BIP32Path
 }
 
 /**

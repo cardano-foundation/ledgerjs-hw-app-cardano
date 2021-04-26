@@ -18,6 +18,7 @@ Added support for Catalyst voting registration metadata creation within the `sig
 
 - added Catalyst voting registration support: https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/99
 - relaxed validation of `signTransaction()` call `ttl` and `validityIntervalStart` parameter to allow zero value
+- `AddressParamsReward` now requires staking key path as the `stakingPath` property instead of `spendingPath` (which was misleading)
 
 ### Fixed
 
