@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [3.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.0.0...v3.1.0) - [?]
+## [3.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.0.0...v3.1.0) - [May 11th 2021]
 
-Added support for Catalyst voting registration metadata creation within the `signTransaction()` call.
+Added support for Catalyst voting registration metadata creation within the `signTransaction()` call, introduced in Ledger Cardano app version 2.3.2.
 
 ### Added
 
