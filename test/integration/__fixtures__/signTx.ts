@@ -1,5 +1,5 @@
 import type { DeviceOwnedAddress, SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada";
-import { TxAuxiliaryDataSupplementType } from "../../../src/Ada";
+import {InvalidDataReason, TxAuxiliaryDataSupplementType} from "../../../src/Ada";
 import { AddressType, CertificateType, Networks, TxAuxiliaryDataType, TxOutputDestinationType, utils } from "../../../src/Ada";
 import { str_to_path } from "../../../src/utils/address";
 
@@ -175,6 +175,11 @@ export const outputs: Record<
   | 'multiassetManyTokens'
   | 'multiassetChange'
   | 'multiassetBigNumber'
+  | 'multiassetInvalidAssetGroupOrdering'
+  | 'multiassetAssetGroupsNotUnique'
+  | 'multiassetInvalidTokenOrderingSameLength'
+  | 'multiassetInvalidTokenOrderingDifferentLengths'
+  | 'multiassetTokensNotUnique'
   , TxOutput
 > = {
   externalByronMainnet: {
@@ -237,22 +242,14 @@ export const outputs: Record<
     amount: "1234",
     tokenBundle: [
       {
-        policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-        tokens: [
-          {
-            assetNameHex: "74652474436f696e",
-            amount: "7878754",
-          },
-          {
-            assetNameHex: "456c204e69c3b16f",
-            amount: "1234",
-          },
-        ],
-      },
-      {
         // fingerprints taken from CIP 14 draft
         policyIdHex: "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373",
         tokens: [
+          {
+            // fingerprint: asset1rjklcrnsdzqp65wjgrg55sy9723kw09mlgvlc3
+            assetNameHex: "",
+            amount: "3"
+          },
           {
             // fingerprint: asset17jd78wukhtrnmjh3fngzasxm8rck0l2r4hhyyt
             assetNameHex: "1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209",
@@ -263,10 +260,18 @@ export const outputs: Record<
             assetNameHex: "0000000000000000000000000000000000000000000000000000000000000000",
             amount: "2"
           },
+        ],
+      },
+      {
+        policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
           {
-            // fingerprint: asset1rjklcrnsdzqp65wjgrg55sy9723kw09mlgvlc3
-            assetNameHex: "",
-            amount: "3"
+            assetNameHex: "456c204e69c3b16f",
+            amount: "1234",
+          },
+          {
+            assetNameHex: "74652474436f696e",
+            amount: "7878754",
           },
         ],
       },
@@ -297,6 +302,111 @@ export const outputs: Record<
           {
             assetNameHex: "74652474436f696e",
             amount: "24103998870869519",
+          },
+        ],
+      },
+    ],
+  },
+  multiassetInvalidAssetGroupOrdering: {
+    destination: destinations.multiassetThirdParty,
+    amount: "1234",
+    tokenBundle: [
+      {
+        policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "7564247542686911",
+            amount: "47",
+          },
+        ],
+      },
+      {
+        policyIdHex: "71a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "7564247542686911",
+            amount: "47",
+          },
+        ],
+      },
+    ],
+  },
+  multiassetAssetGroupsNotUnique: {
+    destination: destinations.multiassetThirdParty,
+    amount: "1234",
+    tokenBundle: [
+      {
+        policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "7564247542686911",
+            amount: "47",
+          },
+        ],
+      },
+      {
+        policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "7564247542686911",
+            amount: "47",
+          },
+        ],
+      },
+    ],
+  },
+  multiassetInvalidTokenOrderingSameLength: {
+    destination: destinations.multiassetThirdParty,
+    amount: "1234",
+    tokenBundle: [
+      {
+        policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "7564247542686911",
+            amount: "47",
+          },
+          {
+            assetNameHex: "74652474436f696e",
+            amount: "7878754",
+          },
+        ],
+      },
+    ],
+  },
+  multiassetInvalidTokenOrderingDifferentLengths: {
+      destination: destinations.multiassetThirdParty,
+      amount: "1234",
+      tokenBundle: [
+        {
+          policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+          tokens: [
+            {
+              assetNameHex: "7564247542686911",
+              amount: "47",
+            },
+            {
+              assetNameHex: "756424754268",
+              amount: "7878754",
+            },
+          ],
+        },
+      ],
+    },
+  multiassetTokensNotUnique: {
+    destination: destinations.multiassetThirdParty,
+    amount: "1234",
+    tokenBundle: [
+      {
+        policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+        tokens: [
+          {
+            assetNameHex: "7564247542686911",
+            amount: "47",
+          },
+          {
+            assetNameHex: "7564247542686911",
+            amount: "7878754",
           },
         ],
       },
@@ -874,15 +984,15 @@ export const testsMary: TestcaseMary[] = [
       ...maryBase,
       outputs: [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath],
     },
-    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a0078386248456c204e69c3b16f1904d2581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1487564247542686911182f8258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f",
+    txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1487564247542686911182f581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a2401904d24874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f",
     result: {
       txHashHex:
-        "e5d45f693b4466e2b2a71fa87c119fabb08f6491d7926968bc3d17d74501981c",
+        "fc640534def42c6c9a16e51de379191cc39d0950015e8db8e237e17b55b7cc5a",
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
           witnessSignatureHex:
-            "6ab398a53f71db868e61cb8f71a2009c5e702b1eda83c23d94858a24f69880bedd78f53319feb4d9dc10021069301f5245d2e52cf5c5e12ca9584d4cc41e6d05",
+            "cf297c45c32dc51fa84f7cdbf967496b6493fac86bf6e283cf6c10564ad1fed7f5702939f712e00eaede88847dde24db6591d7ad6e998287835eb2473de7a204",
         },
       ],
       auxiliaryDataSupplement: null,
@@ -1041,4 +1151,54 @@ export const testsCatalystRegistration: TestcaseMary[] = [
       }
     },
   }
+]
+
+export type InvalidTokenBundleOrderingTestcase = {
+  testname: string,
+  tx: Transaction,
+  rejectReason: InvalidDataReason
+}
+
+export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase[] = [
+  {
+    testname: "Should reject transaction where asset groups are not ordered",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetInvalidAssetGroupOrdering],
+    },
+    rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING,
+  },
+  {
+    testname: "Should reject transaction where asset groups are not unique",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetAssetGroupsNotUnique],
+    },
+    rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE,
+  },
+  {
+    testname: "Should reject transaction where tokens within an asset group are not ordered - alphabetical",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
+    },
+    rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
+  },
+  {
+    testname: "Should reject transaction where tokens within an asset group are not ordered - length",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
+    },
+    rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
+  },
+  {
+    testname: "Should reject transaction where tokens within an asset group are not unique",
+    tx: {
+      ...maryBase,
+      outputs: [outputs.multiassetTokensNotUnique],
+    },
+    rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_NOT_UNIQUE,
+  },
+
 ]

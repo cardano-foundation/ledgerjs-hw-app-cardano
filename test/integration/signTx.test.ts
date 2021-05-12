@@ -7,6 +7,7 @@ import {
   testsAllegra,
   testsByron,
   testsCatalystRegistration,
+  testsInvalidTokenBundleOrdering,
   testsMary,
   testsShelleyOther,
   testsShelleyOutputs,
@@ -116,6 +117,13 @@ describe("signTxOrdinaryMary", async () => {
     it(testname, async () => {
       const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
+    })
+  }
+
+  for (const {testname, tx, rejectReason } of testsInvalidTokenBundleOrdering) {
+    it(testname, async() => {
+      const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION });
+      await expect(promise).to.be.rejectedWith(rejectReason)
     })
   }
 });
