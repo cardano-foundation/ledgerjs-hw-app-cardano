@@ -55,13 +55,35 @@ function parseToken(token: Token): ParsedToken {
 }
 
 function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
-    validate(isArray(assetGroup.tokens), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_TOKENS_NOT_ARRAY);
-    validate(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_TOKENS_TOO_LARGE);
+    validate(isArray(assetGroup.tokens), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_NOT_ARRAY);
+    validate(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_TOO_LARGE);
 
-    return {
-        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, InvalidDataReason.OUTPUT_INVALID_TOKEN_POLICY),
+    const parsedAssetGroup = {
+        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, InvalidDataReason.OUTPUT_INVALID_POLICY_NAME),
         tokens: assetGroup.tokens.map(t => parseToken(t))
     }
+
+    const assetNamesHex = parsedAssetGroup.tokens.map(t => t.assetNameHex)
+    const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
+        if (n1.length == n2.length) return n1.localeCompare(n2)
+        else return n1.length - n2.length
+    })
+    validate(JSON.stringify(assetNamesHex) == JSON.stringify(sortedAssetNames), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING)
+    validate(assetNamesHex.length == new Set(assetNamesHex).size, InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_NOT_UNIQUE)
+
+    return parsedAssetGroup
+}
+
+
+function parseTokenBundle(tokenBundle: AssetGroup[]): ParsedAssetGroup[] {
+    const parsedTokenBundle = tokenBundle.map(ag => parseAssetGroup(ag))
+
+    const policyIds = parsedTokenBundle.map(ag => ag.policyIdHex)
+    const sortedPolicyIds = [...policyIds].sort()
+    validate(JSON.stringify(policyIds) == JSON.stringify(sortedPolicyIds), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING)
+    validate(policyIds.length == new Set(policyIds).size, InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE)
+
+    return parsedTokenBundle
 }
 
 export function parseTransaction(tx: Transaction): ParsedTransaction {
@@ -163,9 +185,9 @@ function parseTxOutput(
 ): ParsedOutput {
     const amount = parseUint64_str(output.amount, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
 
-    validate(isArray(output.tokenBundle ?? []), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE);
+    validate(isArray(output.tokenBundle ?? []), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_ARRAY);
     validate((output.tokenBundle ?? []).length <= ASSET_GROUPS_MAX, InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE);
-    const tokenBundle = (output.tokenBundle ?? []).map((ag) => parseAssetGroup(ag))
+    const tokenBundle = parseTokenBundle(output.tokenBundle ?? [])
 
     const destination = parseTxDestination(network, output.destination)
     return {

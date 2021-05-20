@@ -277,6 +277,12 @@ export type Token = {
  */
 export type AssetGroup = {
     policyIdHex: string,
+    /**
+     * The keys must be sorted lowest value to highest to reflect a valid canonical CBOR.
+     * The sorting rules (as described in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)) are:
+     *  * if two keys have different lengths, the shorter one sorts earlier;
+     *  * if two keys have the same length, the one with the lower value in lexical order sorts earlier.
+     */
     tokens: Array<Token>,
 };
 
@@ -292,7 +298,11 @@ export type TxOutput = {
      */
     amount: bigint_like
     /**
-     * Additional assets sent to the output
+     * Additional assets sent to the output.
+     * If not null, the keys must be sorted lowest value to highest to reflect a canonical CBOR.
+     * The sorting rules (as described in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)) are:
+     *  * if two keys have different lengths, the shorter one sorts earlier;
+     *  * if two keys have the same length, the one with the lower value in lexical order sorts earlier.
      */
     tokenBundle?: Array<AssetGroup> | null
     /**
