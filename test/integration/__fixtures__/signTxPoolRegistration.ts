@@ -357,7 +357,6 @@ export const certificates: Record<
   | 'poolRegistrationOperatorNoOwnersNoRelays'
   | 'poolRegistrationOperatorMultipleOwnersAllRelays'
   | 'poolRegistrationOperatorOneOwnerOperatorNoRelays'
-  | 'poolRetirement'
   , Certificate
 > = {
   // for negative tests 
@@ -461,13 +460,6 @@ export const certificates: Record<
       relays: relayVariationSet.allRelays,
     },
   },
-  poolRetirement: {
-    type: CertificateType.STAKE_POOL_RETIREMENT,
-    params: {
-      poolKeyPath: str_to_path("1853'/1815'/0'/0'"),
-      retirementEpoch: "10",
-    }
-  },
 };
 
 export const invalidCertificates: Array<{ testName: string, poolRegistrationCertificate: Certificate, expectedReject: string }> = [
@@ -524,7 +516,7 @@ export type Testcase = {
 
 export const poolRegistrationOwnerTestcases: Testcase[] = [
   {
-    testname: "Should correctly witness valid multiple mixed owners all relays pool registration",
+    testname: "Witness valid multiple mixed owners all relays pool registration",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
@@ -547,7 +539,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness valid single path owner ipv4 relay pool registration",
+    testname: "Witness valid single path owner ipv4 relay pool registration",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationDefault],
@@ -567,7 +559,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness valid multiple mixed owners ipv4 relay pool registration",
+    testname: "Witness valid multiple mixed owners ipv4 relay pool registration",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwners],
@@ -587,7 +579,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness valid multiple mixed owners mixed ipv4, single host relays pool registration",
+    testname: "Witness valid multiple mixed owners mixed ipv4, single host relays pool registration",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwnersIpv4SingleHostRelays]
@@ -607,7 +599,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration",
+    testname: "Witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwnersIpv4Ipv6Relays],
@@ -627,7 +619,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness valid single path owner no relays pool registration",
+    testname: "Witness valid single path owner no relays pool registration",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationNoRelays],
@@ -648,7 +640,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
   },
   {
     // works as a private pool not visible in yoroi, daedalus, etc.
-    testname: "Should correctly witness pool registration with no metadata",
+    testname: "Witness pool registration with no metadata",
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationNoMetadata],
@@ -668,7 +660,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness pool registration without outputs",
+    testname: "Witness pool registration without outputs",
     tx: {
       ...txBase,
       outputs: [],
@@ -692,7 +684,7 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
 
 export const poolRegistrationOperatorTestcases: Testcase[] = [
   {
-    testname: "Should correctly witness pool registration as operator with no owners and no relays",
+    testname: "Witness pool registration as operator with no owners and no relays",
     tx: {
       ...txBase,
       inputs: [inputs.utxoWithPath0],
@@ -718,7 +710,7 @@ export const poolRegistrationOperatorTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness pool registration as operator with one owner and no relays",
+    testname: "Witness pool registration as operator with one owner and no relays",
     tx: {
       ...txBase,
       inputs: [inputs.utxoWithPath0],
@@ -744,7 +736,7 @@ export const poolRegistrationOperatorTestcases: Testcase[] = [
     },
   },
   {
-    testname: "Should correctly witness pool registration as operator with multiple owners and all relays",
+    testname: "Witness pool registration as operator with multiple owners and all relays",
     tx: {
       ...txBase,
       inputs: [inputs.utxoWithPath0],
@@ -769,37 +761,4 @@ export const poolRegistrationOperatorTestcases: Testcase[] = [
       auxiliaryDataSupplement: null,
     },
   },
-]
-
-export const poolRetirementTestCases: Testcase[] = [
-  {
-    testname: "Should correctly witness pool retirement combined with another certifciate",
-    tx: {
-      ...txBase,
-      inputs: [inputs.utxoWithPath0],
-      certificates: [certificates.poolRetirement, certificates.stakeRegistration],
-    },
-    result: {
-      // WARNING: only as computed by ledger, not verified with cardano-cli
-      txHashHex: "da65ca8c5a9e4e1a8dd3c7f623e7e0e13c4f23d7ef2ae7bdd9e5edd654ec5656",
-      witnesses: [
-        {
-          path: str_to_path("1852'/1815'/0'/0/0"),
-          witnessSignatureHex:
-            "1238a6c4baf2dd0732c4b377db24ce3169196bcf64bd058a41cb0bfb4eefa4269384501645e8fc40be6d3bcc0272a51d1f36d7f06a9f0a55bfc2797bff573f0c"
-        },
-        {
-          path: str_to_path("1853'/1815'/0'/0'"),
-          witnessSignatureHex:
-            "ce19e55d2a6f00ed7627e164f7c4df5686e60e0f26e51280b7459e149ff520cb9adbbccb846d3852d30e492ffccdb40f9315966917e939c7621fbbc80ab3cc02"
-        },
-        {
-          path: str_to_path("1852'/1815'/0'/2/0"),
-          witnessSignatureHex:
-            "09e73628850d3b69e19ba3b95009ab389a6def0b19d6d4b8db84033cd989676384b1cf73dbe65bf1b2e373346e8159a2dc5c92f2c86f6b56827edf541604f30c"
-        },
-      ],
-      auxiliaryDataSupplement: null,
-    },
-  }
 ]

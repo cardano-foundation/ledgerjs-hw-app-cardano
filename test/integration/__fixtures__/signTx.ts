@@ -428,7 +428,7 @@ export type TestcaseByron = {
 
 export const testsByron: TestcaseByron[] = [
   {
-    testname: "Should correctly sign tx without change address with Byron mainnet output",
+    testname: "Sign tx without change address with Byron mainnet output",
     tx: {
       ...byronBase,
       network: Networks.Mainnet,
@@ -452,7 +452,7 @@ export const testsByron: TestcaseByron[] = [
     }
   },
   {
-    testname: "Should correctly sign tx without change address with Byron Daedalus mainnet output",
+    testname: "Sign tx without change address with Byron Daedalus mainnet output",
     tx: {
       ...byronBase,
       network: Networks.Mainnet,
@@ -472,7 +472,7 @@ export const testsByron: TestcaseByron[] = [
     }
   },
   {
-    testname: "Should correctly sign tx without change address with Byron testnet output",
+    testname: "Sign tx without change address with Byron testnet output",
     tx: {
       ...byronBase,
       network: Networks.Testnet,
@@ -510,9 +510,9 @@ export type TestcaseShelley = {
   result: SignedTransactionData
 }
 
-export const testsShelleyOutputs: TestcaseShelley[] = [
+export const testsShelleyNoCertificates: TestcaseShelley[] = [
   {
-    testname: "Should correctly sign tx without outputs",
+    testname: "Sign tx without outputs",
     tx: {
       ...shelleyBase,
       outputs: [],
@@ -531,7 +531,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
     }
   },
   {
-    testname: "Should correctly sign tx without change address",
+    testname: "Sign tx without change address",
     tx: {
       ...shelleyBase,
       outputs: [outputs.externalShelley],
@@ -551,7 +551,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx without change address with Shelley scripthash output",
+    testname: "Sign tx without change address with Shelley scripthash output",
     tx: {
       ...shelleyBase,
       network: Networks.Testnet,
@@ -571,7 +571,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with change base address with staking path",
+    testname: "Sign tx with change base address with staking path",
     tx: {
       ...shelleyBase,
       outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath],
@@ -590,7 +590,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with change base address with staking key hash",
+    testname: "Sign tx with change base address with staking key hash",
     tx: {
       ...shelleyBase,
       outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash],
@@ -609,7 +609,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with enterprise change address",
+    testname: "Sign tx with enterprise change address",
     tx: {
       ...shelleyBase,
       outputs: [outputs.externalByronMainnet, outputs.internalEnterprise],
@@ -628,7 +628,7 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with pointer change address",
+    testname: "Sign tx with pointer change address",
     tx: {
       ...shelleyBase,
       outputs: [outputs.externalByronMainnet, outputs.internalPointer],
@@ -645,12 +645,35 @@ export const testsShelleyOutputs: TestcaseShelley[] = [
       ],
       auxiliaryDataSupplement: null,
     },
-  }
-]
-
-export const testsShelleyOther: TestcaseShelley[] = [
+  },
   {
-    testname: "Should correctly sign tx with withdrawal",
+    testname: "Sign tx with non-reasonable account and address",
+    tx: {
+      ...shelleyBase,
+      inputs: [inputs.utxoNonReasonable],
+      outputs: [outputs.internalBaseWithStakingPathNonReasonable],
+      auxiliaryData: {
+        type: TxAuxiliaryDataType.ARBITRARY_HASH,
+        params: {
+          hashHex: "deadbeef".repeat(8)
+        },
+      }
+    },
+    result: {
+      txHashHex:
+        "40b3a79c645be040139078befee154d5f935c8ba2af6144cebcf447f8ef2e580",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/456'/0/0"),
+          witnessSignatureHex:
+            "bb1a035acf4a7b5dd68914f0007dfc4d1cc7b4d88748c0ad24326fd06597542ce0352075ed861b3ae012ab976cacd3dbbc58802cdf82409917ebf9a8bb182e04",
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testname: "Sign tx with withdrawal",
     tx: {
       ...shelleyBase,
       withdrawals: [
@@ -683,7 +706,38 @@ export const testsShelleyOther: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with a stake registration certificate",
+    testname: "Sign tx with nonempty auxiliary data",
+    tx: {
+      ...shelleyBase,
+      auxiliaryData: {
+        type: TxAuxiliaryDataType.ARBITRARY_HASH,
+        params: {
+          hashHex: "deadbeef".repeat(8)
+        }
+      }
+    },
+    txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
+      "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
+      "e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a075820deadbeefdeadbeefdeadbee" +
+      "fdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    result: {
+      txHashHex:
+        "34c1dd59c14252008b680bf6a727c8f371e2d96e8bca6b783bcf3f8f36407e6f",
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            "953c5243ba09570dd4e52642236834c138ad4abbbb21796a90540a11e8dc96e47043401d370cdaed70ebc332dd4db80c9b167fd7f20971c4f142875cea57200c",
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const testsShelleyWithCertificates: TestcaseShelley[] = [
+  {
+    testname: "Sign tx with a stake registration certificate",
     tx: {
       ...shelleyBase,
       certificates: [
@@ -718,7 +772,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with a stake delegation certificate",
+    testname: "Sign tx with a stake delegation certificate",
     tx: {
       ...shelleyBase,
       certificates: [
@@ -755,7 +809,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with a stake deregistration certificate",
+    testname: "Sign tx with a stake deregistration certificate",
     tx: {
       ...shelleyBase,
       certificates: [
@@ -790,7 +844,7 @@ export const testsShelleyOther: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx and filter out witnesses with duplicate paths",
+    testname: "Sign tx and filter out witnesses with duplicate paths",
     tx: {
       ...shelleyBase,
       certificates: [
@@ -827,59 +881,55 @@ export const testsShelleyOther: TestcaseShelley[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with nonempty auxiliary data",
+    testname: "Sign tx with pool retirement combined with another certificate",
     tx: {
       ...shelleyBase,
-      auxiliaryData: {
-        type: TxAuxiliaryDataType.ARBITRARY_HASH,
-        params: {
-          hashHex: "deadbeef".repeat(8)
-        }
-      }
+      inputs: [
+        {
+          txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+          outputIndex: 0,
+          path: str_to_path("1852'/1815'/0'/0/0"),
+        },      
+      ],
+      certificates: [
+        {
+          type: CertificateType.STAKE_POOL_RETIREMENT,
+          params: {
+            poolKeyPath: str_to_path("1853'/1815'/0'/0'"),
+            retirementEpoch: "10",
+          }
+        },
+        {
+          type: CertificateType.STAKE_REGISTRATION,
+          params: {
+            path: str_to_path("1852'/1815'/0'/2/0"),
+          },
+        },
+      ],
     },
-    txBody: "a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163" +
-      "f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2" +
-      "e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a075820deadbeefdeadbeefdeadbee" +
-      "fdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
     result: {
-      txHashHex:
-        "34c1dd59c14252008b680bf6a727c8f371e2d96e8bca6b783bcf3f8f36407e6f",
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex: "70aea83c8e5e9a3e0ec92860d5bd4750c34911193f092a96b9da6906d6ea6247",
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
           witnessSignatureHex:
-            "953c5243ba09570dd4e52642236834c138ad4abbbb21796a90540a11e8dc96e47043401d370cdaed70ebc332dd4db80c9b167fd7f20971c4f142875cea57200c",
+            "8212cdabe1be514fdc21e02a2b405ce284ebbce0208a5c2b289dac662bf87fb4c2d18237c66761e285d78ee76cc26b7517718e641174d69f49737a49e9482607"
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            "9386c2545e2671497daf95db93be1386690a4f884547a60f2913ef8a9e61486ba068d7477e1cd712f8d9cc20778d9e71b72eda96c9394c2f3111c61803f9a70d"
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            "32d0be05a8103a834265aa9e29562d5dde4473e4d7596714c000ae3a980b8e55543db42dde19e407c40943591978f03b28106f75cbc77d21ea2c28ab1ad4c100"
         },
       ],
       auxiliaryDataSupplement: null,
     },
   },
-  {
-    testname: "Should correctly sign tx with non-reasonable account and address",
-    tx: {
-      ...shelleyBase,
-      inputs: [inputs.utxoNonReasonable],
-      outputs: [outputs.internalBaseWithStakingPathNonReasonable],
-      auxiliaryData: {
-        type: TxAuxiliaryDataType.ARBITRARY_HASH,
-        params: {
-          hashHex: "deadbeef".repeat(8)
-        },
-      }
-    },
-    result: {
-      txHashHex:
-        "40b3a79c645be040139078befee154d5f935c8ba2af6144cebcf447f8ef2e580",
-      witnesses: [
-        {
-          path: str_to_path("1852'/1815'/456'/0/0"),
-          witnessSignatureHex:
-            "bb1a035acf4a7b5dd68914f0007dfc4d1cc7b4d88748c0ad24326fd06597542ce0352075ed861b3ae012ab976cacd3dbbc58802cdf82409917ebf9a8bb182e04",
-        },
-      ],
-      auxiliaryDataSupplement: null,
-    },
-  }
 ]
 
 const allegraBase = {
@@ -897,7 +947,7 @@ export type TestcaseAllegra = {
 }
 export const testsAllegra: TestcaseAllegra[] = [
   {
-    testname: "Transaction with no ttl and no validity interval start",
+    testname: "Sign tx with no ttl and no validity interval start",
     tx: {
       ...allegraBase,
       ttl: null,
@@ -918,7 +968,7 @@ export const testsAllegra: TestcaseAllegra[] = [
     }
   },
   {
-    testname: "Transaction with no ttl, but with validity interval start",
+    testname: "Sign tx with no ttl, but with validity interval start",
     tx: {
       ...allegraBase,
       ttl: null,
@@ -959,7 +1009,7 @@ export type TestcaseMary = {
 
 export const testsMary: TestcaseMary[] = [
   {
-    testname: "Mary era transaction with a multiasset output",
+    testname: "Sign tx with a multiasset output",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath],
@@ -979,7 +1029,7 @@ export const testsMary: TestcaseMary[] = [
     },
   },
   {
-    testname: "Mary era transaction with a complex multiasset output",
+    testname: "Sign tx with a complex multiasset output",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath],
@@ -999,7 +1049,7 @@ export const testsMary: TestcaseMary[] = [
     },
   },
   {
-    testname: "Mary era transaction with big numbers",
+    testname: "Sign tx with big numbers",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetBigNumber],
@@ -1022,7 +1072,7 @@ export const testsMary: TestcaseMary[] = [
     },
   },
   {
-    testname: "Mary era transaction with a multiasset change output",
+    testname: "Sign tx with a multiasset change output",
     tx: {
       ...maryBase,
       outputs: [outputs.externalShelley, outputs.multiassetChange],
@@ -1042,7 +1092,7 @@ export const testsMary: TestcaseMary[] = [
     },
   },
   {
-    testname: "Mary era transaction with zero fee, TTL and validity interval start",
+    testname: "Sign tx with zero fee, TTL and validity interval start",
     tx: {
       ...maryBase,
       fee: 0,
@@ -1068,7 +1118,7 @@ export const testsMary: TestcaseMary[] = [
 
 export const testsCatalystRegistration: TestcaseMary[] = [
   {
-    testname: "Should correctly sign tx with Catalyst voting key registration metadata with base address",
+    testname: "Sign tx with Catalyst voting key registration metadata with base address",
     tx: {
       ...maryBase,
       outputs: [outputs.internalBaseWithStakingPath],
@@ -1110,7 +1160,7 @@ export const testsCatalystRegistration: TestcaseMary[] = [
     },
   },
   {
-    testname: "Should correctly sign tx with Catalyst voting key registration metadata with stake address",
+    testname: "Sign tx with Catalyst voting key registration metadata with stake address",
     tx: {
       ...maryBase,
       outputs: [outputs.internalBaseWithStakingPath],
@@ -1161,7 +1211,7 @@ export type InvalidTokenBundleOrderingTestcase = {
 
 export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase[] = [
   {
-    testname: "Should reject transaction where asset groups are not ordered",
+    testname: "Reject tx where asset groups are not ordered",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetInvalidAssetGroupOrdering],
@@ -1169,7 +1219,7 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
     rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING,
   },
   {
-    testname: "Should reject transaction where asset groups are not unique",
+    testname: "Reject tx where asset groups are not unique",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetAssetGroupsNotUnique],
@@ -1177,7 +1227,7 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
     rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE,
   },
   {
-    testname: "Should reject transaction where tokens within an asset group are not ordered - alphabetical",
+    testname: "Reject tx where tokens within an asset group are not ordered - alphabetical",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
@@ -1185,7 +1235,7 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
   },
   {
-    testname: "Should reject transaction where tokens within an asset group are not ordered - length",
+    testname: "Reject tx where tokens within an asset group are not ordered - length",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
@@ -1193,7 +1243,7 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
   },
   {
-    testname: "Should reject transaction where tokens within an asset group are not unique",
+    testname: "Reject tx where tokens within an asset group are not unique",
     tx: {
       ...maryBase,
       outputs: [outputs.multiassetTokensNotUnique],

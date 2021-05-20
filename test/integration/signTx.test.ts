@@ -9,8 +9,8 @@ import {
   testsCatalystRegistration,
   testsInvalidTokenBundleOrdering,
   testsMary,
-  testsShelleyOther,
-  testsShelleyOutputs,
+  testsShelleyNoCertificates,
+  testsShelleyWithCertificates,
 } from "./__fixtures__/signTx";
 
 // ========================================   BYRON   ========================================
@@ -39,7 +39,7 @@ describe("signTxOrdinaryByron", async () => {
 
 // ========================================   SHELLEY   ========================================
 
-describe("signTxOrdinaryShelley", async () => {
+describe("signTxOrdinaryShelleyNoCertificates", async () => {
   let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
@@ -50,14 +50,26 @@ describe("signTxOrdinaryShelley", async () => {
     await (ada as any).t.close();
   });
 
-  for (const { testname, tx, result: expected } of testsShelleyOutputs) {
+  for (const { testname, tx, result: expected } of testsShelleyNoCertificates) {
     it(testname, async () => {
       const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);
     })
   }
+});
 
-  for (const { testname, tx, result: expected } of testsShelleyOther) {
+describe("signTxOrdinaryShelleyWithCertificates", async () => {
+  let ada: Ada = {} as Ada;
+
+  beforeEach(async () => {
+    ada = await getAda();
+  });
+
+  afterEach(async () => {
+    await (ada as any).t.close();
+  });
+
+  for (const { testname, tx, result: expected } of testsShelleyWithCertificates) {
     it(testname, async () => {
       const response = await ada.signTransaction({ tx, signingMode: TransactionSigningMode.ORDINARY_TRANSACTION })
       expect(response).to.deep.equal(expected);

@@ -16,12 +16,11 @@ import {
   outputs,
   poolRegistrationOperatorTestcases,
   poolRegistrationOwnerTestcases,
-  poolRetirementTestCases,
   withdrawals,
 } from "./__fixtures__/signTxPoolRegistration";
 chai.use(chaiAsPromised)
 
-describe("signTxPoolRegistrationOK", async () => {
+describe("signTxPoolRegistrationOKOwner", async () => {
   let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
@@ -42,13 +41,34 @@ describe("signTxPoolRegistrationOK", async () => {
   }
 
   test(poolRegistrationOwnerTestcases, TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+});
+
+describe("signTxPoolRegistrationOKOperator", async () => {
+  let ada: Ada = {} as Ada;
+
+  beforeEach(async () => {
+    ada = await getAda();
+  });
+
+  afterEach(async () => {
+    await (ada as any).t.close();
+  });
+
+  const test = (testcases: Testcase[], signingMode: TransactionSigningMode) => {
+    for (const { testname, tx, result: expectedResult } of testcases) {
+      it(testname, async () => {
+        const response = await ada.signTransaction({ tx, signingMode });
+        expect(response).to.deep.equal(expectedResult);
+      })
+    }
+  }
+
   test(poolRegistrationOperatorTestcases, TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR)
-  test(poolRetirementTestCases, TransactionSigningMode.ORDINARY_TRANSACTION)
 });
 
 // ======================================== negative tests (tx should be rejected) ===============================
 
-describe("signTxPoolRegistrationReject", async () => {
+describe("signTxPoolRegistrationRejectOwner", async () => {
   let ada: Ada = {} as Ada;
 
   beforeEach(async () => {
@@ -68,7 +88,7 @@ describe("signTxPoolRegistrationReject", async () => {
   }
 
   for (const { testName, poolRegistrationCertificate, expectedReject } of invalidCertificates) {
-    it(`Should reject ${testName}`, async () => {
+    it(`Reject ${testName}`, async () => {
       const tx: Transaction = {
         ...txBase,
         certificates: [poolRegistrationCertificate],
@@ -80,7 +100,7 @@ describe("signTxPoolRegistrationReject", async () => {
   }
 
   for (const { testName, metadata, rejectReason } of invalidPoolMetadataTestcases) {
-    it(`Should reject ${testName}`, async () => {
+    it(`Reject ${testName}`, async () => {
       const cert: Certificate = {
         type: CertificateType.STAKE_POOL_REGISTRATION,
         params: {
@@ -98,7 +118,7 @@ describe("signTxPoolRegistrationReject", async () => {
     });
   }
 
-  describe("Should reject pool registration with invalid relays", async () => {
+  describe("Reject pool registration with invalid relays", async () => {
     for (const { testname, relay, rejectReason } of invalidRelayTestcases) {
       it(testname, async () => {
         const cert: Certificate = {
@@ -120,7 +140,7 @@ describe("signTxPoolRegistrationReject", async () => {
   });
 
 
-  it("Should reject pool registration with numerator bigger than denominator", async () => {
+  it("Reject pool registration with numerator bigger than denominator", async () => {
     const tx: Transaction = {
       ...txBase,
       certificates: [certificates.poolRegistrationWrongMargin],
@@ -130,7 +150,7 @@ describe("signTxPoolRegistrationReject", async () => {
     await expect(promise).to.be.rejectedWith(InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN);
   });
 
-  it("Should reject pool registration along with other certificates", async () => {
+  it("Reject pool registration along with other certificates", async () => {
     const tx: Transaction = {
       ...txBase,
       certificates: [
@@ -143,7 +163,7 @@ describe("signTxPoolRegistrationReject", async () => {
     await expect(promise).to.be.rejectedWith(InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED);
   });
 
-  it("Should reject pool registration along with a withdrawal", async () => {
+  it("Reject pool registration along with a withdrawal", async () => {
     const tx: Transaction = {
       ...txBase,
       certificates: [certificates.poolRegistrationDefault],
