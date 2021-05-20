@@ -1,8 +1,8 @@
-import { InvalidDataReason } from "../errors/invalidDataReason";
-import type { ParsedOperationalCertificate } from "../types/internal";
-import { KES_PUBLIC_KEY_LENGTH } from "../types/internal";
-import type { OperationalCertificate } from "../types/public";
-import { parseBIP32Path, parseHexStringOfLength, parseUint64_str } from "../utils/parse";
+import { InvalidDataReason } from "../errors/invalidDataReason"
+import type { ParsedOperationalCertificate } from "../types/internal"
+import { KES_PUBLIC_KEY_LENGTH } from "../types/internal"
+import type { OperationalCertificate } from "../types/public"
+import { parseBIP32Path, parseHexStringOfLength, parseUint64_str } from "../utils/parse"
 
 export function parseOperationalCertificate(
     operationalCertificate: OperationalCertificate

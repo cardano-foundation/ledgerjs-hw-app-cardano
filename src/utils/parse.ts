@@ -1,8 +1,8 @@
-import { InvalidData } from "../errors";
-import type { InvalidDataReason } from "../errors/index";
-import type { _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "../types/internal";
+import { InvalidData } from "../errors"
+import type { InvalidDataReason } from "../errors/index"
+import type { _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "../types/internal"
 
-export const MAX_UINT_64_STR = "18446744073709551615";
+export const MAX_UINT_64_STR = "18446744073709551615"
 
 export const isString = (data: unknown): data is string =>
     typeof data === "string"
@@ -61,7 +61,7 @@ export const isUintStr = (data: unknown, constraints: { min?: string, max?: stri
         ) && (data.length > min.length ||
             // Note: this is string comparison!
             data >= min
-        )
+    )
 }
 
 export function validate(cond: boolean, errMsg: InvalidDataReason): asserts cond {
@@ -70,11 +70,11 @@ export function validate(cond: boolean, errMsg: InvalidDataReason): asserts cond
 
 
 export function parseAscii(str: unknown, errMsg: InvalidDataReason): VarlenAsciiString {
-    validate(isString(str), errMsg);
+    validate(isString(str), errMsg)
     validate(
         str.split("").every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
         errMsg
-    );
+    )
     return str as VarlenAsciiString
 }
 
@@ -91,17 +91,17 @@ export function parseHexStringOfLength<L extends number>(str: unknown, length: L
 
 export function parseUint64_str(val: unknown, constraints: { min?: string, max?: string }, errMsg: InvalidDataReason): Uint64_str {
     switch (typeof val) {
-        case 'string':
-            validate(isUint64str(val) && isUintStr(val, constraints), errMsg)
-            return val
-        case 'number':
-            validate(isUint64Number(val) && isUintStr(val.toString(), constraints), errMsg)
-            return val.toString() as Uint64_str
-        case 'bigint':
-            validate(isUint64Bigint(val) && isUintStr(val.toString(), constraints), errMsg)
-            return val.toString() as Uint64_str
-        default:
-            validate(false, errMsg)
+    case 'string':
+        validate(isUint64str(val) && isUintStr(val, constraints), errMsg)
+        return val
+    case 'number':
+        validate(isUint64Number(val) && isUintStr(val.toString(), constraints), errMsg)
+        return val.toString() as Uint64_str
+    case 'bigint':
+        validate(isUint64Bigint(val) && isUintStr(val.toString(), constraints), errMsg)
+        return val.toString() as Uint64_str
+    default:
+        validate(false, errMsg)
     }
 }
 
@@ -128,12 +128,12 @@ export function parseBIP32Path(value: unknown, errMsg: InvalidDataReason): Valid
 
 export function parseIntFromStr(str: string, errMsg: InvalidDataReason): number {
     validate(isString(str), errMsg)
-    const i = parseInt(str);
+    const i = parseInt(str)
     // Check that we parsed everything
-    validate("" + i === str, errMsg);
+    validate("" + i === str, errMsg)
     // Could be invalid
-    validate(!isNaN(i), errMsg);
+    validate(!isNaN(i), errMsg)
     // Could still be float
-    validate(isInteger(i), errMsg);
-    return i;
+    validate(isInteger(i), errMsg)
+    return i
 }

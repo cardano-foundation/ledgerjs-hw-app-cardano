@@ -14,51 +14,51 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-import type Transport from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport"
 
-import { DeviceStatusCodes, DeviceStatusError } from './errors';
-import { InvalidDataReason } from "./errors/invalidDataReason";
-import type { Interaction, SendParams } from './interactions/common/types';
-import { deriveAddress } from "./interactions/deriveAddress";
-import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys";
-import { getSerial } from "./interactions/getSerial";
-import { getCompatibility, getVersion } from "./interactions/getVersion";
-import { runTests } from "./interactions/runTests";
-import { showAddress } from "./interactions/showAddress";
-import { signOperationalCertificate } from "./interactions/signOperationalCertificate";
-import { signTransaction } from "./interactions/signTx";
+import { DeviceStatusCodes, DeviceStatusError } from './errors'
+import { InvalidDataReason } from "./errors/invalidDataReason"
+import type { Interaction, SendParams } from './interactions/common/types'
+import { deriveAddress } from "./interactions/deriveAddress"
+import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys"
+import { getSerial } from "./interactions/getSerial"
+import { getCompatibility, getVersion } from "./interactions/getVersion"
+import { runTests } from "./interactions/runTests"
+import { showAddress } from "./interactions/showAddress"
+import { signOperationalCertificate } from "./interactions/signOperationalCertificate"
+import { signTransaction } from "./interactions/signTx"
 import { parseAddress } from './parsing/address'
-import { parseOperationalCertificate } from "./parsing/operationalCertificate";
-import { parseSignTransactionRequest } from "./parsing/transaction";
+import { parseOperationalCertificate } from "./parsing/operationalCertificate"
+import { parseSignTransactionRequest } from "./parsing/transaction"
 import type {
-  ParsedAddressParams,
-  ParsedOperationalCertificate,
-  ParsedSigningRequest,
-  ValidBIP32Path,
-} from './types/internal';
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public';
+    ParsedAddressParams,
+    ParsedOperationalCertificate,
+    ParsedSigningRequest,
+    ValidBIP32Path,
+} from './types/internal'
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public'
 import { AddressType, CertificateType, RelayType, TransactionSigningMode } from "./types/public"
-import utils from "./utils";
+import utils from "./utils"
 import { assert } from './utils/assert'
-import { isArray, parseBIP32Path, validate, } from './utils/parse';
+import { isArray, parseBIP32Path, validate } from './utils/parse'
 
 export * from './errors'
 export * from './types/public'
 
-const CLA = 0xd7;
+const CLA = 0xd7
 
 function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
-  // @ts-ignore
-  return async (...args) => {
-    try {
-      return await fn(...args);
-    } catch (e) {
-      if (e && e.statusCode) {
-        throw new DeviceStatusError(e.statusCode)
-      }
-      throw e;
+    // @ts-ignore
+    return async (...args) => {
+        try {
+            return await fn(...args)
+        } catch (e) {
+            if (e && e.statusCode) {
+                throw new DeviceStatusError(e.statusCode)
+            }
+            throw e
+        }
     }
-  };
 }
 
 /**
@@ -81,40 +81,40 @@ export type SendFn = (params: SendParams) => Promise<Buffer>;
 
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
 function wrapRetryStillInCall<T extends Function>(fn: T): T {
-  // @ts-ignore
-  return async (...args: any) => {
-    try {
-      return await fn(...args);
-    } catch (e) {
-      if (
-        e &&
+    // @ts-ignore
+    return async (...args: any) => {
+        try {
+            return await fn(...args)
+        } catch (e) {
+            if (
+                e &&
         e.statusCode &&
         e.statusCode === DeviceStatusCodes.ERR_STILL_IN_CALL
-      ) {
-        // Do the retry
-        return await fn(...args);
-      }
-      throw e;
+            ) {
+                // Do the retry
+                return await fn(...args)
+            }
+            throw e
+        }
     }
-  };
 }
 
 
 async function interact<T>(
-  interaction: Interaction<T>,
-  send: SendFn,
+    interaction: Interaction<T>,
+    send: SendFn,
 ): Promise<T> {
-  let cursor = interaction.next();
-  let first = true
-  while (!cursor.done) {
-    const apdu = cursor.value
-    const res = first
-      ? await wrapRetryStillInCall(send)(apdu)
-      : await send(apdu);
-    first = false
-    cursor = interaction.next(res);
-  }
-  return cursor.value;
+    let cursor = interaction.next()
+    let first = true
+    while (!cursor.done) {
+        const apdu = cursor.value
+        const res = first
+            ? await wrapRetryStillInCall(send)(apdu)
+            : await send(apdu)
+        first = false
+        cursor = interaction.next(res)
+    }
+    return cursor.value
 }
 
 /**
@@ -128,36 +128,36 @@ export class Ada {
   _send: SendFn;
 
   constructor(transport: Transport<string>, scrambleKey: string = "ADA") {
-    this.transport = transport;
-    // Note: this is list of methods that should "lock" the transport to avoid concurrent use
-    const methods = [
-      "getVersion",
-      "getSerial",
-      "getExtendedPublicKeys",
-      "signTransaction",
-      "deriveAddress",
-      "showAddress",
-    ];
-    this.transport.decorateAppAPIMethods(this, methods, scrambleKey);
-    this._send = async (params: SendParams): Promise<Buffer> => {
-      let response = await wrapConvertDeviceStatusError(this.transport.send)(
-        CLA,
-        params.ins,
-        params.p1,
-        params.p2,
-        params.data
-      );
-      response = utils.stripRetcodeFromResponse(response);
+      this.transport = transport
+      // Note: this is list of methods that should "lock" the transport to avoid concurrent use
+      const methods = [
+          "getVersion",
+          "getSerial",
+          "getExtendedPublicKeys",
+          "signTransaction",
+          "deriveAddress",
+          "showAddress",
+      ]
+      this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
+      this._send = async (params: SendParams): Promise<Buffer> => {
+          let response = await wrapConvertDeviceStatusError(this.transport.send)(
+              CLA,
+              params.ins,
+              params.p1,
+              params.p2,
+              params.data
+          )
+          response = utils.stripRetcodeFromResponse(response)
 
-      if (params.expectedResponseLength != null) {
-        assert(
-          response.length === params.expectedResponseLength,
-          `unexpected response length: ${response.length} instead of ${params.expectedResponseLength}`
-        );
+          if (params.expectedResponseLength != null) {
+              assert(
+                  response.length === params.expectedResponseLength,
+                  `unexpected response length: ${response.length} instead of ${params.expectedResponseLength}`
+              )
+          }
+
+          return response
       }
-
-      return response;
-    };
   }
 
   /**
@@ -171,14 +171,14 @@ export class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    const version = await interact(this._getVersion(), this._send)
-    return { version, compatibility: getCompatibility(version) }
+      const version = await interact(this._getVersion(), this._send)
+      return { version, compatibility: getCompatibility(version) }
   }
 
   // Just for consistency
   /** @ignore */
   *_getVersion(): Interaction<Version> {
-    return yield* getVersion()
+      return yield* getVersion()
   }
 
   /**
@@ -192,13 +192,13 @@ export class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    return interact(this._getSerial(), this._send);
+      return interact(this._getSerial(), this._send)
   }
 
   /** @ignore */
   *_getSerial(): Interaction<GetSerialResponse> {
-    const version = yield* getVersion()
-    return yield* getSerial(version)
+      const version = yield* getVersion()
+      return yield* getSerial(version)
   }
 
 
@@ -206,13 +206,13 @@ export class Ada {
    * Runs unit tests on the device (DEVEL app build only)
    */
   async runTests(): Promise<void> {
-    return interact(this._runTests(), this._send)
+      return interact(this._runTests(), this._send)
   }
 
   /** @ignore */
   *_runTests(): Interaction<void> {
-    const version = yield* getVersion()
-    return yield* runTests(version)
+      const version = yield* getVersion()
+      return yield* runTests(version)
   }
 
 
@@ -229,19 +229,19 @@ export class Ada {
    * ```
    */
   async getExtendedPublicKeys(
-    { paths }: GetExtendedPublicKeysRequest
+      { paths }: GetExtendedPublicKeysRequest
   ): Promise<GetExtendedPublicKeysResponse> {
-    // validate the input
-    validate(isArray(paths), InvalidDataReason.GET_EXT_PUB_KEY_PATHS_NOT_ARRAY);
-    const parsed = paths.map((path) => parseBIP32Path(path, InvalidDataReason.INVALID_PATH));
+      // validate the input
+      validate(isArray(paths), InvalidDataReason.GET_EXT_PUB_KEY_PATHS_NOT_ARRAY)
+      const parsed = paths.map((path) => parseBIP32Path(path, InvalidDataReason.INVALID_PATH))
 
-    return interact(this._getExtendedPublicKeys(parsed), this._send);
+      return interact(this._getExtendedPublicKeys(parsed), this._send)
   }
 
   /** @ignore */
   *_getExtendedPublicKeys(paths: ValidBIP32Path[]) {
-    const version = yield* getVersion()
-    return yield* getExtendedPublicKeys(version, paths)
+      const version = yield* getVersion()
+      return yield* getExtendedPublicKeys(version, paths)
   }
 
   /**
@@ -249,9 +249,9 @@ export class Ada {
    *
    */
   async getExtendedPublicKey(
-    { path }: GetExtendedPublicKeyRequest
+      { path }: GetExtendedPublicKeyRequest
   ): Promise<GetExtendedPublicKeyResponse> {
-    return (await this.getExtendedPublicKeys({ paths: [path] }))[0];
+      return (await this.getExtendedPublicKeys({ paths: [path] }))[0]
   }
 
   /**
@@ -259,15 +259,15 @@ export class Ada {
    * Note that the address is returned in raw *hex* format without any bech32/base58 encoding
    */
   async deriveAddress({ network, address }: DeriveAddressRequest): Promise<DeriveAddressResponse> {
-    const parsedParams = parseAddress(network, address)
+      const parsedParams = parseAddress(network, address)
 
-    return interact(this._deriveAddress(parsedParams), this._send);
+      return interact(this._deriveAddress(parsedParams), this._send)
   }
 
   /** @ignore */
   *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DerivedAddress> {
-    const version = yield* getVersion()
-    return yield* deriveAddress(version, addressParams)
+      const version = yield* getVersion()
+      return yield* deriveAddress(version, addressParams)
   }
 
 
@@ -276,47 +276,47 @@ export class Ada {
    * This is useful for users to check whether the wallet does not try to scam the user.
    */
   async showAddress({ network, address }: ShowAddressRequest): Promise<void> {
-    const parsedParams = parseAddress(network, address)
+      const parsedParams = parseAddress(network, address)
 
-    return interact(this._showAddress(parsedParams), this._send);
+      return interact(this._showAddress(parsedParams), this._send)
   }
 
   /** @ignore */
   *_showAddress(addressParams: ParsedAddressParams): Interaction<void> {
-    const version = yield* getVersion()
-    return yield* showAddress(version, addressParams)
+      const version = yield* getVersion()
+      return yield* showAddress(version, addressParams)
   }
 
 
 
   async signTransaction(
-    request: SignTransactionRequest
+      request: SignTransactionRequest
   ): Promise<SignTransactionResponse> {
 
-    const parsedRequest = parseSignTransactionRequest(request)
+      const parsedRequest = parseSignTransactionRequest(request)
 
-    return interact(this._signTx(parsedRequest), this._send);
+      return interact(this._signTx(parsedRequest), this._send)
   }
 
   /** @ignore */
   * _signTx(request: ParsedSigningRequest): Interaction<SignedTransactionData> {
-    const version = yield* getVersion()
-    return yield* signTransaction(version, request)
+      const version = yield* getVersion()
+      return yield* signTransaction(version, request)
   }
 
 
 
   async signOperationalCertificate(
-    request: SignOperationalCertificateRequest
+      request: SignOperationalCertificateRequest
   ): Promise<SignOperationalCertificateResponse> {
-    const parsedOperationalCertificate = parseOperationalCertificate(request)
+      const parsedOperationalCertificate = parseOperationalCertificate(request)
 
-    return interact(this._signOperationalCertificate(parsedOperationalCertificate), this._send)
+      return interact(this._signOperationalCertificate(parsedOperationalCertificate), this._send)
   }
 
   * _signOperationalCertificate(request: ParsedOperationalCertificate): Interaction<OperationalCertificateSignature> {
-    const version = yield* getVersion()
-    return yield* signOperationalCertificate(version, request)
+      const version = yield* getVersion()
+      return yield* signOperationalCertificate(version, request)
   }
 }
 
@@ -412,20 +412,20 @@ export type SignOperationalCertificateResponse = OperationalCertificateSignature
 
 // reexport
 export type { Transaction, DeviceOwnedAddress }
-export { AddressType, CertificateType, RelayType, InvalidDataReason, TransactionSigningMode, utils };
-export default Ada;
+export { AddressType, CertificateType, RelayType, InvalidDataReason, TransactionSigningMode, utils }
+export default Ada
 
 /**
  * Default Cardano networks
  * @see [[Network]]
  */
 export const Networks = {
-  Mainnet: {
-    networkId: 0x01,
-    protocolMagic: 764824073,
-  } as Network,
-  Testnet: {
-    networkId: 0x00,
-    protocolMagic: 42,
-  } as Network,
+    Mainnet: {
+        networkId: 0x01,
+        protocolMagic: 764824073,
+    } as Network,
+    Testnet: {
+        networkId: 0x00,
+        protocolMagic: 42,
+    } as Network,
 }

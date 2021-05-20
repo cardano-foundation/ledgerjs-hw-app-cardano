@@ -18,14 +18,14 @@ export type Uint8_t = number & { __type: 'uint8_t' }
 export { AddressType, CertificateType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType }
 export { Version, DeviceCompatibility } from './public'
 // Our types
-export const EXTENDED_PUBLIC_KEY_LENGTH = 64;
-export const KEY_HASH_LENGTH = 28;
-export const TX_HASH_LENGTH = 32;
-export const AUXILIARY_DATA_HASH_LENGTH = 32;
-export const KES_PUBLIC_KEY_LENGTH = 32;
-export const VRF_KEY_HASH_LENGTH = 32;
-export const REWARD_ACCOUNT_HEX_LENGTH = 29;
-export const ED25519_SIGNATURE_LENGTH = 64;
+export const EXTENDED_PUBLIC_KEY_LENGTH = 64
+export const KEY_HASH_LENGTH = 28
+export const TX_HASH_LENGTH = 32
+export const AUXILIARY_DATA_HASH_LENGTH = 32
+export const KES_PUBLIC_KEY_LENGTH = 32
+export const VRF_KEY_HASH_LENGTH = 32
+export const REWARD_ACCOUNT_HEX_LENGTH = 29
+export const ED25519_SIGNATURE_LENGTH = 64
 
 export type ParsedCertificate = {
     type: CertificateType.STAKE_REGISTRATION
@@ -46,7 +46,7 @@ export type ParsedCertificate = {
     retirementEpoch: Uint64_str
 }
 
-export const TOKEN_POLICY_LENGTH = 28;
+export const TOKEN_POLICY_LENGTH = 28
 
 
 export type ParsedToken = {
@@ -65,7 +65,7 @@ export type ParsedNetwork = {
     networkId: Uint8_t
 }
 
-export const CATALYST_VOTING_PUBLIC_KEY_LENGTH = 32;
+export const CATALYST_VOTING_PUBLIC_KEY_LENGTH = 32
 
 export type CatalystVotingPublicKey = FixlenHexString<typeof CATALYST_VOTING_PUBLIC_KEY_LENGTH>
 
@@ -258,7 +258,7 @@ export type ParsedOutput = {
     destination: OutputDestination
 }
 
-export const ASSET_NAME_LENGTH_MAX = 32;
+export const ASSET_NAME_LENGTH_MAX = 32
 
 export type ParsedOperationalCertificate = {
     kesPublicKeyHex: FixlenHexString<typeof KES_PUBLIC_KEY_LENGTH>,

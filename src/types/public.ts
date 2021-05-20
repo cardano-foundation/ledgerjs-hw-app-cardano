@@ -110,7 +110,7 @@ export const enum RelayType {
  * 
  * @see [[BIP32Path]]
  */
-export const HARDENED = 0x80000000;
+export const HARDENED = 0x80000000
 
 // Our types
 
@@ -905,7 +905,7 @@ export enum TxAuxiliaryDataType {
      * Auxiliary data representing a Catalyst registration. Ledger serializes the auxiliary data
      * as `[<catalyst registration metadata>, []]` (a.k.a. Mary-era format)
      */
-    CATALYST_REGISTRATION = 'catalyst_registration'
+    CATALYST_REGISTRATION = 'catalyst_registration',
 }
 
 /**

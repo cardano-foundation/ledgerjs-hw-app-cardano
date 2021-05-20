@@ -1,12 +1,12 @@
-import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal";
-import { EXTENDED_PUBLIC_KEY_LENGTH } from "../types/internal";
-import type { ExtendedPublicKey } from "../types/public";
-import { assert } from "../utils/assert";
-import { chunkBy } from "../utils/ioHelpers";
-import { path_to_buf, uint32_to_buf } from "../utils/serialize";
-import { INS } from "./common/ins";
-import type { Interaction, SendParams } from "./common/types";
-import { ensureLedgerAppVersionCompatible } from "./getVersion";
+import type { Uint32_t, ValidBIP32Path, Version } from "../types/internal"
+import { EXTENDED_PUBLIC_KEY_LENGTH } from "../types/internal"
+import type { ExtendedPublicKey } from "../types/public"
+import { assert } from "../utils/assert"
+import { chunkBy } from "../utils/ioHelpers"
+import { path_to_buf, uint32_to_buf } from "../utils/serialize"
+import { INS } from "./common/ins"
+import type { Interaction, SendParams } from "./common/types"
+import { ensureLedgerAppVersionCompatible } from "./getVersion"
 
 
 const send = (params: {
@@ -18,60 +18,60 @@ const send = (params: {
 
 
 export function* getExtendedPublicKeys(
-  version: Version,
-  paths: Array<ValidBIP32Path>
+    version: Version,
+    paths: Array<ValidBIP32Path>
 ): Interaction<Array<ExtendedPublicKey>> {
-  ensureLedgerAppVersionCompatible(version);
+    ensureLedgerAppVersionCompatible(version)
 
   const enum P1 {
     INIT = 0x00,
-    NEXT_KEY = 0x01
+    NEXT_KEY = 0x01,
   }
   const enum P2 {
-    UNUSED = 0x00
+    UNUSED = 0x00,
   }
-  const result = [];
+  const result = []
 
   for (let i = 0; i < paths.length; i++) {
-    const pathData = Buffer.concat([
-      path_to_buf(paths[i]),
-    ]);
+      const pathData = Buffer.concat([
+          path_to_buf(paths[i]),
+      ])
 
-    let response: Buffer;
-    if (i === 0) {
+      let response: Buffer
+      if (i === 0) {
       // initial APDU
 
-      // passing empty Buffer for backwards compatibility
-      // of single key export on Ledger app version 2.0.4
-      const remainingKeysData =
+          // passing empty Buffer for backwards compatibility
+          // of single key export on Ledger app version 2.0.4
+          const remainingKeysData =
         paths.length > 1
-          ? uint32_to_buf(paths.length - 1 as Uint32_t)
-          : Buffer.from([]);
+            ? uint32_to_buf(paths.length - 1 as Uint32_t)
+            : Buffer.from([])
 
-      response = yield send({
-        p1: P1.INIT,
-        p2: P2.UNUSED,
-        data: Buffer.concat([pathData, remainingKeysData]),
-        expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
-      });
-    } else {
+          response = yield send({
+              p1: P1.INIT,
+              p2: P2.UNUSED,
+              data: Buffer.concat([pathData, remainingKeysData]),
+              expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
+          })
+      } else {
       // next key APDU
-      response = yield send({
-        p1: P1.NEXT_KEY,
-        p2: P2.UNUSED,
-        data: pathData,
-        expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
-      });
-    }
+          response = yield send({
+              p1: P1.NEXT_KEY,
+              p2: P2.UNUSED,
+              data: pathData,
+              expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
+          })
+      }
 
-    const [publicKey, chainCode, rest] = chunkBy(response, [32, 32]);
-    assert(rest.length === 0, "invalid response length");
+      const [publicKey, chainCode, rest] = chunkBy(response, [32, 32])
+      assert(rest.length === 0, "invalid response length")
 
-    result.push({
-      publicKeyHex: publicKey.toString("hex"),
-      chainCodeHex: chainCode.toString("hex"),
-    });
+      result.push({
+          publicKeyHex: publicKey.toString("hex"),
+          chainCodeHex: chainCode.toString("hex"),
+      })
   }
 
-  return result;
+  return result
 }
