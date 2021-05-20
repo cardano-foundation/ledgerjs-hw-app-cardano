@@ -19,6 +19,7 @@ Added support for signing pool registration certificates as operator, support fo
 
 - `PoolRegistrationParams.poolKey` has been changed from a `string` to `PoolKey` in order to support pool operator signing - `poolKey` can now also be sent as a path
 - `PoolRegistrationParams.rewardAccount` has been changeed from a `string` to `PoolRewardAccount` in order to support pool operator signing - `rewardAccount` can now also be sent as path
+- `AssetGroup.tokens` and `TxOutput.tokenBundle` are required to be in CBOR canonical order
 
 ## [3.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.0.0...v3.1.0) - [May 11th 2021]
 
