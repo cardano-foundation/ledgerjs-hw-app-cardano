@@ -23,7 +23,7 @@ export function* showAddress(
     yield send({
         p1: P1_DISPLAY,
         p2: P2_UNUSED,
-        data: serializeAddressParams(addressParams),
+        data: serializeAddressParams(addressParams, version),
         expectedResponseLength: 0,
     })
 }

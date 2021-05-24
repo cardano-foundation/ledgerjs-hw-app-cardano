@@ -1,4 +1,5 @@
 import type { Certificate, MultiHostRelayParams, PoolKey, PoolMetadataParams, PoolOwner, PoolRegistrationParams, PoolRewardAccount, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada"
+import { StakeCredentialParamsType } from "../../../src/Ada"
 import { PoolKeyType, PoolRewardAccountType } from "../../../src/Ada"
 import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada"
 import { str_to_path } from "../../../src/utils/address"
@@ -363,14 +364,20 @@ export const certificates: Record<
     stakeDelegation: {
         type: CertificateType.STAKE_DELEGATION,
         params: {
-            path: str_to_path("1852'/1815'/0'/2/0"),
+            stakeCredential: {
+                type: StakeCredentialParamsType.KEY_PATH,
+                keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
             poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
         },
     },
     stakeRegistration: {
         type: 0,
         params: {
-            path: str_to_path("1852'/1815'/0'/2/0"),
+            stakeCredential: {
+                type: StakeCredentialParamsType.KEY_PATH,
+                keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
         },
     },
     poolRegistrationDefault: {
@@ -503,7 +510,10 @@ export const withdrawals: Record<
   , Withdrawal
 > = {
     withdrawal0: {
-        path: str_to_path("1852'/1815'/0'/2/0"),
+        stakeCredential: {
+            type: StakeCredentialParamsType.KEY_PATH,
+            keyPath: str_to_path("1852'/1815'/0'/2/0"),
+        },
         amount: "111",
     },
 }

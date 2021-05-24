@@ -18,30 +18,36 @@ export type bigint_like = number | bigint | string
  */
 export enum AddressType {
     /**
-     * Shelley base address
+     * Shelley base addresses
      * @see [[AddressParamsBase]]
      */
-    BASE = 0b0000,
+    BASE_PAYMENT_KEY_STAKE_KEY          = 0b0000,
+    BASE_PAYMENT_SCRIPT_STAKE_KEY       = 0b0001,
+    BASE_PAYMENT_KEY_STAKE_SCRIPT       = 0b0010,
+    BASE_PAYMENT_SCRIPT_STAKE_SCRIPT    = 0b0011,
     /**
      * Shelley pointer address
      * @see [[AddressParamsPointer]]
      */
-    POINTER = 0b0100,
+    POINTER_KEY                         = 0b0100,
+    POINTER_SCRIPT                      = 0b0101,
     /**
      * Shelley enterprise address
      * @see [[AddressParamsEnterprise]]
      */
-    ENTERPRISE = 0b0110,
+    ENTERPRISE_KEY                      = 0b0110,
+    ENTERPRISE_SCRIPT                   = 0b0111,
     /**
      * Byron address
      * @see [[AddressParamsByron]]
      */
-    BYRON = 0b1000,
+    BYRON                               = 0b1000,
     /**
      * Shelley staking rewards address
      * @see [[AddressParamsReward]]
      */
-    REWARD = 0b1110,
+    REWARD_KEY                          = 0b1110,
+    REWARD_SCRIPT                       = 0b1111,
 }
 
 /** 
@@ -150,16 +156,19 @@ export type DeviceOwnedAddress = {
     type: AddressType.BYRON
     params: AddressParamsByron
 } | {
-    type: AddressType.BASE
+    type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY |
+    AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY |
+    AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT |
+    AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
     params: AddressParamsBase
 } | {
-    type: AddressType.ENTERPRISE
+    type: AddressType.ENTERPRISE_KEY | AddressType.ENTERPRISE_SCRIPT
     params: AddressParamsEnterprise
 } | {
-    type: AddressType.POINTER
+    type: AddressType.POINTER_KEY | AddressType.POINTER_SCRIPT,
     params: AddressParamsPointer
 } | {
-    type: AddressType.REWARD
+    type: AddressType.REWARD_KEY | AddressType.REWARD_SCRIPT,
     params: AddressParamsReward
 }
 
@@ -172,44 +181,39 @@ export type AddressParamsByron = {
     spendingPath: BIP32Path
 }
 
+export type SpendingParams = {
+    spendingPath: BIP32Path
+} | {
+    spendingScriptHash: string
+}
+
 /**
  * Shelley *base* address parameters.
  * The API allows for using device staking key, or supplying third-party staking key.
  * @category Addresses
  * @see [[DeviceOwnedAddress]]
  */
-export type AddressParamsBase = {
-    spendingPath: BIP32Path
-} & AddressParamsBaseStaking
-
-/**
- * Shelley *base* address parameters staking choice.
- * The API allows for using device staking key, or supplying third-party staking key.
- * @category Addresses
- * @see [[DeviceOwnedAddress]]
- */
-// Not really worth the effort of disambiguation through additional tagged enum
-export type AddressParamsBaseStaking =
-    | { stakingPath: BIP32Path }
-    | { stakingKeyHashHex: string }
-
+export type AddressParamsBase = SpendingParams & {
+    stakingPath: BIP32Path
+} | {
+    stakingKeyHashHex: string
+} | {
+    stakingScriptHash: string
+}
 
 /**
  * Shelley *enterprise* address parameters
  * @category Addresses
  * @see [[DeviceOwnedAddress]]
  * */
-export type AddressParamsEnterprise = {
-    spendingPath: BIP32Path
-}
+export type AddressParamsEnterprise = SpendingParams
 
 /**
  * Shelley *pointer* address parameters
  * @category Addresses
  * @see [[DeviceOwnedAddress]]
  * */
-export type AddressParamsPointer = {
-    spendingPath: BIP32Path
+export type AddressParamsPointer = SpendingParams & {
     stakingBlockchainPointer: BlockchainPointer
 }
 
@@ -220,6 +224,8 @@ export type AddressParamsPointer = {
  */
 export type AddressParamsReward = {
     stakingPath: BIP32Path
+} | {
+    stakingScriptHash: string
 }
 
 /** Operational certificate
@@ -260,18 +266,19 @@ export type TxInput = {
 };
 
 /**
- * Describes single token to be transferred with the output
+ * Describes a single token within a multiasset structure.
  * @category Mary
  * @see [[AssetGroup]]
  */
 export type Token = {
     assetNameHex: string,
-    /** Note: device does not know the number of decimal places the token uses */
+    /** Note: can be signed or unsigned, depending on the context.
+     * device does not know the number of decimal places the token uses. */
     amount: bigint_like,
 };
 
 /**
- * Describes asset group transferred with the output
+ * Describes a group of assets belonging to the same policy in a multiasset structure.
  * @category Mary
  * @see [[TxOutput]]
  */
@@ -637,14 +644,33 @@ export type PoolRetirementParams = {
     retirementEpoch: bigint_like,
 }
 
+export enum StakeCredentialParamsType {
+    KEY_PATH,
+    SCRIPT_HASH,
+}
+
+type KeyStakeCredentialParams = {
+    type: StakeCredentialParamsType.KEY_PATH,
+    keyPath: BIP32Path,
+}
+
+type ScriptStakeCredentialParams = {
+    type: StakeCredentialParamsType.SCRIPT_HASH,
+    scriptHash: string,
+}
+
+export type StakeCredentialParams = KeyStakeCredentialParams | ScriptStakeCredentialParams
+
 /**
  * Stake key registration certificate parameters
  * @category Shelley
  * @see [[Certificate]]
  */
 export type StakeRegistrationParams = {
-    /** Path to staking key being registered */
-    path: BIP32Path
+    /**
+     * Id to be registered
+     */
+     stakeCredential: StakeCredentialParams,
 }
 
 /**
@@ -654,9 +680,9 @@ export type StakeRegistrationParams = {
  */
 export type StakeDeregistrationParams = {
     /**
-     * Path to the staking key being deregistered
+     * Id to be deregistered
      */
-    path: BIP32Path
+    stakeCredential: StakeCredentialParams,
 }
 
 /**
@@ -666,10 +692,10 @@ export type StakeDeregistrationParams = {
  * */
 export type StakeDelegationParams = {
     /**
-     * Path to the staking key / reward account that wants to delegate
+     * Id of the staking entity / reward account that wants to delegate
      */
-    path: BIP32Path
-    /**
+     stakeCredential: StakeCredentialParams,
+     /**
      * Pool ID user wants to delegate to
      */
     poolKeyHashHex: string
@@ -707,7 +733,7 @@ export type Withdrawal = {
     /**
      * Path to rewards account being withdrawn
      */
-    path: BIP32Path,
+    stakeCredential: StakeCredentialParams,
     /**
      * Amount (in Lovelace) being withdrawn.
      * Note that Amount *must* be all accumulated rewards.
@@ -779,6 +805,14 @@ export type DeviceCompatibility = {
      * Whether we support script hash derivation
      */
     supportsNativeScriptHashDerivation: boolean
+    /**
+     * Whether we support script transaction
+     */
+    supportsScriptTransaction: boolean
+    /**
+     * Whether we support mint
+     */
+    supportsMint: boolean
 }
 
 /**
@@ -999,7 +1033,17 @@ export type Transaction = {
      * Validity start (block height) if any.
      * Transaction becomes valid only starting from this block height.
      */
-    validityIntervalStart?: bigint_like | null
+    validityIntervalStart?: bigint_like | null,
+    /**
+     * Mint or burn instructions (if any).
+     * Assets to be minted (token amount positive) or burned (token amount negative) with the transaction.
+     * If not null, the entries' keys (policyIds) must be sorted lowest value to highest to reflect a canonical CBOR.
+     * The sorting rules (as described in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)) are:
+     *  * if two keys have different lengths, the shorter one sorts earlier;
+     *  * if two keys have the same length, the one with the lower value in lexical order sorts earlier.
+     */
+    // TODO update the docstring when CIP-0021 is approved
+    mint?: Array<AssetGroup> | null,
 }
 
 /**
@@ -1021,7 +1065,7 @@ export enum TransactionSigningMode {
      * The API witnesses
      * - all non-null [[TxInput.path]] on `inputs`
      * - all [[Withdrawal.path]] on `withdrawals`
-     * - all `path` properties on `certificates` for Stake registering/deregistering/delegating certificate.
+     * - all [[StakeCredentialParams.path]] properties on `certificates` for Stake registering/deregistering/delegating certificate.
      */
     ORDINARY_TRANSACTION = 'ordinary_transaction',
 
@@ -1060,6 +1104,22 @@ export enum TransactionSigningMode {
      * - [[PoolKeyDeviceOwnedParams.path]] found in pool registration
      */
     POOL_REGISTRATION_AS_OPERATOR = 'pool_registration_as_operator',
+
+    /**
+     * Represents a transaction controlled by scripts.
+     *
+     * Like an ordinary transaction, but stake credentials and all similar elements are given as script hashes
+     * and witnesses are decoupled from transaction elements.
+     *
+     * The transaction
+     * - *must* have `path=null` on all `inputs`
+     * - *must not* contain a pool registration certificate
+     * TODO
+     *
+     * The API witnesses
+     * - all given in [[SignTransactionRequest.additionalWitnessPaths]]
+     */
+    SCRIPT_TRANSACTION = 'multisig_transaction',
 }
 
 /**
@@ -1080,6 +1140,8 @@ export type SignTransactionRequest = {
      * Transaction to be signed
      */
     tx: Transaction
+
+    additionalWitnessPaths: BIP32Path[]
 }
 
 /**

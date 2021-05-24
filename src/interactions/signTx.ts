@@ -1,20 +1,23 @@
 import { DeviceVersionUnsupported } from "../errors"
-import type { ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal"
+import type { Int64_str, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal"
+import { StakeCredentialType } from "../types/internal"
 import { CertificateType, ED25519_SIGNATURE_LENGTH, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal"
-import type { SignedTransactionData, TxAuxiliaryDataSupplement } from "../types/public"
+import type { SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
+import { AddressType, TxOutputDestinationType } from "../types/public"
 import { PoolKeyType, TransactionSigningMode, TxAuxiliaryDataSupplementType, TxAuxiliaryDataType } from "../types/public"
 import { assert } from "../utils/assert"
-import { buf_to_hex, hex_to_buf } from "../utils/serialize"
+import { buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf } from "../utils/serialize"
 import { INS } from "./common/ins"
 import type { Interaction, SendParams } from "./common/types"
 import { ensureLedgerAppVersionCompatible, getCompatibility } from "./getVersion"
+import { serializeAddressParams } from "./serialization/addressParams"
 import { serializeCatalystRegistrationNonce, serializeCatalystRegistrationRewardsDestination, serializeCatalystRegistrationStakingPath, serializeCatalystRegistrationVotingKey } from "./serialization/catalystRegistration"
 import { serializeFinancials, serializePoolInitialParams, serializePoolInitialParamsLegacy, serializePoolKey, serializePoolMetadata, serializePoolOwner, serializePoolRelay, serializePoolRewardAccount } from "./serialization/poolRegistrationCertificate"
 import { serializeTxAuxiliaryData } from "./serialization/txAuxiliaryData"
 import { serializeTxCertificate } from "./serialization/txCertificate"
 import { serializeTxInit } from "./serialization/txInit"
-import { serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther"
-import { serializeAssetGroup, serializeToken, serializeTxOutputBasicParams } from "./serialization/txOutput"
+import { serializeAssetGroup, serializeMintBasicParams, serializeToken, serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther"
+import { serializeTxOutputBasicParams } from "./serialization/txOutput"
 
 const enum P1 {
   STAGE_INIT = 0x01,
@@ -27,6 +30,7 @@ const enum P1 {
   STAGE_WITHDRAWALS = 0x07,
   STAGE_VALIDITY_INTERVAL_START = 0x09,
   STAGE_CONFIRM = 0x0a,
+  STAGE_MINT = 0x0b,
   STAGE_WITNESSES = 0x0f,
 }
 
@@ -41,16 +45,16 @@ const send = (params: {
 function* signTx_init(
     tx: ParsedTransaction,
     signingMode: TransactionSigningMode,
-    wittnessPaths: ValidBIP32Path[],
+    witnessPaths: ValidBIP32Path[],
+    version: Version,
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
   }
-
   const _response = yield send({
       p1: P1.STAGE_INIT,
       p2: P2.UNUSED,
-      data: serializeTxInit(tx, signingMode, wittnessPaths.length),
+      data: serializeTxInit(tx, signingMode, witnessPaths.length, version),
       expectedResponseLength: 0,
   })
 }
@@ -72,42 +76,22 @@ function* signTx_addInput(
 
 function* signTx_addOutput(
     output: ParsedOutput,
+    version: Version,
 ): Interaction<void> {
   const enum P2 {
     BASIC_DATA = 0x30,
-    ASSET_GROUP = 0x31,
-    TOKEN = 0x32,
     CONFIRM = 0x33,
   }
 
   // Basic data
-  {
-      yield send({
-          p1: P1.STAGE_OUTPUTS,
-          p2: P2.BASIC_DATA,
-          data: serializeTxOutputBasicParams(output),
-          expectedResponseLength: 0,
-      })
-  }
+  yield send({
+      p1: P1.STAGE_OUTPUTS,
+      p2: P2.BASIC_DATA,
+      data: serializeTxOutputBasicParams(output, version),
+      expectedResponseLength: 0,
+  })
 
-  // Assets
-  for (const assetGroup of output.tokenBundle) {
-      yield send({
-          p1: P1.STAGE_OUTPUTS,
-          p2: P2.ASSET_GROUP,
-          data: serializeAssetGroup(assetGroup),
-          expectedResponseLength: 0,
-      })
-
-      for (const token of assetGroup.tokens) {
-          yield send({
-              p1: P1.STAGE_OUTPUTS,
-              p2: P2.TOKEN,
-              data: serializeToken(token),
-              expectedResponseLength: 0,
-          })
-      }
-  }
+  yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
 
   yield send({
       p1: P1.STAGE_OUTPUTS,
@@ -117,9 +101,37 @@ function* signTx_addOutput(
   })
 }
 
+export type SerializeTokenAmountFn<T> = (val: T) => Buffer
+
+function* signTx_addTokenBundle<T>(tokenBundle: ParsedAssetGroup<T>[], p1: number, serializeTokenAmountFn: SerializeTokenAmountFn<T>) {
+    const enum P2 {
+        ASSET_GROUP = 0x31,
+        TOKEN = 0x32,
+    }
+
+    // Assets
+    for (const assetGroup of tokenBundle) {
+        yield send({
+            p1: p1,
+            p2: P2.ASSET_GROUP,
+            data: serializeAssetGroup(assetGroup),
+            expectedResponseLength: 0,
+        })
+
+        for (const token of assetGroup.tokens) {
+            yield send({
+                p1: p1,
+                p2: P2.TOKEN,
+                data: serializeToken(token, serializeTokenAmountFn),
+                expectedResponseLength: 0,
+            })
+        }
+    }
+}
+
 function* signTx_addCertificate(
-    version: Version,
     certificate: ParsedCertificate,
+    version: Version,
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
@@ -127,7 +139,7 @@ function* signTx_addCertificate(
   yield send({
       p1: P1.STAGE_CERTIFICATES,
       p2: P2.UNUSED,
-      data: serializeTxCertificate(certificate),
+      data: serializeTxCertificate(certificate, version),
       expectedResponseLength: 0,
   })
 
@@ -136,6 +148,7 @@ function* signTx_addCertificate(
       if (getCompatibility(version).supportsPoolRegistrationAsOperator) {
           yield* signTx_addStakePoolRegistrationCertificate(certificate)
       } else {
+          // TODO this should be dropped after verification of witness path against owner path is implemented
           yield* signTx_addStakePoolRegistrationCertificateLegacy(certificate)
       }
   }
@@ -282,16 +295,16 @@ function* signTx_addStakePoolRegistrationCertificateLegacy(
 }
 
 function* signTx_addWithdrawal(
-    withdrawal: ParsedWithdrawal
+    withdrawal: ParsedWithdrawal,
+    version: Version,
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
   }
-
   yield send({
       p1: P1.STAGE_WITHDRAWALS,
       p2: P2.UNUSED,
-      data: serializeTxWithdrawal(withdrawal),
+      data: serializeTxWithdrawal(withdrawal, version),
       expectedResponseLength: 0,
   })
 }
@@ -325,7 +338,8 @@ function* signTx_setTtl(
 }
 
 function* signTx_setAuxiliaryData(
-    auxiliaryData: ParsedTxAuxiliaryData
+    auxiliaryData: ParsedTxAuxiliaryData,
+    version: Version,
 ): Interaction<TxAuxiliaryDataSupplement | null> {
   const enum P2 {
     UNUSED = 0x00,
@@ -373,7 +387,7 @@ function* signTx_setAuxiliaryData(
     yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.VOTING_REWARDS_ADDRESS,
-        data: serializeCatalystRegistrationRewardsDestination(params.rewardsDestination),
+        data: serializeCatalystRegistrationRewardsDestination(params.rewardsDestination, version),
         expectedResponseLength: 0,
     })
 
@@ -433,6 +447,33 @@ function* signTx_setValidityIntervalStart(
   })
 }
 
+function* signTx_setMint(
+    mint: Array<ParsedAssetGroup<Int64_str>>
+): Interaction<void> {
+    const enum P2 {
+        BASIC_DATA = 0x30,
+        CONFIRM = 0x33,
+    }
+
+    // Basic data
+    yield send({
+        p1: P1.STAGE_MINT,
+        p2: P2.BASIC_DATA,
+        data: serializeMintBasicParams(mint),
+        expectedResponseLength: 0,
+    })
+
+    yield* signTx_addTokenBundle(mint, P1.STAGE_MINT, int64_to_buf)
+
+    yield send({
+        p1: P1.STAGE_MINT,
+        p2: P2.CONFIRM,
+        data: Buffer.alloc(0),
+        expectedResponseLength: 0,
+    })
+}
+
+
 function* signTx_awaitConfirm(
 ): Interaction<{ txHashHex: string; }> {
   const enum P2 {
@@ -476,16 +517,10 @@ function* signTx_getWitness(
 function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
     const { tx } = request
   
-    const witnessPaths: Record<string, ValidBIP32Path> = {}
-    // eslint-disable-next-line no-inner-declarations
-    function _insert(path: ValidBIP32Path) {
-        const pathKey = JSON.stringify(path)
-        witnessPaths[pathKey] = path
-    }
-
+    const witnessPaths: ValidBIP32Path[] = []
     for (const input of tx.inputs) {
         if (input.path != null) {
-            _insert(input.path)
+            witnessPaths.push(input.path)
         }
     }
 
@@ -494,22 +529,28 @@ function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
             const deviceOwnedPoolOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED)
             if (deviceOwnedPoolOwner != null) {
                 assert(deviceOwnedPoolOwner.type === PoolOwnerType.DEVICE_OWNED, "bad witness owner type")
-                _insert(deviceOwnedPoolOwner.path)
+                witnessPaths.push(deviceOwnedPoolOwner.path)
             }
 
             if (cert.pool.poolKey.type === PoolKeyType.DEVICE_OWNED) {
-                _insert(cert.pool.poolKey.path)
+                witnessPaths.push(cert.pool.poolKey.path)
             }
+        } else if (cert.type === CertificateType.STAKE_POOL_RETIREMENT) {
+            witnessPaths.push(cert.path)
         } else {
-            _insert(cert.path)
+            if (cert.stakeCredential.type == StakeCredentialType.KEY_PATH) {
+                witnessPaths.push(cert.stakeCredential.path)
+            }
         }
     }
   
     for (const withdrawal of tx.withdrawals) {
-        _insert(withdrawal.path)
+        if (withdrawal.stakeCredential.type == StakeCredentialType.KEY_PATH) {
+            witnessPaths.push(withdrawal.stakeCredential.path)
+        }
     }
 
-    return Object.values(witnessPaths)
+    return witnessPaths
 }
 
 function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
@@ -528,12 +569,60 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Pool registration as operator not supported by Ledger app version ${version}.`)
     }
 
+    
     const certificates = request?.tx?.certificates
     const hasPoolRetirement = certificates && certificates.some(c => c.type === CertificateType.STAKE_POOL_RETIREMENT)
-
+            
     if (hasPoolRetirement && !getCompatibility(version).supportsPoolRetirement) {
         throw new DeviceVersionUnsupported(`Pool retirement certificate not supported by Ledger app version ${version}.`)
     }
+    
+    if (request?.tx?.mint && !getCompatibility(version).supportsMint) {
+        throw new DeviceVersionUnsupported(`Mint not supported by Ledger app version ${version}.`)
+    }
+
+    if (!getCompatibility(version).supportsScriptTransaction) {
+        {
+            const scriptAddressTypes = [
+                AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
+                AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
+                AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
+                AddressType.ENTERPRISE_SCRIPT,
+                AddressType.POINTER_SCRIPT,
+                AddressType.REWARD_SCRIPT,
+            ]
+            const hasScripthashOutputs = request?.tx?.outputs && request.tx.outputs.some(o =>
+                o.destination.type == TxOutputDestinationType.DEVICE_OWNED &&
+                scriptAddressTypes.includes(o.destination.addressParams.type))
+            if (hasScripthashOutputs) {
+                throw new DeviceVersionUnsupported(`Scripthash based address not supported by Ledger app version ${version}.`)
+            }
+        }
+        {
+            const hasScripthashStakeCredentials = certificates && certificates.some(c =>
+                (c.type === CertificateType.STAKE_DELEGATION ||
+                c.type === CertificateType.STAKE_DEREGISTRATION ||
+                c.type === CertificateType.STAKE_REGISTRATION) &&
+                c.stakeCredential.type === StakeCredentialType.SCRIPT_HASH)
+            if (hasScripthashStakeCredentials) {
+                throw new DeviceVersionUnsupported(`Scripthash based certificate not supported by Ledger app version ${version}.`)
+            }
+        }
+        {
+            const withdrawals = request?.tx?.withdrawals
+            const hasScripthashWithdrawals = withdrawals && withdrawals.some(w => w.stakeCredential.type == StakeCredentialType.SCRIPT_HASH)
+            if (hasScripthashWithdrawals) {
+                throw new DeviceVersionUnsupported(`Scripthash based withdrawal not supported by Ledger app version ${version}.`)
+            }
+        }
+    }
+}
+
+// general name, because it should work with any type if generalized
+function uniquify(witnessPaths: ValidBIP32Path[]): ValidBIP32Path[] {
+    const uniquifier: Record<string, ValidBIP32Path> = {}
+    witnessPaths.forEach(p => uniquifier[JSON.stringify(p)] = p)
+    return Object.values(uniquifier)
 }
 
 export function* signTransaction(version: Version, request: ParsedSigningRequest): Interaction<SignedTransactionData> {
@@ -542,17 +631,22 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
 
     const isCatalystRegistrationSupported = getCompatibility(version).supportsCatalystRegistration
 
-    const witnessPaths = generateWitnessPaths(request)
-    const { tx, signingMode } = request
+    const { tx, signingMode, additionalWitnessPaths } = request
+    let witnessPaths = additionalWitnessPaths
+    if (signingMode != TransactionSigningMode.SCRIPT_TRANSACTION) {
+        witnessPaths = witnessPaths.concat(generateWitnessPaths(request))
+    }
+    witnessPaths = uniquify(witnessPaths)
+
     // init
     yield* signTx_init(
-        tx, signingMode, witnessPaths,
+        tx, signingMode, witnessPaths, version
     )
 
     // auxiliary data
     let auxiliaryDataSupplement = null
     if (isCatalystRegistrationSupported && tx.auxiliaryData != null) {
-        auxiliaryDataSupplement = yield* signTx_setAuxiliaryData(tx.auxiliaryData)
+        auxiliaryDataSupplement = yield* signTx_setAuxiliaryData(tx.auxiliaryData, version)
     }
 
     // inputs
@@ -562,7 +656,7 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
 
     // outputs
     for (const output of tx.outputs) {
-        yield* signTx_addOutput(output)
+        yield* signTx_addOutput(output, version)
     }
 
     // fee
@@ -575,12 +669,12 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
 
     // certificates
     for (const certificate of tx.certificates) {
-        yield* signTx_addCertificate(version, certificate)
+        yield* signTx_addCertificate(certificate, version)
     }
 
     // withdrawals
     for (const withdrawal of tx.withdrawals) {
-        yield* signTx_addWithdrawal(withdrawal)
+        yield* signTx_addWithdrawal(withdrawal, version)
     }
 
     // auxiliary data before Ledger app version 2.3.x
@@ -591,6 +685,11 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     // validity start
     if (tx.validityIntervalStart != null) {
         yield* signTx_setValidityIntervalStart(tx.validityIntervalStart)
+    }
+
+    // mint
+    if (tx.mint != null) {
+        yield* signTx_setMint(tx.mint)
     }
 
     // confirm

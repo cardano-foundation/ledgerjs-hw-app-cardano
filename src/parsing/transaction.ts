@@ -1,6 +1,7 @@
 import { InvalidData } from "../errors"
 import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal"
+import { StakeCredentialType } from "../types/internal"
 import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal"
 import type {
     AssetGroup,
@@ -23,8 +24,8 @@ import {
     TxOutputDestinationType,
 } from "../types/public"
 import { unreachable } from "../utils/assert"
-import { isArray, parseBIP32Path, validate } from "../utils/parse"
-import { parseHexString, parseHexStringOfLength, parseUint32_t, parseUint64_str } from "../utils/parse"
+import { isArray, parseBIP32Path, parseStakeCredential,validate } from "../utils/parse"
+import { parseHexString, parseHexStringOfLength, parseInt64_str, parseUint32_t, parseUint64_str } from "../utils/parse"
 import { parseAddress } from "./address"
 import { parseCertificate } from "./certificate"
 import { ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX } from "./constants"
@@ -40,31 +41,35 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
 }
 
 
-function parseToken(token: Token): ParsedToken {
-    const assetNameHex = parseHexString(token.assetNameHex, InvalidDataReason.OUTPUT_INVALID_ASSET_NAME)
+type ParseTokenAmountFn<T> = (val: unknown, constraints: { min?: string | undefined; max?: string | undefined; },
+                              errMsg: InvalidDataReason) => T
+
+function parseToken<T>(token: Token, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedToken<T> {
+    const assetNameHex = parseHexString(token.assetNameHex, InvalidDataReason.MULTIASSET_INVALID_ASSET_NAME)
     validate(
         token.assetNameHex.length <= ASSET_NAME_LENGTH_MAX * 2,
-        InvalidDataReason.OUTPUT_INVALID_ASSET_NAME
+        InvalidDataReason.MULTIASSET_INVALID_ASSET_NAME
     )
 
-    const amount = parseUint64_str(token.amount, {}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
+    const amount = parseTokenAmountFn(token.amount, {}, InvalidDataReason.MULTIASSET_INVALID_TOKEN_AMOUNT)
     return {
         assetNameHex,
         amount,
     }
 }
 
-function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
-    validate(isArray(assetGroup.tokens), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_NOT_ARRAY)
-    validate(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_TOO_LARGE)
+function parseAssetGroup<T>(assetGroup: AssetGroup, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedAssetGroup<T> {
+    validate(isArray(assetGroup.tokens), InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_ARRAY)
+    validate(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_TOO_LARGE)
+    validate(assetGroup.tokens.length > 0, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_EMPTY)
 
     const parsedAssetGroup = {
-        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, InvalidDataReason.OUTPUT_INVALID_POLICY_NAME),
-        tokens: assetGroup.tokens.map(t => parseToken(t)),
+        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, InvalidDataReason.MULTIASSET_INVALID_POLICY_NAME),
+        tokens: assetGroup.tokens.map(t => parseToken(t, parseTokenAmountFn)),
     }
 
     const assetNamesHex = parsedAssetGroup.tokens.map(t => t.assetNameHex)
-    validate(assetNamesHex.length == new Set(assetNamesHex).size, InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_NOT_UNIQUE)
+    validate(assetNamesHex.length == new Set(assetNamesHex).size, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE)
 
     // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
     // const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
@@ -76,12 +81,14 @@ function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     return parsedAssetGroup
 }
 
-
-function parseTokenBundle(tokenBundle: AssetGroup[]): ParsedAssetGroup[] {
-    const parsedTokenBundle = tokenBundle.map(ag => parseAssetGroup(ag))
+function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed: boolean, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedAssetGroup<T>[] {
+    validate(isArray(tokenBundle), InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY)
+    validate(tokenBundle.length <= ASSET_GROUPS_MAX, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_TOO_LARGE)
+    validate(emptyTokenBundleAllowed || tokenBundle.length > 0, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_EMPTY)
+    const parsedTokenBundle = tokenBundle.map(ag => parseAssetGroup(ag, parseTokenAmountFn))
 
     const policyIds = parsedTokenBundle.map(ag => ag.policyIdHex)
-    validate(policyIds.length == new Set(policyIds).size, InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE)
+    validate(policyIds.length == new Set(policyIds).size, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE)
 
     // enforcing of policies order is removed for now and will be added back after the ordering is properly defined by a CIP
     // const sortedPolicyIds = [...policyIds].sort()
@@ -126,6 +133,11 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseUint64_str(tx.validityIntervalStart, {}, InvalidDataReason.VALIDITY_INTERVAL_START_INVALID)
 
+    // mint instructions
+    const mint = tx.mint == null
+        ? null
+        : parseTokenBundle(tx.mint, false, parseInt64_str)
+
     return {
         network,
         inputs,
@@ -136,6 +148,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         withdrawals,
         certificates,
         fee,
+        mint,
     }
 }
 
@@ -152,7 +165,7 @@ function parseTxInput(input: TxInput): ParsedInput {
 function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     return {
         amount: parseUint64_str(params.amount, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT),
-        path: parseBIP32Path(params.path, InvalidDataReason.WITHDRAWAL_INVALID_PATH),
+        stakeCredential: parseStakeCredential(params.stakeCredential, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL),
     }
 }
 
@@ -189,9 +202,7 @@ function parseTxOutput(
 ): ParsedOutput {
     const amount = parseUint64_str(output.amount, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
 
-    validate(isArray(output.tokenBundle ?? []), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_ARRAY)
-    validate((output.tokenBundle ?? []).length <= ASSET_GROUPS_MAX, InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE)
-    const tokenBundle = parseTokenBundle(output.tokenBundle ?? [])
+    const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
 
     const destination = parseTxDestination(network, output.destination)
     return {
@@ -206,6 +217,7 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
     case TransactionSigningMode.ORDINARY_TRANSACTION:
     case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
     case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+    case TransactionSigningMode.SCRIPT_TRANSACTION:
         return mode
     default:
         throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
@@ -215,13 +227,73 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
 export function parseSignTransactionRequest(request: SignTransactionRequest): ParsedSigningRequest {
     const tx = parseTransaction(request.tx)
     const signingMode = parseSigningMode(request.signingMode)
+    const additionalWitnessPaths = request.additionalWitnessPaths.map(path => parseBIP32Path(path, InvalidDataReason.INVALID_PATH))
 
     // Additional restrictions based on signing mode
     switch (signingMode) {
+
     case TransactionSigningMode.ORDINARY_TRANSACTION: {
+        // pool registrations have separate signing modes
         validate(
             tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_REGISTRATION),
             InvalidDataReason.SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED,
+        )
+        // certificate stake credentials given by paths
+        validate(
+            tx.certificates.every(certificate => {
+                switch (certificate.type) {
+                case CertificateType.STAKE_REGISTRATION:
+                case CertificateType.STAKE_DEREGISTRATION:
+                case CertificateType.STAKE_DELEGATION:
+                    return certificate.stakeCredential.type === StakeCredentialType.KEY_PATH
+                default:
+                    return true
+                }
+            }),
+            InvalidDataReason.SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH
+        )
+        // withdrawals as paths
+        validate(
+            tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH),
+            InvalidDataReason.SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH,
+        )
+        break
+    }
+
+    case TransactionSigningMode.SCRIPT_TRANSACTION: {
+        // pool registrations have separate signing modes
+        validate(
+            tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_REGISTRATION),
+            InvalidDataReason.SIGN_MODE_SCRIPT__POOL_REGISTRATION_NOT_ALLOWED,
+        )
+        // pool retirement is not allowed
+        validate(
+            tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_RETIREMENT),
+            InvalidDataReason.SIGN_MODE_SCRIPT__POOL_RETIREMENT_NOT_ALLOWED,
+        )
+        // certificate stake credentials given by scripts
+        validate(
+            tx.certificates.every(certificate => {
+                switch (certificate.type) {
+                case CertificateType.STAKE_REGISTRATION:
+                case CertificateType.STAKE_DEREGISTRATION:
+                case CertificateType.STAKE_DELEGATION:
+                    return certificate.stakeCredential.type === StakeCredentialType.SCRIPT_HASH
+                default:
+                    return true
+                }
+            }),
+            InvalidDataReason.SIGN_MODE_SCRIPT__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT,
+        )
+        // withdrawals as scripts
+        validate(
+            tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.SCRIPT_HASH),
+            InvalidDataReason.SIGN_MODE_SCRIPT__WITHDRAWAL_ONLY_AS_SCRIPT,
+        )
+        // only third-party outputs
+        validate(
+            tx.outputs.every(output => output.destination.type === TxOutputDestinationType.THIRD_PARTY),
+            InvalidDataReason.SIGN_MODE_SCRIPT__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
         )
         break
     }
@@ -264,8 +336,8 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         break
     }
     case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR: {
-        // Most of these restrictions are necessary in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER, 
-        // and since pool owner signatures will be added to the same tx body, we need the restrictions here, too 
+        // Most of these restrictions are necessary in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        // and since pool owner signatures will be added to the same tx body, we need the restrictions here, too
         // (we don't want to let operator sign a tx that pool owners will not be able to sign).
 
         validate(
@@ -299,5 +371,5 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         unreachable(signingMode)
     }
 
-    return { tx, signingMode }
+    return { tx, signingMode, additionalWitnessPaths: additionalWitnessPaths }
 }

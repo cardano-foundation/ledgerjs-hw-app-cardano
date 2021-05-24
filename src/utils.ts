@@ -105,7 +105,8 @@ function getShelleyAddressPrefix(data: Buffer): string {
 
     const addressType = (data[0] & 0b11110000) >> 4
     switch (addressType) {
-    case AddressType.REWARD:
+    case AddressType.REWARD_KEY:
+    case AddressType.REWARD_SCRIPT:
         result = "stake"
         break
     default:

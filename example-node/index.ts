@@ -1,6 +1,6 @@
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 
-import type { Certificate, TxInput, TxOutput, Withdrawal } from "../src/Ada";
+import { Certificate, StakeCredentialParamsType, TxInput, TxOutput, Withdrawal } from "../src/Ada";
 import { Ada, AddressType, CertificateType, HARDENED, Networks, TransactionSigningMode, TxOutputDestinationType } from "../src/Ada";
 import { base58_encode, bech32_encodeAddress, str_to_path } from "../src/utils/address";
 
@@ -59,7 +59,7 @@ const deriveAddress = async (appAda: Ada) => {
   const responseBase = await appAda.deriveAddress({
     network: Networks.Testnet,
     address: {
-      type: AddressType.BASE,
+      type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
         spendingPath: str_to_path("1852'/1815'/0'/0/0"),
         stakingPath: str_to_path("1852'/1815'/0'/2/0")
@@ -102,7 +102,7 @@ const showAddress = async (appAda: Ada) => {
   const responseBase = await appAda.showAddress({
     network: Networks.Testnet,
     address: {
-      type: AddressType.BASE,
+      type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
         spendingPath: str_to_path("1852'/1815'/0'/0/0"),
         stakingPath: str_to_path("1852'/1815'/0'/2/0")
@@ -181,7 +181,7 @@ const signTransaction = async (appAda: Ada) => {
       destination: {
         type: TxOutputDestinationType.DEVICE_OWNED,
         params: {
-          type: AddressType.BASE,
+          type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
           params: {
             spendingPath: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 0, 0],
             stakingPath: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
@@ -196,12 +196,18 @@ const signTransaction = async (appAda: Ada) => {
     {
       type: CertificateType.STAKE_REGISTRATION,
       params: {
-        path: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
+        stakeCredential: {
+          type: StakeCredentialParamsType.KEY_PATH,
+          keyPath: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
+        },
       }
     }, {
       type: CertificateType.STAKE_DELEGATION,
       params: {
-        path: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
+        stakeCredential: {
+          type: StakeCredentialParamsType.KEY_PATH,
+          keyPath: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
+        },
         poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
       }
     }
@@ -209,7 +215,10 @@ const signTransaction = async (appAda: Ada) => {
 
   const withdrawals: Withdrawal[] = [
     {
-      path: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
+      stakeCredential: {
+        type: StakeCredentialParamsType.KEY_PATH,
+        keyPath: [(1852 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 2, 0],
+      },
       amount: "1000",
     },
 
@@ -227,7 +236,8 @@ const signTransaction = async (appAda: Ada) => {
         fee: 42,
         ttl: 10,
         validityIntervalStart: 7,
-      }
+      },
+      additionalWitnessPaths: [],
     })
   );
   /*

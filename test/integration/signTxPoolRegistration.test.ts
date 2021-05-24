@@ -34,7 +34,11 @@ describe("signTxPoolRegistrationOKOwner", async () => {
     const test = (testcases: Testcase[], signingMode: TransactionSigningMode) => {
         for (const { testname, tx, result: expectedResult } of testcases) {
             it(testname, async () => {
-                const response = await ada.signTransaction({ tx, signingMode })
+                const response = await ada.signTransaction({
+                    tx,
+                    signingMode,
+                    additionalWitnessPaths: [],
+                })
                 expect(response).to.deep.equal(expectedResult)
             })
         }
@@ -57,7 +61,11 @@ describe("signTxPoolRegistrationOKOperator", async () => {
     const test = (testcases: Testcase[], signingMode: TransactionSigningMode) => {
         for (const { testname, tx, result: expectedResult } of testcases) {
             it(testname, async () => {
-                const response = await ada.signTransaction({ tx, signingMode })
+                const response = await ada.signTransaction({
+                    tx,
+                    signingMode,
+                    additionalWitnessPaths: [],
+                })
                 expect(response).to.deep.equal(expectedResult)
             })
         }
@@ -93,7 +101,11 @@ describe("signTxPoolRegistrationRejectOwner", async () => {
                 ...txBase,
                 certificates: [poolRegistrationCertificate],
             }
-            const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER })
+            const promise = ada.signTransaction({
+                tx,
+                signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+                additionalWitnessPaths: [],
+            })
 
             await expect(promise).to.be.rejectedWith(expectedReject)
         })
@@ -113,7 +125,11 @@ describe("signTxPoolRegistrationRejectOwner", async () => {
                 ...txBase,
                 certificates: [cert],
             }
-            const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER })
+            const promise = ada.signTransaction({
+                tx,
+                signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+                additionalWitnessPaths: [],
+            })
             await expect(promise).to.be.rejectedWith(rejectReason)
         })
     }
@@ -133,7 +149,11 @@ describe("signTxPoolRegistrationRejectOwner", async () => {
                     ...txBase,
                     certificates: [cert],
                 }
-                const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER })
+                const promise = ada.signTransaction({
+                    tx,
+                    signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+                    additionalWitnessPaths: [],
+                })
                 await expect(promise).to.be.rejectedWith(rejectReason)
             })
         }
@@ -145,7 +165,11 @@ describe("signTxPoolRegistrationRejectOwner", async () => {
             ...txBase,
             certificates: [certificates.poolRegistrationWrongMargin],
         }
-        const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER })
+        const promise = ada.signTransaction({
+            tx,
+            signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+            additionalWitnessPaths: [],
+        })
 
         await expect(promise).to.be.rejectedWith(InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN)
     })
@@ -158,7 +182,11 @@ describe("signTxPoolRegistrationRejectOwner", async () => {
                 certificates.stakeDelegation,
             ],
         }
-        const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER })
+        const promise = ada.signTransaction({
+            tx,
+            signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+            additionalWitnessPaths: [],
+        })
 
         await expect(promise).to.be.rejectedWith(InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED)
     })
@@ -169,7 +197,11 @@ describe("signTxPoolRegistrationRejectOwner", async () => {
             certificates: [certificates.poolRegistrationDefault],
             withdrawals: [withdrawals.withdrawal0],
         }
-        const promise = ada.signTransaction({ tx, signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER })
+        const promise = ada.signTransaction({
+            tx,
+            signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+            additionalWitnessPaths: [],
+        })
 
         await expect(promise).to.be.rejectedWith(InvalidDataReason.SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED)
     })

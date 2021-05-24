@@ -23,6 +23,8 @@ describe("getVersion", async () => {
             isCompatible: true,
             recommendedVersion: null,
             supportsMary: true,
+            supportsMint: true,
+            supportsScriptTransaction: true,
             supportsCatalystRegistration: true,
             supportsZeroTtl: true,
             supportsPoolRegistrationAsOperator: true,

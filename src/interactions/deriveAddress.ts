@@ -12,7 +12,7 @@ const send = (params: {
 }): SendParams => ({ ins: INS.DERIVE_ADDRESS, ...params })
 
 export function* deriveAddress(
-    _version: Version,
+    version: Version,
     addressParams: ParsedAddressParams,
 ): Interaction<DerivedAddress> {
     const P1_RETURN = 0x01
@@ -21,7 +21,7 @@ export function* deriveAddress(
     const response = yield send({
         p1: P1_RETURN,
         p2: P2_UNUSED,
-        data: serializeAddressParams(addressParams),
+        data: serializeAddressParams(addressParams, version),
     })
 
     return {

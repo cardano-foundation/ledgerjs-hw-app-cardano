@@ -1,8 +1,13 @@
 import { InvalidData } from "../errors"
 import type { InvalidDataReason } from "../errors/index"
-import type { _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "../types/internal"
+import type { _Int64_bigint, _Int64_num, _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Int64_str, ParsedStakeCredential,Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "../types/internal"
+import { SCRIPT_HASH_LENGTH,StakeCredentialType } from "../types/internal"
+import type { StakeCredentialParams } from "../types/public"
+import { StakeCredentialParamsType } from "../types/public"
 
 export const MAX_UINT_64_STR = "18446744073709551615"
+export const MIN_INT_64_STR = "-9223372036854775808"
+export const MAX_INT_64_STR = "9223372036854775807"
 
 export const isString = (data: unknown): data is string =>
     typeof data === "string"
@@ -64,6 +69,40 @@ export const isUintStr = (data: unknown, constraints: { min?: string, max?: stri
     )
 }
 
+
+export const isInt64str = (data: unknown): data is Int64_str =>
+    isIntStr(data, {})
+
+export const isInt64Number = (data: unknown): data is _Int64_num =>
+    isInteger(data) && data >= Number.MIN_SAFE_INTEGER && data <= Number.MAX_SAFE_INTEGER
+
+export const isInt64Bigint = (data: unknown): data is _Int64_bigint =>
+    (typeof data === 'bigint') && isInt64str(data.toString())
+
+export const isIntStr = (data: unknown, constraints: { min?: string, max?: string }): data is string => {
+    const min = constraints.min ?? MIN_INT_64_STR
+    const max = constraints.max ?? MAX_INT_64_STR
+
+    let hasValidFormat = isString(data)
+        // check format via RegExp
+        && /^-?[0-9]*$/.test(data)
+        // Length checks
+        && data.length > 0
+
+    let isValidNegativeNumber = isString(data) && data.startsWith("-") &&
+        // leading zeros
+        (data.length === 2 || data[1] !== "0") &&
+        // if number is negative: greater or equal than min value (Note: this is string comparison!)
+        (data.length < min.length || data <= min)
+    let isValidPositiveNumber = isString(data) && !data.startsWith("-") &&
+        // leading zeros
+        (data.length === 1 || data[0] !== "0") &&
+        // if number is positive: less or equal than max value (Note: this is string comparison!)
+        (data.length < max.length || data <= max)
+
+    return hasValidFormat && (isValidNegativeNumber || isValidPositiveNumber)
+}
+
 export function validate(cond: boolean, errMsg: InvalidDataReason): asserts cond {
     if (!cond) throw new InvalidData(errMsg)
 }
@@ -87,6 +126,23 @@ export function parseHexString(str: unknown, errMsg: InvalidDataReason): HexStri
 export function parseHexStringOfLength<L extends number>(str: unknown, length: L, errMsg: InvalidDataReason): FixlenHexString<L> {
     validate(isHexStringOfLength(str, length), errMsg)
     return str
+}
+
+
+export function parseInt64_str(val: unknown, constraints: { min?: string, max?: string}, errMsg: InvalidDataReason): Int64_str {
+    switch (typeof val) {
+    case 'string':
+        validate(isInt64str(val) && isIntStr(val, constraints), errMsg)
+        return val
+    case 'number':
+        validate(isInt64Number(val) && isIntStr(val.toString(), constraints), errMsg)
+        return val.toString() as Int64_str
+    case 'bigint':
+        validate(isInt64Bigint(val) && isIntStr(val.toString(), constraints), errMsg)
+        return val.toString() as Int64_str
+    default:
+        validate(false, errMsg)
+    }
 }
 
 export function parseUint64_str(val: unknown, constraints: { min?: string, max?: string }, errMsg: InvalidDataReason): Uint64_str {
@@ -124,6 +180,22 @@ export function parseBIP32Path(value: unknown, errMsg: InvalidDataReason): Valid
     validate(isValidPath(value), errMsg)
     return value
 }
+
+export function parseStakeCredential(stakeCredential: StakeCredentialParams, errMsg: InvalidDataReason): ParsedStakeCredential {
+    if (stakeCredential.type == StakeCredentialParamsType.KEY_PATH) {
+        return {
+            type: StakeCredentialType.KEY_PATH,
+            path: parseBIP32Path(stakeCredential.keyPath, errMsg),
+        }
+    } else {
+        return {
+            type: StakeCredentialType.SCRIPT_HASH,
+            scriptHash: parseHexStringOfLength(stakeCredential.scriptHash, SCRIPT_HASH_LENGTH, errMsg),
+        }
+    }
+}
+
+
 
 
 export function parseIntFromStr(str: string, errMsg: InvalidDataReason): number {

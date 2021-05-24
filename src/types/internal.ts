@@ -7,12 +7,14 @@ export type HexString = string & { __type: 'hex' }
 
 export type _Uint64_num = number & { __type: 'uint64_t' }
 export type _Uint64_bigint = bigint & { __type: 'uint64_t' }
-
-export type ValidBIP32Path = Array<Uint32_t> & { __type: 'bip32_path' }
 export type Uint64_str = string & { __type: 'uint64_t' }
 export type Uint32_t = number & { __type: 'uint32_t' }
 export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
+export type _Int64_num = number & { __type: 'int64_t' }
+export type _Int64_bigint = bigint & { __type: 'int64_t' }
+export type Int64_str = string & { __type: 'int64_t' }
+export type ValidBIP32Path = Array<Uint32_t> & { __type: 'bip32_path' }
 
 // Reexport blockchain spec
 export { AddressType, CertificateType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType }
@@ -20,6 +22,7 @@ export { Version, DeviceCompatibility, NativeScriptHashDisplayFormat } from './p
 // Our types
 export const EXTENDED_PUBLIC_KEY_LENGTH = 64
 export const KEY_HASH_LENGTH = 28
+export const SCRIPT_HASH_LENGTH = 28
 export const TX_HASH_LENGTH = 32
 export const AUXILIARY_DATA_HASH_LENGTH = 32
 export const KES_PUBLIC_KEY_LENGTH = 32
@@ -27,15 +30,29 @@ export const VRF_KEY_HASH_LENGTH = 32
 export const REWARD_ACCOUNT_HEX_LENGTH = 29
 export const ED25519_SIGNATURE_LENGTH = 64
 
+export const enum StakeCredentialType {
+    KEY_PATH = 0,
+    SCRIPT_HASH = 1,
+}
+
+export type ParsedStakeCredential = 
+    {
+        type: StakeCredentialType.KEY_PATH,
+        path: ValidBIP32Path,
+    } | {
+        type: StakeCredentialType.SCRIPT_HASH,
+        scriptHash: FixlenHexString<typeof SCRIPT_HASH_LENGTH>,
+    }
+
 export type ParsedCertificate = {
     type: CertificateType.STAKE_REGISTRATION
-    path: ValidBIP32Path
+    stakeCredential: ParsedStakeCredential
 } | {
     type: CertificateType.STAKE_DEREGISTRATION
-    path: ValidBIP32Path
+    stakeCredential: ParsedStakeCredential
 } | {
     type: CertificateType.STAKE_DELEGATION
-    path: ValidBIP32Path
+    stakeCredential: ParsedStakeCredential
     poolKeyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
 } | {
     type: CertificateType.STAKE_POOL_REGISTRATION
@@ -49,14 +66,15 @@ export type ParsedCertificate = {
 export const TOKEN_POLICY_LENGTH = 28
 
 
-export type ParsedToken = {
+// this type is used with both uint64 for outputs and int64 for minting
+export type ParsedToken<IntegerType> = {
     assetNameHex: HexString,
-    amount: Uint64_str,
+    amount: IntegerType,
 };
 
-export type ParsedAssetGroup = {
+export type ParsedAssetGroup<T> = {
     policyIdHex: FixlenHexString<typeof TOKEN_POLICY_LENGTH>,
-    tokens: Array<ParsedToken>,
+    tokens: Array<ParsedToken<T>>,
 };
 
 
@@ -95,11 +113,13 @@ export type ParsedTransaction = {
     withdrawals: ParsedWithdrawal[]
     auxiliaryData: ParsedTxAuxiliaryData | null
     validityIntervalStart: Uint64_str | null
+    mint: Array<ParsedAssetGroup<Int64_str>> | null
 }
 
 export type ParsedSigningRequest = {
     tx: ParsedTransaction
     signingMode: TransactionSigningMode
+    additionalWitnessPaths: ValidBIP32Path[]
 }
 
 
@@ -112,7 +132,7 @@ export type ParsedInput = {
 
 export type ParsedWithdrawal = {
     amount: Uint64_str
-    path: ValidBIP32Path
+    stakeCredential: ParsedStakeCredential
 }
 
 
@@ -182,12 +202,30 @@ export type ParsedPoolMetadata = {
     hashHex: FixlenHexString<32>,
 } & { __brand: 'pool_metadata' }
 
+export const enum SpendingDataSourceType {
+    NONE = "no_spending",
+    PATH = "spending_path",
+    SCRIPT_HASH = "spending_script_hash",
+}
 
-export const enum StakingChoiceType {
-    NO_STAKING = 'no_staking',
-    STAKING_KEY_PATH = 'staking_key_path',
-    STAKING_KEY_HASH = 'staking_key_hash',
+type SpendingDataSourceNone = {
+    type: SpendingDataSourceType.NONE,
+}
+type SpendingDataSourcePath = {
+    type: SpendingDataSourceType.PATH,
+    path: ValidBIP32Path,
+}
+type SpendingDataSourceScriptHash = {
+    type: SpendingDataSourceType.SCRIPT_HASH,
+    scriptHash: FixlenHexString<typeof SCRIPT_HASH_LENGTH>,
+}
+
+export const enum StakingDataSourceType {
+    NONE = 'no_staking',
+    KEY_PATH = 'staking_key_path',
+    KEY_HASH = 'staking_key_hash',
     BLOCKCHAIN_POINTER = 'blockchain_pointer',
+    SCRIPT_HASH = 'staking_script_hash',
 }
 
 type ParsedBlockchainPointer = {
@@ -196,49 +234,82 @@ type ParsedBlockchainPointer = {
     certificateIndex: Uint32_t,
 }
 
-type StakingChoiceNone = {
-    type: StakingChoiceType.NO_STAKING
+type StakingDataSourceNone = {
+    type: StakingDataSourceType.NONE
 }
-type StakingChoicePath = {
-    type: StakingChoiceType.STAKING_KEY_PATH,
+type StakingDataSourcePath = {
+    type: StakingDataSourceType.KEY_PATH,
     path: ValidBIP32Path
 }
-type StakingChoiceHash = {
-    type: StakingChoiceType.STAKING_KEY_HASH,
-    hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+type StakingDataSourceKeyHash = {
+    type: StakingDataSourceType.KEY_HASH,
+    keyHash: FixlenHexString<typeof KEY_HASH_LENGTH>
 }
-type StakingChoicePointer = {
-    type: StakingChoiceType.BLOCKCHAIN_POINTER,
+type StakingDataSourcePointer = {
+    type: StakingDataSourceType.BLOCKCHAIN_POINTER,
     pointer: ParsedBlockchainPointer
 }
+type StakingDataSourceScriptHash = {
+    type: StakingDataSourceType.SCRIPT_HASH,
+    scriptHash: FixlenHexString<typeof SCRIPT_HASH_LENGTH>
+}
 
-
-export type StakingChoice = StakingChoiceNone | StakingChoicePath | StakingChoiceHash | StakingChoicePointer
+export type SpendingDataSource = SpendingDataSourcePath | SpendingDataSourceScriptHash | SpendingDataSourceNone
+export type StakingDataSource = StakingDataSourceNone | StakingDataSourcePath | StakingDataSourceKeyHash | StakingDataSourcePointer | StakingDataSourceScriptHash
 
 export type ByronAddressParams = {
     type: AddressType.BYRON,
     protocolMagic: Uint32_t
-    spendingPath: ValidBIP32Path,
-    stakingChoice: StakingChoiceNone,
+    spendingDataSource: SpendingDataSourcePath,
+    stakingDataSource: StakingDataSourceNone,
 }
 
 export type ShelleyAddressParams = {
-    type: AddressType.BASE | AddressType.ENTERPRISE | AddressType.POINTER | AddressType.REWARD,
+    type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY |
+        AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY |
+        AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT |
+        AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT |
+        AddressType.ENTERPRISE_KEY |
+        AddressType.ENTERPRISE_SCRIPT |
+        AddressType.POINTER_KEY |
+        AddressType.POINTER_SCRIPT |
+        AddressType.REWARD_KEY |
+        AddressType.REWARD_SCRIPT,
     networkId: Uint8_t,
-    spendingPath: ValidBIP32Path
-} & ( // Extra properties
+} & (
         {
-            type: AddressType.BASE,
-            stakingChoice: StakingChoicePath | StakingChoiceHash
+            type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY |
+                AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT |
+                AddressType.ENTERPRISE_KEY |
+                AddressType.POINTER_KEY
+            spendingDataSource: SpendingDataSourcePath
         } | {
-            type: AddressType.ENTERPRISE,
-            stakingChoice: StakingChoiceNone
+            type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY |
+            AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT |
+            AddressType.ENTERPRISE_SCRIPT |
+            AddressType.POINTER_SCRIPT
+            spendingDataSource: SpendingDataSourceScriptHash
         } | {
-            type: AddressType.POINTER,
-            stakingChoice: StakingChoicePointer
+            type: AddressType.REWARD_KEY | AddressType.REWARD_SCRIPT
+            spendingDataSource: SpendingDataSourceNone
+        }
+) & (
+        {
+            type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY |
+                AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY |
+                AddressType.REWARD_KEY
+            stakingDataSource: StakingDataSourcePath | StakingDataSourceKeyHash
         } | {
-            type: AddressType.REWARD
-            stakingChoice: StakingChoiceNone // included in spending path
+            type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT |
+                AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT |
+                AddressType.REWARD_SCRIPT
+            stakingDataSource: StakingDataSourceScriptHash
+        } | {
+            type: AddressType.ENTERPRISE_KEY | AddressType.ENTERPRISE_SCRIPT
+            stakingDataSource: StakingDataSourceNone
+        } | {
+            type: AddressType.POINTER_KEY | AddressType.POINTER_SCRIPT
+            stakingDataSource: StakingDataSourcePointer
         }
     )
 
@@ -254,7 +325,7 @@ export type OutputDestination = {
 
 export type ParsedOutput = {
     amount: Uint64_str
-    tokenBundle: ParsedAssetGroup[]
+    tokenBundle: ParsedAssetGroup<Uint64_str>[]
     destination: OutputDestination
 }
 

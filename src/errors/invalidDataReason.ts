@@ -11,33 +11,38 @@ export enum InvalidDataReason {
   NETWORK_INVALID_NETWORK_ID = "invalid network id",
 
   INPUTS_NOT_ARRAY = "inputs not an array",
-
   INPUT_INVALID_TX_HASH = "invalid tx hash in an input",
   INPUT_INVALID_PATH = "invalid input path",
   INPUT_INVALID_UTXO_INDEX = "invalid input utxo index",
 
   OUTPUTS_NOT_ARRAY = "outputs not an array",
-
   OUTPUT_INVALID_AMOUNT = "invalid amount in an output",
-  OUTPUT_INVALID_POLICY_NAME = "invalid policy id in the token bundle in an output ",
-  OUTPUT_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid token bundle in an output - asset groups not an array",
-  OUTPUT_INVALID_TOKEN_BUNDLE_TOO_LARGE = "invalid token bundle in an output - too many asset groups",
-  OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING = "invalid token bundle in an output - incorrect ordering of asset groups",
-  OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE = "invalid token bundle in an output - policyIds not unique",
-  OUTPUT_INVALID_ASSET_NAME = "invalid asset name in the token bundle in an output",
-  OUTPUT_INVALID_ASSET_GROUP_NOT_ARRAY = "invalid asset group in the token bundle in an output - tokens not an array",
-  OUTPUT_INVALID_ASSET_GROUP_TOO_LARGE = "invalid asset group in the token bundle in an output - too many tokens",
-  OUTPUT_INVALID_ASSET_GROUP_ORDERING = "invalid asset group in the token bundle in an output - incorrect ordering of tokens",
-  OUTPUT_INVALID_ASSET_GROUP_NOT_UNIQUE = "invalid asset group in the token bundle in an output - token names not unique",
-
   OUTPUT_INVALID_ADDRESS = "invalid address in an output",
 
+  MULTIASSET_INVALID_POLICY_NAME = "invalid policy id in a multiasset token bundle",
+  MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid multiasset token bundle - asset groups not an array",
+  MULTIASSET_INVALID_TOKEN_BUNDLE_TOO_LARGE = "invalid multiasset token bundle - too many asset groups",
+  MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING = "invalid multiasset token bundle - incorrect ordering of asset groups",
+  MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE = "invalid multiasset token bundle - policyIds not unique",
+  MULTIASSET_INVALID_TOKEN_BUNDLE_EMPTY = "invalid multiasset token bundle - token bundle is not allowed to be empty",
+  MULTIASSET_INVALID_TOKEN_AMOUNT = "invalid token amount in an asset group in a multiasset token bundle",
+  MULTIASSET_INVALID_ASSET_NAME = "invalid asset name in an asset group in a multiasset token bundle",
+  MULTIASSET_INVALID_ASSET_GROUP_NOT_ARRAY = "invalid asset group in multiasset token bundle - tokens not an array",
+  MULTIASSET_INVALID_ASSET_GROUP_TOO_LARGE = "invalid asset group in multiasset token bundle - too many tokens",
+  MULTIASSET_INVALID_ASSET_GROUP_EMPTY = "invalid asset group in multiasset token bundle - zero tokens",
+  MULTIASSET_INVALID_ASSET_GROUP_ORDERING = "invalid asset group in multiasset token bundle - incorrect ordering of tokens",
+  MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE = "invalid asset group in multiasset token bundle - token names not unique",
+
   ADDRESS_UNKNOWN_TYPE = "unknown address type",
-  ADDRESS_INVALID_SPENDING_PATH = "invalid address spending path",
+  ADDRESS_INVALID_SPENDING_INFO = "invalid address spending information",
+  ADDRESS_INVALID_SPENDING_KEY_PATH = "invalid address spending key path",
+  ADDRESS_INVALID_SPENDING_SCRIPT_HASH = "invalid address spending script hash",
   ADDRESS_INVALID_BLOCKCHAIN_POINTER = "invalid address blockchain pointer",
   ADDRESS_INVALID_STAKING_KEY_PATH = "invalid address staking key path",
   ADDRESS_INVALID_STAKING_KEY_HASH = "invalid address staking key hash",
+  ADDRESS_INVALID_STAKING_SCRIPT_HASH = "invalid address staking script hash",
   ADDRESS_INVALID_STAKING_INFO = "Invalid staking info in an output",
+  ADDRESS_INVALID_REWARD_ADDRESS = "invalid reward address for this version of ledger",
 
   FEE_INVALID = "invalid fee",
 
@@ -46,6 +51,8 @@ export enum InvalidDataReason {
   CERTIFICATES_NOT_ARRAY = "certificates not an array",
 
   CERTIFICATE_INVALID_PATH = "one of the certificates contains an invalid path",
+  CERTIFICATE_INVALID_SCRIPT_HASH = "one of the certificates contains an invalid script hash",
+  CERTIFICATE_INVALID_STAKE_CREDENTIAL = "one of the certificates contains both a path and a scripthash or neither",
   CERTIFICATE_INVALID_POOL_KEY_HASH = "one of the certificates contains an invalid pool key hash",
   CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH =
   "superfluous pool key hash in a certificate",
@@ -110,6 +117,7 @@ export enum InvalidDataReason {
 
   WITHDRAWAL_INVALID_AMOUNT = "invalid withdrawal amount",
   WITHDRAWAL_INVALID_PATH = "invalid withdrawal path",
+  WITHDRAWAL_INVALID_STAKE_CREDENTIAL = "withdrawal stake credential contains both a path and a scripthash or neither",
 
   AUXILIARY_DATA_UNKNOWN_TYPE = "unknown auxiliary data type",
   AUXILIARY_DATA_INVALID_HASH = "invalid auxiliary data hash",
@@ -127,6 +135,21 @@ export enum InvalidDataReason {
 
   SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED =
   "pool registration is not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH =
+  "certificate stake credential must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH =
+  "withdrawal must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
+
+  SIGN_MODE_SCRIPT__POOL_REGISTRATION_NOT_ALLOWED =
+  "pool registration is not allowed in TransactionSigningMode.SCRIPT_TRANSACTION",
+  SIGN_MODE_SCRIPT__POOL_RETIREMENT_NOT_ALLOWED =
+  "pool retirement is not allowed in TransactionSigningMode.SCRIPT_TRANSACTION",
+  SIGN_MODE_SCRIPT__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
+  "outputs given by path are not allowed in TransactionSigningMode.SCRIPT_TRANSACTION",
+  SIGN_MODE_SCRIPT__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT =
+  "certificate stake credential must be given as a script hash in TransactionSigningMode.SCRIPT_TRANSACTION",
+  SIGN_MODE_SCRIPT__WITHDRAWAL_ONLY_AS_SCRIPT =
+  "withdrawal must be given as a script hash in TransactionSigningMode.SCRIPT_TRANSACTION",
 
   SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
