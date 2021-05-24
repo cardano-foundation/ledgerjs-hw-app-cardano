@@ -1,7 +1,7 @@
-import type { ParsedTransaction, Uint8_t, Uint32_t } from "../../types/internal";
-import { TransactionSigningMode } from "../../types/internal";
-import { assert } from "../../utils/assert";
-import { uint8_to_buf, uint32_to_buf } from "../../utils/serialize";
+import type { ParsedTransaction, Uint8_t, Uint32_t } from "../../types/internal"
+import { TransactionSigningMode } from "../../types/internal"
+import { assert } from "../../utils/assert"
+import { uint8_to_buf, uint32_to_buf } from "../../utils/serialize"
 
 const _serializeSigningMode = (
     mode: TransactionSigningMode
@@ -9,19 +9,19 @@ const _serializeSigningMode = (
     const value = {
         [TransactionSigningMode.ORDINARY_TRANSACTION]: 3 as Uint8_t,
         [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: 4 as Uint8_t,
-        [TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
-    }[mode];
+        [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
+    }[mode]
 
     assert(value !== undefined, 'Invalid signing mode')
 
     return uint8_to_buf(value)
-};
+}
 
 function _serializeOptionFlag(included: boolean) {
     const SignTxIncluded = {
         NO: 1 as Uint8_t,
         YES: 2 as Uint8_t,
-    };
+    }
 
     const value = included
         ? SignTxIncluded.YES
@@ -43,5 +43,5 @@ export function serializeTxInit(tx: ParsedTransaction, signingMode: TransactionS
         uint32_to_buf(tx.certificates.length as Uint32_t),
         uint32_to_buf(tx.withdrawals.length as Uint32_t),
         uint32_to_buf(numWitnesses as Uint32_t),
-    ]);
+    ])
 }

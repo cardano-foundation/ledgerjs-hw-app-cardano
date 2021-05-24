@@ -6,6 +6,7 @@ export const enum INS {
   DERIVE_ADDRESS = 0x11,
 
   SIGN_TX = 0x21,
+  SIGN_OPERATIONAL_CERTIFICATE = 0x22,
 
   RUN_TESTS = 0xf0,
 }

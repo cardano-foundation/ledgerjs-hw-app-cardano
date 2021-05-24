@@ -1,4 +1,4 @@
-import { ErrorBase } from "./errorBase";
+import { ErrorBase } from "./errorBase"
 
 /**
  * Raw error codes returned by APDU protocol. Note that this is *not* an exhaustive list.
@@ -15,7 +15,7 @@ export const DeviceStatusCodes = {
 
     // Not thrown by ledger-app-cardano itself but other apps
     ERR_CLA_NOT_SUPPORTED: 0x6e00 as const,
-};
+}
 
 // Human-readable version of errors reported by APDU protocol
 const DeviceStatusMessages: Record<number, string> = {
@@ -28,17 +28,17 @@ const DeviceStatusMessages: Record<number, string> = {
     [DeviceStatusCodes.ERR_DEVICE_LOCKED]: "Device is locked",
     [DeviceStatusCodes.ERR_CLA_NOT_SUPPORTED]: "Wrong Ledger app",
     [DeviceStatusCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: "Unsupported address type",
-};
+}
 
 const GH_DEVICE_ERRORS_LINK =
-    "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h";
+    "https://github.com/cardano-foundation/ledger-app-cardano/blob/master/src/errors.h"
 
 const getDeviceErrorDescription = (statusCode: number) => {
-    const statusCodeHex = `0x${statusCode.toString(16)}`;
-    const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_DEVICE_ERRORS_LINK}`;
+    const statusCodeHex = `0x${statusCode.toString(16)}`
+    const defaultMsg = `General error ${statusCodeHex}. Please consult ${GH_DEVICE_ERRORS_LINK}`
 
-    return DeviceStatusMessages[statusCode] ?? defaultMsg;
-};
+    return DeviceStatusMessages[statusCode] ?? defaultMsg
+}
 
 /**
  * Error wrapping APDU device error codes with human-readable message.

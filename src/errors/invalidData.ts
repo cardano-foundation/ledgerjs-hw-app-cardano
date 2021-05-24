@@ -1,5 +1,5 @@
-import { ErrorBase } from "./errorBase";
-import type { InvalidDataReason } from "./invalidDataReason";
+import { ErrorBase } from "./errorBase"
+import type { InvalidDataReason } from "./invalidDataReason"
 
 /**
  * Request data is invalid, caller should check what is feeding to us
