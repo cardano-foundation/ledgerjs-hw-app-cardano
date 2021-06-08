@@ -61,7 +61,7 @@
   },
   "homepage": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano",
   "scripts": {
-    "prepare": "cd node_modules/typedoc && yarn install && yarn build",
+    "prepare": "cd node_modules/typedoc && npm install && npm run build",
     "prepack": "yarn build:flowtypes && yarn flow",
     "lint": "yarn eslint . --max-warnings=0",
     "clean": "rm -rf dist/",
