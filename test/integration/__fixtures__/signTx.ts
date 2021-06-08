@@ -175,10 +175,10 @@ export const outputs: Record<
   | 'multiassetManyTokens'
   | 'multiassetChange'
   | 'multiassetBigNumber'
-  | 'multiassetInvalidAssetGroupOrdering'
+//   | 'multiassetInvalidAssetGroupOrdering'
   | 'multiassetAssetGroupsNotUnique'
-  | 'multiassetInvalidTokenOrderingSameLength'
-  | 'multiassetInvalidTokenOrderingDifferentLengths'
+//   | 'multiassetInvalidTokenOrderingSameLength'
+//   | 'multiassetInvalidTokenOrderingDifferentLengths'
   | 'multiassetTokensNotUnique'
   , TxOutput
 > = {
@@ -307,30 +307,31 @@ export const outputs: Record<
             },
         ],
     },
-    multiassetInvalidAssetGroupOrdering: {
-        destination: destinations.multiassetThirdParty,
-        amount: "1234",
-        tokenBundle: [
-            {
-                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-                tokens: [
-                    {
-                        assetNameHex: "7564247542686911",
-                        amount: "47",
-                    },
-                ],
-            },
-            {
-                policyIdHex: "71a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-                tokens: [
-                    {
-                        assetNameHex: "7564247542686911",
-                        amount: "47",
-                    },
-                ],
-            },
-        ],
-    },
+    // enforcing of asset groups order is removed for now and will be added back after the ordering is properly defined by a CIP
+    // multiassetInvalidAssetGroupOrdering: {
+    //     destination: destinations.multiassetThirdParty,
+    //     amount: "1234",
+    //     tokenBundle: [
+    //         {
+    //             policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+    //             tokens: [
+    //                 {
+    //                     assetNameHex: "7564247542686911",
+    //                     amount: "47",
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             policyIdHex: "71a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+    //             tokens: [
+    //                 {
+    //                     assetNameHex: "7564247542686911",
+    //                     amount: "47",
+    //                 },
+    //             ],
+    //         },
+    //     ],
+    // },
     multiassetAssetGroupsNotUnique: {
         destination: destinations.multiassetThirdParty,
         amount: "1234",
@@ -355,44 +356,45 @@ export const outputs: Record<
             },
         ],
     },
-    multiassetInvalidTokenOrderingSameLength: {
-        destination: destinations.multiassetThirdParty,
-        amount: "1234",
-        tokenBundle: [
-            {
-                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-                tokens: [
-                    {
-                        assetNameHex: "7564247542686911",
-                        amount: "47",
-                    },
-                    {
-                        assetNameHex: "74652474436f696e",
-                        amount: "7878754",
-                    },
-                ],
-            },
-        ],
-    },
-    multiassetInvalidTokenOrderingDifferentLengths: {
-        destination: destinations.multiassetThirdParty,
-        amount: "1234",
-        tokenBundle: [
-            {
-                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-                tokens: [
-                    {
-                        assetNameHex: "7564247542686911",
-                        amount: "47",
-                    },
-                    {
-                        assetNameHex: "756424754268",
-                        amount: "7878754",
-                    },
-                ],
-            },
-        ],
-    },
+    // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
+    // multiassetInvalidTokenOrderingSameLength: {
+    //     destination: destinations.multiassetThirdParty,
+    //     amount: "1234",
+    //     tokenBundle: [
+    //         {
+    //             policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+    //             tokens: [
+    //                 {
+    //                     assetNameHex: "7564247542686911",
+    //                     amount: "47",
+    //                 },
+    //                 {
+    //                     assetNameHex: "74652474436f696e",
+    //                     amount: "7878754",
+    //                 },
+    //             ],
+    //         },
+    //     ],
+    // },
+    // multiassetInvalidTokenOrderingDifferentLengths: {
+    //     destination: destinations.multiassetThirdParty,
+    //     amount: "1234",
+    //     tokenBundle: [
+    //         {
+    //             policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+    //             tokens: [
+    //                 {
+    //                     assetNameHex: "7564247542686911",
+    //                     amount: "47",
+    //                 },
+    //                 {
+    //                     assetNameHex: "756424754268",
+    //                     amount: "7878754",
+    //                 },
+    //             ],
+    //         },
+    //     ],
+    // },
     multiassetTokensNotUnique: {
         destination: destinations.multiassetThirdParty,
         amount: "1234",
@@ -1210,14 +1212,15 @@ export type InvalidTokenBundleOrderingTestcase = {
 }
 
 export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase[] = [
-    {
-        testname: "Reject tx where asset groups are not ordered",
-        tx: {
-            ...maryBase,
-            outputs: [outputs.multiassetInvalidAssetGroupOrdering],
-        },
-        rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING,
-    },
+    // enforcing of asset groups order is removed for now and will be added back after the ordering is properly defined by a CIP
+    // {
+    //     testname: "Reject tx where asset groups are not ordered",
+    //     tx: {
+    //         ...maryBase,
+    //         outputs: [outputs.multiassetInvalidAssetGroupOrdering],
+    //     },
+    //     rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING,
+    // },
     {
         testname: "Reject tx where asset groups are not unique",
         tx: {
@@ -1226,22 +1229,23 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
         },
         rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE,
     },
-    {
-        testname: "Reject tx where tokens within an asset group are not ordered - alphabetical",
-        tx: {
-            ...maryBase,
-            outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
-        },
-        rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
-    },
-    {
-        testname: "Reject tx where tokens within an asset group are not ordered - length",
-        tx: {
-            ...maryBase,
-            outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
-        },
-        rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
-    },
+    // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
+    // {
+    //     testname: "Reject tx where tokens within an asset group are not ordered - alphabetical",
+    //     tx: {
+    //         ...maryBase,
+    //         outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
+    //     },
+    //     rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
+    // },
+    // {
+    //     testname: "Reject tx where tokens within an asset group are not ordered - length",
+    //     tx: {
+    //         ...maryBase,
+    //         outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
+    //     },
+    //     rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
+    // },
     {
         testname: "Reject tx where tokens within an asset group are not unique",
         tx: {

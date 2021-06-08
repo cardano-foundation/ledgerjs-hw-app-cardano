@@ -64,12 +64,14 @@ function parseAssetGroup(assetGroup: AssetGroup): ParsedAssetGroup {
     }
 
     const assetNamesHex = parsedAssetGroup.tokens.map(t => t.assetNameHex)
-    const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
-        if (n1.length == n2.length) return n1.localeCompare(n2)
-        else return n1.length - n2.length
-    })
-    validate(JSON.stringify(assetNamesHex) == JSON.stringify(sortedAssetNames), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING)
     validate(assetNamesHex.length == new Set(assetNamesHex).size, InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_NOT_UNIQUE)
+
+    // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
+    // const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
+    //     if (n1.length == n2.length) return n1.localeCompare(n2)
+    //     else return n1.length - n2.length
+    // })
+    // validate(JSON.stringify(assetNamesHex) == JSON.stringify(sortedAssetNames), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING)
 
     return parsedAssetGroup
 }
@@ -79,9 +81,11 @@ function parseTokenBundle(tokenBundle: AssetGroup[]): ParsedAssetGroup[] {
     const parsedTokenBundle = tokenBundle.map(ag => parseAssetGroup(ag))
 
     const policyIds = parsedTokenBundle.map(ag => ag.policyIdHex)
-    const sortedPolicyIds = [...policyIds].sort()
-    validate(JSON.stringify(policyIds) == JSON.stringify(sortedPolicyIds), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING)
     validate(policyIds.length == new Set(policyIds).size, InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_NOT_UNIQUE)
+
+    // enforcing of policies order is removed for now and will be added back after the ordering is properly defined by a CIP
+    // const sortedPolicyIds = [...policyIds].sort()
+    // validate(JSON.stringify(policyIds) == JSON.stringify(sortedPolicyIds), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING)
 
     return parsedTokenBundle
 }
