@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.1.0...v3.2.0) - [?]
+## [3.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.0...v3.2.1) - [June 9th 2021]
+
+Patch update removing the requirement to order token bundle canonically.
+
+### Removed
+
+- Temporarily remove asset groups canonical ordering validation: https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/111
+
+## [3.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.1.0...v3.2.0) - [May 24th 2021]
 
 Added support for signing pool registration certificates as operator, support for pool retirement certificates within the `signTransaction()` call and added a new call for operational ceritificate signing - `signOperationalCertificate()`.
 
