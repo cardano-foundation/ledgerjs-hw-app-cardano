@@ -1,4 +1,4 @@
-import { AddressType, CertificateType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, RelayType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType } from './public'
+import { AddressType, CertificateType, NativeScriptType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, RelayType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType } from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -15,7 +15,7 @@ export type Uint16_t = number & { __type: 'uint16_t' }
 export type Uint8_t = number & { __type: 'uint8_t' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType }
+export { AddressType, CertificateType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType }
 export { Version, DeviceCompatibility } from './public'
 // Our types
 export const EXTENDED_PUBLIC_KEY_LENGTH = 64
@@ -266,3 +266,5 @@ export type ParsedOperationalCertificate = {
     issueCounter: Uint64_str,
     coldKeyPath: ValidBIP32Path,
 }
+
+export type ParsedNativeScript = {}
