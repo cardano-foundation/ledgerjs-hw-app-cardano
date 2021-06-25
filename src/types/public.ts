@@ -775,6 +775,10 @@ export type DeviceCompatibility = {
      * Whether we support pool retirement certificate
      */
     supportsPoolRetirement: boolean
+    /**
+     * Whether we support script hash derivation
+     */
+    supportsNativeScriptHashDerivation: boolean
 }
 
 /**

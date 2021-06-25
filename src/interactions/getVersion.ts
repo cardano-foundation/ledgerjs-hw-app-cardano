@@ -40,6 +40,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
     const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 2, Infinity)
     const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 2, Infinity)
     const v2_4 = isLedgerAppVersionAtLeast(version, 2, 4) && isLedgerAppVersionAtMost(version, 2, Infinity)
+    const v2_5 = isLedgerAppVersionAtLeast(version, 2, 5) && isLedgerAppVersionAtMost(version, 2, Infinity)
 
     return {
         isCompatible: v2_2,
@@ -49,6 +50,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsZeroTtl: v2_3,
         supportsPoolRegistrationAsOperator: v2_4,
         supportsPoolRetirement: v2_4,
+        supportsNativeScriptHashDerivation: v2_5,
     }
 }
 
