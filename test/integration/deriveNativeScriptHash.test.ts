@@ -1,10 +1,10 @@
 import chai, { expect } from "chai"
 import chaiAsPromised from "chai-as-promised"
 
-import type { Ada} from "../../src/Ada"
-import { InvalidData, NativeScriptHashDisplayFormat } from "../../src/Ada"
-import { getAda } from "../test_utils"
-import { InvalidScriptTestcases, ValidNativeScriptTestcases } from "./__fixtures__/deriveNativeScriptHash"
+import type { Ada } from "../../src/Ada"
+import { DeviceStatusError, InvalidData, NativeScriptHashDisplayFormat } from "../../src/Ada"
+import { describeWithoutValidation, getAda } from "../test_utils"
+import { InvalidOnLedgerScriptTestcases, InvalidScriptTestcases, ValidNativeScriptTestcases } from "./__fixtures__/deriveNativeScriptHash"
 
 chai.use(chaiAsPromised)
 
@@ -32,7 +32,19 @@ describe("deriveNativeScriptHash", async () => {
         }
     })
 
-    describe("Should not permit invalid scripts", async () => {
+    describeWithoutValidation("Ledger should not permit invalid scripts", async () => {
+        for (const { testname, script } of InvalidOnLedgerScriptTestcases) {
+            it(testname, async () => {
+                const promise = ada.deriveNativeScriptHash({
+                    script,
+                    displayFormat: NativeScriptHashDisplayFormat.BECH32,
+                })
+                await expect(promise).to.be.rejectedWith(DeviceStatusError)
+            })
+        }
+    })
+
+    describe("Ledgerjs should not permit invalid scripts", async () => {
         for (const { testname, script, invalidDataReason: expectedInvalidDataReason } of InvalidScriptTestcases) {
             it(testname, async () => {
                 const promise = ada.deriveNativeScriptHash({

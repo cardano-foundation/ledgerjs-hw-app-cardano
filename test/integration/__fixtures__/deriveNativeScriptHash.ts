@@ -330,6 +330,51 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
     },
 ]
 
+type InvalidOnLedgerScriptTestcase = {
+    testname: string,
+    script: NativeScript,
+}
+
+export const InvalidOnLedgerScriptTestcases: InvalidOnLedgerScriptTestcase[] = [
+    {
+        testname: "PUBKEY - invalid key path",
+        script: {
+            type: NativeScriptType.PUBKEY_DEVICE_OWNED,
+            params: {
+                path: [0, 0, 0, 0, 0, 0],
+            },
+        },
+    },
+    {
+        testname: "PUBKEY - invalid key hash (too short)",
+        script: {
+            type: NativeScriptType.PUBKEY_THIRD_PARTY,
+            params: {
+                keyHashHex: '3a55d9f68255dfbefa1efd711f82d005fae1be2e145d616c90cf0fa',
+            },
+        },
+    },
+    {
+        testname: "PUBKEY - invalid key hash (not hex)",
+        script: {
+            type: NativeScriptType.PUBKEY_THIRD_PARTY,
+            params: {
+                keyHashHex: '3g55d9f68255dfbefa1efd711f82d005fae1be2e145d616c90cf0fa9',
+            },
+        },
+    },
+    {
+        testname: "N_OF_K - invalid required count (higher than number of scripts)",
+        script: {
+            type: NativeScriptType.N_OF_K,
+            params: {
+                requiredCount: 1,
+                scripts: [],
+            },
+        },
+    },
+]
+
 type InvalidScriptTestcase = {
     testname: string,
     script: NativeScript,
