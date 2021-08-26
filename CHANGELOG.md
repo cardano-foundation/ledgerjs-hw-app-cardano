@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.0](TBD) - [TBD]
+
+Support for script elements in transactions and addresses.
+
+### Added
+
+- support for address types with script hashes (all Shelley address types are now supported)
+- support for script elements in transactions via a new `TransactionSigningMode.SCRIPT_TRANSACTION`
+- support for mint field in transaction body
+- native script hash derivation call
+- validation of canonical ordering of cbor map keys (token policy ids in outputs and mint, asset names within an asset group)
+
+### Changed
+
+- API changes: replacing paths with stake credentials in various address and transaction parameters breaks compatibility
+
+### Fixed
+
+
 ## [3.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.0...v3.2.1) - [June 9th 2021]
 
 Patch update removing the requirement to order token bundle canonically.
