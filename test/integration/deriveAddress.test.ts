@@ -47,10 +47,40 @@ describe("deriveAddress", async () => {
         }
     }).timeout(60000)
 
-    describe("Should not permit invalid path", async () => {
+    describe("Should not permit invalid path for derive address", async () => {
         for (const { testname, network, addressParams, errCls, errMsg } of InvalidPathTestcases) {
             it(testname, async () => {
                 const promise = ada.deriveAddress({
+                    network,
+                    address: addressParams,
+                })
+                await expect(promise).to.be.rejectedWith(errCls, errMsg)
+            })
+        }
+    })
+
+    describe("Should succesfully show Byron address", async () => {
+        for (const { testname, network, addressParams } of byronTestcases) {
+            it(testname, async () => {
+                const result = await ada.showAddress({ network, address: addressParams })
+                expect(result).to.equal(undefined)
+            })
+        }
+    })
+
+    describe("Should succesfully show Shelley address", async () => {
+        for (const { testname, network, addressParams } of shelleyTestcases) {
+            it(testname, async () => {
+                const result = await ada.showAddress({ network, address: addressParams })
+                expect(result).to.equal(undefined)
+            })
+        }
+    }).timeout(60000)
+
+    describe("Should not permit invalid path for show address", async () => {
+        for (const { testname, network, addressParams, errCls, errMsg } of InvalidPathTestcases) {
+            it(testname, async () => {
+                const promise = ada.showAddress({
                     network,
                     address: addressParams,
                 })
