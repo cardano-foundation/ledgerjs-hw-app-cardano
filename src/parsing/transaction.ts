@@ -71,12 +71,11 @@ function parseAssetGroup<T>(assetGroup: AssetGroup, parseTokenAmountFn: ParseTok
     const assetNamesHex = parsedAssetGroup.tokens.map(t => t.assetNameHex)
     validate(assetNamesHex.length == new Set(assetNamesHex).size, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE)
 
-    // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
-    // const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
-    //     if (n1.length == n2.length) return n1.localeCompare(n2)
-    //     else return n1.length - n2.length
-    // })
-    // validate(JSON.stringify(assetNamesHex) == JSON.stringify(sortedAssetNames), InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING)
+    const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
+        if (n1.length == n2.length) return n1.localeCompare(n2)
+        else return n1.length - n2.length
+    })
+    validate(JSON.stringify(assetNamesHex) == JSON.stringify(sortedAssetNames), InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING)
 
     return parsedAssetGroup
 }
@@ -90,9 +89,8 @@ function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed:
     const policyIds = parsedTokenBundle.map(ag => ag.policyIdHex)
     validate(policyIds.length == new Set(policyIds).size, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE)
 
-    // enforcing of policies order is removed for now and will be added back after the ordering is properly defined by a CIP
-    // const sortedPolicyIds = [...policyIds].sort()
-    // validate(JSON.stringify(policyIds) == JSON.stringify(sortedPolicyIds), InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING)
+    const sortedPolicyIds = [...policyIds].sort()
+    validate(JSON.stringify(policyIds) == JSON.stringify(sortedPolicyIds), InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING)
 
     return parsedTokenBundle
 }
@@ -120,6 +118,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     const certificates = parseCertificates(tx.certificates ?? [])
 
     // withdrawals
+    // we can't check here, but withdrawal map keys (derived from stake credentials) should be in CBOR canonical ordering
     validate(isArray(tx.withdrawals ?? []), InvalidDataReason.WITHDRAWALS_NOT_ARRAY)
     const withdrawals = (tx.withdrawals ?? []).map(w => parseWithdrawal(w))
 

@@ -279,6 +279,10 @@ export type Token = {
 
 /**
  * Describes a group of assets belonging to the same policy in a multiasset structure.
+ * The asset names of tokens must be unique and sorted lowest value to highest to reflect a canonical CBOR.
+ * The sorting rules (as described in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)) are:
+ *  * if two keys have different lengths, the shorter one sorts earlier;
+ *  * if two keys have the same length, the one with the lower value in lexical order sorts earlier.
  * @category Mary
  * @see [[TxOutput]]
  */
@@ -300,6 +304,9 @@ export type TxOutput = {
     amount: bigint_like
     /**
      * Additional assets sent to the output.
+     * If not null, the entries' keys (policyIds) must be unique and sorted to reflect a canonical CBOR as described
+     * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
+     * i.e. the key with the lower value in lexical order sorts earlier.
      */
     tokenBundle?: Array<AssetGroup> | null
     /**
@@ -1023,6 +1030,10 @@ export type Transaction = {
     certificates?: Array<Certificate> | null,
     /**
      * Withdrawals (if any) from rewards accounts
+     * If not null, the entries' keys (reward addresses derived from the given stake credentials)
+     * must be unique and sorted ascending to reflect a canonical CBOR as described
+     * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
+     * i.e. the key with the lower value in lexical order sorts earlier.
      */
     withdrawals?: Array<Withdrawal> | null,
     /**
@@ -1037,12 +1048,10 @@ export type Transaction = {
     /**
      * Mint or burn instructions (if any).
      * Assets to be minted (token amount positive) or burned (token amount negative) with the transaction.
-     * If not null, the entries' keys (policyIds) must be sorted lowest value to highest to reflect a canonical CBOR.
-     * The sorting rules (as described in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)) are:
-     *  * if two keys have different lengths, the shorter one sorts earlier;
-     *  * if two keys have the same length, the one with the lower value in lexical order sorts earlier.
+     * If not null, the entries' keys (policyIds) must be unique and sorted to reflect a canonical CBOR as described
+     * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
+     * i.e. the key with the lower value in lexical order sorts earlier.
      */
-    // TODO update the docstring when CIP-0021 is approved
     mint?: Array<AssetGroup> | null,
 }
 

@@ -1,5 +1,5 @@
-import type { AssetGroup, DeviceOwnedAddress, SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada"
-import {InvalidDataReason, TxAuxiliaryDataSupplementType} from "../../../src/Ada"
+import type { AssetGroup, DeviceOwnedAddress, ErrorBase,SignedTransactionData, Transaction, TxInput, TxOutput, TxOutputDestination } from "../../../src/Ada"
+import {DeviceStatusError, InvalidDataReason, TxAuxiliaryDataSupplementType} from "../../../src/Ada"
 import { AddressType, CertificateType, Networks, TxAuxiliaryDataType, TxOutputDestinationType, utils } from "../../../src/Ada"
 import type { BIP32Path} from '../../../src/types/public'
 import { StakeCredentialParamsType, TransactionSigningMode } from '../../../src/types/public'
@@ -267,10 +267,10 @@ export const outputs: Record<
   | 'multiassetManyTokens'
   | 'multiassetChange'
   | 'multiassetBigNumber'
-//   | 'multiassetInvalidAssetGroupOrdering'
+  | 'multiassetInvalidAssetGroupOrdering'
   | 'multiassetAssetGroupsNotUnique'
-//   | 'multiassetInvalidTokenOrderingSameLength'
-//   | 'multiassetInvalidTokenOrderingDifferentLengths'
+  | 'multiassetInvalidTokenOrderingSameLength'
+  | 'multiassetInvalidTokenOrderingDifferentLengths'
   | 'multiassetTokensNotUnique'
   | 'trezorParity'
   , TxOutput
@@ -400,31 +400,30 @@ export const outputs: Record<
             },
         ],
     },
-    // enforcing of asset groups order is removed for now and will be added back after the ordering is properly defined by a CIP
-    // multiassetInvalidAssetGroupOrdering: {
-    //     destination: destinations.multiassetThirdParty,
-    //     amount: "1234",
-    //     tokenBundle: [
-    //         {
-    //             policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-    //             tokens: [
-    //                 {
-    //                     assetNameHex: "7564247542686911",
-    //                     amount: "47",
-    //                 },
-    //             ],
-    //         },
-    //         {
-    //             policyIdHex: "71a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-    //             tokens: [
-    //                 {
-    //                     assetNameHex: "7564247542686911",
-    //                     amount: "47",
-    //                 },
-    //             ],
-    //         },
-    //     ],
-    // },
+    multiassetInvalidAssetGroupOrdering: {
+        destination: destinations.multiassetThirdParty,
+        amount: "1234",
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                ],
+            },
+            {
+                policyIdHex: "71a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                ],
+            },
+        ],
+    },
     multiassetAssetGroupsNotUnique: {
         destination: destinations.multiassetThirdParty,
         amount: "1234",
@@ -449,45 +448,44 @@ export const outputs: Record<
             },
         ],
     },
-    // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
-    // multiassetInvalidTokenOrderingSameLength: {
-    //     destination: destinations.multiassetThirdParty,
-    //     amount: "1234",
-    //     tokenBundle: [
-    //         {
-    //             policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-    //             tokens: [
-    //                 {
-    //                     assetNameHex: "7564247542686911",
-    //                     amount: "47",
-    //                 },
-    //                 {
-    //                     assetNameHex: "74652474436f696e",
-    //                     amount: "7878754",
-    //                 },
-    //             ],
-    //         },
-    //     ],
-    // },
-    // multiassetInvalidTokenOrderingDifferentLengths: {
-    //     destination: destinations.multiassetThirdParty,
-    //     amount: "1234",
-    //     tokenBundle: [
-    //         {
-    //             policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
-    //             tokens: [
-    //                 {
-    //                     assetNameHex: "7564247542686911",
-    //                     amount: "47",
-    //                 },
-    //                 {
-    //                     assetNameHex: "756424754268",
-    //                     amount: "7878754",
-    //                 },
-    //             ],
-    //         },
-    //     ],
-    // },
+    multiassetInvalidTokenOrderingSameLength: {
+        destination: destinations.multiassetThirdParty,
+        amount: "1234",
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                    {
+                        assetNameHex: "74652474436f696e",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+    },
+    multiassetInvalidTokenOrderingDifferentLengths: {
+        destination: destinations.multiassetThirdParty,
+        amount: "1234",
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                    {
+                        assetNameHex: "756424754268",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+    },
     multiassetTokensNotUnique: {
         destination: destinations.multiassetThirdParty,
         amount: "1234",
@@ -1674,19 +1672,23 @@ export type InvalidTokenBundleOrderingTestcase = {
   testname: string,
   tx: Transaction,
   signingMode: TransactionSigningMode
-  rejectReason: InvalidDataReason
+  errCls: new (...args: any[]) => ErrorBase,
+  errMsg: string,
+  rejectReason: InvalidDataReason,
 }
 
 export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase[] = [
-    // enforcing of asset groups order is removed for now and will be added back after the ordering is properly defined by a CIP
-    // {
-    //     testname: "Reject tx where asset groups are not ordered",
-    //     tx: {
-    //         ...maryBase,
-    //         outputs: [outputs.multiassetInvalidAssetGroupOrdering],
-    //     },
-    //     rejectReason: InvalidDataReason.OUTPUT_INVALID_TOKEN_BUNDLE_ORDERING,
-    // },
+    {
+        testname: "Reject tx where asset groups are not ordered",
+        tx: {
+            ...maryBase,
+            outputs: [outputs.multiassetInvalidAssetGroupOrdering],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
+        rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
+    },
     {
         testname: "Reject tx where asset groups are not unique",
         tx: {
@@ -1694,25 +1696,32 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
             outputs: [outputs.multiassetAssetGroupsNotUnique],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
         rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE,
     },
-    // enforcing of asset order is removed for now and will be added back after the ordering is properly defined by a CIP
-    // {
-    //     testname: "Reject tx where tokens within an asset group are not ordered - alphabetical",
-    //     tx: {
-    //         ...maryBase,
-    //         outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
-    //     },
-    //     rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
-    // },
-    // {
-    //     testname: "Reject tx where tokens within an asset group are not ordered - length",
-    //     tx: {
-    //         ...maryBase,
-    //         outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
-    //     },
-    //     rejectReason: InvalidDataReason.OUTPUT_INVALID_ASSET_GROUP_ORDERING,
-    // },
+    {
+        testname: "Reject tx where tokens within an asset group are not ordered - alphabetical",
+        tx: {
+            ...maryBase,
+            outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
+        rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
+    },
+    {
+        testname: "Reject tx where tokens within an asset group are not ordered - length",
+        tx: {
+            ...maryBase,
+            outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
+        rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
+    },
     {
         testname: "Reject tx where tokens within an asset group are not unique",
         tx: {
@@ -1720,27 +1729,32 @@ export const testsInvalidTokenBundleOrdering: InvalidTokenBundleOrderingTestcase
             outputs: [outputs.multiassetTokensNotUnique],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
         rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE,
     },
-    // !! canonical ordering is temporarily out of the codebase !!
-    // {
-    //     testname: "Reject tx with mint fields with invalid canonical ordering of policies",
-    //     tx: {
-    //         ...maryBase,
-    //         outputs: [],
-    //         mint: mints.mintInvalidCanonicalOrderingPolicy,
-    //     },
-    //     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-    //     rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
-    // },
-    // {
-    //     testname: "Reject tx with mint fields with invalid canonical ordering of asset names",
-    //     tx: {
-    //         ...maryBase,
-    //         outputs: [],
-    //         mint: mints.mintInvalidCanonicalOrderingAssetName,
-    //     },
-    //     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-    //     rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
-    // },
+    {
+        testname: "Reject tx with mint fields with invalid canonical ordering of policies",
+        tx: {
+            ...maryBase,
+            outputs: [],
+            mint: mints.mintInvalidCanonicalOrderingPolicy,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
+        rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
+    },
+    {
+        testname: "Reject tx with mint fields with invalid canonical ordering of asset names",
+        tx: {
+            ...maryBase,
+            outputs: [],
+            mint: mints.mintInvalidCanonicalOrderingAssetName,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Invalid data supplied to Ledger",
+        rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
+    },
 ]
