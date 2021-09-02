@@ -10,7 +10,6 @@ import { buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf } from "../utils/se
 import { INS } from "./common/ins"
 import type { Interaction, SendParams } from "./common/types"
 import { ensureLedgerAppVersionCompatible, getCompatibility } from "./getVersion"
-import { serializeAddressParams } from "./serialization/addressParams"
 import { serializeCatalystRegistrationNonce, serializeCatalystRegistrationRewardsDestination, serializeCatalystRegistrationStakingPath, serializeCatalystRegistrationVotingKey } from "./serialization/catalystRegistration"
 import { serializeFinancials, serializePoolInitialParams, serializePoolInitialParamsLegacy, serializePoolKey, serializePoolMetadata, serializePoolOwner, serializePoolRelay, serializePoolRewardAccount } from "./serialization/poolRegistrationCertificate"
 import { serializeTxAuxiliaryData } from "./serialization/txAuxiliaryData"
