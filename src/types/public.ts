@@ -193,13 +193,13 @@ export type SpendingParams = {
  * @category Addresses
  * @see [[DeviceOwnedAddress]]
  */
-export type AddressParamsBase = SpendingParams & {
+export type AddressParamsBase = SpendingParams & ({
     stakingPath: BIP32Path
 } | {
     stakingKeyHashHex: string
 } | {
     stakingScriptHash: string
-}
+})
 
 /**
  * Shelley *enterprise* address parameters
