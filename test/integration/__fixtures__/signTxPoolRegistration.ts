@@ -1,7 +1,8 @@
-import type { Certificate, MultiHostRelayParams, PoolKey, PoolMetadataParams, PoolOwner, PoolRegistrationParams, PoolRewardAccount, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal } from "../../../src/Ada"
-import { StakeCredentialParamsType } from "../../../src/Ada"
+import type { Certificate, ErrorBase,MultiHostRelayParams, PoolKey, PoolMetadataParams, PoolOwner, PoolRegistrationParams, PoolRewardAccount, Relay, SignedTransactionData, SingleHostHostnameRelayParams, Transaction, TxInput, TxOutput, Withdrawal} from "../../../src/Ada"
+import { DeviceStatusError,StakeCredentialParamsType } from "../../../src/Ada"
 import { PoolKeyType, PoolRewardAccountType } from "../../../src/Ada"
 import { CertificateType, InvalidDataReason, Networks, PoolOwnerType, RelayType, TxOutputDestinationType, utils } from "../../../src/Ada"
+import type { BIP32Path} from '../../../src/types/public'
 import { str_to_path } from "../../../src/utils/address"
 
 export const inputs: Record<
@@ -689,6 +690,56 @@ export const poolRegistrationOwnerTestcases: Testcase[] = [
             ],
             auxiliaryDataSupplement: null,
         },
+    },
+]
+
+export type RejectTestcase = {
+    testname: string,
+    tx: Transaction,
+    additionalWitnessPaths: BIP32Path[],
+    errCls: new (...args: any[]) => ErrorBase,
+    errMsg: string,
+}
+
+export const poolRegistrationOwnerRejectTestcases: RejectTestcase[] = [
+    {
+        testname: "Different index",
+        tx: {
+            ...txBase,
+            certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
+        },
+        additionalWitnessPaths: [str_to_path("1852'/1815'/0'/2/0"), str_to_path("1852'/1815'/0'/2/1")],
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+    },
+    {
+        testname: "Different prefix",
+        tx: {
+            ...txBase,
+            certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
+        },
+        additionalWitnessPaths: [str_to_path("1852'/1815'/0'/2/0"), str_to_path("1854'/1815'/0'/2/0")],
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+    },
+    {
+        testname: "No path given",
+        tx: {
+            ...txBase,
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: {
+                        ...defaultPoolRegistration,
+                        poolOwners: poolOwnerVariationSet.singleHashOwner,
+                        relays: relayVariationSet.allRelays,
+                    },
+                },
+            ],
+        },
+        additionalWitnessPaths: [str_to_path("1852'/1815'/0'/2/0"), str_to_path("1854'/1815'/0'/2/0")],
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
     },
 ]
 
