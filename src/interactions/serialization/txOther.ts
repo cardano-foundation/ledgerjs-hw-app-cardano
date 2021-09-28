@@ -19,7 +19,7 @@ export function serializeTxWithdrawal(
     withdrawal: ParsedWithdrawal,
     version: Version,
 ) {
-    if (getCompatibility(version).supportsScriptTransaction) {
+    if (getCompatibility(version).supportsMultisigTransaction) {
         return Buffer.concat([
             uint64_to_buf(withdrawal.amount),
             stake_credential_to_buf(withdrawal.stakeCredential),

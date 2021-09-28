@@ -140,16 +140,16 @@ export enum InvalidDataReason {
   SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH =
   "withdrawal must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
 
-  SIGN_MODE_SCRIPT__POOL_REGISTRATION_NOT_ALLOWED =
-  "pool registration is not allowed in TransactionSigningMode.SCRIPT_TRANSACTION",
-  SIGN_MODE_SCRIPT__POOL_RETIREMENT_NOT_ALLOWED =
-  "pool retirement is not allowed in TransactionSigningMode.SCRIPT_TRANSACTION",
-  SIGN_MODE_SCRIPT__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
-  "outputs given by path are not allowed in TransactionSigningMode.SCRIPT_TRANSACTION",
-  SIGN_MODE_SCRIPT__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT =
-  "certificate stake credential must be given as a script hash in TransactionSigningMode.SCRIPT_TRANSACTION",
-  SIGN_MODE_SCRIPT__WITHDRAWAL_ONLY_AS_SCRIPT =
-  "withdrawal must be given as a script hash in TransactionSigningMode.SCRIPT_TRANSACTION",
+  SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED =
+  "pool registration is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__POOL_RETIREMENT_NOT_ALLOWED =
+  "pool retirement is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
+  "outputs given by path are not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT =
+  "certificate stake credential must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT =
+  "withdrawal must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
 
   SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",

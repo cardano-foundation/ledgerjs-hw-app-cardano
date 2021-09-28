@@ -24,7 +24,7 @@ describe("getVersion", async () => {
             recommendedVersion: null,
             supportsMary: true,
             supportsMint: true,
-            supportsScriptTransaction: true,
+            supportsMultisigTransaction: true,
             supportsCatalystRegistration: true,
             supportsZeroTtl: true,
             supportsPoolRegistrationAsOperator: true,

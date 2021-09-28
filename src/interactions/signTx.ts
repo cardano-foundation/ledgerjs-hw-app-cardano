@@ -580,7 +580,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Mint not supported by Ledger app version ${version}.`)
     }
 
-    if (!getCompatibility(version).supportsScriptTransaction) {
+    if (!getCompatibility(version).supportsMultisigTransaction) {
         {
             const scriptAddressTypes = [
                 AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
@@ -632,7 +632,7 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
 
     const { tx, signingMode, additionalWitnessPaths } = request
     let witnessPaths = additionalWitnessPaths
-    if (signingMode != TransactionSigningMode.SCRIPT_TRANSACTION) {
+    if (signingMode != TransactionSigningMode.MULTISIG_TRANSACTION) {
         witnessPaths = witnessPaths.concat(generateWitnessPaths(request))
     }
     witnessPaths = uniquify(witnessPaths)

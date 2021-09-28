@@ -12,7 +12,7 @@ Support for script elements in transactions and addresses.
 ### Added
 
 - support for address types with script hashes (all Shelley address types are now supported)
-- support for script elements in transactions via a new `TransactionSigningMode.SCRIPT_TRANSACTION`
+- support for script elements in transactions via a new `TransactionSigningMode.MULTISIG_TRANSACTION`
 - support for mint field in transaction body
 - native script hash derivation call
 - validation of canonical ordering of cbor map keys (token policy ids in outputs and mint, asset names within an asset group)

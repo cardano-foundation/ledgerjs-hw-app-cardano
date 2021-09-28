@@ -216,7 +216,7 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
     case TransactionSigningMode.ORDINARY_TRANSACTION:
     case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
     case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
-    case TransactionSigningMode.SCRIPT_TRANSACTION:
+    case TransactionSigningMode.MULTISIG_TRANSACTION:
         return mode
     default:
         throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
@@ -259,16 +259,16 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         break
     }
 
-    case TransactionSigningMode.SCRIPT_TRANSACTION: {
+    case TransactionSigningMode.MULTISIG_TRANSACTION: {
         // pool registrations have separate signing modes
         validate(
             tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_REGISTRATION),
-            InvalidDataReason.SIGN_MODE_SCRIPT__POOL_REGISTRATION_NOT_ALLOWED,
+            InvalidDataReason.SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED,
         )
         // pool retirement is not allowed
         validate(
             tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_RETIREMENT),
-            InvalidDataReason.SIGN_MODE_SCRIPT__POOL_RETIREMENT_NOT_ALLOWED,
+            InvalidDataReason.SIGN_MODE_MULTISIG__POOL_RETIREMENT_NOT_ALLOWED,
         )
         // certificate stake credentials given by scripts
         validate(
@@ -282,17 +282,17 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
                     return true
                 }
             }),
-            InvalidDataReason.SIGN_MODE_SCRIPT__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT,
+            InvalidDataReason.SIGN_MODE_MULTISIG__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT,
         )
         // withdrawals as scripts
         validate(
             tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.SCRIPT_HASH),
-            InvalidDataReason.SIGN_MODE_SCRIPT__WITHDRAWAL_ONLY_AS_SCRIPT,
+            InvalidDataReason.SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT,
         )
         // only third-party outputs
         validate(
             tx.outputs.every(output => output.destination.type === TxOutputDestinationType.THIRD_PARTY),
-            InvalidDataReason.SIGN_MODE_SCRIPT__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
+            InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
         )
         break
     }

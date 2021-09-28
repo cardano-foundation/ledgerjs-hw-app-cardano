@@ -47,7 +47,7 @@ export function serializeTxCertificate(
     certificate: ParsedCertificate,
     version: Version,
 ) {
-    if (!getCompatibility(version).supportsScriptTransaction) {
+    if (!getCompatibility(version).supportsMultisigTransaction) {
         return serializeTxCertificatePreMultisig(certificate)
     }
 
