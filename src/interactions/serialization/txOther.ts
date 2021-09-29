@@ -26,7 +26,7 @@ export function serializeTxWithdrawal(
         ])
     } else {
         // pre-multisig
-        assert(withdrawal.stakeCredential.type == StakeCredentialType.KEY_PATH, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL)
+        assert(withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL)
         return Buffer.concat([
             uint64_to_buf(withdrawal.amount),
             path_to_buf(withdrawal.stakeCredential.path),

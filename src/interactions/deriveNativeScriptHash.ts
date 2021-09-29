@@ -3,6 +3,7 @@ import type { ParsedComplexNativeScript, ParsedNativeScript, ParsedSimpleNativeS
 import { NATIVE_SCRIPT_HASH_LENGTH } from "../types/internal"
 import type { NativeScriptHash, NativeScriptHashDisplayFormat, Version } from "../types/public"
 import { NativeScriptType } from "../types/public"
+import { getVersionString } from "../utils"
 import { INS } from "./common/ins"
 import type { Interaction, SendParams } from "./common/types"
 import { ensureLedgerAppVersionCompatible, getCompatibility } from "./getVersion"
@@ -92,7 +93,7 @@ function ensureScriptHashDerivationSupportedByAppVersion(
     version: Version
 ): void {
     if (!getCompatibility(version).supportsNativeScriptHashDerivation) {
-        throw new DeviceVersionUnsupported(`Native script hash derivation not supported by Ledger app version ${version}.`)
+        throw new DeviceVersionUnsupported(`Native script hash derivation not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
 

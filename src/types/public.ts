@@ -1016,7 +1016,7 @@ export type Transaction = {
     outputs: Array<TxOutput>,
     /**
      * Transaction fee (in Lovelace).
-     * Note that transaction is valid only if inputs + fee == outputs.
+     * Note that transaction is valid only if inputs + fee === outputs.
      */
     fee: bigint_like,
     /**

@@ -95,17 +95,17 @@ function validateSpendingDataSource(
     case AddressType.POINTER_KEY:
     case AddressType.ENTERPRISE_KEY:
     case AddressType.BYRON:
-        validate(spending.type == SpendingDataSourceType.PATH, InvalidDataReason.ADDRESS_INVALID_SPENDING_INFO)
+        validate(spending.type === SpendingDataSourceType.PATH, InvalidDataReason.ADDRESS_INVALID_SPENDING_INFO)
         break
     case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
     case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
     case AddressType.POINTER_SCRIPT:
     case AddressType.ENTERPRISE_SCRIPT:
-        validate(spending.type == SpendingDataSourceType.SCRIPT_HASH, InvalidDataReason.ADDRESS_INVALID_SPENDING_INFO)
+        validate(spending.type === SpendingDataSourceType.SCRIPT_HASH, InvalidDataReason.ADDRESS_INVALID_SPENDING_INFO)
         break
     case AddressType.REWARD_KEY:
     case AddressType.REWARD_SCRIPT:
-        validate(spending.type == SpendingDataSourceType.NONE, InvalidDataReason.ADDRESS_INVALID_SPENDING_INFO)
+        validate(spending.type === SpendingDataSourceType.NONE, InvalidDataReason.ADDRESS_INVALID_SPENDING_INFO)
         break
     default:
         throw new InvalidData(InvalidDataReason.ADDRESS_UNKNOWN_TYPE)
@@ -120,22 +120,22 @@ function validateStakingDataSource(
     case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
     case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
     case AddressType.REWARD_KEY:
-        validate(staking.type == StakingDataSourceType.KEY_PATH ||
-                staking.type == StakingDataSourceType.KEY_HASH, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+        validate(staking.type === StakingDataSourceType.KEY_PATH ||
+                staking.type === StakingDataSourceType.KEY_HASH, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         break
     case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
     case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT:
     case AddressType.REWARD_SCRIPT:
-        validate(staking.type == StakingDataSourceType.SCRIPT_HASH, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+        validate(staking.type === StakingDataSourceType.SCRIPT_HASH, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         break
     case AddressType.POINTER_KEY:
     case AddressType.POINTER_SCRIPT:
-        validate(staking.type == StakingDataSourceType.BLOCKCHAIN_POINTER, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+        validate(staking.type === StakingDataSourceType.BLOCKCHAIN_POINTER, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         break
     case AddressType.BYRON:
     case AddressType.ENTERPRISE_KEY:
     case AddressType.ENTERPRISE_SCRIPT:
-        validate(staking.type == StakingDataSourceType.NONE, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+        validate(staking.type === StakingDataSourceType.NONE, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         break
     default:
         throw new InvalidData(InvalidDataReason.ADDRESS_UNKNOWN_TYPE)

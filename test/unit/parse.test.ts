@@ -47,7 +47,7 @@ describe("basicParseTest", async () => {
         const objectRepresentation = (signed ? new Int64BE(numberString, 10) : new Uint64BE(numberString, 10))
         const bufferRep = objectRepresentation.toBuffer()
 
-        assert(bufferRep.length == 8, "invalid binary length")
+        assert(bufferRep.length === 8, "invalid binary length")
 
         expect(objectRepresentation.toString()).to.equal(numberString)
     }

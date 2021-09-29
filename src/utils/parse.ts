@@ -182,7 +182,7 @@ export function parseBIP32Path(value: unknown, errMsg: InvalidDataReason): Valid
 }
 
 export function parseStakeCredential(stakeCredential: StakeCredentialParams, errMsg: InvalidDataReason): ParsedStakeCredential {
-    if (stakeCredential.type == StakeCredentialParamsType.KEY_PATH) {
+    if (stakeCredential.type === StakeCredentialParamsType.KEY_PATH) {
         return {
             type: StakeCredentialType.KEY_PATH,
             path: parseBIP32Path(stakeCredential.keyPath, errMsg),

@@ -3,6 +3,7 @@ import { InvalidDataReason } from "../../errors/invalidDataReason"
 import type { ParsedAddressParams, SpendingDataSource, StakingDataSource, Uint8_t, Version } from "../../types/internal"
 import { SpendingDataSourceType } from "../../types/internal"
 import { AddressType, StakingDataSourceType } from "../../types/internal"
+import { getVersionString } from "../../utils"
 import { assert } from "../../utils/assert"
 import { hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf } from "../../utils/serialize"
 import { getCompatibility } from "../getVersion"
@@ -69,8 +70,8 @@ export function serializeAddressParams(
     let spending: SpendingDataSource = params.spendingDataSource
     let staking: StakingDataSource = params.stakingDataSource
     if (!getCompatibility(version).supportsMultisigTransaction) {
-        if (params.type == AddressType.REWARD_KEY) {
-            assert(staking.type == StakingDataSourceType.KEY_PATH, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
+        if (params.type === AddressType.REWARD_KEY) {
+            assert(staking.type === StakingDataSourceType.KEY_PATH, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
             spending = {
                 type: SpendingDataSourceType.PATH,
                 path: staking.path,
@@ -78,8 +79,8 @@ export function serializeAddressParams(
             staking = {
                 type: StakingDataSourceType.NONE,
             }
-        } else if (params.type == AddressType.REWARD_SCRIPT) {
-            throw new DeviceVersionUnsupported(`Scripthash based address derivation not supported by Ledger app version ${version}.`)
+        } else if (params.type === AddressType.REWARD_SCRIPT) {
+            throw new DeviceVersionUnsupported(`Scripthash based address derivation not supported by Ledger app version ${getVersionString(version)}.`)
         }
     }
     return Buffer.concat([

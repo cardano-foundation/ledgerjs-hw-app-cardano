@@ -3,6 +3,7 @@ import bech32 from "bech32"
 
 import { InvalidDataReason } from "./errors"
 import { AddressType } from "./types/internal"
+import type { Version } from "./types/public"
 import { HARDENED } from "./types/public"
 import { assert } from "./utils/assert"
 import { isArray, isBuffer, isInteger, isString, parseIntFromStr, validate } from "./utils/parse"
@@ -146,4 +147,8 @@ export default {
 
     chunkBy,
     stripRetcodeFromResponse,
+}
+
+export function getVersionString(version: Version): string {
+    return `${version.major}.${version.minor}.${version.patch}`
 }
