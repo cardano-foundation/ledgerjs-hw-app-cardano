@@ -1150,7 +1150,10 @@ export type SignTransactionRequest = {
      */
     tx: Transaction
 
-    additionalWitnessPaths: BIP32Path[]
+    /**
+     * Additional witness paths that are not gathered from the transaction body, eg. mint witnesses
+     */
+    additionalWitnessPaths?: BIP32Path[]
 }
 
 /**

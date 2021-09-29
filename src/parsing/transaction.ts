@@ -226,7 +226,7 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
 export function parseSignTransactionRequest(request: SignTransactionRequest): ParsedSigningRequest {
     const tx = parseTransaction(request.tx)
     const signingMode = parseSigningMode(request.signingMode)
-    const additionalWitnessPaths = request.additionalWitnessPaths.map(path => parseBIP32Path(path, InvalidDataReason.INVALID_PATH))
+    const additionalWitnessPaths = request.additionalWitnessPaths ? request.additionalWitnessPaths.map(path => parseBIP32Path(path, InvalidDataReason.INVALID_PATH)) : []
 
     // Additional restrictions based on signing mode
     switch (signingMode) {
