@@ -196,6 +196,7 @@ function parseIPv6(ipv6: string, errMsg: InvalidDataReason): Buffer {
 function parseDnsName(dnsName: string, errMsg: InvalidDataReason): VarlenAsciiString {
     validate(isString(dnsName), errMsg)
     validate(dnsName.length <= 64, errMsg)
+    validate(dnsName.length > 0, errMsg)
     // eslint-disable-next-line no-control-regex
     validate(/^[\x00-\x7F]*$/.test(dnsName), errMsg)
     validate(
