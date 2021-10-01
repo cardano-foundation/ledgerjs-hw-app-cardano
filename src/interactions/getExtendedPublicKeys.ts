@@ -64,7 +64,9 @@ export function* getExtendedPublicKeys(
           })
       }
 
-      const [publicKey, chainCode, rest] = chunkBy(response, [32, 32])
+      const VKEY_LENGTH = 32
+      const CHAINCODE_LENGTH = 32
+      const [publicKey, chainCode, rest] = chunkBy(response, [VKEY_LENGTH, CHAINCODE_LENGTH])
       assert(rest.length === 0, "invalid response length")
 
       result.push({

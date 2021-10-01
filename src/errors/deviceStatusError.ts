@@ -18,7 +18,7 @@ export const DeviceStatusCodes = {
 }
 
 // Human-readable version of errors reported by APDU protocol
-const DeviceStatusMessages: Record<number, string> = {
+export const DeviceStatusMessages: Record<number, string> = {
     [DeviceStatusCodes.ERR_INVALID_DATA]: "Invalid data supplied to Ledger",
     [DeviceStatusCodes.ERR_INVALID_BIP_PATH]:
         "Invalid derivation path supplied to Ledger",

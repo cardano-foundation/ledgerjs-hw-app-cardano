@@ -1,6 +1,7 @@
 import { InvalidData } from "../errors"
 import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { ParsedMargin, ParsedPoolKey, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedPoolRewardAccount, Uint16_t, Uint64_str, VarlenAsciiString } from "../types/internal"
+import { AUXILIARY_DATA_HASH_LENGTH } from "../types/internal"
 import { KEY_HASH_LENGTH, RelayType, REWARD_ACCOUNT_HEX_LENGTH, VRF_KEY_HASH_LENGTH } from "../types/internal"
 import type {
     MultiHostRelayParams,
@@ -256,7 +257,7 @@ function parsePoolMetadataParams(params: PoolMetadataParams): ParsedPoolMetadata
         InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL
     )
 
-    const hashHex = parseHexStringOfLength(params.metadataHashHex, 32, InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH)
+    const hashHex = parseHexStringOfLength(params.metadataHashHex, AUXILIARY_DATA_HASH_LENGTH, InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH)
 
     return {
         url,

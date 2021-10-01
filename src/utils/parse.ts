@@ -1,7 +1,7 @@
 import { InvalidData } from "../errors"
 import type { InvalidDataReason } from "../errors/index"
 import type { _Int64_bigint, _Int64_num, _Uint64_bigint, _Uint64_num, FixlenHexString, HexString, Int64_str, ParsedStakeCredential,Uint8_t, Uint16_t, Uint32_t, Uint64_str, ValidBIP32Path, VarlenAsciiString } from "../types/internal"
-import { SCRIPT_HASH_LENGTH,StakeCredentialType } from "../types/internal"
+import { KEY_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType } from "../types/internal"
 import type { StakeCredentialParams } from "../types/public"
 import { StakeCredentialParamsType } from "../types/public"
 
@@ -182,12 +182,18 @@ export function parseBIP32Path(value: unknown, errMsg: InvalidDataReason): Valid
 }
 
 export function parseStakeCredential(stakeCredential: StakeCredentialParams, errMsg: InvalidDataReason): ParsedStakeCredential {
-    if (stakeCredential.type === StakeCredentialParamsType.KEY_PATH) {
+    switch (stakeCredential.type) {
+    case StakeCredentialParamsType.KEY_PATH:
         return {
             type: StakeCredentialType.KEY_PATH,
             path: parseBIP32Path(stakeCredential.keyPath, errMsg),
         }
-    } else {
+    case StakeCredentialParamsType.KEY_HASH:
+        return {
+            type: StakeCredentialType.KEY_HASH,
+            keyHash: parseHexStringOfLength(stakeCredential.keyHash, KEY_HASH_LENGTH, errMsg),
+        }
+    case StakeCredentialParamsType.SCRIPT_HASH:
         return {
             type: StakeCredentialType.SCRIPT_HASH,
             scriptHash: parseHexStringOfLength(stakeCredential.scriptHash, SCRIPT_HASH_LENGTH, errMsg),

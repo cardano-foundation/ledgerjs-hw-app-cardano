@@ -29,16 +29,23 @@ export const KES_PUBLIC_KEY_LENGTH = 32
 export const VRF_KEY_HASH_LENGTH = 32
 export const REWARD_ACCOUNT_HEX_LENGTH = 29
 export const ED25519_SIGNATURE_LENGTH = 64
+export const SCRIPT_DATA_HASH_LENGTH = 32
+export const DATUM_HASH_LENGTH = 32
 
 export const enum StakeCredentialType {
+    // enum values are affected by backwards-compatibility
     KEY_PATH = 0,
+    KEY_HASH = 2,
     SCRIPT_HASH = 1,
 }
 
-export type ParsedStakeCredential = 
+export type ParsedStakeCredential =
     {
         type: StakeCredentialType.KEY_PATH,
         path: ValidBIP32Path,
+    } | {
+        type: StakeCredentialType.KEY_HASH,
+        keyHash: FixlenHexString<typeof KEY_HASH_LENGTH>,
     } | {
         type: StakeCredentialType.SCRIPT_HASH,
         scriptHash: FixlenHexString<typeof SCRIPT_HASH_LENGTH>,
@@ -114,6 +121,10 @@ export type ParsedTransaction = {
     auxiliaryData: ParsedTxAuxiliaryData | null
     validityIntervalStart: Uint64_str | null
     mint: Array<ParsedAssetGroup<Int64_str>> | null
+    scriptDataHashHex: ScriptDataHash | null
+    collaterals: ParsedInput[]
+    requiredSigners: ParsedRequiredSigner[]
+    includeNetworkId: boolean
 }
 
 export type ParsedSigningRequest = {
@@ -135,12 +146,25 @@ export type ParsedWithdrawal = {
     stakeCredential: ParsedStakeCredential
 }
 
+export type ScriptDataHash = FixlenHexString<typeof SCRIPT_DATA_HASH_LENGTH>
+
+export const enum RequiredSignerType {
+    PATH = 0,
+    HASH = 1,
+}
+
+export type ParsedRequiredSigner = {
+    type: RequiredSignerType.HASH
+    hash: FixlenHexString<typeof KEY_HASH_LENGTH>
+} | {
+    type: RequiredSignerType.PATH
+    path: ValidBIP32Path
+}
 
 export type ParsedMargin = {
     numerator: Uint64_str,
     denominator: Uint64_str
 }
-
 
 export type ParsedPoolParams = {
     poolKey: ParsedPoolKey,
@@ -323,10 +347,13 @@ export type OutputDestination = {
     addressParams: ParsedAddressParams
 }
 
+export type DatumHash = FixlenHexString<typeof DATUM_HASH_LENGTH>
+
 export type ParsedOutput = {
     amount: Uint64_str
     tokenBundle: ParsedAssetGroup<Uint64_str>[]
     destination: OutputDestination
+    datumHashHex?: DatumHash | null
 }
 
 export const ASSET_NAME_LENGTH_MAX = 32

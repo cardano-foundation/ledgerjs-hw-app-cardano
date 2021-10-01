@@ -1,8 +1,9 @@
 import { InvalidDataReason } from "../../errors/invalidDataReason"
-import type { Int64_str, ParsedAssetGroup, ParsedInput, ParsedToken, ParsedWithdrawal, Uint32_t, Uint64_str, ValidBIP32Path, Version } from "../../types/internal"
+import type { Int64_str, ParsedAssetGroup, ParsedInput, ParsedRequiredSigner, ParsedToken, ParsedWithdrawal, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path, Version} from "../../types/internal"
+import      { RequiredSignerType } from "../../types/internal"
 import { StakeCredentialType } from "../../types/internal"
 import { assert } from "../../utils/assert"
-import { hex_to_buf, path_to_buf, stake_credential_to_buf,uint32_to_buf, uint64_to_buf } from "../../utils/serialize"
+import { hex_to_buf, path_to_buf, stake_credential_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../../utils/serialize"
 import { getCompatibility } from "../getVersion"
 import type {SerializeTokenAmountFn} from "../signTx"
 
@@ -85,4 +86,18 @@ export function serializeMintBasicParams(mint: Array<ParsedAssetGroup<Int64_str>
     return Buffer.concat([
         uint32_to_buf(mint.length as Uint32_t),
     ])
+}
+export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner) {
+    switch (requiredSigner.type) {
+    case RequiredSignerType.PATH:
+        return Buffer.concat([
+            uint8_to_buf(requiredSigner.type as Uint8_t),
+            path_to_buf(requiredSigner.path),
+        ])
+    case RequiredSignerType.HASH:
+        return Buffer.concat([
+            uint8_to_buf(requiredSigner.type as Uint8_t),
+            hex_to_buf(requiredSigner.hash),
+        ])
+    }
 }

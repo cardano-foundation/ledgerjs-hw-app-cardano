@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.0](TBD) - [TBD]
+
+Support for Alonzo era (Plutus scripts)
+
+### Added
+
+- support for all new Alonzo transaction elements
+- support for stake credentials given by key hash
+- a new transaction signing mode for Plutus transactions
+
+### Changed
+
+- the account on HD derivation path must be the same across the transaction elements (incl. witnesses)
+- KeyStakeCredentialParams type replaced by KeyPathStakeCredentialParams, KeyHashStakeCredentialParams added
+
+### Fixed
+
+- pool registration transaction witness must be consistent with the path of the owner (for `SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER`)
+
+
 ## [4.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.1...v4.0.0) - [October 27th 2021]
 
 Support for script elements in transactions and addresses.
@@ -20,6 +40,7 @@ Support for script elements in transactions and addresses.
 ### Changed
 
 - API changes: replacing paths with stake credentials in various address and transaction parameters breaks compatibility
+
 
 ## [3.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.0...v3.2.1) - [June 9th 2021]
 
@@ -45,6 +66,7 @@ Added support for signing pool registration certificates as operator, support fo
 - `PoolRegistrationParams.rewardAccount` has been changeed from a `string` to `PoolRewardAccount` in order to support pool operator signing - `rewardAccount` can now also be sent as path
 - `AssetGroup.tokens` and `TxOutput.tokenBundle` are required to be in CBOR canonical order
 
+
 ## [3.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.0.0...v3.1.0) - [May 11th 2021]
 
 Added support for Catalyst voting registration metadata creation within the `signTransaction()` call, introduced in Ledger Cardano app version 2.3.2.
@@ -62,6 +84,7 @@ Added support for Catalyst voting registration metadata creation within the `sig
 ### Fixed
 
 - validation of zero numerical values, previously the library was incorrectly failing for any zero value passed
+
 
 ## [3.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.1...v3.0.0) - [April 13th 2021]
 
@@ -92,6 +115,7 @@ Major release. Switched from flow to TypeScript.
 
 - Compatibility with pre-Mary (<2.2) App versions.
 
+
 ## [2.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.2.0...v2.2.1) - [February 18th 2021]
 
 Patch release with a minor fix in signTransaction() call's parameters validation
@@ -103,6 +127,7 @@ Patch release with a minor fix in signTransaction() call's parameters validation
 ### Fixed
 
 - relax the tokenBundle feature check to allow an empty array https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/pull/17
+
 
 ## [2.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v2.1.0...v2.2.0) - [February 8th 2021]
 
@@ -119,6 +144,7 @@ Works with Ledger Cardano app 2.2.0 and is backwards compatible with older versi
 ### Fixed
 
 - Fixed incorrect validation of numerical parameters passed as strings which failed for values over JS max safe integer: https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/29
+
 
 ## [2.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/releases/tag/v2.1.0) - [December 11th 2020]
 
@@ -137,6 +163,7 @@ Works with Ledger Cardano app 2.1.0 and is backwards compatible with 2.0.4/2.0.5
 
 ### Fixed
 
+
 ## [2.0.1] - [August 20th 2020]
 
 ### Added
@@ -146,6 +173,7 @@ Works with Ledger Cardano app 2.1.0 and is backwards compatible with 2.0.4/2.0.5
 ### Changed
 
 ### Fixed
+
 
 ## [2.0.0] - [August 18th 2020]
 

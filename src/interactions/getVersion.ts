@@ -1,5 +1,6 @@
 import { DeviceVersionUnsupported } from "../errors"
 import type { DeviceCompatibility, Version } from "../types/internal"
+import { getVersionString } from "../utils"
 import { INS } from "./common/ins"
 import type { Interaction, SendParams } from "./common/types"
 
@@ -37,14 +38,15 @@ export function* getVersion(): Interaction<Version> {
 
 export function getCompatibility(version: Version): DeviceCompatibility {
     // We restrict forward compatibility only to backward-compatible semver changes
-    const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 3, Infinity)
-    const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 3, Infinity)
-    const v2_4 = isLedgerAppVersionAtLeast(version, 2, 4) && isLedgerAppVersionAtMost(version, 3, Infinity)
-    const v3_0 = isLedgerAppVersionAtLeast(version, 3, 0) && isLedgerAppVersionAtMost(version, 3, Infinity)
+    const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 4, Infinity)
+    const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 4, Infinity)
+    const v2_4 = isLedgerAppVersionAtLeast(version, 2, 4) && isLedgerAppVersionAtMost(version, 4, Infinity)
+    const v3_0 = isLedgerAppVersionAtLeast(version, 3, 0) && isLedgerAppVersionAtMost(version, 4, Infinity)
+    const v4_0_Alonzo = isLedgerAppVersionAtLeast(version, 4, 0) && isLedgerAppVersionAtMost(version, 4, Infinity)
 
     return {
         isCompatible: v2_2,
-        recommendedVersion: v2_2 ? null : '3.0',
+        recommendedVersion: v2_2 ? null : '4.0',
         supportsMary: v2_2,
         supportsCatalystRegistration: v2_3,
         supportsZeroTtl: v2_3,
@@ -53,6 +55,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsNativeScriptHashDerivation: v3_0,
         supportsMultisigTransaction: v3_0,
         supportsMint: v3_0,
+        supportsAlonzo: v4_0_Alonzo,
     }
 }
 
@@ -82,6 +85,6 @@ export function ensureLedgerAppVersionCompatible(
     const { isCompatible, recommendedVersion } = getCompatibility(version)
 
     if (!isCompatible) {
-        throw new DeviceVersionUnsupported(`Device app version unsupported. Please upgrade to ${recommendedVersion}.`)
+        throw new DeviceVersionUnsupported(`Device app version ${getVersionString(version)} unsupported, recommended version is ${recommendedVersion}.`)
     }
 }

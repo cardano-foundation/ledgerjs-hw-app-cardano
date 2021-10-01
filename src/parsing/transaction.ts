@@ -1,12 +1,14 @@
 import { InvalidData } from "../errors"
 import { InvalidDataReason } from "../errors/invalidDataReason"
-import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal"
+import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedRequiredSigner, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal} from "../types/internal"
+import { KEY_HASH_LENGTH,RequiredSignerType } from "../types/internal"
 import { StakeCredentialType } from "../types/internal"
-import { ASSET_NAME_LENGTH_MAX, CertificateType, SpendingDataSourceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal"
+import { ASSET_NAME_LENGTH_MAX, CertificateType, SCRIPT_DATA_HASH_LENGTH,SpendingDataSourceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal"
 import type {
     AssetGroup,
     Certificate,
     Network,
+    RequiredSigner,
     SignTransactionRequest,
     Token,
     Transaction,
@@ -16,16 +18,19 @@ import type {
     Withdrawal,
 } from "../types/public"
 import {
+    AddressType,
     PoolKeyType,
 } from "../types/public"
 import {
     PoolOwnerType,
     TransactionSigningMode,
     TxOutputDestinationType,
+    TxRequiredSignerType,
 } from "../types/public"
-import { unreachable } from "../utils/assert"
+import { unreachable } from '../utils/assert'
 import { isArray, parseBIP32Path, parseStakeCredential,validate } from "../utils/parse"
 import { parseHexString, parseHexStringOfLength, parseInt64_str, parseUint32_t, parseUint64_str } from "../utils/parse"
+import { hex_to_buf } from "../utils/serialize"
 import { parseAddress } from "./address"
 import { parseCertificate } from "./certificate"
 import { ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX } from "./constants"
@@ -95,6 +100,11 @@ function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed:
     return parsedTokenBundle
 }
 
+function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
+    validate(typeof value === 'boolean', errorMsg)
+    return value
+}
+
 export function parseTransaction(tx: Transaction): ParsedTransaction {
     const network = parseNetwork(tx.network)
     // inputs
@@ -137,6 +147,20 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseTokenBundle(tx.mint, false, parseInt64_str)
 
+    const scriptDataHashHex = tx.scriptDataHashHex == null
+        ? null
+        : parseHexStringOfLength(tx.scriptDataHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
+
+    validate(isArray(tx.collaterals ?? []), InvalidDataReason.COLLATERALS_NOT_ARRAY)
+    const collaterals = (tx.collaterals ?? []).map(inp => parseTxInput(inp))
+
+    validate(isArray(tx.requiredSigners ?? []), InvalidDataReason.REQUIRED_SIGNERS_NOT_ARRAY)
+    const requiredSigners = (tx.requiredSigners ?? []).map(rs => parseRequiredSigner(rs))
+
+    const includeNetworkId = tx.includeNetworkId == null
+        ? false
+        : parseBoolean(tx.includeNetworkId, InvalidDataReason.NETWORK_ID_INCLUDE_INVALID)
+
     return {
         network,
         inputs,
@@ -148,6 +172,10 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         certificates,
         fee,
         mint,
+        scriptDataHashHex,
+        collaterals,
+        requiredSigners,
+        includeNetworkId,
     }
 }
 
@@ -196,6 +224,31 @@ function parseTxDestination(
     }
 }
 
+// a HW wallet cannot distinguish between native script hash and Plutus script hash
+// so allows datum hash whenever the payment part is script
+function addressAllowsDatum(destination: OutputDestination): boolean {
+    let type: AddressType
+    switch (destination.type) {
+    case TxOutputDestinationType.THIRD_PARTY: {
+        const addressBytes: Buffer = hex_to_buf(destination.addressHex)
+        type = (addressBytes[0] & 0b11110000) >> 4
+        break
+    }
+    case TxOutputDestinationType.DEVICE_OWNED:
+        type = destination.addressParams.type
+        break
+    }
+    switch (type) {
+    case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
+    case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
+    case AddressType.POINTER_SCRIPT:
+    case AddressType.ENTERPRISE_SCRIPT:
+        return true
+    default:
+        return false
+    }
+}
+
 function parseTxOutput(
     output: TxOutput,
     network: Network,
@@ -205,10 +258,35 @@ function parseTxOutput(
     const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
 
     const destination = parseTxDestination(network, output.destination)
+
+    const datumHashHex = output.datumHashHex == null
+        ? null
+        : parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
+    validate(!datumHashHex || addressAllowsDatum(destination),
+        InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
+
     return {
         amount,
         tokenBundle,
         destination,
+        datumHashHex,
+    }
+}
+
+function parseRequiredSigner(requiredSigner: RequiredSigner): ParsedRequiredSigner {
+    switch (requiredSigner.type) {
+    case TxRequiredSignerType.PATH:
+        return {
+            type: RequiredSignerType.PATH,
+            path: parseBIP32Path(requiredSigner.path, InvalidDataReason.REQUIRED_SIGNER_INVALID_PATH),
+        }
+    case TxRequiredSignerType.HASH:
+        return {
+            type: RequiredSignerType.HASH,
+            hash: parseHexStringOfLength(requiredSigner.hash, KEY_HASH_LENGTH, InvalidDataReason.VKEY_HASH_WRONG_LENGTH),
+        }
+    default:
+        throw new InvalidData(InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE)
     }
 }
 
@@ -218,6 +296,7 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
     case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
     case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
     case TransactionSigningMode.MULTISIG_TRANSACTION:
+    case TransactionSigningMode.PLUTUS_TRANSACTION:
         return mode
     default:
         throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
@@ -258,10 +337,26 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH),
             InvalidDataReason.SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH,
         )
+        // cannot have collaterals in the tx
+        validate(
+            tx.collaterals.length === 0,
+            InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED
+        )
+        // cannot have required signers in the tx
+        validate(
+            tx.requiredSigners.length === 0,
+            InvalidDataReason.SIGN_MODE_ORDINARY__REQUIRED_SIGNERS_NOT_ALLOWED
+        )
+
         break
     }
 
     case TransactionSigningMode.MULTISIG_TRANSACTION: {
+        // only third-party outputs
+        validate(
+            tx.outputs.every(output => output.destination.type === TxOutputDestinationType.THIRD_PARTY),
+            InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
+        )
         // pool registrations have separate signing modes
         validate(
             tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_REGISTRATION),
@@ -291,13 +386,20 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.SCRIPT_HASH),
             InvalidDataReason.SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT,
         )
-        // only third-party outputs
+        // cannot have collaterals in the tx
         validate(
-            tx.outputs.every(output => output.destination.type === TxOutputDestinationType.THIRD_PARTY),
-            InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
+            tx.collaterals.length === 0,
+            InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED
         )
+        // cannot have required signers in the tx
+        validate(
+            tx.requiredSigners.length === 0,
+            InvalidDataReason.SIGN_MODE_MULTISIG__REQUIRED_SIGNERS_NOT_ALLOWED
+        )
+
         break
     }
+
     case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER: {
         // all these restictions are due to fact that pool owner signature *might* accidentally/maliciously sign another part of tx
         // but we are not showing these parts to the user
@@ -308,12 +410,19 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.inputs.every(inp => inp.path == null),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__INPUT_WITH_PATH_NOT_ALLOWED
         )
-        // cannot have our output in the tx
+        // cannot have change output in the tx, all is paid by the pool operator
         validate(
             tx.outputs.every(out => out.destination.type === TxOutputDestinationType.THIRD_PARTY),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED
         )
 
+        // no datum in outputs
+        validate(
+            tx.outputs.every(out => out.datumHashHex == null),
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED
+        )
+
+        // only a single certificate that is pool registration
         validate(
             tx.certificates.length === 1,
             InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
@@ -322,6 +431,10 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             validate(
                 certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
                 InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
+            )
+            validate(
+                certificate.pool.poolKey.type === PoolKeyType.THIRD_PARTY,
+                InvalidDataReason.SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED
             )
             validate(
                 certificate.pool.owners.filter(o => o.type === PoolOwnerType.DEVICE_OWNED).length === 1,
@@ -334,18 +447,50 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.withdrawals.length === 0,
             InvalidDataReason.SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED
         )
+
+        // cannot have mint in the tx
+        validate(
+            tx.mint == null,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED
+        )
+
+        // cannot have script data hash in the tx
+        validate(
+            tx.scriptDataHashHex == null,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__SCRIPT_DATA_HASH_NOT_ALLOWED
+        )
+
+        // cannot have collaterals in the tx
+        validate(
+            tx.collaterals.length === 0,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED
+        )
+
+        // cannot have required signers in the tx
+        validate(
+            tx.requiredSigners.length === 0,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED
+        )
+
         break
     }
+
     case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR: {
         // Most of these restrictions are necessary in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         // and since pool owner signatures will be added to the same tx body, we need the restrictions here, too
         // (we don't want to let operator sign a tx that pool owners will not be able to sign).
 
+        // no datum in outputs
+        validate(
+            tx.outputs.every(out => out.datumHashHex == null),
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED
+        )
+
+        // only a single certificate that is pool registration
         validate(
             tx.certificates.length === 1,
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED
         )
-
         tx.certificates.forEach(certificate => {
             validate(
                 certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
@@ -366,8 +511,44 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.withdrawals.length === 0,
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED
         )
+
+        // cannot have mint in the tx
+        validate(
+            tx.mint == null,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__MINT_NOT_ALLOWED
+        )
+
+        // cannot have script data hash in the tx
+        validate(
+            tx.scriptDataHashHex == null,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SCRIPT_DATA_HASH_NOT_ALLOWED
+        )
+
+        // cannot have collaterals in the tx
+        validate(
+            tx.collaterals.length === 0,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERALS_NOT_ALLOWED
+        )
+
+        // cannot have required signers in the tx
+        validate(
+            tx.requiredSigners.length === 0,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED
+        )
+
         break
     }
+
+    case TransactionSigningMode.PLUTUS_TRANSACTION: {
+        // pool registrations not allowed to be combined with Plutus
+        validate(
+            tx.certificates.every(certificate => certificate.type !== CertificateType.STAKE_POOL_REGISTRATION),
+            InvalidDataReason.SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED,
+        )
+
+        break
+    }
+
     default:
         unreachable(signingMode)
     }

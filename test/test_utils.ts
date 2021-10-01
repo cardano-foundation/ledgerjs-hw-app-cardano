@@ -2,10 +2,11 @@
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
 import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos"
 import * as blake2 from "blake2"
+import { expect } from "chai"
 import { ImportMock } from "ts-mock-imports"
 import type { FixlenHexString} from "types/internal"
 
-import Ada from "../src/Ada"
+import { Ada, utils } from "../src/Ada"
 import { InvalidDataReason } from "../src/errors/index"
 import * as parseModule from "../src/utils/parse"
 
@@ -83,8 +84,100 @@ export const Networks = {
 
 type TxHash = FixlenHexString<32>
 
-export function hashTxBody(txBodyHex: string): TxHash {
+function hashTxBody(txBodyHex: string): TxHash {
     let b2 = blake2.createHash("blake2b", { digestLength: 32 })
     b2.update(Buffer.from(txBodyHex, 'hex'))
     return parseModule.parseHexStringOfLength(b2.digest('hex'), 32, InvalidDataReason.INVALID_B2_HASH)
 }
+
+export function bech32_to_hex(str: string): string {
+    return utils.buf_to_hex(utils.bech32_decodeAddress(str))
+}
+
+export const DontRunOnLedger: string = "DO NOT RUN ON LEDGER"
+
+export function describeRejects(name: string, testList: any) {
+    describe(name + "_JS", async () => {
+        let ada: Ada = {} as Ada
+
+        beforeEach(async () => {
+            ada = await getAda()
+        })
+
+        afterEach(async () => {
+            await (ada as any).t.close()
+        })
+
+        for (const {testname, tx, additionalWitnessPaths, signingMode, rejectReason } of testList) {
+            it(testname, async() => {
+                if (rejectReason === InvalidDataReason.LEDGER_POLICY) {
+                    return
+                }
+                const response = ada.signTransaction({
+                    tx,
+                    signingMode,
+                    additionalWitnessPaths: additionalWitnessPaths || [] ,
+                })
+                await expect(response).to.be.rejectedWith(rejectReason)
+            })
+        }
+    })
+
+    describeWithoutValidation(name + "_Ledger", async () => {
+        let ada: Ada = {} as Ada
+
+        beforeEach(async () => {
+            ada = await getAda()
+        })
+
+        afterEach(async () => {
+            await (ada as any).t.close()
+        })
+
+        for (const {testname, tx, additionalWitnessPaths, signingMode, errCls, errMsg } of testList) {
+            it(testname, async() => {
+                if (errMsg === DontRunOnLedger) {
+                    return
+                }
+                const response = ada.signTransaction({
+                    tx,
+                    signingMode,
+                    additionalWitnessPaths: additionalWitnessPaths || [],
+                })
+                await expect(response).to.be.rejectedWith(errCls, errMsg)
+            })
+        }
+    })
+}
+
+export function describePositiveTest(name: string, tests: any[]) {
+    describe(name, async () => {
+        let ada: Ada = {} as Ada
+
+        beforeEach(async () => {
+            ada = await getAda()
+        })
+
+        afterEach(async () => {
+            await (ada as any).t.close()
+        })
+
+        for (const { testname, tx, signingMode, additionalWitnessPaths, txBody, result: expected } of tests) {
+            const additionalWitnessPathsIfPresent = additionalWitnessPaths || []
+            it(testname, async () => {
+                if (!txBody) {
+                    console.log("WARNING --- No tx body given: " + testname)
+                } else if (hashTxBody(txBody) !== expected.txHashHex) {
+                    console.log("WARNING --- Tx body hash mismatch: " + testname)
+                }
+                const response = await ada.signTransaction({
+                    tx,
+                    signingMode,
+                    additionalWitnessPaths: additionalWitnessPathsIfPresent,
+                })
+                expect(response).to.deep.equal(expected)
+            })
+        }
+    })
+}
+

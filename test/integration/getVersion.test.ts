@@ -17,7 +17,7 @@ describe("getVersion", async () => {
     it("Should correctly get the semantic version of device", async () => {
         const { version, compatibility } = await ada.getVersion()
 
-        expect(version.major).to.equal(3)
+        expect(version.major).to.equal(4)
         expect(version.minor).to.equal(0)
         expect(compatibility).to.deep.equal({
             isCompatible: true,
@@ -30,6 +30,7 @@ describe("getVersion", async () => {
             supportsPoolRegistrationAsOperator: true,
             supportsPoolRetirement: true,
             supportsNativeScriptHashDerivation: true,
+            supportsAlonzo: true,
         })
     })
 })

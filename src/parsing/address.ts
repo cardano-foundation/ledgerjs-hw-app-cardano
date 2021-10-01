@@ -44,7 +44,7 @@ function extractStakingDataSource(
         return {
             type: StakingDataSourceType.KEY_PATH,
             path: codedStakingPath,
-        }            
+        }
     }
     if (null != stakingKeyHashHex) {
         validate(stakingPath == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)

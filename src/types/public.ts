@@ -1,6 +1,6 @@
 /**
  * Type for 64-bit integers.
- * 
+ *
  * We accept either
  * - `Number` (if it is less than Number.MAX_SAFE_INTEGER)
  * - `String` (representing 64-bit number)
@@ -50,7 +50,7 @@ export enum AddressType {
     REWARD_SCRIPT                       = 0b1111,
 }
 
-/** 
+/**
  * Certificate type (as defined by the Cardano spec)
  * @category Shelley
  * @see [[Certificate]]
@@ -108,12 +108,12 @@ export const enum RelayType {
 
 /**
  * Hardened derivation
- * 
+ *
  * @example
  * ```
  * const accountId = 0 + HARDENED
  * ```
- * 
+ *
  * @see [[BIP32Path]]
  */
 export const HARDENED = 0x80000000
@@ -122,14 +122,14 @@ export const HARDENED = 0x80000000
 
 /**
  * Represents BIP 32 path.
- * 
+ *
  * @example
  * ```
  *  const HD = HARDENED
  *  const ByronAccount0 = [44 + HD, 1815 + HD, 0 + HD];
- *  const ShelleyChangeAddress0 = [1852 + HD, 1815 + HD, 0 + HD, 1, 0]; 
+ *  const ShelleyChangeAddress0 = [1852 + HD, 1815 + HD, 0 + HD, 1, 0];
  * ```
- * 
+ *
  * @see [[HARDENED]]
  * @category Basic types
  */
@@ -172,7 +172,7 @@ export type DeviceOwnedAddress = {
     params: AddressParamsReward
 }
 
-/** 
+/**
  * Byron address parameters
  * @category Addresses
  * @see [[DeviceOwnedAddress]]
@@ -218,7 +218,7 @@ export type AddressParamsPointer = SpendingParams & {
 }
 
 /** Shelley *reward* address parameters.
- * 
+ *
  * @category Addresses
  * @see [[DeviceOwnedAddress]]
  */
@@ -255,11 +255,11 @@ export type TxInput = {
     outputIndex: number,
     /**
      * Describes path used for witnessing this UTxO. The API will sign transaction with this path.
-     * 
+     *
      * Note: null indicates we don't want to sign this utxo. This is highly non-standard
      * and the only usecase so far is pool registration as owner.
      * We therefore don't mark it as optional so that people won't forget specifying it
-     * 
+     *
      * Note: Device has no ability to really check whether `path` is correct witnessing path for this UTxO.
      */
     path: BIP32Path | null,
@@ -298,6 +298,10 @@ export type AssetGroup = {
  */
 export type TxOutput = {
     /**
+     * Destination address of the output
+     */
+    destination: TxOutputDestination
+    /**
      * Output amount.
      * Specified in Lovelace
      */
@@ -310,9 +314,9 @@ export type TxOutput = {
      */
     tokenBundle?: Array<AssetGroup> | null
     /**
-     * Destination address of the output
+     * Optional datum hash
      */
-    destination: TxOutputDestination
+    datumHashHex?: string | null
 }
 
 /**
@@ -587,7 +591,7 @@ export type Relay = {
 
 /**
  * Pool registration metadata
- * 
+ *
  * @category Pool registration certificate
  * @see [[PoolRegistrationParams]]
  */
@@ -598,7 +602,7 @@ export type PoolMetadataParams = {
 
 /**
  * Pool margin represented as fraction (numerator/denominator)
- * 
+ *
  * @category Pool registration certificate
  * @see [[PoolRegistrationParams]]
  */
@@ -617,7 +621,7 @@ export type Margin = {
 
 /**
  * Pool registration certificate
- * 
+ *
  * @category Pool registration certificate
  * @see [[Certificate]]
  */
@@ -653,20 +657,26 @@ export type PoolRetirementParams = {
 
 export enum StakeCredentialParamsType {
     KEY_PATH,
+    KEY_HASH,
     SCRIPT_HASH,
 }
 
-type KeyStakeCredentialParams = {
+export type KeyPathStakeCredentialParams = {
     type: StakeCredentialParamsType.KEY_PATH,
     keyPath: BIP32Path,
 }
 
-type ScriptStakeCredentialParams = {
+export type KeyHashStakeCredentialParams = {
+    type: StakeCredentialParamsType.KEY_HASH,
+    keyHash: string,
+}
+
+export type ScriptStakeCredentialParams = {
     type: StakeCredentialParamsType.SCRIPT_HASH,
     scriptHash: string,
 }
 
-export type StakeCredentialParams = KeyStakeCredentialParams | ScriptStakeCredentialParams
+export type StakeCredentialParams = KeyPathStakeCredentialParams | KeyHashStakeCredentialParams | ScriptStakeCredentialParams
 
 /**
  * Stake key registration certificate parameters
@@ -757,7 +767,7 @@ export type Flags = {
     isDebug: boolean,
 };
 
-/** 
+/**
  * Device app version
  * @category Basic types
  * @see [[Ada.getVersion]]
@@ -820,6 +830,10 @@ export type DeviceCompatibility = {
      * Whether we support mint
      */
     supportsMint: boolean
+    /**
+     * Whether we support Alonzo and Plutus
+     */
+    supportsAlonzo: boolean
 }
 
 /**
@@ -873,7 +887,7 @@ export type Witness = {
      * Witnessed path
      */
     path: BIP32Path,
-    /** 
+    /**
      * Note: this is *only* a signature.
      * You need to add proper extended public key to form a full witness
      */
@@ -994,6 +1008,20 @@ export type CatalystRegistrationParams = {
     nonce: bigint_like,
 }
 
+export enum TxRequiredSignerType {
+    /** Required Signer is supplied as key path or hash value */
+    PATH = 'required_signer_path',
+    HASH = 'required_signer_hash',
+}
+
+export type RequiredSigner = {
+    type: TxRequiredSignerType.PATH,
+    path: BIP32Path,
+} | {
+    type: TxRequiredSignerType.HASH,
+    hash: string,
+}
+
 /**
  * Represents transaction to be signed by the device.
  * Note that this represents a *superset* of what Ledger can sign due to certain hardware app/security limitations.
@@ -1053,6 +1081,22 @@ export type Transaction = {
      * i.e. the key with the lower value in lexical order sorts earlier.
      */
     mint?: Array<AssetGroup> | null,
+    /**
+     * Script Data hash (if any)
+     */
+    scriptDataHashHex?: string | null,
+    /**
+     * Collaterals (if any)
+     */
+    collaterals?: Array<TxInput> | null,
+    /**
+     * Required Signers by key (if any)
+     */
+    requiredSigners?: Array<RequiredSigner> | null,
+    /**
+     * True if network id should be included in the transaction body; false or not given otherwise
+     */
+    includeNetworkId?: boolean,
 }
 
 /**
@@ -1066,13 +1110,17 @@ export type Transaction = {
 export enum TransactionSigningMode {
     /**
      * Represents an ordinary user transaction transferring funds.
-     * 
+     *
      * The transaction
      * - *should* have valid `path` property on all `inputs`
      * - *must not* contain a pool registration certificate
+     * - *must* contain key path stake credentials in certificates and withdrawals (no key or script hash)
+     * - *must not* contain collateral inputs
+     * - *must not* contain required signers
+     *
      * - *must* contain only 1852 and 1855 paths
      * - *must* contain 1855 witness requests only when transaction contains token minting/burning
-     * 
+     *
      * The API witnesses
      * - all non-null [[TxInput.path]] on `inputs`
      * - all [[Withdrawal.path]] on `withdrawals`
@@ -1081,55 +1129,19 @@ export enum TransactionSigningMode {
     ORDINARY_TRANSACTION = 'ordinary_transaction',
 
     /**
-     * Represents pool registration from the perspective of pool owner.
-     * 
-     * The transaction
-     * - *must* have `path=null` on all `inputs` (i.e., we are not witnessing any UTxO)
-     * - *must* have single Pool registration certificate
-     * - *must* have single owner of type [[PoolOwnerType.DEVICE_OWNED]] on that certificate
-     * - *must not* contain withdrawals
-     * - *must not* contain token minting
-     * - *must* contain only staking witness requests
-     * 
-     * These restrictions are in place due to a possibility of maliciously signing *another* part of
-     * the transaction with the pool owner path as we are not displaying device-owned paths on the device screen.
-     * 
-     * The API witnesses
-     * - the single [[PoolOwnerDeviceOwnedParams.stakingPath]] found in pool registration
-     */
-    POOL_REGISTRATION_AS_OWNER = 'pool_registration_as_owner',
-
-    /**
-     * Represents pool registration from the perspective of pool operator.
-     * 
-     * The transaction
-     * - *should* have valid `path` property on all `inputs`
-     * - *must* have single Pool registration certificate
-     * - *must* have a pool key of [[PoolKeyType.DEVICE_OWNED]] on that certificate
-     * - *must* have all owners of type [[PoolOwnerType.THIRD_PARTY]] on that certificate
-     * - *must not* have withdrawals
-     * - *must not* contain token minting
-     * 
-     * Most of these restrictions are in place since pool owners need to be able to sign
-     * the same tx body.
-     * 
-     * The API witnesses
-     * - all non-null [[TxInput.path]] on `inputs`
-     * - [[PoolKeyDeviceOwnedParams.path]] found in pool registration
-     */
-    POOL_REGISTRATION_AS_OPERATOR = 'pool_registration_as_operator',
-
-    /**
-     * Represents a transaction controlled by scripts.
+     * Represents a transaction controlled by native scripts.
      *
      * Like an ordinary transaction, but stake credentials and all similar elements are given as script hashes
      * and witnesses are decoupled from transaction elements.
      *
      * The transaction
      * - *must* have `path` undefined on all `inputs`
-     * - *must not* contain output addresses given by parameters
-     * - *must not* contain a pool registration certificate
-     * - *must* contain script hash stake credentials in certificates and withdrawals (no paths)
+     * - *must* only contain output addresses given as [[TxOutputDestinationType.THIRD_PARTY]]
+     * - *must not* contain a pool registration or retirement certificate
+     * - *must* contain script hash stake credentials in certificates and withdrawals
+     * - *must not* contain collateral inputs
+     * - *must not* contain required signers
+     *
      * - *must* contain only 1854 and 1855 witness requests
      * - *must* contain 1855 witness requests only when transaction contains token minting/burning
      *
@@ -1137,6 +1149,62 @@ export enum TransactionSigningMode {
      * - all given in [[SignTransactionRequest.additionalWitnessPaths]]
      */
     MULTISIG_TRANSACTION = 'multisig_transaction',
+
+    /**
+     * Represents pool registration from the perspective of a pool owner.
+     *
+     * The transaction
+     * - *must* have `path=null` on all `inputs` (i.e., we are not witnessing any UTxO)
+     * - *must not* have device-owned outputs
+     * - *must not* have outputs with datum
+     * - *must* have a single certificate, and it must be pool registration
+     * - *must* have a single owner of type [[PoolOwnerType.DEVICE_OWNED]] on that certificate
+     * - *must not* contain withdrawals
+     * - *must not* contain token minting
+     * - *must not* contain script data hash
+     * - *must not* contain collateral inputs
+     * - *must not* contain required signers
+     * - *must* contain only staking witness requests
+     *
+     * These restrictions are in place due to a possibility of maliciously signing *another* part of
+     * the transaction with the pool owner path as we are not displaying device-owned paths on the device screen.
+     *
+     * The API witnesses
+     * - the single [[PoolOwnerDeviceOwnedParams.stakingPath]] found in pool registration
+     */
+    POOL_REGISTRATION_AS_OWNER = 'pool_registration_as_owner',
+
+    /**
+     * Represents pool registration from the perspective of a pool operator.
+     *
+     * The transaction
+     * - *should* have valid `path` property on all `inputs`
+     * - *must not* have outputs with datum
+     * - *must* have a single certificate, and it must be pool registration
+     * - *must* have a pool key of [[PoolKeyType.DEVICE_OWNED]] on that certificate
+     * - *must* have all owners of type [[PoolOwnerType.THIRD_PARTY]] on that certificate
+     * - *must not* have withdrawals
+     * - *must not* contain token minting
+     * - *must not* contain script data hash
+     * - *must not* contain collateral inputs
+     * - *must not* contain required signers
+     *
+     * Most of these restrictions are in place since pool owners need to be able to sign
+     * the same tx body.
+     *
+     * The API witnesses
+     * - all non-null [[TxInput.path]] on `inputs`
+     * - [[PoolKeyDeviceOwnedParams.path]] found in pool registration
+     */
+    POOL_REGISTRATION_AS_OPERATOR = 'pool_registration_as_operator',
+
+    /**
+     * Represents a transaction that includes Plutus script evaluation (e.g. spending from a script address).
+     *
+     * The transaction
+     * - *must not* contain a pool registration certificate
+     */
+    PLUTUS_TRANSACTION = 'plutus_transaction',
 }
 
 /**
@@ -1150,7 +1218,7 @@ export type SignTransactionRequest = {
      * Mode in which we want to sign the transaction.
      * Ledger has certain limitations (see [[TransactionSigningMode]] in detail) due to which
      * it cannot sign arbitrary combination of all transaction features.
-     * The mode specifies which use-case the user want to use and triggers additional validation on `tx` field. 
+     * The mode specifies which use-case the user want to use and triggers additional validation on `tx` field.
      */
     signingMode: TransactionSigningMode
     /**

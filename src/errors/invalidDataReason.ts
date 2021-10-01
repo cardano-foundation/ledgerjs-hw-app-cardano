@@ -9,6 +9,7 @@ export enum InvalidDataReason {
 
   NETWORK_INVALID_PROTOCOL_MAGIC = "invalid protocol magic",
   NETWORK_INVALID_NETWORK_ID = "invalid network id",
+  NETWORK_ID_INCLUDE_INVALID = "invalid value for includeNetworkId",
 
   INPUTS_NOT_ARRAY = "inputs not an array",
   INPUT_INVALID_TX_HASH = "invalid tx hash in an input",
@@ -19,6 +20,7 @@ export enum InvalidDataReason {
   OUTPUT_INVALID_AMOUNT = "invalid amount in an output",
   OUTPUT_INVALID_ADDRESS = "invalid address in an output",
   OUTPUT_INVALID_ADDRESS_PARAMS = "change address must have path as payment part",
+  OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH = "datum hash is only allowed when the output address contains a payment script hash",
 
   MULTIASSET_INVALID_POLICY_NAME = "invalid policy id in a multiasset token bundle",
   MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid multiasset token bundle - asset groups not an array",
@@ -132,14 +134,27 @@ export enum InvalidDataReason {
 
   VALIDITY_INTERVAL_START_INVALID = "invalid validity interval start",
 
+  SCRIPT_DATA_HASH_WRONG_LENGTH = "script data hash not 32 bytes long",
+
+  COLLATERALS_NOT_ARRAY = "collaterals not an array",
+
+  REQUIRED_SIGNERS_NOT_ARRAY = "required signers not an array",
+  VKEY_HASH_WRONG_LENGTH = "vkey hash not 28 bytes long",
+  UNKNOWN_REQUIRED_SIGNER_TYPE = "unknown required signer type",
+  REQUIRED_SIGNER_INVALID_PATH = "invalid path for required signer",
+
   SIGN_MODE_UNKNOWN = "unknown signing mode",
 
   SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED =
   "pool registration is not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH =
-  "certificate stake credential must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
+  "certificate stake credential must be given as a staking path in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH =
   "withdrawal must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED =
+  "collaterals not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__REQUIRED_SIGNERS_NOT_ALLOWED =
+  "required signers not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
 
   SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED =
   "pool registration is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
@@ -151,6 +166,10 @@ export enum InvalidDataReason {
   "certificate stake credential must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT =
   "withdrawal must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED =
+  "collaterals not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__REQUIRED_SIGNERS_NOT_ALLOWED =
+  "required signers not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
 
   SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
@@ -162,6 +181,18 @@ export enum InvalidDataReason {
   "single device-owned pool owner is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED =
   "no withdrawals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED =
+  "no mint allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__SCRIPT_DATA_HASH_NOT_ALLOWED =
+  "no script data hash allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED =
+  "no collaterals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED =
+  "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED =
+  "third party pool key is required in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED =
+  "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
 
   SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED =
   "single pool registration certificate is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
@@ -171,6 +202,21 @@ export enum InvalidDataReason {
   "no device-owned pool owner is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED =
   "no withdrawals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__MINT_NOT_ALLOWED =
+  "no mint allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__SCRIPT_DATA_HASH_NOT_ALLOWED =
+  "no script data hash allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__COLLATERALS_NOT_ALLOWED =
+  "no collaterals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED =
+  "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED =
+  "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+
+  SIGN_MODE_PLUTUS__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
+  "outputs given by path are not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",
+  SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED =
+  "pool registration is not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",
 
   ADDITIONAL_WITNESSES_NOT_ARRAY = "additional witnesses not an array",
 
@@ -195,7 +241,8 @@ export enum InvalidDataReason {
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_DISPLAY_FORMAT = "invalid native script hash display format",
 
   /**
-   * For errors that we don't want to check on the LedgerJS side
+   * For errors that we don't want to check on the LedgerJS side,
+   * typically resulting from a detailed analysis of key derivation paths
    */
   LEDGER_POLICY = "Action rejected by Ledger's security policy",
 

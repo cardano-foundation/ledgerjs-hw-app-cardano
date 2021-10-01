@@ -1,4 +1,5 @@
-import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
+import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
+import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos"
 
 import { Certificate, StakeCredentialParamsType, TxInput, TxOutput, Withdrawal } from "../src/Ada";
 import { Ada, AddressType, CertificateType, HARDENED, Networks, TransactionSigningMode, TxOutputDestinationType } from "../src/Ada";
@@ -123,8 +124,7 @@ const signTransaction = async (appAda: Ada) => {
   const inputs: TxInput[] = [
     {
 
-      txHashHex:
-        "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
+      txHashHex: "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
       outputIndex: 0,
       path: [(44 + HARDENED), (1815 + HARDENED), (0 + HARDENED), 0, 1],
     },
@@ -258,17 +258,26 @@ const signTransaction = async (appAda: Ada) => {
   console.log("-".repeat(40));
 }
 
+export function shouldUseSpeculos(): boolean {
+    return process.env.LEDGER_TRANSPORT === 'speculos'
+}
+
+export function getTransport() {
+    return shouldUseSpeculos()
+        ? SpeculosTransport.open({apduPort: 9999})
+        : TransportNodeHid.create(1000)
+}
 
 async function example() {
   console.log("Running ADA examples");
-  const transport = await TransportNodeHid.create(5000);
+  const transport = await getTransport();
   // transport.setDebugMode(true);
   const appAda = new Ada(transport);
 
-  await getVersion(appAda);
-  await getExtendedPublicKey(appAda);
-  await deriveAddress(appAda);
-  await showAddress(appAda);
+  // await getVersion(appAda);
+  // await getExtendedPublicKey(appAda);
+  // await deriveAddress(appAda);
+  // await showAddress(appAda);
   await signTransaction(appAda);
 
 }

@@ -470,6 +470,6 @@ export const Networks = {
     } as Network,
     Testnet: {
         networkId: 0x00,
-        protocolMagic: 42,
+        protocolMagic: 1097911063,
     } as Network,
 }

@@ -1,4 +1,5 @@
 import type { DeviceOwnedAddress, ErrorBase, Network } from "../../../src/Ada"
+import { DeviceStatusCodes, DeviceStatusMessages } from "../../../src/Ada"
 import { DeviceStatusError } from "../../../src/Ada"
 import { AddressType } from "../../../src/Ada"
 import { str_to_path } from "../../../src/utils/address"
@@ -326,7 +327,7 @@ export const InvalidPathTestcases: InvalidPathTestcase[] = [
             },
         },
         errCls: DeviceStatusError,
-        errMsg: "Action rejected by Ledger's security policy",
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
     },
     {
         testname: "invalid path",
@@ -338,6 +339,6 @@ export const InvalidPathTestcases: InvalidPathTestcase[] = [
             },
         },
         errCls: DeviceStatusError,
-        errMsg: "Action rejected by Ledger's security policy",
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
     },
 ]

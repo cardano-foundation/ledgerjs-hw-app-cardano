@@ -1,7 +1,7 @@
 import type { ParsedTransaction, Uint8_t, Uint32_t, Version } from "../../types/internal"
 import { TransactionSigningMode } from "../../types/internal"
 import { assert } from "../../utils/assert"
-import { uint8_to_buf, uint32_to_buf } from "../../utils/serialize"
+import { serializeOptionFlag, uint8_to_buf, uint32_to_buf } from "../../utils/serialize"
 import { getCompatibility } from "../getVersion"
 
 const _serializeSigningMode = (
@@ -12,22 +12,10 @@ const _serializeSigningMode = (
         [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: 4 as Uint8_t,
         [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
         [TransactionSigningMode.MULTISIG_TRANSACTION]: 6 as Uint8_t,
+        [TransactionSigningMode.PLUTUS_TRANSACTION]: 7 as Uint8_t,
     }[mode]
 
     assert(value !== undefined, 'Invalid signing mode')
-
-    return uint8_to_buf(value)
-}
-
-function _serializeOptionFlag(included: boolean) {
-    const SignTxIncluded = {
-        NO: 1 as Uint8_t,
-        YES: 2 as Uint8_t,
-    }
-
-    const value = included
-        ? SignTxIncluded.YES
-        : SignTxIncluded.NO
 
     return uint8_to_buf(value)
 }
@@ -39,21 +27,37 @@ export function serializeTxInit(
     version: Version,
 ) {
     const mintBuffer = getCompatibility(version).supportsMint
-        ? _serializeOptionFlag(tx.mint != null)
+        ? serializeOptionFlag(tx.mint != null)
+        : Buffer.from([])
+    const scriptDataHashBuffer = getCompatibility(version).supportsAlonzo
+        ? serializeOptionFlag(tx.scriptDataHashHex != null)
+        : Buffer.from([])
+    const collateralsBuffer = getCompatibility(version).supportsAlonzo
+        ? uint32_to_buf(tx.collaterals.length as Uint32_t)
+        : Buffer.from([])
+    const requiredSignersBuffer = getCompatibility(version).supportsAlonzo
+        ? uint32_to_buf(tx.requiredSigners.length as Uint32_t)
+        : Buffer.from([])
+    const includeNetworkIdBuffer = getCompatibility(version).supportsAlonzo
+        ? serializeOptionFlag(tx.includeNetworkId)
         : Buffer.from([])
 
     return Buffer.concat([
         uint8_to_buf(tx.network.networkId),
         uint32_to_buf(tx.network.protocolMagic),
-        _serializeOptionFlag(tx.ttl != null),
-        _serializeOptionFlag(tx.auxiliaryData != null),
-        _serializeOptionFlag(tx.validityIntervalStart != null),
+        serializeOptionFlag(tx.ttl != null),
+        serializeOptionFlag(tx.auxiliaryData != null),
+        serializeOptionFlag(tx.validityIntervalStart != null),
         mintBuffer,
+        scriptDataHashBuffer,
+        includeNetworkIdBuffer,
         _serializeSigningMode(signingMode),
         uint32_to_buf(tx.inputs.length as Uint32_t),
         uint32_to_buf(tx.outputs.length as Uint32_t),
         uint32_to_buf(tx.certificates.length as Uint32_t),
         uint32_to_buf(tx.withdrawals.length as Uint32_t),
         uint32_to_buf(numWitnesses as Uint32_t),
+        collateralsBuffer,
+        requiredSignersBuffer,
     ])
 }

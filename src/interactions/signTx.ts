@@ -1,6 +1,7 @@
 import { DeviceVersionUnsupported } from "../errors"
-import type { Int64_str, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, Uint64_str, ValidBIP32Path, Version } from "../types/internal"
-import { StakeCredentialType } from "../types/internal"
+import type { Int64_str, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedRequiredSigner, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, ScriptDataHash, Uint64_str, ValidBIP32Path, Version } from "../types/internal"
+import { AUXILIARY_DATA_HASH_LENGTH } from "../types/internal"
+import { RequiredSignerType, StakeCredentialType } from "../types/internal"
 import { CertificateType, ED25519_SIGNATURE_LENGTH, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal"
 import type { SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
 import { AddressType, TxOutputDestinationType } from "../types/public"
@@ -16,9 +17,10 @@ import { serializeFinancials, serializePoolInitialParams, serializePoolInitialPa
 import { serializeTxAuxiliaryData } from "./serialization/txAuxiliaryData"
 import { serializeTxCertificate } from "./serialization/txCertificate"
 import { serializeTxInit } from "./serialization/txInit"
-import { serializeAssetGroup, serializeMintBasicParams, serializeToken, serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther"
+import { serializeAssetGroup, serializeMintBasicParams, serializeRequiredSigner,serializeToken, serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther"
 import { serializeTxOutputBasicParams } from "./serialization/txOutput"
 
+// the numerical values are meaningless, we try to keep them backwards-compatible
 const enum P1 {
   STAGE_INIT = 0x01,
   STAGE_AUX_DATA = 0x08,
@@ -29,8 +31,11 @@ const enum P1 {
   STAGE_CERTIFICATES = 0x06,
   STAGE_WITHDRAWALS = 0x07,
   STAGE_VALIDITY_INTERVAL_START = 0x09,
-  STAGE_CONFIRM = 0x0a,
   STAGE_MINT = 0x0b,
+  STAGE_SCRIPT_DATA_HASH = 0x0c,
+  STAGE_COLLATERALS = 0x0d,
+  STAGE_REQUIRED_SIGNERS = 0x0e,
+  STAGE_CONFIRM = 0x0a,
   STAGE_WITNESSES = 0x0f,
 }
 
@@ -80,6 +85,7 @@ function* signTx_addOutput(
 ): Interaction<void> {
   const enum P2 {
     BASIC_DATA = 0x30,
+    DATUM_HASH = 0x34,
     CONFIRM = 0x33,
   }
 
@@ -92,6 +98,15 @@ function* signTx_addOutput(
   })
 
   yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
+
+  if (output.datumHashHex != null) {
+      yield send({
+          p1: P1.STAGE_OUTPUTS,
+          p2: P2.DATUM_HASH,
+          data: hex_to_buf(output.datumHashHex),
+          expectedResponseLength: 0,
+      })
+  }
 
   yield send({
       p1: P1.STAGE_OUTPUTS,
@@ -148,7 +163,12 @@ function* signTx_addCertificate(
       if (getCompatibility(version).supportsPoolRegistrationAsOperator) {
           yield* signTx_addStakePoolRegistrationCertificate(certificate)
       } else {
-          // TODO this should be dropped after verification of witness path against owner path is implemented
+          // TODO since version 4.0.0 of the Ledger app, pool registration owner witness
+          // is checked against the pool owner in the certificate
+          // after that version is tested and widespread, we want to drop support
+          // for the previous unsafe version (since 2.4) and the unsafe legacy version (since 2.1 or so)
+          // When the support for unsafe version is gone,
+          // the following legacy serialization should be removed, too.
           yield* signTx_addStakePoolRegistrationCertificateLegacy(certificate)
       }
   }
@@ -398,17 +418,22 @@ function* signTx_setAuxiliaryData(
         expectedResponseLength: 0,
     })
 
+    const ED25519_SIGNATURE_LENGTH = 64
+
     const response = yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.CONFIRM,
         data: Buffer.alloc(0),
-        expectedResponseLength: 96,
+        expectedResponseLength: AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH,
     })
+
+    const auxDataHash = response.slice(0, AUXILIARY_DATA_HASH_LENGTH)
+    const catalystSignature = response.slice(AUXILIARY_DATA_HASH_LENGTH, AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH)
 
     return {
         type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
-        auxiliaryDataHashHex: response.slice(0, 32).toString('hex'),
-        catalystRegistrationSignatureHex: response.slice(32, 96).toString('hex'),
+        auxiliaryDataHashHex: auxDataHash.toString('hex'),
+        catalystRegistrationSignatureHex: catalystSignature.toString('hex'),
     }
   }
 
@@ -473,6 +498,48 @@ function* signTx_setMint(
     })
 }
 
+function* signTx_setScriptDataHash(
+    scriptDataHash: ScriptDataHash
+): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+  yield send({
+      p1: P1.STAGE_SCRIPT_DATA_HASH,
+      p2: P2.UNUSED,
+      data: hex_to_buf(scriptDataHash),
+  })
+}
+
+function* signTx_addCollateral(
+    input: ParsedInput
+): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+
+  yield send({
+      p1: P1.STAGE_COLLATERALS,
+      p2: P2.UNUSED,
+      data: serializeTxInput(input),
+      expectedResponseLength: 0,
+  })
+}
+
+function* signTx_addRequiredSigner(
+    requiredSigner: ParsedRequiredSigner
+): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+
+  yield send({
+      p1: P1.STAGE_REQUIRED_SIGNERS,
+      p2: P2.UNUSED,
+      data: serializeRequiredSigner(requiredSigner),
+      expectedResponseLength: 0,
+  })
+}
 
 function* signTx_awaitConfirm(
 ): Interaction<{ txHashHex: string; }> {
@@ -513,17 +580,19 @@ function* signTx_getWitness(
   }
 }
 
-
 function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
     const { tx } = request
-  
+
     const witnessPaths: ValidBIP32Path[] = []
+
+    // input witnesses
     for (const input of tx.inputs) {
         if (input.path != null) {
             witnessPaths.push(input.path)
         }
     }
 
+    // certificate witnesses
     for (const cert of tx.certificates) {
         if (cert.type === CertificateType.STAKE_POOL_REGISTRATION) {
             const deviceOwnedPoolOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED)
@@ -543,10 +612,31 @@ function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
             }
         }
     }
-  
+
+    // withdrawal witnesses
     for (const withdrawal of tx.withdrawals) {
         if (withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH) {
             witnessPaths.push(withdrawal.stakeCredential.path)
+        }
+    }
+
+    // required signers witnesses
+    for (const signer of tx.requiredSigners) {
+        switch (signer.type) {
+
+        case RequiredSignerType.PATH:
+            witnessPaths.push(signer.path)
+            break
+
+        default:
+            break
+        }
+    }
+
+    // collateral inputs witnesses
+    for (const collateral of tx.collaterals) {
+        if (collateral.path != null) {
+            witnessPaths.push(collateral.path)
         }
     }
 
@@ -554,30 +644,36 @@ function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
 }
 
 function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
-    const auxiliaryData = request?.tx?.auxiliaryData
+    const auxiliaryData = request.tx?.auxiliaryData
     const hasCatalystRegistration = auxiliaryData?.type === TxAuxiliaryDataType.CATALYST_REGISTRATION
 
     if (hasCatalystRegistration && !getCompatibility(version).supportsCatalystRegistration) {
         throw new DeviceVersionUnsupported(`Catalyst registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request?.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
+    if (request.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
         throw new DeviceVersionUnsupported(`Zero TTL not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request?.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR && !getCompatibility(version).supportsPoolRegistrationAsOperator) {
+    if (request.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR && !getCompatibility(version).supportsPoolRegistrationAsOperator) {
         throw new DeviceVersionUnsupported(`Pool registration as operator not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    
-    const certificates = request?.tx?.certificates
+    {
+        const hasDatumHashInOutputs = request.tx.outputs.some(o => o.datumHashHex != null)
+        if (hasDatumHashInOutputs && !getCompatibility(version).supportsAlonzo) {
+            throw new DeviceVersionUnsupported(`Datum hash in output not supported by Ledger app version ${getVersionString(version)}.`)
+        }
+    }
+
+    const certificates = request.tx?.certificates
     const hasPoolRetirement = certificates && certificates.some(c => c.type === CertificateType.STAKE_POOL_RETIREMENT)
-            
+
     if (hasPoolRetirement && !getCompatibility(version).supportsPoolRetirement) {
         throw new DeviceVersionUnsupported(`Pool retirement certificate not supported by Ledger app version ${getVersionString(version)}.`)
     }
-    
-    if (request?.tx?.mint && !getCompatibility(version).supportsMint) {
+
+    if (request.tx?.mint && !getCompatibility(version).supportsMint) {
         throw new DeviceVersionUnsupported(`Mint not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
@@ -591,7 +687,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
                 AddressType.POINTER_SCRIPT,
                 AddressType.REWARD_SCRIPT,
             ]
-            const hasScripthashOutputs = request?.tx?.outputs && request.tx.outputs.some(o =>
+            const hasScripthashOutputs = request.tx?.outputs && request.tx.outputs.some(o =>
                 o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
                 scriptAddressTypes.includes(o.destination.addressParams.type))
             if (hasScripthashOutputs) {
@@ -609,12 +705,37 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
             }
         }
         {
-            const withdrawals = request?.tx?.withdrawals
+            const withdrawals = request.tx?.withdrawals
             const hasScripthashWithdrawals = withdrawals && withdrawals.some(w => w.stakeCredential.type === StakeCredentialType.SCRIPT_HASH)
             if (hasScripthashWithdrawals) {
                 throw new DeviceVersionUnsupported(`Script hash in withdrawal not supported by Ledger app version ${getVersionString(version)}.`)
             }
         }
+    }
+
+    // TODO is the feature covered precisely since Mary? is this check needed, or all versions automatically support this?
+    if (request.tx.validityIntervalStart && !getCompatibility(version).supportsMary) {
+        throw new DeviceVersionUnsupported(`Validity interval start not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.scriptDataHashHex && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Script data hash not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.collaterals.length != 0 && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Collaterals not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.requiredSigners.length != 0 && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Required signers not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.includeNetworkId && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Network id in tx body not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.signingMode === TransactionSigningMode.PLUTUS_TRANSACTION && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Plutus transaction not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
 
@@ -690,6 +811,21 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     // mint
     if (tx.mint != null) {
         yield* signTx_setMint(tx.mint)
+    }
+
+    // script data hash
+    if (tx.scriptDataHashHex != null) {
+        yield* signTx_setScriptDataHash(tx.scriptDataHashHex)
+    }
+
+    // collateral inputs
+    for (const input of tx.collaterals) {
+        yield* signTx_addCollateral(input)
+    }
+
+    // required signers
+    for (const input of tx.requiredSigners) {
+        yield* signTx_addRequiredSigner(input)
     }
 
     // confirm
