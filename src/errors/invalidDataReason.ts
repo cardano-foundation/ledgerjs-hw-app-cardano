@@ -18,6 +18,7 @@ export enum InvalidDataReason {
   OUTPUTS_NOT_ARRAY = "outputs not an array",
   OUTPUT_INVALID_AMOUNT = "invalid amount in an output",
   OUTPUT_INVALID_ADDRESS = "invalid address in an output",
+  OUTPUT_INVALID_ADDRESS_PARAMS = "change address must have path as payment part",
 
   MULTIASSET_INVALID_POLICY_NAME = "invalid policy id in a multiasset token bundle",
   MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid multiasset token bundle - asset groups not an array",

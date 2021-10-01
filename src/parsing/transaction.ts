@@ -2,7 +2,7 @@ import { InvalidData } from "../errors"
 import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal } from "../types/internal"
 import { StakeCredentialType } from "../types/internal"
-import { ASSET_NAME_LENGTH_MAX, CertificateType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal"
+import { ASSET_NAME_LENGTH_MAX, CertificateType, SpendingDataSourceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal"
 import type {
     AssetGroup,
     Certificate,
@@ -184,10 +184,11 @@ function parseTxDestination(
     }
     case TxOutputDestinationType.DEVICE_OWNED: {
         const params = destination.params
-
+        const addressParams = parseAddress(network, params)
+        validate(addressParams.spendingDataSource.type == SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)
         return {
             type: TxOutputDestinationType.DEVICE_OWNED,
-            addressParams: parseAddress(network, params),
+            addressParams: addressParams,
         }
     }
     default:

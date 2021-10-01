@@ -1331,6 +1331,140 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
     },
 ]
 
+export type TestcaseRejectShelley = {
+    testname: string
+    tx: Transaction
+    signingMode: TransactionSigningMode
+    additionalWitnessPaths?: BIP32Path[],
+    errCls: new (...args: any[]) => ErrorBase,
+    errMsg: string,
+    rejectReason: InvalidDataReason,
+}
+
+export const testsShelleyRejects: TestcaseRejectShelley[] = [
+    {
+        testname: "Reject tx for invalid address params: reward address",
+        tx: {
+            ...shelleyBase,
+            outputs: [
+                {
+                    amount: 3003112,
+                    destination: destinations.rewardsInternal,
+                },
+            ],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+        rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
+    },
+    {
+        testname: "Reject tx for invalid address params: base address 1",
+        tx: {
+            ...shelleyBase,
+            outputs: [
+                {
+                    amount: 3003112,
+                    destination: {
+                        type: TxOutputDestinationType.DEVICE_OWNED,
+                        params: {
+                            type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
+                            params: {
+                                spendingScriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                                stakingKeyHashHex:
+                          "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+        rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
+    },
+    {
+        testname: "Reject tx for invalid address params: base address 2",
+        tx: {
+            ...shelleyBase,
+            outputs: [
+                {
+                    amount: 3003112,
+                    destination: {
+                        type: TxOutputDestinationType.DEVICE_OWNED,
+                        params: {
+                            type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
+                            params: {
+                                spendingScriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                                stakingScriptHash:  "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+        rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
+    },
+    {
+        testname: "Reject tx for invalid address params: enterprise",
+        tx: {
+            ...shelleyBase,
+            outputs: [
+                {
+                    amount: 3003112,
+                    destination: {
+                        type: TxOutputDestinationType.DEVICE_OWNED,
+                        params: {
+                            type: AddressType.ENTERPRISE_SCRIPT,
+                            params: {
+                                spendingScriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+        rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
+    },
+    {
+        testname: "Reject tx for invalid address params: pointer",
+        tx: {
+            ...shelleyBase,
+            outputs: [
+                {
+                    amount: 3003112,
+                    destination: {
+                        type: TxOutputDestinationType.DEVICE_OWNED,
+                        params: {
+                            type: AddressType.POINTER_SCRIPT,
+                            params: {
+                                spendingScriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                                stakingBlockchainPointer: {
+                                    blockIndex: 1,
+                                    txIndex: 2,
+                                    certificateIndex: 3,
+                                },
+                            },
+                        },
+                    },
+                },
+            ],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: "Action rejected by Ledger's security policy",
+        rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
+    },
+]
+  
+
 const allegraBase = {
     network: Networks.Mainnet,
     inputs: [inputs.utxoShelley],
