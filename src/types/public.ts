@@ -1070,6 +1070,8 @@ export enum TransactionSigningMode {
      * The transaction
      * - *should* have valid `path` property on all `inputs`
      * - *must not* contain a pool registration certificate
+     * - *must* contain only 1852 and 1855 paths
+     * - *must* contain 1855 witness requests only when transaction contains token minting/burning
      * 
      * The API witnesses
      * - all non-null [[TxInput.path]] on `inputs`
@@ -1085,7 +1087,9 @@ export enum TransactionSigningMode {
      * - *must* have `path=null` on all `inputs` (i.e., we are not witnessing any UTxO)
      * - *must* have single Pool registration certificate
      * - *must* have single owner of type [[PoolOwnerType.DEVICE_OWNED]] on that certificate
-     * - *must not* have withdrawals
+     * - *must not* contain withdrawals
+     * - *must not* contain token minting
+     * - *must* contain only staking witness requests
      * 
      * These restrictions are in place due to a possibility of maliciously signing *another* part of
      * the transaction with the pool owner path as we are not displaying device-owned paths on the device screen.
@@ -1104,6 +1108,7 @@ export enum TransactionSigningMode {
      * - *must* have a pool key of [[PoolKeyType.DEVICE_OWNED]] on that certificate
      * - *must* have all owners of type [[PoolOwnerType.THIRD_PARTY]] on that certificate
      * - *must not* have withdrawals
+     * - *must not* contain token minting
      * 
      * Most of these restrictions are in place since pool owners need to be able to sign
      * the same tx body.
@@ -1121,9 +1126,12 @@ export enum TransactionSigningMode {
      * and witnesses are decoupled from transaction elements.
      *
      * The transaction
-     * - *must* have `path=null` on all `inputs`
+     * - *must* have `path` undefined on all `inputs`
+     * - *must not* contain output addresses given by parameters
      * - *must not* contain a pool registration certificate
-     * TODO
+     * - *must* contain script hash stake credentials in certificates and withdrawals (no paths)
+     * - *must* contain only 1854 and 1855 witness requests
+     * - *must* contain 1855 witness requests only when transaction contains token minting/burning
      *
      * The API witnesses
      * - all given in [[SignTransactionRequest.additionalWitnessPaths]]
