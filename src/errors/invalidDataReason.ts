@@ -191,4 +191,9 @@ export enum InvalidDataReason {
   "invalid required count - higher than number of total scripts",
   DERIVE_NATIVE_SCRIPT_HASH_UNKNOWN_TYPE = "unknown script type",
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_DISPLAY_FORMAT = "invalid native script hash display format",
+
+  /**
+   * For errors that we don't want to check on the LedgerJS side
+   */
+   LEDGER_POLICY = "Action rejected by Ledger's security policy",
 }
