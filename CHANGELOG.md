@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [4.0.0](TBD) - [TBD]
+## [4.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.1...v4.0.0) - [October 27th 2021]
 
 Support for script elements in transactions and addresses.
 
@@ -15,14 +15,11 @@ Support for script elements in transactions and addresses.
 - support for script elements in transactions via a new `TransactionSigningMode.MULTISIG_TRANSACTION`
 - support for mint field in transaction body
 - native script hash derivation call
-- validation of canonical ordering of cbor map keys (token policy ids in outputs and mint, asset names within an asset group)
+- validation of canonical ordering of cbor map keys compliant with [CIP 21](https://cips.cardano.org/cips/cip21) (withdrawals, token policy ids in outputs and mint, asset names within an asset group)
 
 ### Changed
 
 - API changes: replacing paths with stake credentials in various address and transaction parameters breaks compatibility
-
-### Fixed
-
 
 ## [3.2.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.0...v3.2.1) - [June 9th 2021]
 
