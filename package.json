@@ -78,5 +78,12 @@
     "test-integration": "yarn mocha --timeout 3600000 -r ts-node/register test/integration/**/*.test.ts",
     "test-unit": "yarn mocha -r ts-node/register test/unit/**/*.test.ts",
     "//": "run single test by specifying --grep <name> parameter in test-integration"
+  },
+  "resolutions": {
+    "chalk/ansi-regex": "<6.0.6",
+    "prettier-eslint/**/ansi-regex": "<6.0.0",
+    "eslint/**/ansi-regex": "<6.0.0",
+    "@ledgerhq/hw-transport-node-hid/**/ansi-regex": "<6.0.0",
+    "mocha/**/ansi-regex": "<6.0.0"
   }
 }
