@@ -172,6 +172,8 @@ export enum InvalidDataReason {
   SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED =
   "no withdrawals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
 
+  ADDITIONAL_WITNESSES_NOT_ARRAY = "additional witnesses not an array",
+
   OPERATIONAL_CERTIFICATE_INVALID_KES_KEY =
   "invalid operational certificate kes key",
   OPERATIONAL_CERTIFICATE_INVALID_KES_PERIOD =
