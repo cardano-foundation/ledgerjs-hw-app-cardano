@@ -1,5 +1,6 @@
 // @ts-ignore
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
+import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos"
 import * as blake2 from "blake2"
 import { ImportMock } from "ts-mock-imports"
 import type { FixlenHexString} from "types/internal"
@@ -8,12 +9,18 @@ import Ada from "../src/Ada"
 import { InvalidDataReason } from "../src/errors/index"
 import * as parseModule from "../src/utils/parse"
 
-export async function getTransport() {
-    return await TransportNodeHid.create(1000)
+export function shouldUseSpeculos(): boolean {
+    return process.env.LEDGER_TRANSPORT === 'speculos'
+}
+
+export function getTransport() {
+    return shouldUseSpeculos()
+        ? SpeculosTransport.open({apduPort: 9999})
+        : TransportNodeHid.create(1000)
 }
 
 export async function getAda() {
-    const transport = await TransportNodeHid.create(1000)
+    const transport = await getTransport()
 
     const ada = new Ada(transport);
     (ada as any).t = transport
