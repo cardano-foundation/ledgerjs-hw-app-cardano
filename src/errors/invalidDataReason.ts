@@ -197,5 +197,7 @@ export enum InvalidDataReason {
   /**
    * For errors that we don't want to check on the LedgerJS side
    */
-   LEDGER_POLICY = "Action rejected by Ledger's security policy",
+  LEDGER_POLICY = "Action rejected by Ledger's security policy",
+
+  INVALID_B2_HASH = "invalid blake2 hashing",
 }

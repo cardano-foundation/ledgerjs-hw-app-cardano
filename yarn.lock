@@ -162,6 +162,13 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
+"@types/blake2@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@types/blake2/-/blake2-4.0.1.tgz#baecf440808cb82524190b38c56974115df20a51"
+  integrity sha512-zcBydVD4uEsGo5gFRfm2phVMLqgrGJqcTZaT6lkZMWJzYovUi6wwraUJKdY1eO92q0bhWWVSAH4OnSp2m7rCfQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/chai-as-promised@^7.1.3":
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@types/chai-as-promised/-/chai-as-promised-7.1.3.tgz#779166b90fda611963a3adbfd00b339d03b747bd"
@@ -554,6 +561,13 @@ bl@^4.0.1:
     buffer "^5.5.0"
     inherits "^2.0.4"
     readable-stream "^3.4.0"
+
+blake2@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/blake2/-/blake2-4.0.2.tgz#f32204ff2cf7b8b90c6ec9f8f0d67ef46cb47779"
+  integrity sha512-Z7yip562cm1s1pXBYfn64ScLH9HVy6zarw5FCKEVqTBRxyXn736sPmM3nYSCWw1zWt+zEUSwrbEXbElgwDi9aw==
+  dependencies:
+    nan "^2.14.2"
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -2029,6 +2043,11 @@ nan@^2.14.0:
   version "2.14.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.0.tgz#7818f722027b2459a86f0295d434d1fc2336c52c"
   integrity sha512-INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==
+
+nan@^2.14.2:
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
+  integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
 
 nanoid@3.1.25:
   version "3.1.25"

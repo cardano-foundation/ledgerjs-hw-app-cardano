@@ -532,6 +532,7 @@ export type TestcaseByron = {
   testname: string
   tx: Transaction
   signingMode: TransactionSigningMode
+  txBody?: string
   result: SignedTransactionData
 }
 
@@ -618,8 +619,8 @@ export type TestcaseShelley = {
   testname: string
   tx: Transaction
   signingMode: TransactionSigningMode
-    additionalWitnessPaths: BIP32Path[],
-  txBody?: string,
+  additionalWitnessPaths: BIP32Path[]
+  txBody?: string
   txAuxiliaryData?: string,
   result: SignedTransactionData
 }
@@ -1165,6 +1166,7 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         additionalWitnessPaths: [],
+        txBody: "",
         result: {
             txHashHex:
         "8d720755bcbc724fc71a1868bafbd057d855a176362417f62711a34f2d9b896d",
@@ -1215,6 +1217,7 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         additionalWitnessPaths: [],
+        txBody: "",
         result: {
             // WARNING: only as computed by ledger, not verified with cardano-cli
             txHashHex: "70aea83c8e5e9a3e0ec92860d5bd4750c34911193f092a96b9da6906d6ea6247",
@@ -1313,7 +1316,7 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
         },
         signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
         additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0"), str_to_path("1854'/1815'/0'/2/0")],
-
+        txBody: "",
         result: {
             txHashHex: "2be64c04ea3f5bac3c224ec47a4157ade91fc6ab4fd6b83ce3d57b2e9186720b",
             witnesses: [
