@@ -1,8 +1,11 @@
 // @ts-ignore
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
+import * as blake2 from "blake2"
 import { ImportMock } from "ts-mock-imports"
+import type { FixlenHexString} from "types/internal"
 
 import Ada from "../src/Ada"
+import { InvalidDataReason } from "../src/errors/index"
 import * as parseModule from "../src/utils/parse"
 
 export async function getTransport() {
@@ -69,4 +72,12 @@ export const Networks = {
         networkId: 0x03,
         protocolMagic: 47,
     },
+}
+
+type TxHash = FixlenHexString<32>
+
+export function hashTxBody(txBodyHex: string): TxHash {
+    let b2 = blake2.createHash("blake2b", { digestLength: 32 })
+    b2.update(Buffer.from(txBodyHex, 'hex'))
+    return parseModule.parseHexStringOfLength(b2.digest('hex'), 32, InvalidDataReason.INVALID_B2_HASH)
 }
