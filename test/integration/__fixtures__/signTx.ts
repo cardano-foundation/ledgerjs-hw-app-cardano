@@ -700,6 +700,13 @@ export const testsShelleyNoCertificates: TestcaseShelley[] = [
         testname: "Sign tx with change base address with staking path",
         tx: {
             ...shelleyBase,
+            inputs: [
+                {
+                    ...inputs.utxoByron,
+                    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+                    path: str_to_path("44'/1815'/0'/0/0"),
+                },
+            ],
             outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingPath],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -710,9 +717,9 @@ export const testsShelleyNoCertificates: TestcaseShelley[] = [
         "bd9e06485299c3c2be83135438f18fa4bde6e324420ae0a79dd2a12295f28597",
             witnesses: [
                 {
-                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    path: str_to_path("44'/1815'/0'/0/0"),
                     witnessSignatureHex:
-            "ce028294627e27e8d80c5902f7dae91da851bf530df8b12efef44f7afa316b613cdb2b404e39df2a47f7fa64818a66b2b34d4b45ca3a04bf519c24c7a4ac3f00",
+            "5f8a24d93f055ce953cae39fae1b7d90e7ed518852d2c77a0a76e78f8a94cff06974984c91032dcbbf0c0bc9130b85688e7e4fd2efc32edb5b56f41af7254c0d",
                 },
             ],
             auxiliaryDataSupplement: null,
