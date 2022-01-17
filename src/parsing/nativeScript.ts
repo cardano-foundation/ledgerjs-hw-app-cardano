@@ -10,11 +10,11 @@ export function parseNativeScript(
 ): ParsedNativeScript {
     // union of all param fields
     const params = script.params as {
-        path?: BIP32Path,
-        keyHashHex?: string,
-        requiredCount?: bigint_like,
-        slot?: bigint_like,
-        scripts?: NativeScript[],
+        path?: BIP32Path;
+        keyHashHex?: string;
+        requiredCount?: bigint_like;
+        slot?: bigint_like;
+        scripts?: NativeScript[];
     }
 
     switch (script.type) {

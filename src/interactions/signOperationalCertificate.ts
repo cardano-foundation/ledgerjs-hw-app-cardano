@@ -9,10 +9,10 @@ import { getCompatibility } from "./getVersion"
 import { serializeOperationalCertificate } from "./serialization/operationalCertificate"
 
 const send = (params: {
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number
+  p1: number;
+  p2: number;
+  data: Buffer;
+  expectedResponseLength?: number;
 }): SendParams => ({ ins: INS.SIGN_OPERATIONAL_CERTIFICATE, ...params })
 
 export function* signOperationalCertificate(

@@ -150,12 +150,12 @@ export function parseAddress(
 
     // Cast to union of all param fields
     const params = address.params as {
-        spendingPath?: BIP32Path,
-        spendingScriptHash?: string,
-        stakingPath?: BIP32Path
-        stakingKeyHashHex?: string
-        stakingBlockchainPointer?: BlockchainPointer
-        stakingScriptHash?: string
+        spendingPath?: BIP32Path;
+        spendingScriptHash?: string;
+        stakingPath?: BIP32Path;
+        stakingKeyHashHex?: string;
+        stakingBlockchainPointer?: BlockchainPointer;
+        stakingScriptHash?: string;
     }
 
     // will be cast to 'any' since the extract functions guarantee the type match

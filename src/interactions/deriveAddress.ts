@@ -5,10 +5,10 @@ import type { Interaction, SendParams } from "./common/types"
 import { serializeAddressParams } from "./serialization/addressParams"
 
 const send = (params: {
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number
+  p1: number;
+  p2: number;
+  data: Buffer;
+  expectedResponseLength?: number;
 }): SendParams => ({ ins: INS.DERIVE_ADDRESS, ...params })
 
 export function* deriveAddress(

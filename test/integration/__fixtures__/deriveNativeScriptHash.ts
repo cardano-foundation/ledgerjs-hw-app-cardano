@@ -3,10 +3,10 @@ import { InvalidDataReason, NativeScriptHashDisplayFormat, NativeScriptType } fr
 import { str_to_path } from "../../../src/utils/address"
 
 type ValidNativeScriptTestcase = {
-    testname: string,
-    script: NativeScript,
-    displayFormat: NativeScriptHashDisplayFormat,
-    hash: string,
+    testname: string;
+    script: NativeScript;
+    displayFormat: NativeScriptHashDisplayFormat;
+    hash: string;
 }
 
 export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
@@ -331,8 +331,8 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
 ]
 
 type InvalidOnLedgerScriptTestcase = {
-    testname: string,
-    script: NativeScript,
+    testname: string;
+    script: NativeScript;
 }
 
 export const InvalidOnLedgerScriptTestcases: InvalidOnLedgerScriptTestcase[] = [
@@ -376,9 +376,9 @@ export const InvalidOnLedgerScriptTestcases: InvalidOnLedgerScriptTestcase[] = [
 ]
 
 type InvalidScriptTestcase = {
-    testname: string,
-    script: NativeScript,
-    invalidDataReason: InvalidDataReason,
+    testname: string;
+    script: NativeScript;
+    invalidDataReason: InvalidDataReason;
 }
 
 export const InvalidScriptTestcases: InvalidScriptTestcase[] = [

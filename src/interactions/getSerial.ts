@@ -6,10 +6,10 @@ import type { Interaction, SendParams } from "./common/types"
 import { ensureLedgerAppVersionCompatible } from "./getVersion"
 
 const send = (params: {
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number
+  p1: number;
+  p2: number;
+  data: Buffer;
+  expectedResponseLength?: number;
 }): SendParams => ({ ins: INS.GET_SERIAL, ...params })
 
 

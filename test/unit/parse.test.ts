@@ -6,8 +6,8 @@ import {assert} from "../../src/utils/assert"
 import {parseInt64_str, parseUint64_str} from "../../src/utils/parse"
 
 type BasicParseTest = {
-    signed: boolean,
-    numberString: string,
+    signed: boolean;
+    numberString: string;
 }
 
 const basicParseTests: BasicParseTest[] = [

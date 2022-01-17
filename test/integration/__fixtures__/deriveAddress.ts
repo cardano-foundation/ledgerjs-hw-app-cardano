@@ -6,10 +6,10 @@ import { str_to_path } from "../../../src/utils/address"
 import { Networks } from "../../test_utils"
 
 type ByronTestcase = {
-    testname: string,
-    network: Network,
-    addressParams: DeviceOwnedAddress,
-    result: string
+    testname: string;
+    network: Network;
+    addressParams: DeviceOwnedAddress;
+    result: string;
 }
 
 export const byronTestcases: ByronTestcase[] = [
@@ -53,10 +53,10 @@ export const byronTestcases: ByronTestcase[] = [
 const Pointer = (blockIndex: number, txIndex: number, certificateIndex: number) => ({ blockIndex, txIndex, certificateIndex })
 
 type ShelleyTestcase = {
-    testname: string,
-    network: Network,
-    addressParams: DeviceOwnedAddress,
-    result: string
+    testname: string;
+    network: Network;
+    addressParams: DeviceOwnedAddress;
+    result: string;
 }
 export const shelleyTestcases: ShelleyTestcase[] = [
     {
@@ -309,11 +309,11 @@ export const shelleyTestcases: ShelleyTestcase[] = [
 
 
 type InvalidPathTestcase = {
-    testname: string,
-    network: Network,
-    addressParams: DeviceOwnedAddress,
-    errCls: new (...args: any[]) => ErrorBase,
-    errMsg: string,
+    testname: string;
+    network: Network;
+    addressParams: DeviceOwnedAddress;
+    errCls: new (...args: any[]) => ErrorBase;
+    errMsg: string;
 }
 
 export const InvalidPathTestcases: InvalidPathTestcase[] = [

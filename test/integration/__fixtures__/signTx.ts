@@ -7,11 +7,11 @@ import { str_to_path } from "../../../src/utils/address"
 import { allegraBase, alonzoBase, byronBase, destinations, inputs, maryBase, mints, outputs, shelleyBase } from "./txElements"
 
 export type TestcaseByron = {
-  testname: string
-  tx: Transaction
-  signingMode: TransactionSigningMode
-  txBody?: string
-  result: SignedTransactionData
+  testname: string;
+  tx: Transaction;
+  signingMode: TransactionSigningMode;
+  txBody?: string;
+  result: SignedTransactionData;
 }
 
 export const testsByron: TestcaseByron[] = [
@@ -83,13 +83,13 @@ export const testsByron: TestcaseByron[] = [
 ]
 
 export type TestcaseShelley = {
-  testname: string
-  tx: Transaction
-  signingMode: TransactionSigningMode
-  additionalWitnessPaths: BIP32Path[]
-  txBody?: string
-  txAuxiliaryData?: string,
-  result: SignedTransactionData
+  testname: string;
+  tx: Transaction;
+  signingMode: TransactionSigningMode;
+  additionalWitnessPaths: BIP32Path[];
+  txBody?: string;
+  txAuxiliaryData?: string;
+  result: SignedTransactionData;
 }
 
 export const testsShelleyNoCertificates: TestcaseShelley[] = [
@@ -648,11 +648,11 @@ export const testsMultisig: TestcaseShelley[] = [
 ]
 
 export type TestcaseAllegra = {
-  testname: string
-  tx: Transaction
-  signingMode: TransactionSigningMode
-  txBody: string
-  result: SignedTransactionData
+  testname: string;
+  tx: Transaction;
+  signingMode: TransactionSigningMode;
+  txBody: string;
+  result: SignedTransactionData;
 }
 
 export const testsAllegra: TestcaseAllegra[] = [
@@ -699,12 +699,12 @@ export const testsAllegra: TestcaseAllegra[] = [
 ]
 
 export type TestcaseMary = {
-  testname: string
-  tx: Transaction
-  signingMode: TransactionSigningMode
-  txBody: string,
-  txAuxiliaryData?: string,
-  result: SignedTransactionData
+  testname: string;
+  tx: Transaction;
+  signingMode: TransactionSigningMode;
+  txBody: string;
+  txAuxiliaryData?: string;
+  result: SignedTransactionData;
 }
 
 export const testsMary: TestcaseMary[] = [
@@ -952,13 +952,13 @@ export const testsCatalystRegistration: TestcaseMary[] = [
 ]
 
 export type TestcaseAlonzo = {
-  testname: string
-  tx: Transaction
-  signingMode: TransactionSigningMode
-  additionalWitnessPaths: BIP32Path[]
-  txBody?: string
-  txAuxiliaryData?: string,
-  result: SignedTransactionData
+  testname: string;
+  tx: Transaction;
+  signingMode: TransactionSigningMode;
+  additionalWitnessPaths: BIP32Path[];
+  txBody?: string;
+  txAuxiliaryData?: string;
+  result: SignedTransactionData;
 }
 
 export const testsAlonzo: TestcaseAlonzo[] = [

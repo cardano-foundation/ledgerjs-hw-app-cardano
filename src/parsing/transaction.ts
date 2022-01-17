@@ -46,7 +46,7 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
 }
 
 
-type ParseTokenAmountFn<T> = (val: unknown, constraints: { min?: string | undefined; max?: string | undefined; },
+type ParseTokenAmountFn<T> = (val: unknown, constraints: { min?: string | undefined; max?: string | undefined },
                               errMsg: InvalidDataReason) => T
 
 function parseToken<T>(token: Token, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedToken<T> {

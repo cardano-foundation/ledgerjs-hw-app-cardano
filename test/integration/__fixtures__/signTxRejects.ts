@@ -8,13 +8,13 @@ import { bech32_to_hex } from "../../test_utils"
 import { destinations, inputs, maryBase, mints, outputs, shelleyBase } from "./txElements"
 
 export type TestcaseRejectShelley = {
-    testname: string
-    tx: Transaction
-    signingMode: TransactionSigningMode
-    additionalWitnessPaths?: BIP32Path[],
-    errCls: new (...args: any[]) => ErrorBase,
-    errMsg: string,
-    rejectReason: InvalidDataReason,
+    testname: string;
+    tx: Transaction;
+    signingMode: TransactionSigningMode;
+    additionalWitnessPaths?: BIP32Path[];
+    errCls: new (...args: any[]) => ErrorBase;
+    errMsg: string;
+    rejectReason: InvalidDataReason;
 }
 
 const poolRegParamOwner: PoolRegistrationParams = {

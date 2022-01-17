@@ -40,10 +40,10 @@ const enum P1 {
 }
 
 const send = (params: {
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number
+  p1: number;
+  p2: number;
+  data: Buffer;
+  expectedResponseLength?: number;
 }): SendParams => ({ ins: INS.SIGN_TX, ...params })
 
 
@@ -542,7 +542,7 @@ function* signTx_addRequiredSigner(
 }
 
 function* signTx_awaitConfirm(
-): Interaction<{ txHashHex: string; }> {
+): Interaction<{ txHashHex: string }> {
   const enum P2 {
     UNUSED = 0x00,
   }

@@ -141,9 +141,9 @@ export type BIP32Path = Array<number>;
  */
 export type Network = {
     /** byron protocol id */
-    protocolMagic: number
+    protocolMagic: number;
     /** shelley network id */
-    networkId: number
+    networkId: number;
 }
 
 /**
@@ -153,23 +153,23 @@ export type Network = {
  * @see [[AddressType]]
  */
 export type DeviceOwnedAddress = {
-    type: AddressType.BYRON
-    params: AddressParamsByron
+    type: AddressType.BYRON;
+    params: AddressParamsByron;
 } | {
     type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY |
     AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY |
     AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT |
-    AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
-    params: AddressParamsBase
+    AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT;
+    params: AddressParamsBase;
 } | {
-    type: AddressType.ENTERPRISE_KEY | AddressType.ENTERPRISE_SCRIPT
-    params: AddressParamsEnterprise
+    type: AddressType.ENTERPRISE_KEY | AddressType.ENTERPRISE_SCRIPT;
+    params: AddressParamsEnterprise;
 } | {
-    type: AddressType.POINTER_KEY | AddressType.POINTER_SCRIPT,
-    params: AddressParamsPointer
+    type: AddressType.POINTER_KEY | AddressType.POINTER_SCRIPT;
+    params: AddressParamsPointer;
 } | {
-    type: AddressType.REWARD_KEY | AddressType.REWARD_SCRIPT,
-    params: AddressParamsReward
+    type: AddressType.REWARD_KEY | AddressType.REWARD_SCRIPT;
+    params: AddressParamsReward;
 }
 
 /**
@@ -178,13 +178,13 @@ export type DeviceOwnedAddress = {
  * @see [[DeviceOwnedAddress]]
  */
 export type AddressParamsByron = {
-    spendingPath: BIP32Path
+    spendingPath: BIP32Path;
 }
 
 export type SpendingParams = {
-    spendingPath: BIP32Path
+    spendingPath: BIP32Path;
 } | {
-    spendingScriptHash: string
+    spendingScriptHash: string;
 }
 
 /**
@@ -194,11 +194,11 @@ export type SpendingParams = {
  * @see [[DeviceOwnedAddress]]
  */
 export type AddressParamsBase = SpendingParams & ({
-    stakingPath: BIP32Path
+    stakingPath: BIP32Path;
 } | {
-    stakingKeyHashHex: string
+    stakingKeyHashHex: string;
 } | {
-    stakingScriptHash: string
+    stakingScriptHash: string;
 })
 
 /**
@@ -214,7 +214,7 @@ export type AddressParamsEnterprise = SpendingParams
  * @see [[DeviceOwnedAddress]]
  * */
 export type AddressParamsPointer = SpendingParams & {
-    stakingBlockchainPointer: BlockchainPointer
+    stakingBlockchainPointer: BlockchainPointer;
 }
 
 /** Shelley *reward* address parameters.
@@ -223,9 +223,9 @@ export type AddressParamsPointer = SpendingParams & {
  * @see [[DeviceOwnedAddress]]
  */
 export type AddressParamsReward = {
-    stakingPath: BIP32Path
+    stakingPath: BIP32Path;
 } | {
-    stakingScriptHash: string
+    stakingScriptHash: string;
 }
 
 /** Operational certificate
@@ -233,10 +233,10 @@ export type AddressParamsReward = {
  * @category Basic types
  */
 export type OperationalCertificate = {
-    kesPublicKeyHex: string,
-    kesPeriod: bigint_like,
-    issueCounter: bigint_like,
-    coldKeyPath: BIP32Path,
+    kesPublicKeyHex: string;
+    kesPeriod: bigint_like;
+    issueCounter: bigint_like;
+    coldKeyPath: BIP32Path;
 }
 
 /**
@@ -248,11 +248,11 @@ export type TxInput = {
     /**
      * UTxO's hash of the transaction
      */
-    txHashHex: string,
+    txHashHex: string;
     /**
      * UTxO's transaction output index
      */
-    outputIndex: number,
+    outputIndex: number;
     /**
      * Describes path used for witnessing this UTxO. The API will sign transaction with this path.
      *
@@ -262,7 +262,7 @@ export type TxInput = {
      *
      * Note: Device has no ability to really check whether `path` is correct witnessing path for this UTxO.
      */
-    path: BIP32Path | null,
+    path: BIP32Path | null;
 };
 
 /**
@@ -271,10 +271,10 @@ export type TxInput = {
  * @see [[AssetGroup]]
  */
 export type Token = {
-    assetNameHex: string,
+    assetNameHex: string;
     /** Note: can be signed or unsigned, depending on the context.
      * device does not know the number of decimal places the token uses. */
-    amount: bigint_like,
+    amount: bigint_like;
 };
 
 /**
@@ -287,8 +287,8 @@ export type Token = {
  * @see [[TxOutput]]
  */
 export type AssetGroup = {
-    policyIdHex: string,
-    tokens: Array<Token>,
+    policyIdHex: string;
+    tokens: Array<Token>;
 };
 
 /**
@@ -300,23 +300,23 @@ export type TxOutput = {
     /**
      * Destination address of the output
      */
-    destination: TxOutputDestination
+    destination: TxOutputDestination;
     /**
      * Output amount.
      * Specified in Lovelace
      */
-    amount: bigint_like
+    amount: bigint_like;
     /**
      * Additional assets sent to the output.
      * If not null, the entries' keys (policyIds) must be unique and sorted to reflect a canonical CBOR as described
      * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
      * i.e. the key with the lower value in lexical order sorts earlier.
      */
-    tokenBundle?: Array<AssetGroup> | null
+    tokenBundle?: Array<AssetGroup> | null;
     /**
      * Optional datum hash
      */
-    datumHashHex?: string | null
+    datumHashHex?: string | null;
 }
 
 /**
@@ -348,7 +348,7 @@ export type ThirdPartyAddressParams = {
     /**
      * Byron or Shelley address in raw hex format (without bech32/base58 encoding)
      */
-    addressHex: string
+    addressHex: string;
 }
 
 /**
@@ -358,11 +358,11 @@ export type ThirdPartyAddressParams = {
  * @see [[Transaction]]
  */
 export type TxOutputDestination = {
-    type: TxOutputDestinationType.THIRD_PARTY
-    params: ThirdPartyAddressParams
+    type: TxOutputDestinationType.THIRD_PARTY;
+    params: ThirdPartyAddressParams;
 } | {
-    type: TxOutputDestinationType.DEVICE_OWNED
-    params: DeviceOwnedAddress
+    type: TxOutputDestinationType.DEVICE_OWNED;
+    params: DeviceOwnedAddress;
 }
 
 /**
@@ -371,9 +371,9 @@ export type TxOutputDestination = {
  * @see [[AddressParamsPointer]]
  */
 export type BlockchainPointer = {
-    blockIndex: number,
-    txIndex: number,
-    certificateIndex: number,
+    blockIndex: number;
+    txIndex: number;
+    certificateIndex: number;
 };
 
 /**
@@ -401,11 +401,11 @@ export enum PoolKeyType {
  * @see [[PoolRegistrationParams]]
  */
 export type PoolKey = {
-    type: PoolKeyType.THIRD_PARTY
-    params: PoolKeyThirdPartyParams
+    type: PoolKeyType.THIRD_PARTY;
+    params: PoolKeyThirdPartyParams;
 } | {
-    type: PoolKeyType.DEVICE_OWNED
-    params: PoolKeyDeviceOwnedParams
+    type: PoolKeyType.DEVICE_OWNED;
+    params: PoolKeyDeviceOwnedParams;
 }
 
 /**
@@ -415,7 +415,7 @@ export type PoolKey = {
  * @see [[PoolKeyType]]
  */
 export type PoolKeyThirdPartyParams = {
-    keyHashHex: string,
+    keyHashHex: string;
 }
 
 /**
@@ -425,7 +425,7 @@ export type PoolKeyThirdPartyParams = {
  * @see [[PoolKeyType]]
  */
 export type PoolKeyDeviceOwnedParams = {
-    path: BIP32Path,
+    path: BIP32Path;
 };
 
 /**
@@ -453,11 +453,11 @@ export enum PoolOwnerType {
  * @see [[PoolRegistrationParams]]
  */
 export type PoolOwner = {
-    type: PoolOwnerType.THIRD_PARTY
-    params: PoolOwnerThirdPartyParams
+    type: PoolOwnerType.THIRD_PARTY;
+    params: PoolOwnerThirdPartyParams;
 } | {
-    type: PoolOwnerType.DEVICE_OWNED
-    params: PoolOwnerDeviceOwnedParams
+    type: PoolOwnerType.DEVICE_OWNED;
+    params: PoolOwnerDeviceOwnedParams;
 }
 
 /**
@@ -467,7 +467,7 @@ export type PoolOwner = {
  * @see [[PoolOwnerType]]
  */
 export type PoolOwnerThirdPartyParams = {
-    stakingKeyHashHex: string,
+    stakingKeyHashHex: string;
 }
 
 /**
@@ -477,7 +477,7 @@ export type PoolOwnerThirdPartyParams = {
  * @see [[PoolOwnerType]]
  */
 export type PoolOwnerDeviceOwnedParams = {
-    stakingPath: BIP32Path,
+    stakingPath: BIP32Path;
 };
 
 /**
@@ -505,11 +505,11 @@ export enum PoolRewardAccountType {
  * @see [[PoolRegistrationParams]]
  */
 export type PoolRewardAccount = {
-    type: PoolRewardAccountType.THIRD_PARTY
-    params: PoolRewardAccountThirdPartyParams
+    type: PoolRewardAccountType.THIRD_PARTY;
+    params: PoolRewardAccountThirdPartyParams;
 } | {
-    type: PoolRewardAccountType.DEVICE_OWNED
-    params: PoolRewardAccountDeviceOwnedParams
+    type: PoolRewardAccountType.DEVICE_OWNED;
+    params: PoolRewardAccountDeviceOwnedParams;
 }
 
 /**
@@ -519,7 +519,7 @@ export type PoolRewardAccount = {
  * @see [[PoolRewardAccountType]]
  */
 export type PoolRewardAccountThirdPartyParams = {
-    rewardAccountHex: string,
+    rewardAccountHex: string;
 }
 
 /**
@@ -529,7 +529,7 @@ export type PoolRewardAccountThirdPartyParams = {
  * @see [[PoolRewardAccountType]]
  */
 export type PoolRewardAccountDeviceOwnedParams = {
-    path: BIP32Path,
+    path: BIP32Path;
 };
 
 /**
@@ -543,17 +543,17 @@ export type SingleHostIpAddrRelayParams = {
      * TCP port of the relay.
      * Should be 0..65535
      */
-    portNumber?: number | null,
+    portNumber?: number | null;
     /**
      * IPv4 address of the relay.
      * Should be in string format, e.g. `"192.168.0.1"`
      * */
-    ipv4?: string | null,
+    ipv4?: string | null;
     /**
      * IPv6 address of the relay.
      * Should be in *fully expanded* string format, e.g. `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"`
      * */
-    ipv6?: string | null,
+    ipv6?: string | null;
 };
 
 /**
@@ -561,8 +561,8 @@ export type SingleHostIpAddrRelayParams = {
  * @see [[Relay]]
  */
 export type SingleHostHostnameRelayParams = {
-    portNumber?: number | null,
-    dnsName: string,
+    portNumber?: number | null;
+    dnsName: string;
 };
 
 /**
@@ -570,7 +570,7 @@ export type SingleHostHostnameRelayParams = {
  * @see [[Relay]]
  */
 export type MultiHostRelayParams = {
-    dnsName: string,
+    dnsName: string;
 };
 
 /**
@@ -579,14 +579,14 @@ export type MultiHostRelayParams = {
  * @see [[PoolRegistrationParams]]
  */
 export type Relay = {
-    type: RelayType.SINGLE_HOST_IP_ADDR
-    params: SingleHostIpAddrRelayParams
+    type: RelayType.SINGLE_HOST_IP_ADDR;
+    params: SingleHostIpAddrRelayParams;
 } | {
-    type: RelayType.SINGLE_HOST_HOSTNAME
-    params: SingleHostHostnameRelayParams
+    type: RelayType.SINGLE_HOST_HOSTNAME;
+    params: SingleHostHostnameRelayParams;
 } | {
-    type: RelayType.MULTI_HOST
-    params: MultiHostRelayParams
+    type: RelayType.MULTI_HOST;
+    params: MultiHostRelayParams;
 }
 
 /**
@@ -596,8 +596,8 @@ export type Relay = {
  * @see [[PoolRegistrationParams]]
  */
 export type PoolMetadataParams = {
-    metadataUrl: string,
-    metadataHashHex: string,
+    metadataUrl: string;
+    metadataHashHex: string;
 };
 
 /**
@@ -611,12 +611,12 @@ export type Margin = {
      * Numerator
      * Must be <= denominator
      */
-    numerator: bigint_like,
+    numerator: bigint_like;
     /**
      * Denominator.
      * Limited to maximum value of 1e18
      */
-    denominator: bigint_like,
+    denominator: bigint_like;
 };
 
 /**
@@ -626,17 +626,17 @@ export type Margin = {
  * @see [[Certificate]]
  */
 export type PoolRegistrationParams = {
-    poolKey: PoolKey,
+    poolKey: PoolKey;
     /** Pool vrf key */
-    vrfKeyHashHex: string,
+    vrfKeyHashHex: string;
     /** Owner pledge */
-    pledge: bigint_like,
-    cost: bigint_like,
-    margin: Margin,
-    rewardAccount: PoolRewardAccount,
-    poolOwners: Array<PoolOwner>,
-    relays: Array<Relay>,
-    metadata?: PoolMetadataParams | null,
+    pledge: bigint_like;
+    cost: bigint_like;
+    margin: Margin;
+    rewardAccount: PoolRewardAccount;
+    poolOwners: Array<PoolOwner>;
+    relays: Array<Relay>;
+    metadata?: PoolMetadataParams | null;
 };
 
 /**
@@ -648,11 +648,11 @@ export type PoolRetirementParams = {
     /**
      * Path to the pool key
      */
-    poolKeyPath: BIP32Path
+    poolKeyPath: BIP32Path;
     /**
      * Epoch after which the pool should be retired
      */
-    retirementEpoch: bigint_like,
+    retirementEpoch: bigint_like;
 }
 
 export enum StakeCredentialParamsType {
@@ -662,18 +662,18 @@ export enum StakeCredentialParamsType {
 }
 
 export type KeyPathStakeCredentialParams = {
-    type: StakeCredentialParamsType.KEY_PATH,
-    keyPath: BIP32Path,
+    type: StakeCredentialParamsType.KEY_PATH;
+    keyPath: BIP32Path;
 }
 
 export type KeyHashStakeCredentialParams = {
-    type: StakeCredentialParamsType.KEY_HASH,
-    keyHash: string,
+    type: StakeCredentialParamsType.KEY_HASH;
+    keyHash: string;
 }
 
 export type ScriptStakeCredentialParams = {
-    type: StakeCredentialParamsType.SCRIPT_HASH,
-    scriptHash: string,
+    type: StakeCredentialParamsType.SCRIPT_HASH;
+    scriptHash: string;
 }
 
 export type StakeCredentialParams = KeyPathStakeCredentialParams | KeyHashStakeCredentialParams | ScriptStakeCredentialParams
@@ -687,7 +687,7 @@ export type StakeRegistrationParams = {
     /**
      * Id to be registered
      */
-     stakeCredential: StakeCredentialParams,
+     stakeCredential: StakeCredentialParams;
 }
 
 /**
@@ -699,7 +699,7 @@ export type StakeDeregistrationParams = {
     /**
      * Id to be deregistered
      */
-    stakeCredential: StakeCredentialParams,
+    stakeCredential: StakeCredentialParams;
 }
 
 /**
@@ -711,11 +711,11 @@ export type StakeDelegationParams = {
     /**
      * Id of the staking entity / reward account that wants to delegate
      */
-     stakeCredential: StakeCredentialParams,
+     stakeCredential: StakeCredentialParams;
      /**
      * Pool ID user wants to delegate to
      */
-    poolKeyHashHex: string
+    poolKeyHashHex: string;
 }
 
 /**
@@ -725,20 +725,20 @@ export type StakeDelegationParams = {
  * @see [[Transaction]]
  */
 export type Certificate = {
-    type: CertificateType.STAKE_REGISTRATION
-    params: StakeRegistrationParams
+    type: CertificateType.STAKE_REGISTRATION;
+    params: StakeRegistrationParams;
 } | {
-    type: CertificateType.STAKE_DEREGISTRATION
-    params: StakeDeregistrationParams
+    type: CertificateType.STAKE_DEREGISTRATION;
+    params: StakeDeregistrationParams;
 } | {
-    type: CertificateType.STAKE_DELEGATION
-    params: StakeDelegationParams
+    type: CertificateType.STAKE_DELEGATION;
+    params: StakeDelegationParams;
 } | {
-    type: CertificateType.STAKE_POOL_REGISTRATION
-    params: PoolRegistrationParams
+    type: CertificateType.STAKE_POOL_REGISTRATION;
+    params: PoolRegistrationParams;
 } | {
-    type: CertificateType.STAKE_POOL_RETIREMENT
-    params: PoolRetirementParams
+    type: CertificateType.STAKE_POOL_RETIREMENT;
+    params: PoolRetirementParams;
 }
 
 /**
@@ -750,12 +750,12 @@ export type Withdrawal = {
     /**
      * Path to rewards account being withdrawn
      */
-    stakeCredential: StakeCredentialParams,
+    stakeCredential: StakeCredentialParams;
     /**
      * Amount (in Lovelace) being withdrawn.
      * Note that Amount *must* be all accumulated rewards.
      */
-    amount: bigint_like,
+    amount: bigint_like;
 };
 
 /**
@@ -764,7 +764,7 @@ export type Withdrawal = {
  * @see [[Version]]
  */
 export type Flags = {
-    isDebug: boolean,
+    isDebug: boolean;
 };
 
 /**
@@ -774,10 +774,10 @@ export type Flags = {
  * @see [[DeviceCompatibility]]
  */
 export type Version = {
-    major: number,
-    minor: number,
-    patch: number,
-    flags: Flags,
+    major: number;
+    minor: number;
+    patch: number;
+    flags: Flags;
 };
 
 /**
@@ -791,49 +791,49 @@ export type DeviceCompatibility = {
      *   extent of the features supported by the firmware itself)
      * - false if SDK refuses to communicate with current device version
      */
-    isCompatible: boolean
+    isCompatible: boolean;
     /**
      * In case there are some compatibility problem, SDK recommended version.
      * Clients of SDK should check whether this is null and if not, urge users to upgrade.
      */
-    recommendedVersion: string | null
+    recommendedVersion: string | null;
     /**
      * Whether we support Mary features
      */
-    supportsMary: boolean
+    supportsMary: boolean;
     /**
      * Whether we support Catalyst registration
      */
-    supportsCatalystRegistration: boolean
+    supportsCatalystRegistration: boolean;
     /**
      * Whether we support transactions with zero TTL
      * (useful for dummy transactions to ensure invalidity)
      */
-    supportsZeroTtl: boolean
+    supportsZeroTtl: boolean;
     /**
      * Whether we support operational certificate signing
      */
-    supportsPoolRegistrationAsOperator: boolean
+    supportsPoolRegistrationAsOperator: boolean;
     /**
      * Whether we support pool retirement certificate
      */
-    supportsPoolRetirement: boolean
+    supportsPoolRetirement: boolean;
     /**
      * Whether we support script hash derivation
      */
-    supportsNativeScriptHashDerivation: boolean
+    supportsNativeScriptHashDerivation: boolean;
     /**
      * Whether we support multisig transaction
      */
-    supportsMultisigTransaction: boolean
+    supportsMultisigTransaction: boolean;
     /**
      * Whether we support mint
      */
-    supportsMint: boolean
+    supportsMint: boolean;
     /**
      * Whether we support Alonzo and Plutus
      */
-    supportsAlonzo: boolean
+    supportsAlonzo: boolean;
 }
 
 /**
@@ -845,7 +845,7 @@ export type Serial = {
      * Serial is a Ledger device identifier.
      * It is 7 bytes long, which is represented here as 14-character hex string
      */
-    serial: string,
+    serial: string;
 };
 
 /**
@@ -854,7 +854,7 @@ export type Serial = {
  * @see [[DeriveAddressRequest]]
  */
 export type DerivedAddress = {
-    addressHex: string,
+    addressHex: string;
 };
 
 
@@ -864,8 +864,8 @@ export type DerivedAddress = {
  * @see [[Ada.getExtendedPublicKey]]
  */
 export type ExtendedPublicKey = {
-    publicKeyHex: string,
-    chainCodeHex: string,
+    publicKeyHex: string;
+    chainCodeHex: string;
 };
 
 /**
@@ -874,7 +874,7 @@ export type ExtendedPublicKey = {
  * @see [[Ada.signOperationalCertificate]]
  */
 export type OperationalCertificateSignature = {
-    signatureHex: string
+    signatureHex: string;
 }
 
 /**
@@ -886,12 +886,12 @@ export type Witness = {
     /**
      * Witnessed path
      */
-    path: BIP32Path,
+    path: BIP32Path;
     /**
      * Note: this is *only* a signature.
      * You need to add proper extended public key to form a full witness
      */
-    witnessSignatureHex: string,
+    witnessSignatureHex: string;
 };
 
 /**
@@ -914,11 +914,11 @@ export enum TxAuxiliaryDataSupplementType {
  * @see [[SignedTransactionData]]
  */
 export type TxAuxiliaryDataSupplement = {
-    type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
+    type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION;
     /** Hash of the auxiliary data including the Catalyst registration */
-    auxiliaryDataHashHex: string,
+    auxiliaryDataHashHex: string;
     /** Signature of the Catalyst registration payload by the staking key that was supplied */
-    catalystRegistrationSignatureHex: string,
+    catalystRegistrationSignatureHex: string;
 };
 
 /**
@@ -930,16 +930,16 @@ export type SignedTransactionData = {
     /**
      * Hash of signed transaction. Callers should check that they serialize tx the same way
      */
-    txHashHex: string,
+    txHashHex: string;
     /**
      * List of witnesses. Caller should assemble full transaction to be submitted to the network.
      */
-    witnesses: Array<Witness>,
+    witnesses: Array<Witness>;
     /**
      * Additional information about auxiliary data serialized into the transaction, providing
      * the caller with information needed to assemble the transation containing these auxiliary data.
      */
-    auxiliaryDataSupplement: TxAuxiliaryDataSupplement | null,
+    auxiliaryDataSupplement: TxAuxiliaryDataSupplement | null;
 };
 
 /**
@@ -965,11 +965,11 @@ export enum TxAuxiliaryDataType {
  */
 export type TxAuxiliaryData =
     {
-        type: TxAuxiliaryDataType.ARBITRARY_HASH,
-        params: TxAuxiliaryDataArbitraryHashParams
+        type: TxAuxiliaryDataType.ARBITRARY_HASH;
+        params: TxAuxiliaryDataArbitraryHashParams;
     } | {
-        type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
-        params: CatalystRegistrationParams
+        type: TxAuxiliaryDataType.CATALYST_REGISTRATION;
+        params: CatalystRegistrationParams;
     }
 
 /**
@@ -978,7 +978,7 @@ export type TxAuxiliaryData =
  */
 export type TxAuxiliaryDataArbitraryHashParams = {
     /** Hash of the transaction auxiliary data */
-    hashHex: string
+    hashHex: string;
 }
 
 /**
@@ -990,22 +990,22 @@ export type CatalystRegistrationParams = {
     /**
      * Voting key to be registered given in hex
      */
-    votingPublicKeyHex: string,
+    votingPublicKeyHex: string;
 
     /**
      * Path to the staking key to which voting rights would be associated
      */
-    stakingPath: BIP32Path,
+    stakingPath: BIP32Path;
 
     /**
      * Address for receiving voting rewards, Byron-era addresses not supported
      */
-    rewardsDestination: DeviceOwnedAddress,
+    rewardsDestination: DeviceOwnedAddress;
 
     /**
      * Nonce value
      */
-    nonce: bigint_like,
+    nonce: bigint_like;
 }
 
 export enum TxRequiredSignerType {
@@ -1015,11 +1015,11 @@ export enum TxRequiredSignerType {
 }
 
 export type RequiredSigner = {
-    type: TxRequiredSignerType.PATH,
-    path: BIP32Path,
+    type: TxRequiredSignerType.PATH;
+    path: BIP32Path;
 } | {
-    type: TxRequiredSignerType.HASH,
-    hash: string,
+    type: TxRequiredSignerType.HASH;
+    hash: string;
 }
 
 /**
@@ -1033,29 +1033,29 @@ export type Transaction = {
     /**
      * Cardano network the transaction is supposed to be submitted to.
      */
-    network: Network,
+    network: Network;
     /**
      * Transaction inputs (UTxOs)
      */
-    inputs: Array<TxInput>,
+    inputs: Array<TxInput>;
     /**
      * Transaction outputs
      */
-    outputs: Array<TxOutput>,
+    outputs: Array<TxOutput>;
     /**
      * Transaction fee (in Lovelace).
      * Note that transaction is valid only if inputs + fee === outputs.
      */
-    fee: bigint_like,
+    fee: bigint_like;
     /**
      * "Time-to-live" (block height).
      * Transaction will become invalid at this block height.
      */
-    ttl?: bigint_like | null,
+    ttl?: bigint_like | null;
     /**
      * Transaction certificates (if any).
      */
-    certificates?: Array<Certificate> | null,
+    certificates?: Array<Certificate> | null;
     /**
      * Withdrawals (if any) from rewards accounts
      * If not null, the entries' keys (reward addresses derived from the given stake credentials)
@@ -1063,16 +1063,16 @@ export type Transaction = {
      * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
      * i.e. the key with the lower value in lexical order sorts earlier.
      */
-    withdrawals?: Array<Withdrawal> | null,
+    withdrawals?: Array<Withdrawal> | null;
     /**
      * Transaction auxiliary data (if any)
      */
-    auxiliaryData?: TxAuxiliaryData | null,
+    auxiliaryData?: TxAuxiliaryData | null;
     /**
      * Validity start (block height) if any.
      * Transaction becomes valid only starting from this block height.
      */
-    validityIntervalStart?: bigint_like | null,
+    validityIntervalStart?: bigint_like | null;
     /**
      * Mint or burn instructions (if any).
      * Assets to be minted (token amount positive) or burned (token amount negative) with the transaction.
@@ -1080,23 +1080,23 @@ export type Transaction = {
      * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
      * i.e. the key with the lower value in lexical order sorts earlier.
      */
-    mint?: Array<AssetGroup> | null,
+    mint?: Array<AssetGroup> | null;
     /**
      * Script Data hash (if any)
      */
-    scriptDataHashHex?: string | null,
+    scriptDataHashHex?: string | null;
     /**
      * Collaterals (if any)
      */
-    collaterals?: Array<TxInput> | null,
+    collaterals?: Array<TxInput> | null;
     /**
      * Required Signers by key (if any)
      */
-    requiredSigners?: Array<RequiredSigner> | null,
+    requiredSigners?: Array<RequiredSigner> | null;
     /**
      * True if network id should be included in the transaction body; false or not given otherwise
      */
-    includeNetworkId?: boolean,
+    includeNetworkId?: boolean;
 }
 
 /**
@@ -1220,16 +1220,16 @@ export type SignTransactionRequest = {
      * it cannot sign arbitrary combination of all transaction features.
      * The mode specifies which use-case the user want to use and triggers additional validation on `tx` field.
      */
-    signingMode: TransactionSigningMode
+    signingMode: TransactionSigningMode;
     /**
      * Transaction to be signed
      */
-    tx: Transaction
+    tx: Transaction;
 
     /**
      * Additional witness paths that are not gathered from the transaction body, eg. mint witnesses
      */
-    additionalWitnessPaths?: BIP32Path[]
+    additionalWitnessPaths?: BIP32Path[];
 }
 
 /**
@@ -1286,26 +1286,26 @@ export enum NativeScriptType {
  * @see [[NativeScriptType]]
  */
 export type NativeScript = {
-    type: NativeScriptType.PUBKEY_DEVICE_OWNED,
-    params: NativeScriptParamsDeviceOwnedPubkey,
+    type: NativeScriptType.PUBKEY_DEVICE_OWNED;
+    params: NativeScriptParamsDeviceOwnedPubkey;
 } | {
-    type: NativeScriptType.PUBKEY_THIRD_PARTY,
-    params: NativeScriptParamsThirdPartyPubkey,
+    type: NativeScriptType.PUBKEY_THIRD_PARTY;
+    params: NativeScriptParamsThirdPartyPubkey;
 } | {
-    type: NativeScriptType.ALL,
-    params: NativeScriptParamsAll,
+    type: NativeScriptType.ALL;
+    params: NativeScriptParamsAll;
 } | {
-    type: NativeScriptType.ANY,
-    params: NativeScriptParamsAny,
+    type: NativeScriptType.ANY;
+    params: NativeScriptParamsAny;
 } | {
-    type: NativeScriptType.N_OF_K,
-    params: NativeScriptParamsNofK,
+    type: NativeScriptType.N_OF_K;
+    params: NativeScriptParamsNofK;
 } | {
-    type: NativeScriptType.INVALID_BEFORE,
-    params: NativeScriptParamsInvalidBefore,
+    type: NativeScriptType.INVALID_BEFORE;
+    params: NativeScriptParamsInvalidBefore;
 } | {
-    type: NativeScriptType.INVALID_HEREAFTER,
-    params: NativeScriptParamsInvalidHereafter,
+    type: NativeScriptType.INVALID_HEREAFTER;
+    params: NativeScriptParamsInvalidHereafter;
 }
 
 /**
@@ -1316,7 +1316,7 @@ export type NativeScript = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsDeviceOwnedPubkey = {
-    path: BIP32Path,
+    path: BIP32Path;
 }
 
 /**
@@ -1327,7 +1327,7 @@ export type NativeScriptParamsDeviceOwnedPubkey = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsThirdPartyPubkey = {
-    keyHashHex: string,
+    keyHashHex: string;
 }
 
 /**
@@ -1337,7 +1337,7 @@ export type NativeScriptParamsThirdPartyPubkey = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsAll = {
-    scripts: NativeScript[],
+    scripts: NativeScript[];
 }
 
 /**
@@ -1347,7 +1347,7 @@ export type NativeScriptParamsAll = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsAny = {
-    scripts: NativeScript[],
+    scripts: NativeScript[];
 }
 
 /**
@@ -1357,8 +1357,8 @@ export type NativeScriptParamsAny = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsNofK = {
-    requiredCount: bigint_like,
-    scripts: NativeScript[],
+    requiredCount: bigint_like;
+    scripts: NativeScript[];
 }
 
 /**
@@ -1368,7 +1368,7 @@ export type NativeScriptParamsNofK = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsInvalidBefore = {
-    slot: bigint_like,
+    slot: bigint_like;
 }
 
 /**
@@ -1378,7 +1378,7 @@ export type NativeScriptParamsInvalidBefore = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsInvalidHereafter = {
-    slot: bigint_like,
+    slot: bigint_like;
 }
 
 /**
@@ -1387,7 +1387,7 @@ export type NativeScriptParamsInvalidHereafter = {
  * @see [[DeriveNativeScriptHashRequest]]
  */
 export type NativeScriptHash = {
-    scriptHashHex: string,
+    scriptHashHex: string;
 }
 
 /**

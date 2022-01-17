@@ -2,9 +2,9 @@ import type { OperationalCertificate, OperationalCertificateSignature } from "..
 import { str_to_path } from "../../../src/utils"
 
 export type TestCase = {
-  testname: string,
-  operationalCertificate: OperationalCertificate,
-  expected: OperationalCertificateSignature,
+  testname: string;
+  operationalCertificate: OperationalCertificate;
+  expected: OperationalCertificateSignature;
 }
 
 export const tests: TestCase[] = [

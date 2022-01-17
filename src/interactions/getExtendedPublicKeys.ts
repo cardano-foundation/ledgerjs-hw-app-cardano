@@ -10,10 +10,10 @@ import { ensureLedgerAppVersionCompatible } from "./getVersion"
 
 
 const send = (params: {
-  p1: number,
-  p2: number,
-  data: Buffer,
-  expectedResponseLength?: number
+  p1: number;
+  p2: number;
+  data: Buffer;
+  expectedResponseLength?: number;
 }): SendParams => ({ ins: INS.GET_EXT_PUBLIC_KEY, ...params })
 
 

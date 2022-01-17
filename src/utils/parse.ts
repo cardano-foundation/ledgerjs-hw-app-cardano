@@ -48,7 +48,7 @@ export const isUint64Number = (data: unknown): data is _Uint64_num =>
 export const isUint64Bigint = (data: unknown): data is _Uint64_bigint =>
     (typeof data === 'bigint') && isUint64str(data.toString())
 
-export const isUintStr = (data: unknown, constraints: { min?: string, max?: string }): data is string => {
+export const isUintStr = (data: unknown, constraints: { min?: string; max?: string }): data is string => {
     const min = constraints.min ?? "0"
     const max = constraints.max ?? MAX_UINT_64_STR
 
@@ -79,7 +79,7 @@ export const isInt64Number = (data: unknown): data is _Int64_num =>
 export const isInt64Bigint = (data: unknown): data is _Int64_bigint =>
     (typeof data === 'bigint') && isInt64str(data.toString())
 
-export const isIntStr = (data: unknown, constraints: { min?: string, max?: string }): data is string => {
+export const isIntStr = (data: unknown, constraints: { min?: string; max?: string }): data is string => {
     const min = constraints.min ?? MIN_INT_64_STR
     const max = constraints.max ?? MAX_INT_64_STR
 
@@ -129,7 +129,7 @@ export function parseHexStringOfLength<L extends number>(str: unknown, length: L
 }
 
 
-export function parseInt64_str(val: unknown, constraints: { min?: string, max?: string}, errMsg: InvalidDataReason): Int64_str {
+export function parseInt64_str(val: unknown, constraints: { min?: string; max?: string}, errMsg: InvalidDataReason): Int64_str {
     switch (typeof val) {
     case 'string':
         validate(isInt64str(val) && isIntStr(val, constraints), errMsg)
@@ -145,7 +145,7 @@ export function parseInt64_str(val: unknown, constraints: { min?: string, max?: 
     }
 }
 
-export function parseUint64_str(val: unknown, constraints: { min?: string, max?: string }, errMsg: InvalidDataReason): Uint64_str {
+export function parseUint64_str(val: unknown, constraints: { min?: string; max?: string }, errMsg: InvalidDataReason): Uint64_str {
     switch (typeof val) {
     case 'string':
         validate(isUint64str(val) && isUintStr(val, constraints), errMsg)

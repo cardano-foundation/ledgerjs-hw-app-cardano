@@ -353,8 +353,8 @@ export class Ada {
  * @category Main
  */
 export type GetVersionResponse = {
-  version: Version
-  compatibility: DeviceCompatibility
+  version: Version;
+  compatibility: DeviceCompatibility;
 }
 
 /**
@@ -364,7 +364,7 @@ export type GetVersionResponse = {
  */
 export type GetExtendedPublicKeysRequest = {
   /** Paths to public keys which should be derived by the device */
-  paths: BIP32Path[]
+  paths: BIP32Path[];
 }
 
 /**
@@ -381,7 +381,7 @@ export type GetExtendedPublicKeysResponse = Array<ExtendedPublicKey>
  */
 export type GetExtendedPublicKeyRequest = {
   /** Path to public key which should be derived */
-  path: BIP32Path
+  path: BIP32Path;
 }
 /**
  * Get single public key ([[Ada.getExtendedPublicKey]]) response data
@@ -396,8 +396,8 @@ export type GetExtendedPublicKeyResponse = ExtendedPublicKey
  * @see [[DeriveAddressResponse]]
  */
 export type DeriveAddressRequest = {
-  network: Network,
-  address: DeviceOwnedAddress
+  network: Network;
+  address: DeviceOwnedAddress;
 }
 /**
  * Derive address ([[Ada.deriveAddress]]) response data
@@ -444,8 +444,8 @@ export type SignOperationalCertificateResponse = OperationalCertificateSignature
  * @see [[DeriveNativeScriptHashResponse]]
  */
 export type DeriveNativeScriptHashRequest = {
-  script: NativeScript,
-  displayFormat: NativeScriptHashDisplayFormat,
+  script: NativeScript;
+  displayFormat: NativeScriptHashDisplayFormat;
 }
 /**
  * Derive native script hash ([[Ada.deriveNativeScriptHash]]) response data
