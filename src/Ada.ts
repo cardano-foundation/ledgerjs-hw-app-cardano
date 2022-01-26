@@ -55,7 +55,7 @@ function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
     return async (...args) => {
         try {
             return await fn(...args)
-        } catch (e) {
+        } catch (e: any) {
             if (e && e.statusCode) {
                 throw new DeviceStatusError(e.statusCode)
             }
@@ -77,7 +77,7 @@ export type SendFn = (params: SendParams) => Promise<Buffer>;
 
 // It can happen that we try to send a message to the device
 // when the device thinks it is still in a middle of previous ADPU stream.
-// This happens mostly if host does abort communication for some reason
+// This happens mostly if the host aborts communication for some reason
 // leaving ledger mid-call.
 // In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
 // default. We can therefore transparently retry the request.
@@ -88,11 +88,11 @@ function wrapRetryStillInCall<T extends Function>(fn: T): T {
     return async (...args: any) => {
         try {
             return await fn(...args)
-        } catch (e) {
+        } catch (e: any) {
             if (
                 e &&
-        e.statusCode &&
-        e.statusCode === DeviceStatusCodes.ERR_STILL_IN_CALL
+                e.statusCode &&
+                e.statusCode === DeviceStatusCodes.ERR_STILL_IN_CALL
             ) {
                 // Do the retry
                 return await fn(...args)
