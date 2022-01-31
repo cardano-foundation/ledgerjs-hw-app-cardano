@@ -1,9 +1,9 @@
 {
   "entryPoints": ["src/Ada.ts"],
   "out": "docs_generated",
-  "theme": "./_typedoc/custom-theme",
   "categorizeByGroup": false,
   "categoryOrder": ["Main", "API request/response", "Basic types", "Addresses", "Shelley", "Mary", "Pool registration", "*"],
+  "sort": "source-order",
   "readme": "none",
   "includeVersion": "true"
 }
