@@ -306,8 +306,11 @@ export function parseSigningMode(mode: TransactionSigningMode): TransactionSigni
 export function parseSignTransactionRequest(request: SignTransactionRequest): ParsedSigningRequest {
     const tx = parseTransaction(request.tx)
     const signingMode = parseSigningMode(request.signingMode)
-    validate(isArray(request.additionalWitnessPaths), InvalidDataReason.ADDITIONAL_WITNESSES_NOT_ARRAY)
-    const additionalWitnessPaths = request.additionalWitnessPaths?.map(path => parseBIP32Path(path, InvalidDataReason.INVALID_PATH)) || []
+
+    validate(isArray(request.additionalWitnessPaths ?? []), InvalidDataReason.ADDITIONAL_WITNESSES_NOT_ARRAY)
+    const additionalWitnessPaths = (request.additionalWitnessPaths ?? []).map(
+        path => parseBIP32Path(path, InvalidDataReason.INVALID_PATH)
+    )
 
     // Additional restrictions based on signing mode
     switch (signingMode) {

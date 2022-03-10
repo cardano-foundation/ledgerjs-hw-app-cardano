@@ -86,7 +86,7 @@ export type TestcaseShelley = {
   testname: string;
   tx: Transaction;
   signingMode: TransactionSigningMode;
-  additionalWitnessPaths: BIP32Path[];
+  additionalWitnessPaths?: BIP32Path[];
   txBody?: string;
   txAuxiliaryData?: string;
   result: SignedTransactionData;
@@ -100,7 +100,7 @@ export const testsShelleyNoCertificates: TestcaseShelley[] = [
             outputs: [],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        additionalWitnessPaths: [],
+        additionalWitnessPaths: undefined,
         txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a",
         result: {
             txHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",

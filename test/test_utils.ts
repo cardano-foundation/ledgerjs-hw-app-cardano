@@ -163,7 +163,6 @@ export function describePositiveTest(name: string, tests: any[]) {
         })
 
         for (const { testname, tx, signingMode, additionalWitnessPaths, txBody, result: expected } of tests) {
-            const additionalWitnessPathsIfPresent = additionalWitnessPaths || []
             it(testname, async () => {
                 if (!txBody) {
                     console.log("WARNING --- No tx body given: " + testname)
@@ -173,7 +172,7 @@ export function describePositiveTest(name: string, tests: any[]) {
                 const response = await ada.signTransaction({
                     tx,
                     signingMode,
-                    additionalWitnessPaths: additionalWitnessPathsIfPresent,
+                    additionalWitnessPaths,
                 })
                 expect(response).to.deep.equal(expected)
             })
