@@ -43,6 +43,15 @@ export const testsByron: TestCase[] = [
 export const testsShelley: TestCase[] = [
     // Shelley
     {
+        path: "1852'/1815'/4'",
+        expected: {
+            publicKey:
+        "4e4353d7cc6f49e8e7a281e08a7672d000d4abfdf07be299cbff95d6a05df224",
+            chainCode:
+        "cbc28c222a6c15c0cfe98434f97b3aef860b5ce6902e177820adbd70ed7dc2ec",
+        },
+    },
+    {
         path: "1852'/1815'/0'/0/1",
         expected: {
             publicKey:
@@ -64,12 +73,21 @@ export const testsShelley: TestCase[] = [
 
 export const testsShelleyUnusual: TestCase[] = [
     {
-        path: "1852'/1815'/150'/0/10'",
+        path: "1852'/1815'/101'",
         expected: {
             publicKey:
-        "cfd898d89110dae7c762e77cf8f58b02ab0ac6cd142781c7bb6bbf62df0c53ac",
+        "674af1cfe5919576714bb31f065ac93788a6a2fb5168362c0aa9509ac513bbbc",
             chainCode:
-        "964fd2c6038d5e5b1aef40b25ad673e8169b7a55ba29845c17e3c4df7af72cee",
+        "5d403248edff92b87433ae97942326cd1656a57301a03988fb36b9ae728d4d2c",
+        },
+    },
+    {
+        path: "1852'/1815'/100'/0/1000001'",
+        expected: {
+            publicKey:
+        "d06a7a9d87e95f475811e31b03564d272f1c2614e8b2cf0f37d6e973fd2aba9c",
+            chainCode:
+        "8aca949d791e4a4f26e05e55d39d17f565884b56882283cf7d97e338fa7ab9ee",
         },
     },
 ]

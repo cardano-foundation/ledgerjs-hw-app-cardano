@@ -32,16 +32,16 @@ describe("getExtendedPublicKey", async () => {
             }
         }
 
-        it('byron', async () => {
+        it('get a single extended public key --- byron', async () => {
             await test(testsByron)
         })
-        it('shelley', async () => {
+        it('get a single extended public key --- shelley', async () => {
             await test(testsShelley)
         })
-        it('shelley unusual', async () => {
+        it('get a single extended public key --- shelley unusual', async () => {
             await test(testsShelleyUnusual)
         })
-        it('cold keys', async () => {
+        it('get a single extended public key --- cold keys', async () => {
             await test(testsColdKeys)
         })
     })
