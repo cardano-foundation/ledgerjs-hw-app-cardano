@@ -659,6 +659,21 @@ function hasStakeCredentialInWithdrawals(tx: ParsedTransaction, stakeCredentialT
     )
 }
 
+function hasScriptHashInAddressParams(tx: ParsedTransaction) {
+    const scriptAddressTypes = [
+        AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
+        AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
+        AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
+        AddressType.ENTERPRISE_SCRIPT,
+        AddressType.POINTER_SCRIPT,
+        AddressType.REWARD_SCRIPT,
+    ]
+    return tx.outputs.some(o =>
+        o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
+        scriptAddressTypes.includes(o.destination.addressParams.type)
+    )
+}
+
 function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
     // signing modes
 
@@ -676,18 +691,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
 
     // transaction elements
 
-    const scriptAddressTypes = [
-        AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
-        AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
-        AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
-        AddressType.ENTERPRISE_SCRIPT,
-        AddressType.POINTER_SCRIPT,
-        AddressType.REWARD_SCRIPT,
-    ]
-    const hasScripthashOutputs = request.tx.outputs.some(o =>
-        o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
-        scriptAddressTypes.includes(o.destination.addressParams.type))
-    if (hasScripthashOutputs && !getCompatibility(version).supportsMultisigTransaction) {
+    if (hasScriptHashInAddressParams(request.tx) && !getCompatibility(version).supportsMultisigTransaction) {
         throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
