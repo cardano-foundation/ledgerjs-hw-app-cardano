@@ -84,6 +84,43 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4",
     },
     {
+        testname: "base address path/path unusual spending path account",
+        network: Networks.Fake,
+        addressParams: {
+            type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+            params: {
+                spendingPath: str_to_path("1852'/1815'/101'/0/1"),
+                stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+        },
+        result: "addr1qv6dcymepkghuyt0za9jxg5hn89art9y8yjcvhxclxdhndsayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqdqq9xn",
+    },
+    {
+        testname: "base address path/path unusual spending path address index",
+        network: Networks.Fake,
+        addressParams: {
+            type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+            params: {
+                spendingPath: str_to_path("1852'/1815'/1'/0/1000001"),
+                stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+        },
+        result: "addr1q08rwk27cdm6vcp272pqcwq3t3gzea0q5xws2z84zzejrkcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2cxp3q",
+    },
+    // TODO check for warning cases in security policies --- we don't have them covered by tests apparently, at least not for addresses, where we don't have reject tests either?
+    {
+        testname: "base address path/path unusual staking path account",
+        network: Networks.Fake,
+        addressParams: {
+            type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+            params: {
+                spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+                stakingPath: str_to_path("1852'/1815'/101'/2/0"),
+            },
+        },
+        result: "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vmfwjwuljn5a0p37d4yvxevnte42mffrpmf4823vcdq62xq3kdpkj",
+    },
+    {
         testname: "base address path/keyHash 1",
         network: Networks.Testnet,
         addressParams: {
