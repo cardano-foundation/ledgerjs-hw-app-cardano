@@ -640,80 +640,100 @@ function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
         }
     }
 
+    // TODO all of this should be covered by tests
     return witnessPaths
 }
 
-function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
-    const auxiliaryData = request.tx?.auxiliaryData
-    const hasCatalystRegistration = auxiliaryData?.type === TxAuxiliaryDataType.CATALYST_REGISTRATION
+function hasStakeCredentialInCertificates(tx: ParsedTransaction, stakeCredentialType: StakeCredentialType) {
+    return tx.certificates.some(c =>
+        (c.type === CertificateType.STAKE_DELEGATION ||
+        c.type === CertificateType.STAKE_DEREGISTRATION ||
+        c.type === CertificateType.STAKE_REGISTRATION) &&
+        c.stakeCredential.type === stakeCredentialType
+    )
+}
 
-    if (hasCatalystRegistration && !getCompatibility(version).supportsCatalystRegistration) {
-        throw new DeviceVersionUnsupported(`Catalyst registration not supported by Ledger app version ${getVersionString(version)}.`)
+function hasStakeCredentialInWithdrawals(tx: ParsedTransaction, stakeCredentialType: StakeCredentialType) {
+    return tx.withdrawals.some(w =>
+        w.stakeCredential.type === stakeCredentialType
+    )
+}
+
+function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSigningRequest): void {
+    // signing modes
+
+    if (request.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR && !getCompatibility(version).supportsPoolRegistrationAsOperator) {
+        throw new DeviceVersionUnsupported(`Pool registration as operator not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.signingMode === TransactionSigningMode.MULTISIG_TRANSACTION && !getCompatibility(version).supportsMultisigTransaction) {
+        throw new DeviceVersionUnsupported(`Multisig transactions not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.signingMode === TransactionSigningMode.PLUTUS_TRANSACTION && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Plutus transactions not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    // transaction elements
+
+    const scriptAddressTypes = [
+        AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
+        AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
+        AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
+        AddressType.ENTERPRISE_SCRIPT,
+        AddressType.POINTER_SCRIPT,
+        AddressType.REWARD_SCRIPT,
+    ]
+    const hasScripthashOutputs = request.tx.outputs.some(o =>
+        o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
+        scriptAddressTypes.includes(o.destination.addressParams.type))
+    if (hasScripthashOutputs && !getCompatibility(version).supportsMultisigTransaction) {
+        throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    const hasDatumHashInOutputs = request.tx.outputs.some(o => o.datumHashHex != null)
+    if (hasDatumHashInOutputs && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Datum hash in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
     if (request.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
         throw new DeviceVersionUnsupported(`Zero TTL not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR && !getCompatibility(version).supportsPoolRegistrationAsOperator) {
-        throw new DeviceVersionUnsupported(`Pool registration as operator not supported by Ledger app version ${getVersionString(version)}.`)
+    if (
+        hasStakeCredentialInWithdrawals(request.tx, StakeCredentialType.SCRIPT_HASH) &&
+        !getCompatibility(version).supportsMultisigTransaction
+    ) {
+        throw new DeviceVersionUnsupported(`Script hash in withdrawal not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+    if (
+        hasStakeCredentialInWithdrawals(request.tx, StakeCredentialType.KEY_HASH) &&
+        !getCompatibility(version).supportsAlonzo
+    ) {
+        throw new DeviceVersionUnsupported(`Key hash in withdrawal not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    {
-        const hasDatumHashInOutputs = request.tx.outputs.some(o => o.datumHashHex != null)
-        if (hasDatumHashInOutputs && !getCompatibility(version).supportsAlonzo) {
-            throw new DeviceVersionUnsupported(`Datum hash in output not supported by Ledger app version ${getVersionString(version)}.`)
-        }
-    }
-
-    const certificates = request.tx?.certificates
-    const hasPoolRetirement = certificates && certificates.some(c => c.type === CertificateType.STAKE_POOL_RETIREMENT)
-
+    const hasPoolRetirement = request.tx.certificates.some(c => c.type === CertificateType.STAKE_POOL_RETIREMENT)
     if (hasPoolRetirement && !getCompatibility(version).supportsPoolRetirement) {
         throw new DeviceVersionUnsupported(`Pool retirement certificate not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+    if (
+        hasStakeCredentialInCertificates(request.tx, StakeCredentialType.SCRIPT_HASH) &&
+        !getCompatibility(version).supportsMultisigTransaction
+    ) {
+        throw new DeviceVersionUnsupported(`Script hash in certificate stake credential not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+    if (
+        hasStakeCredentialInCertificates(request.tx, StakeCredentialType.KEY_HASH) &&
+        !getCompatibility(version).supportsAlonzo
+    ) {
+        throw new DeviceVersionUnsupported(`Key hash in certificate stake credential not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
     if (request.tx?.mint && !getCompatibility(version).supportsMint) {
         throw new DeviceVersionUnsupported(`Mint not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (!getCompatibility(version).supportsMultisigTransaction) {
-        {
-            const scriptAddressTypes = [
-                AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
-                AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
-                AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
-                AddressType.ENTERPRISE_SCRIPT,
-                AddressType.POINTER_SCRIPT,
-                AddressType.REWARD_SCRIPT,
-            ]
-            const hasScripthashOutputs = request.tx?.outputs && request.tx.outputs.some(o =>
-                o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
-                scriptAddressTypes.includes(o.destination.addressParams.type))
-            if (hasScripthashOutputs) {
-                throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
-            }
-        }
-        {
-            const hasScripthashStakeCredentials = certificates && certificates.some(c =>
-                (c.type === CertificateType.STAKE_DELEGATION ||
-                c.type === CertificateType.STAKE_DEREGISTRATION ||
-                c.type === CertificateType.STAKE_REGISTRATION) &&
-                c.stakeCredential.type === StakeCredentialType.SCRIPT_HASH)
-            if (hasScripthashStakeCredentials) {
-                throw new DeviceVersionUnsupported(`Script hash in certificate stake credential not supported by Ledger app version ${getVersionString(version)}.`)
-            }
-        }
-        {
-            const withdrawals = request.tx?.withdrawals
-            const hasScripthashWithdrawals = withdrawals && withdrawals.some(w => w.stakeCredential.type === StakeCredentialType.SCRIPT_HASH)
-            if (hasScripthashWithdrawals) {
-                throw new DeviceVersionUnsupported(`Script hash in withdrawal not supported by Ledger app version ${getVersionString(version)}.`)
-            }
-        }
-    }
-
-    // TODO is the feature covered precisely since Mary? is this check needed, or all versions automatically support this?
     if (request.tx.validityIntervalStart && !getCompatibility(version).supportsMary) {
         throw new DeviceVersionUnsupported(`Validity interval start not supported by Ledger app version ${getVersionString(version)}.`)
     }
@@ -734,8 +754,12 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Network id in tx body not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.signingMode === TransactionSigningMode.PLUTUS_TRANSACTION && !getCompatibility(version).supportsAlonzo) {
-        throw new DeviceVersionUnsupported(`Plutus transaction not supported by Ledger app version ${getVersionString(version)}.`)
+    // catalyst voting registration is a specific type of auxiliary data that requires a HW wallet signature
+    const auxiliaryData = request.tx?.auxiliaryData
+    const hasCatalystRegistration = auxiliaryData?.type === TxAuxiliaryDataType.CATALYST_REGISTRATION
+
+    if (hasCatalystRegistration && !getCompatibility(version).supportsCatalystRegistration) {
+        throw new DeviceVersionUnsupported(`Catalyst registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
 
