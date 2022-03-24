@@ -640,7 +640,8 @@ function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
         }
     }
 
-    // TODO all of this should be covered by tests
+    // Note: if anything is added here, it should be covered by tests too
+
     return witnessPaths
 }
 

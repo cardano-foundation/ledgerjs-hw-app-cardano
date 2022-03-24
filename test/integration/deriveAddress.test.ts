@@ -4,7 +4,7 @@ import chaiAsPromised from "chai-as-promised"
 import type { Ada } from "../../src/Ada"
 import { utils } from "../../src/Ada"
 import { getAda } from "../test_utils"
-import { byronTestcases, InvalidPathTestcases, shelleyTestcases } from "./__fixtures__/deriveAddress"
+import { byronTestcases, RejectTestcases, shelleyTestcases } from "./__fixtures__/deriveAddress"
 
 chai.use(chaiAsPromised)
 
@@ -47,8 +47,8 @@ describe("deriveAddress", async () => {
         }
     }).timeout(60000)
 
-    describe("Should not permit invalid path for derive address", async () => {
-        for (const { testname, network, addressParams, errCls, errMsg } of InvalidPathTestcases) {
+    describe("Should reject address derive", async () => {
+        for (const { testname, network, addressParams, errCls, errMsg } of RejectTestcases) {
             it(testname, async () => {
                 const promise = ada.deriveAddress({
                     network,
@@ -77,8 +77,8 @@ describe("deriveAddress", async () => {
         }
     }).timeout(60000)
 
-    describe("Should not permit invalid path for show address", async () => {
-        for (const { testname, network, addressParams, errCls, errMsg } of InvalidPathTestcases) {
+    describe("Should reject address show", async () => {
+        for (const { testname, network, addressParams, errCls, errMsg } of RejectTestcases) {
             it(testname, async () => {
                 const promise = ada.showAddress({
                     network,
