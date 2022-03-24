@@ -144,7 +144,7 @@ export const destinations: Record<
             type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
             params: {
                 spendingPath: str_to_path("1852'/1815'/0'/0/0"),
-                stakingScriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                stakingScriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
             },
         },
     },
@@ -203,7 +203,7 @@ export const destinations: Record<
         params: {
             type: AddressType.REWARD_SCRIPT,
             params: {
-                stakingScriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                stakingScriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
             },
         },
     },

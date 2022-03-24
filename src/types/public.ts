@@ -184,7 +184,7 @@ export type AddressParamsByron = {
 export type SpendingParams = {
     spendingPath: BIP32Path;
 } | {
-    spendingScriptHash: string;
+    spendingScriptHashHex: string;
 }
 
 /**
@@ -198,7 +198,7 @@ export type AddressParamsBase = SpendingParams & ({
 } | {
     stakingKeyHashHex: string;
 } | {
-    stakingScriptHash: string;
+    stakingScriptHashHex: string;
 })
 
 /**
@@ -225,7 +225,7 @@ export type AddressParamsPointer = SpendingParams & {
 export type AddressParamsReward = {
     stakingPath: BIP32Path;
 } | {
-    stakingScriptHash: string;
+    stakingScriptHashHex: string;
 }
 
 /** Operational certificate
@@ -668,12 +668,12 @@ export type KeyPathStakeCredentialParams = {
 
 export type KeyHashStakeCredentialParams = {
     type: StakeCredentialParamsType.KEY_HASH;
-    keyHash: string;
+    keyHashHex: string;
 }
 
 export type ScriptStakeCredentialParams = {
     type: StakeCredentialParamsType.SCRIPT_HASH;
-    scriptHash: string;
+    scriptHashHex: string;
 }
 
 export type StakeCredentialParams = KeyPathStakeCredentialParams | KeyHashStakeCredentialParams | ScriptStakeCredentialParams
@@ -845,7 +845,7 @@ export type Serial = {
      * Serial is a Ledger device identifier.
      * It is 7 bytes long, which is represented here as 14-character hex string
      */
-    serial: string;
+    serialHex: string;
 };
 
 /**
@@ -1019,7 +1019,7 @@ export type RequiredSigner = {
     path: BIP32Path;
 } | {
     type: TxRequiredSignerType.HASH;
-    hash: string;
+    hashHex: string;
 }
 
 /**

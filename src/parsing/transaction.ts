@@ -283,7 +283,7 @@ function parseRequiredSigner(requiredSigner: RequiredSigner): ParsedRequiredSign
     case TxRequiredSignerType.HASH:
         return {
             type: RequiredSignerType.HASH,
-            hash: parseHexStringOfLength(requiredSigner.hash, KEY_HASH_LENGTH, InvalidDataReason.VKEY_HASH_WRONG_LENGTH),
+            hashHex: parseHexStringOfLength(requiredSigner.hashHex, KEY_HASH_LENGTH, InvalidDataReason.VKEY_HASH_WRONG_LENGTH),
         }
     default:
         throw new InvalidData(InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE)

@@ -191,7 +191,7 @@ export class Ada {
    * @returns Result object containing the device serial number.
    *
    * @example
-   * const { serial } = await ada.getSerial();
+   * const { serialHex } = await ada.getSerial();
    * console.log(`Serial number ${serial}`);
    *
    */

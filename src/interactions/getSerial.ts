@@ -25,6 +25,6 @@ export function* getSerial(version: Version): Interaction<Serial> {
         expectedResponseLength: 7,
     })
 
-    const serial = utils.buf_to_hex(response)
-    return { serial }
+    const serialHex = utils.buf_to_hex(response)
+    return { serialHex }
 }

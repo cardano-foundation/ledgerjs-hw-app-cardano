@@ -6,7 +6,7 @@ type ValidNativeScriptTestcase = {
     testname: string;
     script: NativeScript;
     displayFormat: NativeScriptHashDisplayFormat;
-    hash: string;
+    hashHex: string;
 }
 
 export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
@@ -19,7 +19,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "5102a193b3d5f0c256fcc425836ffb15e7d96d3389f5e57dc6bea726",
+        hashHex: "5102a193b3d5f0c256fcc425836ffb15e7d96d3389f5e57dc6bea726",
     },
     {
         testname: "PUBKEY - third party",
@@ -30,7 +30,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb",
+        hashHex: "855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb",
     },
     {
         testname: "PUBKEY - third party (script hash displayed as policy id)",
@@ -41,7 +41,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.POLICY_ID,
-        hash: "855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb",
+        hashHex: "855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb",
     },
     {
         testname: "ALL script",
@@ -65,7 +65,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "af5c2ce476a6ede1c879f7b1909d6a0b96cb2081391712d4a355cef6",
+        hashHex: "af5c2ce476a6ede1c879f7b1909d6a0b96cb2081391712d4a355cef6",
     },
     {
         testname: "ALL script (no subscripts)",
@@ -76,7 +76,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "d441227553a0f1a965fee7d60a0f724b368dd1bddbc208730fccebcf",
+        hashHex: "d441227553a0f1a965fee7d60a0f724b368dd1bddbc208730fccebcf",
     },
     {
         testname: "ANY script",
@@ -100,7 +100,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "d6428ec36719146b7b5fb3a2d5322ce702d32762b8c7eeeb797a20db",
+        hashHex: "d6428ec36719146b7b5fb3a2d5322ce702d32762b8c7eeeb797a20db",
     },
     {
         testname: "ANY script (no subscripts)",
@@ -111,7 +111,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "52dc3d43b6d2465e96109ce75ab61abe5e9c1d8a3c9ce6ff8a3af528",
+        hashHex: "52dc3d43b6d2465e96109ce75ab61abe5e9c1d8a3c9ce6ff8a3af528",
     },
     {
         testname: "N_OF_K script",
@@ -136,7 +136,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "78963f8baf8e6c99ed03e59763b24cf560bf12934ec3793eba83377b",
+        hashHex: "78963f8baf8e6c99ed03e59763b24cf560bf12934ec3793eba83377b",
     },
     {
         testname: "N_OF_K script (no subscripts)",
@@ -148,7 +148,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "3530cc9ae7f2895111a99b7a02184dd7c0cea7424f1632d73951b1d7",
+        hashHex: "3530cc9ae7f2895111a99b7a02184dd7c0cea7424f1632d73951b1d7",
     },
     {
         testname: "INVALID_BEFORE script",
@@ -159,7 +159,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "2a25e608a683057e32ea38b50ce8875d5b34496b393da8d25d314c4e",
+        hashHex: "2a25e608a683057e32ea38b50ce8875d5b34496b393da8d25d314c4e",
     },
     {
         testname: "INVALID_BEFORE script (slot is a big number)",
@@ -170,7 +170,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "d2469adac494849dd27d1b344b74cc6cd5bf31fbd01c879eae84c04b",
+        hashHex: "d2469adac494849dd27d1b344b74cc6cd5bf31fbd01c879eae84c04b",
     },
     {
         testname: "INVALID_HEREAFTER script",
@@ -181,7 +181,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "1620dc65993296335183f23ff2f7747268168fabbeecbf24c8a20194",
+        hashHex: "1620dc65993296335183f23ff2f7747268168fabbeecbf24c8a20194",
     },
     {
         testname: "INVALID_HEREAFTER script (slot is a big number)",
@@ -192,7 +192,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "da60fa40290f93b889a88750eb141fd2275e67a1255efb9bac251005",
+        hashHex: "da60fa40290f93b889a88750eb141fd2275e67a1255efb9bac251005",
     },
     {
         testname: "Nested native scripts",
@@ -267,7 +267,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+        hashHex: "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
     },
     {
         testname: "Nested native scripts #2",
@@ -298,7 +298,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "903e52ef2421abb11562329130330763583bb87cd98006b70ecb1b1c",
+        hashHex: "903e52ef2421abb11562329130330763583bb87cd98006b70ecb1b1c",
     },
     {
         testname: "Nested native scripts #3",
@@ -326,7 +326,7 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
             },
         },
         displayFormat: NativeScriptHashDisplayFormat.BECH32,
-        hash: "ed1dd7ef95caf389669c62618eb7f7aa7eadd08feb76618db2ae0cfc",
+        hashHex: "ed1dd7ef95caf389669c62618eb7f7aa7eadd08feb76618db2ae0cfc",
     },
 ]
 

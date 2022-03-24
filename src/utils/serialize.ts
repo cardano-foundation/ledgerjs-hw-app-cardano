@@ -91,12 +91,12 @@ export function stake_credential_to_buf(stakeCredential: ParsedStakeCredential):
     case StakeCredentialType.KEY_HASH:
         return Buffer.concat([
             uint8_to_buf(stakeCredential.type as Uint8_t),
-            hex_to_buf(stakeCredential.keyHash),
+            hex_to_buf(stakeCredential.keyHashHex),
         ])
     case StakeCredentialType.SCRIPT_HASH:
         return Buffer.concat([
             uint8_to_buf(stakeCredential.type as Uint8_t),
-            hex_to_buf(stakeCredential.scriptHash),
+            hex_to_buf(stakeCredential.scriptHashHex),
         ])
     }
 }

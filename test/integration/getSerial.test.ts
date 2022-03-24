@@ -16,6 +16,6 @@ describe("getSerial", async () => {
 
     it("Should correctly get the serial number of the device", async () => {
         const response = await ada.getSerial()
-        expect(response.serial.length).to.equal(14)
+        expect(response.serialHex.length).to.equal(14)
     })
 })

@@ -534,7 +534,7 @@ export const testsMultisig: TestcaseShelley[] = [
                 {
                     stakeCredential: {
                         type: StakeCredentialParamsType.SCRIPT_HASH,
-                        scriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                        scriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                     },
                     amount: 111,
                 },
@@ -564,7 +564,7 @@ export const testsMultisig: TestcaseShelley[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.SCRIPT_HASH,
-                            scriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            scriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                         },
                     },
                 },
@@ -594,7 +594,7 @@ export const testsMultisig: TestcaseShelley[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.SCRIPT_HASH,
-                            scriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            scriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                         },
                         poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                     },
@@ -625,7 +625,7 @@ export const testsMultisig: TestcaseShelley[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.SCRIPT_HASH,
-                            scriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            scriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                         },
                     },
                 },
@@ -1137,7 +1137,7 @@ export const testsAlonzo: TestcaseAlonzo[] = [
             requiredSigners: [
                 {
                     type: TxRequiredSignerType.HASH,
-                    hash: "fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
+                    hashHex: "fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
                 },
                 {
                     type: TxRequiredSignerType.PATH,
@@ -1168,11 +1168,11 @@ export const testsAlonzo: TestcaseAlonzo[] = [
             requiredSigners: [
                 {
                     type: TxRequiredSignerType.HASH,
-                    hash: "fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
+                    hashHex: "fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
                 },
                 {
                     type: TxRequiredSignerType.HASH,
-                    hash: "eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
+                    hashHex: "eea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
                 },
             ],
             includeNetworkId: true,
@@ -1231,7 +1231,7 @@ export const testsAlonzo: TestcaseAlonzo[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.KEY_HASH,
-                            keyHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                            keyHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                         },
                         poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                     },
@@ -1241,7 +1241,7 @@ export const testsAlonzo: TestcaseAlonzo[] = [
                 {
                     stakeCredential: {
                         type: StakeCredentialParamsType.KEY_HASH,
-                        keyHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        keyHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                     },
                     amount: 1000,
                 },
@@ -1283,7 +1283,7 @@ export const testsAlonzoTrezorComparison: TestcaseAlonzo[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.SCRIPT_HASH,
-                            scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                         },
                     },
                 },
@@ -1292,7 +1292,7 @@ export const testsAlonzoTrezorComparison: TestcaseAlonzo[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.SCRIPT_HASH,
-                            scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                         },
                     },
                 },
@@ -1301,7 +1301,7 @@ export const testsAlonzoTrezorComparison: TestcaseAlonzo[] = [
                     params: {
                         stakeCredential: {
                             type: StakeCredentialParamsType.SCRIPT_HASH,
-                            scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                         },
                         poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                     },
@@ -1311,7 +1311,7 @@ export const testsAlonzoTrezorComparison: TestcaseAlonzo[] = [
                 {
                     stakeCredential: {
                         type: StakeCredentialParamsType.SCRIPT_HASH,
-                        scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                     },
                     amount: 1000,
                 },

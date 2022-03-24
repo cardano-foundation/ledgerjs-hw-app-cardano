@@ -19,6 +19,7 @@ Support for Alonzo era (Plutus scripts)
 
 - the account on HD derivation path must be the same across the transaction elements (incl. witnesses)
 - KeyStakeCredentialParams type replaced by KeyPathStakeCredentialParams, KeyHashStakeCredentialParams added
+- several items related to hex strings in exported types have been renamed
 
 ### Fixed
 

@@ -97,7 +97,7 @@ export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner) {
     case RequiredSignerType.HASH:
         return Buffer.concat([
             uint8_to_buf(requiredSigner.type as Uint8_t),
-            hex_to_buf(requiredSigner.hash),
+            hex_to_buf(requiredSigner.hashHex),
         ])
     }
 }

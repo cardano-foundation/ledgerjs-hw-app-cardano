@@ -87,7 +87,7 @@ const stakeRegistrationPathParam: StakeRegistrationParams = {
 const stakeRegistrationScriptHashParam: StakeRegistrationParams = {
     stakeCredential: {
         type: StakeCredentialParamsType.SCRIPT_HASH,
-        scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
     },
 }
 
@@ -213,7 +213,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
                 {
                     stakeCredential: {
                         type: StakeCredentialParamsType.SCRIPT_HASH,
-                        scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                     },
                     amount: 1000,
                 },
@@ -239,7 +239,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
                 {
                     stakeCredential: {
                         type: StakeCredentialParamsType.SCRIPT_HASH,
-                        scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                     },
                     amount: 1000,
                 },
@@ -527,7 +527,7 @@ export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
                         params: {
                             type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
                             params: {
-                                spendingScriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                                spendingScriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                                 stakingKeyHashHex:
                           "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                             },
@@ -553,8 +553,8 @@ export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
                         params: {
                             type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
                             params: {
-                                spendingScriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
-                                stakingScriptHash:  "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                                spendingScriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                                stakingScriptHashHex:  "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                             },
                         },
                     },
@@ -577,7 +577,7 @@ export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
                     params: {
                         type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
                         params: {
-                            spendingScriptHash: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
+                            spendingScriptHashHex: "122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
                             stakingPath: str_to_path("1852'/1815'/456'/2/0"),
                         },
                     },
@@ -903,7 +903,7 @@ export const withdrawalRejectTestcases: TestcaseRejectShelley[] = [
                 {
                     stakeCredential: {
                         type: StakeCredentialParamsType.SCRIPT_HASH,
-                        scriptHash: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
                     },
                     amount: 1000,
                 },

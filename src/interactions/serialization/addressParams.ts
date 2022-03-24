@@ -13,7 +13,7 @@ function serializeSpendingDataSource(dataSource: SpendingDataSource): Buffer {
     case SpendingDataSourceType.PATH:
         return path_to_buf(dataSource.path)
     case SpendingDataSourceType.SCRIPT_HASH:
-        return hex_to_buf(dataSource.scriptHash)
+        return hex_to_buf(dataSource.scriptHashHex)
     case SpendingDataSourceType.NONE:
         return Buffer.alloc(0)
     }
@@ -37,13 +37,13 @@ function serializeStakingDataSource(dataSource: StakingDataSource): Buffer {
     case StakingDataSourceType.KEY_HASH: {
         return Buffer.concat([
             uint8_to_buf(stakingChoicesEncoding[dataSource.type] as Uint8_t),
-            hex_to_buf(dataSource.keyHash),
+            hex_to_buf(dataSource.keyHashHex),
         ])
     }
     case StakingDataSourceType.SCRIPT_HASH: {
         return Buffer.concat([
             uint8_to_buf(stakingChoicesEncoding[dataSource.type] as Uint8_t),
-            hex_to_buf(dataSource.scriptHash),
+            hex_to_buf(dataSource.scriptHashHex),
         ])
     }
     case StakingDataSourceType.KEY_PATH: {

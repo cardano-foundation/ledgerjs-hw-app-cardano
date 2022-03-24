@@ -20,7 +20,7 @@ describe("deriveNativeScriptHash", async () => {
     })
 
     describe("Valid native scripts", async () => {
-        for (const { testname, script, displayFormat, hash: expectedHash } of ValidNativeScriptTestcases) {
+        for (const { testname, script, displayFormat, hashHex: expectedHash } of ValidNativeScriptTestcases) {
             it(testname, async () => {
                 const { scriptHashHex } = await ada.deriveNativeScriptHash({
                     script,

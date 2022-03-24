@@ -191,12 +191,12 @@ export function parseStakeCredential(stakeCredential: StakeCredentialParams, err
     case StakeCredentialParamsType.KEY_HASH:
         return {
             type: StakeCredentialType.KEY_HASH,
-            keyHash: parseHexStringOfLength(stakeCredential.keyHash, KEY_HASH_LENGTH, errMsg),
+            keyHashHex: parseHexStringOfLength(stakeCredential.keyHashHex, KEY_HASH_LENGTH, errMsg),
         }
     case StakeCredentialParamsType.SCRIPT_HASH:
         return {
             type: StakeCredentialType.SCRIPT_HASH,
-            scriptHash: parseHexStringOfLength(stakeCredential.scriptHash, SCRIPT_HASH_LENGTH, errMsg),
+            scriptHashHex: parseHexStringOfLength(stakeCredential.scriptHashHex, SCRIPT_HASH_LENGTH, errMsg),
         }
     }
 }
