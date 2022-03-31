@@ -21,10 +21,6 @@ Support for Alonzo era (Plutus scripts)
 - KeyStakeCredentialParams type replaced by KeyPathStakeCredentialParams, KeyHashStakeCredentialParams added
 - several items related to hex strings in exported types have been renamed
 
-### Fixed
-
-- pool registration transaction witness must be consistent with the path of the owner (for `SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER`)
-
 
 ## [4.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.2.1...v4.0.0) - [October 27th 2021]
 
