@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [5.0.0](TBD) - [TBD]
+## [5.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v4.0.0...v5.0.0) - [March 31st 2022]
 
 Support for Alonzo era (Plutus scripts)
 
@@ -14,10 +14,10 @@ Support for Alonzo era (Plutus scripts)
 - support for all new Alonzo transaction elements
 - support for stake credentials given by key hash
 - a new transaction signing mode for Plutus transactions
+- compatibility with Cardano Ledger app v4.0.0
 
 ### Changed
 
-- the account on HD derivation path must be the same across the transaction elements (incl. witnesses)
 - KeyStakeCredentialParams type replaced by KeyPathStakeCredentialParams, KeyHashStakeCredentialParams added
 - several items related to hex strings in exported types have been renamed
 
