@@ -24,9 +24,11 @@
     "indent": 2,
     "semi": ["error", "never"],
     "simple-import-sort/imports": "warn",
+    "no-redeclare": "off",
     "no-unused-vars": "off",
     "comma-dangle": "off",
     "@typescript-eslint/comma-dangle": ["error", "always-multiline"],
+    "@typescript-eslint/no-redeclare": ["error"],
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
