@@ -69,9 +69,6 @@ jobs:
           key: v2-dependencies-{{ checksum "yarn.lock" }}
 
       - run:
-          name: Build custom typedoc
-          command: yarn prepare
-      - run:
           name: Get ledgerjs library version
           command: |
             LEDGERJS_PACKAGE_VERSION=$(cat package.json \
