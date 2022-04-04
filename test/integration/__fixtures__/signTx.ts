@@ -329,10 +329,6 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
                     path: str_to_path("1852'/1815'/0'/0/0"),
                     witnessSignatureHex: "9825594e5a91333b9f5762665ba316af34c2208bd7ef073178af5e48f2aae8673d50436045e292d5bb9be7492eeeda475a04e58621a326c91049a2ef26a33200",
                 },
-                {
-                    path: str_to_path("1852'/1815'/0'/2/0"),
-                    witnessSignatureHex: "a2a22faa4ac4ba4b5a89c770dd7b2afe877ba8c86f0205df8c01a2184275aaafada9b6be4640aa573cafbbca26ac2eccd98f804065b39b10a0559c7dc441fa0a",
-                },
             ],
             auxiliaryDataSupplement: null,
         },
@@ -450,7 +446,7 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
         },
     },
     {
-        testname: "Sign tx with pool retirement combined with another certificate",
+        testname: "Sign tx with pool retirement combined with stake registration",
         tx: {
             ...shelleyBase,
             inputs: [
@@ -494,9 +490,58 @@ export const testsShelleyWithCertificates: TestcaseShelley[] = [
                     path: str_to_path("1853'/1815'/0'/0'"),
                     witnessSignatureHex: "9386c2545e2671497daf95db93be1386690a4f884547a60f2913ef8a9e61486ba068d7477e1cd712f8d9cc20778d9e71b72eda96c9394c2f3111c61803f9a70d",
                 },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with pool retirement combined with stake deregistration",
+        tx: {
+            ...shelleyBase,
+            inputs: [
+                {
+                    txHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+                    outputIndex: 0,
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                },
+            ],
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_RETIREMENT,
+                    params: {
+                        poolKeyPath: str_to_path("1853'/1815'/0'/0'"),
+                        retirementEpoch: "10",
+                    },
+                },
+                {
+                    type: CertificateType.STAKE_DEREGISTRATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.KEY_PATH,
+                            keyPath: str_to_path("1852'/1815'/0'/2/0"),
+                        },
+                    },
+                },
+            ],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a04828304581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b70a82018200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c",
+        result: {
+            // WARNING: only as computed by ledger, not verified with cardano-cli
+            txHashHex: "edbafe86ae40467d2a02b917aa782eb9c37d2fbc4e316a3c446c0d3946231882",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "82bc899f008446e57daef9dc750d500d43f12fdd1e353d5ab8b42100a7bb94c9794de5e1ce03c06775e7da581f9cb08427e1d8b491d39ddfb3db060de3001700",
+                },
+                {
+                    path: str_to_path("1853'/1815'/0'/0'"),
+                    witnessSignatureHex: "4f58bfe90112eee3ce66edb7196506b5548c1c342619ee125e1f35fdbe009736593b3bfa80622727b6debc72626d60e3c4cb2d35007da9478baa4109dd80d004",
+                },
                 {
                     path: str_to_path("1852'/1815'/0'/2/0"),
-                    witnessSignatureHex: "32d0be05a8103a834265aa9e29562d5dde4473e4d7596714c000ae3a980b8e55543db42dde19e407c40943591978f03b28106f75cbc77d21ea2c28ab1ad4c100",
+                    witnessSignatureHex: "1c926e24d825d699a4b2d5d7dc95d717d4c19a0196ed120f115c76a168a7e661e6c393c4f97fe7b7533f20017be834fae53711265a3fe52b4c4211ac18990007",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -1209,12 +1254,12 @@ export const testsAlonzo: TestcaseAlonzo[] = [
             txHashHex: "728bbc72445c3a17a9d56d1cb6a99b1362d3bcbf508fcb153320dfa62e4b42ba",
             witnesses: [
                 {
-                    path: str_to_path("1855'/1815'/0'"),
-                    witnessSignatureHex: "29d3410bf89fa938a73fb27df35a30910fb3111eb941e835946fd30c0bfcc377c7b8a8ac15dc807f995fb482efdf57e6d697d0d3effaa5cab104861698e39900",
-                },
-                {
                     path: str_to_path("1852'/1815'/0'/0/0"),
                     witnessSignatureHex: "3dcd818effb503e4cf9d7c3836c29498d5258de7775915bf376eccae95e1b933afa5372478f136720b3c60346c9e674efea9f4b222916c96f0805962a16e9806",
+                },
+                {
+                    path: str_to_path("1855'/1815'/0'"),
+                    witnessSignatureHex: "29d3410bf89fa938a73fb27df35a30910fb3111eb941e835946fd30c0bfcc377c7b8a8ac15dc807f995fb482efdf57e6d697d0d3effaa5cab104861698e39900",
                 },
             ],
             auxiliaryDataSupplement: null,

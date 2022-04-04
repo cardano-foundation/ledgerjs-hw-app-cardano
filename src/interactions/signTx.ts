@@ -580,69 +580,95 @@ function* signTx_getWitness(
   }
 }
 
-function generateWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
-    const { tx } = request
+// general name, because it should work with any type if generalized
+function uniquify(witnessPaths: ValidBIP32Path[]): ValidBIP32Path[] {
+    const uniquifier: Record<string, ValidBIP32Path> = {}
+    witnessPaths.forEach(p => uniquifier[JSON.stringify(p)] = p)
+    return Object.values(uniquifier)
+}
 
+function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
+    const { tx, signingMode, additionalWitnessPaths } = request
     const witnessPaths: ValidBIP32Path[] = []
 
-    // input witnesses
-    for (const input of tx.inputs) {
-        if (input.path != null) {
-            witnessPaths.push(input.path)
-        }
-    }
+    if (signingMode != TransactionSigningMode.MULTISIG_TRANSACTION) {
+        // for multisig, all the witness paths should be given in additionalWitnessPaths
+        // because there might be several (or none) for each of the tx body elements
 
-    // certificate witnesses
-    for (const cert of tx.certificates) {
-        if (cert.type === CertificateType.STAKE_POOL_REGISTRATION) {
-            const deviceOwnedPoolOwner = cert.pool.owners.find((owner) => owner.type === PoolOwnerType.DEVICE_OWNED)
-            if (deviceOwnedPoolOwner != null) {
-                assert(deviceOwnedPoolOwner.type === PoolOwnerType.DEVICE_OWNED, "bad witness owner type")
-                witnessPaths.push(deviceOwnedPoolOwner.path)
-            }
-
-            if (cert.pool.poolKey.type === PoolKeyType.DEVICE_OWNED) {
-                witnessPaths.push(cert.pool.poolKey.path)
-            }
-        } else if (cert.type === CertificateType.STAKE_POOL_RETIREMENT) {
-            witnessPaths.push(cert.path)
-        } else {
-            if (cert.stakeCredential.type === StakeCredentialType.KEY_PATH) {
-                witnessPaths.push(cert.stakeCredential.path)
+        // input witnesses
+        for (const input of tx.inputs) {
+            if (input.path != null) {
+                witnessPaths.push(input.path)
             }
         }
-    }
 
-    // withdrawal witnesses
-    for (const withdrawal of tx.withdrawals) {
-        if (withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH) {
-            witnessPaths.push(withdrawal.stakeCredential.path)
+        // certificate witnesses
+        for (const cert of tx.certificates) {
+            switch (cert.type) {
+
+            case CertificateType.STAKE_DELEGATION:
+            case CertificateType.STAKE_DEREGISTRATION:
+                if (cert.stakeCredential.type === StakeCredentialType.KEY_PATH) {
+                    witnessPaths.push(cert.stakeCredential.path)
+                }
+                break
+
+            case CertificateType.STAKE_POOL_REGISTRATION:
+                cert.pool.owners.forEach((owner) => {
+                    if (owner.type === PoolOwnerType.DEVICE_OWNED) {
+                        witnessPaths.push(owner.path)
+                    }
+                })
+
+                if (cert.pool.poolKey.type === PoolKeyType.DEVICE_OWNED) {
+                    witnessPaths.push(cert.pool.poolKey.path)
+                }
+                break
+
+            case CertificateType.STAKE_POOL_RETIREMENT:
+                witnessPaths.push(cert.path)
+                break
+
+            default:
+                // no witness path in other certificate types
+                break
+            }
+        }
+
+        // withdrawal witnesses
+        for (const withdrawal of tx.withdrawals) {
+            if (withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH) {
+                witnessPaths.push(withdrawal.stakeCredential.path)
+            }
+        }
+
+        // required signers witnesses
+        for (const signer of tx.requiredSigners) {
+            switch (signer.type) {
+
+            case RequiredSignerType.PATH:
+                witnessPaths.push(signer.path)
+                break
+
+            default:
+                break
+            }
+        }
+
+        // collateral inputs witnesses
+        for (const collateral of tx.collaterals) {
+            if (collateral.path != null) {
+                witnessPaths.push(collateral.path)
+            }
         }
     }
 
-    // required signers witnesses
-    for (const signer of tx.requiredSigners) {
-        switch (signer.type) {
+    // Note: if anything from tx body is added here, it should be covered by tests too
 
-        case RequiredSignerType.PATH:
-            witnessPaths.push(signer.path)
-            break
+    additionalWitnessPaths.forEach((path) => witnessPaths.push(path))
 
-        default:
-            break
-        }
-    }
-
-    // collateral inputs witnesses
-    for (const collateral of tx.collaterals) {
-        if (collateral.path != null) {
-            witnessPaths.push(collateral.path)
-        }
-    }
-
-    // Note: if anything is added here, it should be covered by tests too
-
-    return witnessPaths
+    // we do not ask for the same witness more than once
+    return uniquify(witnessPaths)
 }
 
 function hasStakeCredentialInCertificates(tx: ParsedTransaction, stakeCredentialType: StakeCredentialType) {
@@ -768,25 +794,14 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
     }
 }
 
-// general name, because it should work with any type if generalized
-function uniquify(witnessPaths: ValidBIP32Path[]): ValidBIP32Path[] {
-    const uniquifier: Record<string, ValidBIP32Path> = {}
-    witnessPaths.forEach(p => uniquifier[JSON.stringify(p)] = p)
-    return Object.values(uniquifier)
-}
-
 export function* signTransaction(version: Version, request: ParsedSigningRequest): Interaction<SignedTransactionData> {
     ensureLedgerAppVersionCompatible(version)
     ensureRequestSupportedByAppVersion(version, request)
 
     const isCatalystRegistrationSupported = getCompatibility(version).supportsCatalystRegistration
 
-    const { tx, signingMode, additionalWitnessPaths } = request
-    let witnessPaths = additionalWitnessPaths
-    if (signingMode != TransactionSigningMode.MULTISIG_TRANSACTION) {
-        witnessPaths = witnessPaths.concat(generateWitnessPaths(request))
-    }
-    witnessPaths = uniquify(witnessPaths)
+    const { tx, signingMode } = request
+    const witnessPaths = gatherWitnessPaths(request)
 
     // init
     yield* signTx_init(
