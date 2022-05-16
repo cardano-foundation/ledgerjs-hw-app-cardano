@@ -40,7 +40,7 @@ export const testsByron: TestCase[] = [
     },
 ]
 
-export const testsShelley: TestCase[] = [
+export const testsShelleyUsual: TestCase[] = [
     // Shelley
     {
         path: "1852'/1815'/4'",

@@ -6,7 +6,7 @@ import { DeviceStatusError } from "../../src/Ada"
 import { str_to_path } from "../../src/utils/address"
 import { getAda } from "../test_utils"
 import type { TestCase } from "./__fixtures__/getExtendedPublicKey"
-import { testsByron, testsColdKeys, testsShelley, testsShelleyUnusual } from "./__fixtures__/getExtendedPublicKey"
+import { testsByron, testsColdKeys, testsShelleyUnusual, testsShelleyUsual } from "./__fixtures__/getExtendedPublicKey"
 chai.use(chaiAsPromised)
 
 describe("getExtendedPublicKey", async () => {
@@ -35,8 +35,8 @@ describe("getExtendedPublicKey", async () => {
         it('get a single extended public key --- byron', async () => {
             await test(testsByron)
         })
-        it('get a single extended public key --- shelley', async () => {
-            await test(testsShelley)
+        it('get a single extended public key --- shelley usual', async () => {
+            await test(testsShelleyUsual)
         })
         it('get a single extended public key --- shelley unusual', async () => {
             await test(testsShelleyUnusual)
@@ -60,11 +60,11 @@ describe("getExtendedPublicKey", async () => {
         }
 
         it('starting with a usual one', async () => {
-            await test([...testsByron, ...testsShelley, ...testsColdKeys])
+            await test([...testsByron, ...testsShelleyUsual, ...testsColdKeys])
         })
 
         it('starting with an unusual one', async () => {
-            await test([...testsShelleyUnusual, ...testsByron, ...testsColdKeys, ...testsShelley])
+            await test([...testsShelleyUnusual, ...testsByron, ...testsColdKeys, ...testsShelleyUsual])
         })
     })
 
