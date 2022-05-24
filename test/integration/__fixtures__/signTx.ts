@@ -4,7 +4,7 @@ import { CertificateType, Networks, TxAuxiliaryDataType, TxRequiredSignerType } 
 import type { BIP32Path, SignedTransactionData} from '../../../src/types/public'
 import { StakeCredentialParamsType, TransactionSigningMode } from '../../../src/types/public'
 import { str_to_path } from "../../../src/utils/address"
-import { allegraBase, alonzoBase, byronBase, destinations, inputs, maryBase, mints, outputs, shelleyBase } from "./txElements"
+import { allegraBase, alonzoBase, destinations, inputs, maryBase, mints, outputs, shelleyBase } from "./txElements"
 
 export type TestcaseByron = {
   testname: string;
@@ -16,9 +16,11 @@ export type TestcaseByron = {
 
 export const testsByron: TestcaseByron[] = [
     {
-        testname: "Sign tx without change address with Byron mainnet output",
+        testname: "Sign tx with third-party Byron mainnet output",
         tx: {
-            ...byronBase,
+            inputs: [inputs.utxoByron],
+            fee: 42,
+            ttl: 10,
             network: Networks.Mainnet,
             outputs: [outputs.externalByronMainnet],
         },
@@ -36,9 +38,11 @@ export const testsByron: TestcaseByron[] = [
         },
     },
     {
-        testname: "Sign tx without change address with Byron Daedalus mainnet output",
+        testname: "Sign tx with third-party Byron Daedalus mainnet output",
         tx: {
-            ...byronBase,
+            inputs: [inputs.utxoByron],
+            fee: 42,
+            ttl: 10,
             network: Networks.Mainnet,
             outputs: [outputs.externalByronDaedalusMainnet],
         },
@@ -56,9 +60,11 @@ export const testsByron: TestcaseByron[] = [
         },
     },
     {
-        testname: "Sign tx without change address with Byron testnet output",
+        testname: "Sign tx with third-party Byron testnet output",
         tx: {
-            ...byronBase,
+            inputs: [inputs.utxoByron],
+            fee: 42,
+            ttl: 10,
             network: {
                 ... Networks.Testnet,
                 // legacy Byron testnet used 42 for protocol magic

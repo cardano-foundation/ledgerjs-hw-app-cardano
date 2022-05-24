@@ -640,12 +640,6 @@ export const outputs: Record<
     },
 }
 
-export const byronBase = {
-    inputs: [inputs.utxoByron],
-    fee: 42,
-    ttl: 10,
-}
-
 export const shelleyBase = {
     network: Networks.Mainnet,
     inputs: [inputs.utxoShelley],
