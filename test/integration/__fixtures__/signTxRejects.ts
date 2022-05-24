@@ -363,38 +363,6 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED,
     },
     {
-        testname: "Ordinary tx - required signers included",
-        tx: {
-            ...shelleyBase,
-            requiredSigners: [
-                {
-                    type: TxRequiredSignerType.PATH,
-                    path: str_to_path("1852'/1815'/0'/0/0"),
-                },
-            ],
-        },
-        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        errCls: DeviceStatusError,
-        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__REQUIRED_SIGNERS_NOT_ALLOWED,
-    },
-    {
-        testname: "Multisig tx - required signers included",
-        tx: {
-            ...shelleyBase,
-            requiredSigners: [
-                {
-                    type: TxRequiredSignerType.PATH,
-                    path: str_to_path("1852'/1815'/0'/0/0"),
-                },
-            ],
-        },
-        signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
-        errCls: DeviceStatusError,
-        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__REQUIRED_SIGNERS_NOT_ALLOWED,
-    },
-    {
         testname: "Pool registration (operator) - required signers included",
         tx: {
             ...shelleyBase,

@@ -345,11 +345,6 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.collaterals.length === 0,
             InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED
         )
-        // cannot have required signers in the tx
-        validate(
-            tx.requiredSigners.length === 0,
-            InvalidDataReason.SIGN_MODE_ORDINARY__REQUIRED_SIGNERS_NOT_ALLOWED
-        )
 
         break
     }
@@ -395,10 +390,6 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED
         )
         // cannot have required signers in the tx
-        validate(
-            tx.requiredSigners.length === 0,
-            InvalidDataReason.SIGN_MODE_MULTISIG__REQUIRED_SIGNERS_NOT_ALLOWED
-        )
 
         break
     }

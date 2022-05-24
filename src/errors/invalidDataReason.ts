@@ -153,8 +153,6 @@ export enum InvalidDataReason {
   "withdrawal must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED =
   "collaterals not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
-  SIGN_MODE_ORDINARY__REQUIRED_SIGNERS_NOT_ALLOWED =
-  "required signers not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
 
   SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED =
   "pool registration is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
@@ -168,8 +166,6 @@ export enum InvalidDataReason {
   "withdrawal must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED =
   "collaterals not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
-  SIGN_MODE_MULTISIG__REQUIRED_SIGNERS_NOT_ALLOWED =
-  "required signers not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
 
   SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
