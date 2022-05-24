@@ -648,15 +648,6 @@ export const shelleyBase = {
     ttl: 10,
 }
 
-export const maryBase = {
-    network: Networks.Mainnet,
-    inputs: [inputs.utxoShelley],
-    fee: 42,
-    ttl: 10,
-    // FIXME: this is quite unreasonable as validity start is after ttl
-    validityIntervalStart: 47,
-}
-
 export const mainnetFeeTtl = {
     network: Networks.Mainnet,
     fee: 42,

@@ -4,7 +4,7 @@ import { CertificateType, Networks, TxAuxiliaryDataType } from "../../../src/Ada
 import type { BIP32Path, SignedTransactionData} from '../../../src/types/public'
 import { StakeCredentialParamsType, TransactionSigningMode } from '../../../src/types/public'
 import { str_to_path } from "../../../src/utils/address"
-import { destinations, inputs, mainnetFeeTtl, maryBase, mints, outputs, shelleyBase } from "./txElements"
+import { destinations, inputs, mainnetFeeTtl, mints, outputs, shelleyBase } from "./txElements"
 
 export type SignTxTestcase = {
     testname: string;
@@ -748,17 +748,19 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with a multiasset output",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath],
+            validityIntervalStart: 7,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f",
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a0807",
         expectedResult: {
-            txHashHex: "8502ab1a781627663e8bfcff54a58747e319da3bb592a3446fc35fa5d2f2fbe9",
+            txHashHex: "9a9bce0cfe146a1327a94a6257e1013b12476d9c73c891d73faf74aaf131cde5",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "b48877586d90a249579a5f3994c3ad0c21c5f78960a04aadd182ca49c3b606f1d8a578edf17923188e4e0e40f191e019a5174081c092c458a82e9f0c1e1fae08",
+                    witnessSignatureHex: "6c4d490ea8f3973f9d030c36ff7221f012663af276bde346f8b90b54b06f49c22bcde3968cc281d548183e1506380028853948f7ef3c98a9e179540119688106",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -767,17 +769,19 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with a complex multiasset output",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetManyTokens, outputs.internalBaseWithStakingPath],
+            validityIntervalStart: 7,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a34003581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209015820000000000000000000000000000000000000000000000000000000000000000002581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a248456c204e69c3b16f1904d24874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a08182f",
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a34003581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209015820000000000000000000000000000000000000000000000000000000000000000002581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a248456c204e69c3b16f1904d24874652474436f696e1a007838628258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a0807",
         expectedResult: {
-            txHashHex: "fc640534def42c6c9a16e51de379191cc39d0950015e8db8e237e17b55b7cc5a",
+            txHashHex: "b81c3a6f8506eeacb0512a54f12500151745fbb683f52dbc52f6c099437baca8",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "cf297c45c32dc51fa84f7cdbf967496b6493fac86bf6e283cf6c10564ad1fed7f5702939f712e00eaede88847dde24db6591d7ad6e998287835eb2473de7a204",
+                    witnessSignatureHex: "e2c96040194d1baef4b9dfac945496f60d446597863a2049d12796df7fb6f9f9f31392555cfccfd7c745eef802d1904ba3a9ba4892569d0eed6f6e19a871630f",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -786,7 +790,8 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with big numbers",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetBigNumber],
             fee: "24103998870869519",
             ttl: "24103998870869519",
@@ -808,17 +813,18 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with a multiasset change output",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.externalShelleyBaseKeyhashKeyhash, outputs.multiassetChange],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f3461114018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a08182f",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f3461114018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a",
         expectedResult: {
-            txHashHex: "75ef0b3ac08d56e8ca4a6d3a3de054ed028bad025b0fad3cbb351fc94e967bc5",
+            txHashHex: "23bd1070aa86ef2aeb988089bccd839649580ae8d4f451bd395627e1675194e4",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "f19c5f698d3d46dac99c83268d8b5154262c22f9599d38b5221b78d08cef8f5bb81de648a0c94d328b74e88c58d46535de289123f08a47a05a1c253980d6b80e",
+                    witnessSignatureHex: "16e78cec61bf6d6b37ad3a4b80fce55b92daf180c42505a5999aa5ec92e369acf88b4b0777ef8c059ae97791d7c2a04aac15d820c845644994258d774042720c",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -827,10 +833,11 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with zero fee, TTL and validity interval start",
         tx: {
-            ...maryBase,
+            network: Networks.Mainnet,
             fee: 0,
             ttl: 0,
             validityIntervalStart: 0,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPath],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -849,14 +856,15 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with mint fields with various amounts",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [],
             mint: mints.mintAmountVariety,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a08182f09a1581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a44000581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20920581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20a1b7fffffffffffffff581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20b3b7fffffffffffffff",
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a09a1581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a44000581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20920581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20a1b7fffffffffffffff581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20b3b7fffffffffffffff",
         expectedResult: {
-            txHashHex: "dd0b254a628cbfa271e580091bce114a1344cf037a07f4ad1d6afe7fa93501ac",
+            txHashHex: "d31008087e3a9a267661f802993f7604ac2dd53d4b458f27bfc3663bc7072de1",
             "witnesses": [
                 {
                     "path": [
@@ -866,7 +874,7 @@ export const testsMary: SignTxTestcase[] = [
                         0,
                         0,
                     ],
-                    "witnessSignatureHex": "10c83de863442e6aca75674b63429fd257323883e7c6195d53884a022d9742c607c30602986bd57f69c9560311b32b507f390a7fdfae9c7c724ba4d5203fd302",
+                    "witnessSignatureHex": "18fa055fb6d74b12170cdc227aaf4922c78405d4caf7bdbe5f959df2c3a912e20c5a18c4412d504685fe1179d32b5b588efe4a8d59f0274492de77f30f315409",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -875,7 +883,8 @@ export const testsMary: SignTxTestcase[] = [
     {
         testname: "Sign tx with mint fields among other fields",
         tx: {
-            ...maryBase,
+            network: Networks.Mainnet,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetOneToken, outputs.internalBaseWithStakingPath],
             fee: 10,
             validityIntervalStart: 100,
@@ -908,8 +917,10 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
     {
         testname: "Sign tx with Catalyst voting key registration metadata with base address",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPath],
+            validityIntervalStart: 7,
             auxiliaryData: {
                 type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
                 params: {
@@ -921,14 +932,14 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
             },
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec92608182f",
+        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec926081807",
         txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a10158400ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af240630eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e80",
         expectedResult: {
-            txHashHex: "ffb0c7daf1bcb661cdab8b452a6e6664a9fd9da289405a4234c356c75ce5be66",
+            txHashHex: "9941060a76f5702e72b43c382f77b143ed0e328ac3977a0791f08a5f0e0149cd",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "b4e2bd2985668b6cbce395700545f3773b72ca1e86cc9470cb5340e5b266d05feb968cf09a1febe852d180f5ba93113f13e5d56fe8cf7bbfb31b3ccaa45fb800",
+                    witnessSignatureHex: "b0bc6b3ddc0ab65e5b2e83cfdedbbf76619c3a833705f634f1c8c335dc7c1c5372ec7ebb8199d6d18204da4a0168a172c41c6dd53f45235225f5e62b672ca709",
                 },
             ],
             auxiliaryDataSupplement: {
@@ -941,7 +952,8 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
     {
         testname: "Sign tx with Catalyst voting key registration metadata with stake address",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPath],
             auxiliaryData: {
                 type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
@@ -954,14 +966,14 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
             },
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb08182f",
+        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb081807",
         txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a10158401514b6bbc582b33edcf5fa30ec04dcaa62128de8755c786768ae5922132c2aa50b9ba17be28072de979f45b0f429c7f5d489c549a1e22bc8e7d0b2445c10360980",
         expectedResult: {
-            txHashHex: "83deb3ed2f37df4cb6c7a4d81399cd29f88505e4f3d053342ada4f630fb23ae1",
+            txHashHex: "90ab18ad3a25cb9f48470cb16a51e1fe04181b96f639d939c51ca81ab4c0fa23",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "a344a5e466eb333e0bf417edefce2dec8a5fc4ddd6458b5fbb349bf2b42bf7b302a3d052d44b82e799a5de9d2c3442a5761d6baa77ec2051244b8184b5f35902",
+                    witnessSignatureHex: "138afde8640bd8d1a08309455f604d842d65a85e5ce2f584974f004e9043dea670ead5de3e4895a320f94033d5476d56ccf7147f327156cc30aef8304c66c006",
                 },
             ],
             auxiliaryDataSupplement: {

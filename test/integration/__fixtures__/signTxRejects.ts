@@ -5,7 +5,7 @@ import type { BIP32Path, Network, PoolRegistrationParams, PoolRetirementParams, 
 import { PoolKeyType, PoolOwnerType,PoolRewardAccountType, StakeCredentialParamsType, TransactionSigningMode  } from '../../../src/types/public'
 import { str_to_path } from "../../../src/utils/address"
 import { bech32_to_hex } from "../../test_utils"
-import { destinations, inputs, maryBase, mints, outputs, shelleyBase } from "./txElements"
+import { destinations, inputs, mainnetFeeTtl, mints, outputs, shelleyBase } from "./txElements"
 
 export type TestcaseRejectShelley = {
     testname: string;
@@ -1284,7 +1284,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx where asset groups are not ordered",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetInvalidAssetGroupOrdering],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -1295,7 +1296,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx where asset groups are not unique",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetAssetGroupsNotUnique],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -1306,7 +1308,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx where tokens within an asset group are not ordered - alphabetical",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetInvalidTokenOrderingSameLength],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -1317,7 +1320,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx where tokens within an asset group are not ordered - length",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetInvalidTokenOrderingDifferentLengths],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -1328,7 +1332,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx where tokens within an asset group are not unique",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.multiassetTokensNotUnique],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -1339,7 +1344,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx with mint fields with invalid canonical ordering of policies",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [],
             mint: mints.mintInvalidCanonicalOrderingPolicy,
         },
@@ -1351,7 +1357,8 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
     {
         testname: "Reject tx with mint fields with invalid canonical ordering of asset names",
         tx: {
-            ...maryBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [],
             mint: mints.mintInvalidCanonicalOrderingAssetName,
         },
