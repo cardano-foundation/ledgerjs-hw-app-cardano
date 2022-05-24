@@ -1,4 +1,4 @@
-import { describePositiveTest,describeRejects  } from "../test_utils"
+import { describeSignTxPositiveTest,describeSignTxRejects  } from "../test_utils"
 import {
     testsAllegra,
     testsAlonzoTrezorComparison,
@@ -23,23 +23,23 @@ import {
     witnessRejectTestcases,
 } from "./__fixtures__/signTxRejects"
 
-describePositiveTest("signTxByron", testsByron)
-describePositiveTest("signTxShelleyNoCertificates", testsShelleyNoCertificates)
-describePositiveTest("signTxShelleyWithCertificates", testsShelleyWithCertificates)
-describePositiveTest("signTxMultisig", testsMultisig)
-describePositiveTest("signTxAllegra", testsAllegra)
-describePositiveTest("signTxMary", testsMary)
-describePositiveTest("signTxCatalyst", testsCatalystRegistration)
-describePositiveTest("signTxAlonzo", testsAlonzo)
-describePositiveTest("signTxTrezorComparison", testsAlonzoTrezorComparison)
+describeSignTxPositiveTest("signTxByron", testsByron)
+describeSignTxPositiveTest("signTxShelleyNoCertificates", testsShelleyNoCertificates)
+describeSignTxPositiveTest("signTxShelleyWithCertificates", testsShelleyWithCertificates)
+describeSignTxPositiveTest("signTxMultisig", testsMultisig)
+describeSignTxPositiveTest("signTxAllegra", testsAllegra)
+describeSignTxPositiveTest("signTxMary", testsMary)
+describeSignTxPositiveTest("signTxCatalyst", testsCatalystRegistration)
+describeSignTxPositiveTest("signTxAlonzo", testsAlonzo)
+describeSignTxPositiveTest("signTxTrezorComparison", testsAlonzoTrezorComparison)
 
-describeRejects("signTxInitPolicyRejects", transactionInitRejectTestcases)
-describeRejects("signTxAddressBytesPolicyRejects", addressBytesRejectTestcases)
-describeRejects("signTxAddressParamsPolicyRejects", addressParamsRejectTestcases)
-describeRejects("signTxCertificatePolicyRejects", certificateRejectTestcases)
-describeRejects("signTxCertificateStakingPolicyRejects", certificateStakingRejectTestcases)
-describeRejects("signTxCertificateStakePoolRetirementPolicyRejects", certificateStakePoolRetirementRejectTestcases)
-describeRejects("signTxWithdrawalRejects", withdrawalRejectTestcases)
-describeRejects("signTxWitnessRejects", witnessRejectTestcases)
-describeRejects("signTxInvalidMultiassetRejects", testsInvalidTokenBundleOrdering)
-describeRejects("signTxSingleAccountRejects", singleAccountRejectTestcases)
+describeSignTxRejects("signTxInitPolicyRejects", transactionInitRejectTestcases)
+describeSignTxRejects("signTxAddressBytesPolicyRejects", addressBytesRejectTestcases)
+describeSignTxRejects("signTxAddressParamsPolicyRejects", addressParamsRejectTestcases)
+describeSignTxRejects("signTxCertificatePolicyRejects", certificateRejectTestcases)
+describeSignTxRejects("signTxCertificateStakingPolicyRejects", certificateStakingRejectTestcases)
+describeSignTxRejects("signTxCertificateStakePoolRetirementPolicyRejects", certificateStakePoolRetirementRejectTestcases)
+describeSignTxRejects("signTxWithdrawalRejects", withdrawalRejectTestcases)
+describeSignTxRejects("signTxWitnessRejects", witnessRejectTestcases)
+describeSignTxRejects("signTxInvalidMultiassetRejects", testsInvalidTokenBundleOrdering)
+describeSignTxRejects("signTxSingleAccountRejects", singleAccountRejectTestcases)

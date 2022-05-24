@@ -96,7 +96,7 @@ export function bech32_to_hex(str: string): string {
 
 export const DontRunOnLedger: string = "DO NOT RUN ON LEDGER"
 
-export function describeRejects(name: string, testList: any) {
+export function describeSignTxRejects(name: string, testList: any) {
     describe(name + "_JS", async () => {
         let ada: Ada = {} as Ada
 
@@ -150,7 +150,7 @@ export function describeRejects(name: string, testList: any) {
     })
 }
 
-export function describePositiveTest(name: string, tests: any[]) {
+export function describeSignTxPositiveTest(name: string, tests: any[]) {
     describe(name, async () => {
         let ada: Ada = {} as Ada
 
