@@ -1,7 +1,6 @@
 import { describePositiveTest,describeRejects  } from "../test_utils"
 import {
     testsAllegra,
-    testsAlonzo,
     testsAlonzoTrezorComparison,
     testsByron,
     testsCatalystRegistration,
@@ -10,6 +9,7 @@ import {
     testsShelleyNoCertificates,
     testsShelleyWithCertificates,
 } from "./__fixtures__/signTx"
+import { testsAlonzo } from "./__fixtures__/signTxPlutus"
 import {
     addressBytesRejectTestcases,
     addressParamsRejectTestcases,
@@ -23,15 +23,15 @@ import {
     witnessRejectTestcases,
 } from "./__fixtures__/signTxRejects"
 
-describePositiveTest("signTxOrdinaryByron", testsByron)
-describePositiveTest("signTxOrdinaryShelleyNoCertificates", testsShelleyNoCertificates)
-describePositiveTest("signTxOrdinaryShelleyWithCertificates", testsShelleyWithCertificates)
-describePositiveTest("signTxOrdinaryMultisig", testsMultisig)
-describePositiveTest("signTxOrdinaryAllegra", testsAllegra)
-describePositiveTest("signTxOrdinaryMary", testsMary)
-describePositiveTest("signTxOrdinaryMaryCatalyst", testsCatalystRegistration)
-describePositiveTest("signTxOrdinaryAlonzo", testsAlonzo)
-describePositiveTest("signTxOrdinaryTrezorComparison", testsAlonzoTrezorComparison)
+describePositiveTest("signTxByron", testsByron)
+describePositiveTest("signTxShelleyNoCertificates", testsShelleyNoCertificates)
+describePositiveTest("signTxShelleyWithCertificates", testsShelleyWithCertificates)
+describePositiveTest("signTxMultisig", testsMultisig)
+describePositiveTest("signTxAllegra", testsAllegra)
+describePositiveTest("signTxMary", testsMary)
+describePositiveTest("signTxCatalyst", testsCatalystRegistration)
+describePositiveTest("signTxAlonzo", testsAlonzo)
+describePositiveTest("signTxTrezorComparison", testsAlonzoTrezorComparison)
 
 describeRejects("signTxInitPolicyRejects", transactionInitRejectTestcases)
 describeRejects("signTxAddressBytesPolicyRejects", addressBytesRejectTestcases)

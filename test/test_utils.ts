@@ -109,7 +109,7 @@ export function describeRejects(name: string, testList: any) {
         })
 
         for (const {testname, tx, additionalWitnessPaths, signingMode, rejectReason } of testList) {
-            it(testname, async() => {
+            it(`${testname} [${signingMode}]`, async() => {
                 if (rejectReason === InvalidDataReason.LEDGER_POLICY) {
                     return
                 }
@@ -135,7 +135,7 @@ export function describeRejects(name: string, testList: any) {
         })
 
         for (const {testname, tx, additionalWitnessPaths, signingMode, errCls, errMsg } of testList) {
-            it(testname, async() => {
+            it(`${testname} [${signingMode}]`, async() => {
                 if (errMsg === DontRunOnLedger) {
                     return
                 }
@@ -162,11 +162,11 @@ export function describePositiveTest(name: string, tests: any[]) {
             await (ada as any).t.close()
         })
 
-        for (const { testname, tx, signingMode, additionalWitnessPaths, txBody, result: expected } of tests) {
-            it(testname, async () => {
+        for (const { testname, tx, signingMode, additionalWitnessPaths, txBody, expectedResult } of tests) {
+            it(`${testname} [${signingMode}]`, async () => {
                 if (!txBody) {
                     console.log("WARNING --- No tx body given: " + testname)
-                } else if (hashTxBody(txBody) !== expected.txHashHex) {
+                } else if (hashTxBody(txBody) !== expectedResult.txHashHex) {
                     console.log("WARNING --- Tx body hash mismatch: " + testname)
                 }
                 const response = await ada.signTransaction({
@@ -174,7 +174,7 @@ export function describePositiveTest(name: string, tests: any[]) {
                     signingMode,
                     additionalWitnessPaths,
                 })
-                expect(response).to.deep.equal(expected)
+                expect(response).to.deep.equal(expectedResult)
             })
         }
     })

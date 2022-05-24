@@ -648,13 +648,6 @@ export const shelleyBase = {
     ttl: 10,
 }
 
-export const allegraBase = {
-    network: Networks.Mainnet,
-    inputs: [inputs.utxoShelley],
-    outputs: [outputs.externalShelleyBaseKeyhashKeyhash],
-    fee: 42,
-}
-
 export const maryBase = {
     network: Networks.Mainnet,
     inputs: [inputs.utxoShelley],
@@ -664,10 +657,8 @@ export const maryBase = {
     validityIntervalStart: 47,
 }
 
-export const alonzoBase = {
+export const mainnetFeeTtl = {
     network: Networks.Mainnet,
-    inputs: [inputs.utxoShelley],
-    outputs: [outputs.externalByronMainnet],
     fee: 42,
     ttl: 10,
 }
