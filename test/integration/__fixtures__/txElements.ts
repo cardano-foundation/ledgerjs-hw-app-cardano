@@ -653,3 +653,9 @@ export const mainnetFeeTtl = {
     fee: 42,
     ttl: 10,
 }
+
+export const testnetFeeTtl = {
+    network: Networks.Testnet,
+    fee: 42,
+    ttl: 10,
+}

@@ -4,7 +4,7 @@ import { CertificateType, Networks, TxAuxiliaryDataType } from "../../../src/Ada
 import type { BIP32Path, SignedTransactionData} from '../../../src/types/public'
 import { StakeCredentialParamsType, TransactionSigningMode } from '../../../src/types/public'
 import { str_to_path } from "../../../src/utils/address"
-import { destinations, inputs, mainnetFeeTtl, mints, outputs, shelleyBase } from "./txElements"
+import { destinations, inputs, mainnetFeeTtl, mints, outputs, shelleyBase, testnetFeeTtl } from "./txElements"
 
 export type SignTxTestcase = {
     testname: string;
@@ -96,7 +96,8 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx without outputs",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -116,7 +117,8 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx without change address",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.externalShelleyBaseKeyhashKeyhash],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -157,7 +159,8 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx with change base address with staking key hash",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.externalByronMainnet, outputs.internalBaseWithStakingKeyHash],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -177,7 +180,8 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx with enterprise change address",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.externalByronMainnet, outputs.internalEnterprise],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -197,7 +201,8 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx with pointer change address",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
             outputs: [outputs.externalByronMainnet, outputs.internalPointer],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -217,7 +222,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx with non-reasonable account and address",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
             inputs: [inputs.utxoNonReasonable],
             outputs: [outputs.internalBaseWithStakingPathNonReasonable],
             auxiliaryData: {
@@ -244,7 +249,9 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx with path based withdrawal",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.externalByronMainnet],
             withdrawals: [
                 {
                     stakeCredential: {
@@ -276,7 +283,9 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
         testname: "Sign tx with nonempty auxiliary data",
         tx: {
-            ...shelleyBase,
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.externalByronMainnet],
             auxiliaryData: {
                 type: TxAuxiliaryDataType.ARBITRARY_HASH,
                 params: {
@@ -553,8 +562,7 @@ export const testsMultisig: SignTxTestcase[] = [
     {
         testname: "Sign tx without change address with Shelley scripthash output",
         tx: {
-            ...shelleyBase,
-            network: Networks.Testnet,
+            ...testnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [outputs.externalShelleyBaseScripthashKeyhash],
         },
