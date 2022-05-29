@@ -281,7 +281,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with nonempty auxiliary data",
+        testname: "Sign tx with auxiliary data hash",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
