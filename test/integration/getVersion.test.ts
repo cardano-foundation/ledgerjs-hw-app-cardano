@@ -18,7 +18,7 @@ describe("getVersion", async () => {
         const { version, compatibility } = await ada.getVersion()
 
         expect(version.major).to.equal(4)
-        expect(version.minor).to.equal(0)
+        expect(version.minor).to.equal(1)
         expect(compatibility).to.deep.equal({
             isCompatible: true,
             recommendedVersion: null,
@@ -31,6 +31,7 @@ describe("getVersion", async () => {
             supportsPoolRetirement: true,
             supportsNativeScriptHashDerivation: true,
             supportsAlonzo: true,
+            supportsReqSignersInOrdinaryTx: true,
         })
     })
 })
