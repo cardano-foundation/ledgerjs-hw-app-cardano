@@ -291,12 +291,31 @@ export type AssetGroup = {
     tokens: Array<Token>;
 };
 
+export enum DatumType {
+    HASH = 0,
+    INLINE = 1,
+}
+
+export type Datum = {
+    type: DatumType.HASH;
+    datumHashHex: string;
+} | {
+    type: DatumType.INLINE;
+    datumHex: string;
+};
+
+export enum TxOutputType {
+    ARRAY_LEGACY,
+    MAP_BABBAGE,
+}
+
 /**
- * Transaction output
- * @category Basic types
- * @see [[Transaction]]
+ * Corresponds to legacy_transaction_output in
+ * https://github.com/input-output-hk/cardano-ledger/blob/master/eras/babbage/test-suite/cddl-files/babbage.cddl
+ * Serializes as a tuple.
  */
-export type TxOutput = {
+export type TxOutputAlonzo = {
+    type: TxOutputType.ARRAY_LEGACY;
     /**
      * Destination address of the output
      */
@@ -317,7 +336,48 @@ export type TxOutput = {
      * Optional datum hash
      */
     datumHashHex?: string | null;
-}
+};
+
+/**
+ * Corresponds to post_alonzo_transaction_output in
+ * https://github.com/input-output-hk/cardano-ledger/blob/master/eras/babbage/test-suite/cddl-files/babbage.cddl
+ * Serializes as a map.
+ */
+export type TxOutputBabbage = {
+    type: TxOutputType.MAP_BABBAGE;
+    /**
+     * Destination address of the output
+     */
+    destination: TxOutputDestination;
+    /**
+     * Output amount.
+     * Specified in Lovelace
+     */
+    amount: bigint_like;
+    /**
+     * Additional assets sent to the output.
+     * If not null, the entries' keys (policyIds) must be unique and sorted to reflect a canonical CBOR as described
+     * in the [CBOR RFC](https://datatracker.ietf.org/doc/html/rfc7049#section-3.9)),
+     * i.e. the key with the lower value in lexical order sorts earlier.
+     */
+    tokenBundle?: Array<AssetGroup> | null;
+    /**
+     * Optional datum hash or inline datum
+     */
+    datum?: Datum;
+    /**
+     * Optional reference script
+     * (without the #6.24 tag)
+     */
+    scriptHex?: string | null;
+};
+
+/**
+ * Transaction output
+ * @category Basic types
+ * @see [[Transaction]]
+ */
+export type TxOutput = TxOutputAlonzo | TxOutputBabbage;
 
 /**
  * Specified type of output destination
@@ -1048,7 +1108,6 @@ export type Transaction = {
     outputs: Array<TxOutput>;
     /**
      * Transaction fee (in Lovelace).
-     * Note that transaction is valid only if inputs + fee === outputs.
      */
     fee: bigint_like;
     /**
@@ -1086,7 +1145,7 @@ export type Transaction = {
      */
     mint?: Array<AssetGroup> | null;
     /**
-     * Script Data hash (if any)
+     * Script data hash (if any)
      */
     scriptDataHashHex?: string | null;
     /**
@@ -1101,6 +1160,18 @@ export type Transaction = {
      * True if network id should be included in the transaction body; false or not given otherwise
      */
     includeNetworkId?: boolean;
+    /**
+     * Collateral return output
+     */
+    collRet?: TxOutput;
+    /**
+     * Total collateral (in Lovelace).
+     */
+    totalCollateral?: bigint_like;
+    /**
+     * Reference inputs (UTxOs). Visible to Plutus scripts, but not spent.
+     */
+    referenceInputs: Array<TxInput>;
 }
 
 /**
