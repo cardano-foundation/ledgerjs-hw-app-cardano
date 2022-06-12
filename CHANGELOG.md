@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
 ## [5.0.1](TBD) - [April 5th 2022]
 
 ### Fixed
 
 - do not provide an unnecessary witness for stake registration certificate (the path in the certificate is shown to the user, but a witness for the path is no longer asked from the Cardano Ledger app; if you want it, add the path to `SignTransactionRequest.additionalWitnessPaths`)
+
 
 ## [5.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v4.0.0...v5.0.0) - [March 31st 2022]
 

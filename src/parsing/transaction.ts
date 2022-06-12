@@ -389,7 +389,6 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.collaterals.length === 0,
             InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED
         )
-        // cannot have required signers in the tx
 
         break
     }

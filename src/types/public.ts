@@ -834,6 +834,10 @@ export type DeviceCompatibility = {
      * Whether we support Alonzo and Plutus
      */
     supportsAlonzo: boolean;
+    /**
+     * Whether we support required signers in ordinary and multisig transactions
+     */
+     supportsReqSignersInOrdinaryTx: boolean;
 }
 
 /**

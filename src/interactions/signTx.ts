@@ -777,8 +777,20 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Collaterals not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.tx.requiredSigners.length != 0 && !getCompatibility(version).supportsAlonzo) {
-        throw new DeviceVersionUnsupported(`Required signers not supported by Ledger app version ${getVersionString(version)}.`)
+    if (request.tx.requiredSigners.length != 0) {
+        if (!getCompatibility(version).supportsAlonzo) {
+            throw new DeviceVersionUnsupported(`Required signers not supported by Ledger app version ${getVersionString(version)}.`)
+        }
+        if (!getCompatibility(version).supportsReqSignersInOrdinaryTx) {
+            switch (request.signingMode) {
+            case TransactionSigningMode.ORDINARY_TRANSACTION:
+                throw new DeviceVersionUnsupported(`Required signers in ordinary transaction not supported by Ledger app version ${getVersionString(version)}.`)
+            case TransactionSigningMode.MULTISIG_TRANSACTION:
+                throw new DeviceVersionUnsupported(`Required signers in multisig transaction not supported by Ledger app version ${getVersionString(version)}.`)
+            default:
+                break
+            }
+        }
     }
 
     if (request.tx.includeNetworkId && !getCompatibility(version).supportsAlonzo) {
