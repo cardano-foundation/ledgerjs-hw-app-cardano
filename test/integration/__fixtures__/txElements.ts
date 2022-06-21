@@ -210,11 +210,39 @@ export const destinations: Record<
 }
 
 export const mints: Record<
+    | 'mintWithDecimalPlaces'
     | 'mintAmountVariety'
     | 'mintInvalidCanonicalOrderingPolicy'
     | 'mintInvalidCanonicalOrderingAssetName'
   , Array<AssetGroup>
 > = {
+    mintWithDecimalPlaces: [
+        {
+            policyIdHex: "6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15f",
+            tokens: [
+                {
+                    // fingerprint: asset155nxgqj5acff7fdhc8ranfwyl7nq4ljrks7l6w
+                    assetNameHex: "5354524950",
+                    amount: "-3456789", // -3,456.789
+                },
+            ],
+        },
+        {
+            policyIdHex: "af2e27f580f7f08e93190a81f72462f153026d06450924726645891b",
+            tokens: [
+                {
+                    // fingerprint: asset14yqf3pclzx88jjahydyfad8pxw5xhuca6j7k2p
+                    assetNameHex: "44524950",
+                    amount: "1234", // 0.01234
+                },
+                {
+                    // fingerprint: asset12wejgxu04lpg6h3pm056qd207k2sfh7yjklclf
+                    assetNameHex: "ffffffffffffffffffffffff",
+                    amount: "1234", // 1,234 with warning
+                },
+            ],
+        },
+    ],
     mintAmountVariety: [
         {
             // fingerprints taken from CIP 14 draft
@@ -305,6 +333,7 @@ export const outputs: Record<
   | 'internalPointer'
   | 'multiassetOneToken'
   | 'multiassetManyTokens'
+  | 'multiassetDecimalPlaces'
   | 'multiassetChange'
   | 'multiassetBigNumber'
   | 'multiassetInvalidAssetGroupOrdering'
@@ -412,6 +441,37 @@ export const outputs: Record<
                     {
                         assetNameHex: "74652474436f696e",
                         amount: "7878754",
+                    },
+                ],
+            },
+        ],
+    },
+    multiassetDecimalPlaces: {
+        destination: destinations.multiassetThirdParty,
+        amount: "1234",
+        tokenBundle: [
+            {
+                policyIdHex: "6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15f",
+                tokens: [
+                    {
+                        // fingerprint: asset155nxgqj5acff7fdhc8ranfwyl7nq4ljrks7l6w
+                        assetNameHex: "5354524950",
+                        amount: "3456789", // 3,456.789
+                    },
+                ],
+            },
+            {
+                policyIdHex: "af2e27f580f7f08e93190a81f72462f153026d06450924726645891b",
+                tokens: [
+                    {
+                        // fingerprint: asset14yqf3pclzx88jjahydyfad8pxw5xhuca6j7k2p
+                        assetNameHex: "44524950",
+                        amount: "1234", // 0.01234
+                    },
+                    {
+                        // fingerprint: asset12wejgxu04lpg6h3pm056qd207k2sfh7yjklclf
+                        assetNameHex: "ffffffffffffffffffffffff",
+                        amount: "1234", // 1,234 with warning
                     },
                 ],
             },

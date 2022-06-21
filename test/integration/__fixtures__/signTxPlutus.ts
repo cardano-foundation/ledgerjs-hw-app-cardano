@@ -30,7 +30,7 @@ export const testsAlonzo: SignTxTestcase[] = [
         },
     },
     {
-        // TODO somewhat odd since it does not contain any Plutus elements, differs only in UI
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
         testname: "Sign tx with change output (Plutus)",
         tx: {
             ...mainnetFeeTtl,

@@ -862,6 +862,33 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
+        testname: "Sign tx with output with decimal places",
+        tx: {
+            network: Networks.Mainnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.multiassetDecimalPlaces],
+            fee: 33,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a09a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249503a0034bf14581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2",
+        expectedResult: {
+            txHashHex: "a36c270c8ee52c8f5b9cc47ccad0869ad72f00dd1ac1510b682752e09738a27f",
+            "witnesses": [
+                {
+                    "path": [
+                        2147485500,
+                        2147485463,
+                        2147483648,
+                        0,
+                        0,
+                    ],
+                    "witnessSignatureHex": "30e8da0b9230bc1b1e2748ef51e9259f457d4e0bd0387eb186ade839f3bbac5a2face7eea72061b850c7d26a5b66bd0f90cff546c6c30e0987091a067c960d06",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
         testname: "Sign tx with mint fields with various amounts",
         tx: {
             ...mainnetFeeTtl,
@@ -883,6 +910,34 @@ export const testsMary: SignTxTestcase[] = [
                         0,
                     ],
                     "witnessSignatureHex": "18fa055fb6d74b12170cdc227aaf4922c78405d4caf7bdbe5f959df2c3a912e20c5a18c4412d504685fe1179d32b5b588efe4a8d59f0274492de77f30f315409",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with mint with decimal places",
+        tx: {
+            network: Networks.Mainnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.externalShelleyBaseKeyhashKeyhash],
+            fee: 33,
+            mint: mints.mintWithDecimalPlaces,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a09a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249503a0034bf14581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2",
+        expectedResult: {
+            txHashHex: "f15863b8ade43da43d14cc2d519982fa3402d4024de272b2d16111cfa99985bc",
+            "witnesses": [
+                {
+                    "path": [
+                        2147485500,
+                        2147485463,
+                        2147483648,
+                        0,
+                        0,
+                    ],
+                    "witnessSignatureHex": "906fc532008b75ad6f77db60ef4c661983a6310527a0f44203f7e476480395a8d415ccd764051d31bcfae1db50288d7559caf2977c4126113e9be5f9b7c63a02",
                 },
             ],
             auxiliaryDataSupplement: null,
