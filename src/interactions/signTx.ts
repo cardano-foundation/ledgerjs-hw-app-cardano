@@ -1,24 +1,80 @@
-import { DeviceVersionUnsupported } from "../errors"
-import type { Int64_str, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedRequiredSigner, ParsedSigningRequest, ParsedTransaction, ParsedTxAuxiliaryData, ParsedWithdrawal, ScriptDataHash, Uint64_str, ValidBIP32Path, Version } from "../types/internal"
-import { AUXILIARY_DATA_HASH_LENGTH } from "../types/internal"
-import { RequiredSignerType, StakeCredentialType } from "../types/internal"
-import { CertificateType, ED25519_SIGNATURE_LENGTH, PoolOwnerType, TX_HASH_LENGTH } from "../types/internal"
-import type { SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
-import { AddressType, TxOutputDestinationType } from "../types/public"
-import { PoolKeyType, TransactionSigningMode, TxAuxiliaryDataSupplementType, TxAuxiliaryDataType } from "../types/public"
-import { getVersionString } from "../utils"
-import { assert } from "../utils/assert"
-import { buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf } from "../utils/serialize"
-import { INS } from "./common/ins"
-import type { Interaction, SendParams } from "./common/types"
-import { ensureLedgerAppVersionCompatible, getCompatibility } from "./getVersion"
-import { serializeCatalystRegistrationNonce, serializeCatalystRegistrationRewardsDestination, serializeCatalystRegistrationStakingPath, serializeCatalystRegistrationVotingKey } from "./serialization/catalystRegistration"
-import { serializeFinancials, serializePoolInitialParams, serializePoolInitialParamsLegacy, serializePoolKey, serializePoolMetadata, serializePoolOwner, serializePoolRelay, serializePoolRewardAccount } from "./serialization/poolRegistrationCertificate"
-import { serializeTxAuxiliaryData } from "./serialization/txAuxiliaryData"
-import { serializeTxCertificate } from "./serialization/txCertificate"
-import { serializeTxInit } from "./serialization/txInit"
-import { serializeAssetGroup, serializeMintBasicParams, serializeRequiredSigner,serializeToken, serializeTxFee, serializeTxInput, serializeTxTtl, serializeTxValidityStart, serializeTxWithdrawal, serializeTxWitnessRequest } from "./serialization/txOther"
-import { serializeTxOutputBasicParams } from "./serialization/txOutput"
+import {DeviceVersionUnsupported, InvalidDataReason} from "../errors"
+import type {
+    Int64_str,
+    ParsedAssetGroup,
+    ParsedCertificate,
+    ParsedInput,
+    ParsedOutput,
+    ParsedRequiredSigner,
+    ParsedSigningRequest,
+    ParsedTransaction,
+    ParsedTxAuxiliaryData,
+    ParsedWithdrawal,
+    ScriptDataHash,
+    Uint64_str,
+    ValidBIP32Path,
+    Version,
+} from "../types/internal"
+import {
+    AUXILIARY_DATA_HASH_LENGTH,
+    CertificateType,
+    DATUM_HASH_LENGTH,
+    ED25519_SIGNATURE_LENGTH,
+    PoolOwnerType,
+    RequiredSignerType,
+    StakeCredentialType,
+    TX_HASH_LENGTH,
+} from "../types/internal"
+import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
+import {
+    AddressType,
+    DatumType,
+    PoolKeyType,
+    TransactionSigningMode,
+    TxAuxiliaryDataSupplementType,
+    TxAuxiliaryDataType,
+    TxOutputDestinationType,
+    TxOutputType,
+} from "../types/public"
+import {getVersionString} from "../utils"
+import {assert} from "../utils/assert"
+import {buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf} from "../utils/serialize"
+import {INS} from "./common/ins"
+import type {Interaction, SendParams} from "./common/types"
+import {ensureLedgerAppVersionCompatible, getCompatibility} from "./getVersion"
+import {
+    serializeCatalystRegistrationNonce,
+    serializeCatalystRegistrationRewardsDestination,
+    serializeCatalystRegistrationStakingPath,
+    serializeCatalystRegistrationVotingKey,
+} from "./serialization/catalystRegistration"
+import {
+    serializeFinancials,
+    serializePoolInitialParams,
+    serializePoolInitialParamsLegacy,
+    serializePoolKey,
+    serializePoolMetadata,
+    serializePoolOwner,
+    serializePoolRelay,
+    serializePoolRewardAccount,
+} from "./serialization/poolRegistrationCertificate"
+import {serializeTxAuxiliaryData} from "./serialization/txAuxiliaryData"
+import {serializeTxCertificate} from "./serialization/txCertificate"
+import {serializeTxInit} from "./serialization/txInit"
+import {
+    serializeAssetGroup,
+    serializeMintBasicParams,
+    serializeRequiredSigner,
+    serializeToken,
+    serializeTxFee,
+    serializeTxInput,
+    serializeTxTtl,
+    serializeTxValidityStart,
+    serializeTxWithdrawal,
+    serializeTxWitnessRequest,
+} from "./serialization/txOther"
+import {serializeTxOutputBasicParams} from "./serialization/txOutput"
+import {parseHexStringOfLength} from "../utils/parse"
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
 const enum P1 {
@@ -98,14 +154,24 @@ function* signTx_addOutput(
   })
 
   yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
-
-  if (output.datumHashHex != null) {
-      yield send({
-          p1: P1.STAGE_OUTPUTS,
-          p2: P2.DATUM_HASH,
-          data: hex_to_buf(output.datumHashHex),
-          expectedResponseLength: 0,
-      })
+  if (output.type !== TxOutputType.MAP_BABBAGE) {
+      if (output.datumHashHex != null) {
+          yield send({
+              p1: P1.STAGE_OUTPUTS,
+              p2: P2.DATUM_HASH,
+              data: hex_to_buf(output.datumHashHex),
+              expectedResponseLength: 0,
+          })
+      }
+  } else {
+      if (output.datum?.type === DatumType.HASH) {
+          yield send({
+              p1: P1.STAGE_OUTPUTS,
+              p2: P2.DATUM_HASH,
+              data: hex_to_buf(parseHexStringOfLength(output.datum.datumHashHex, DATUM_HASH_LENGTH,InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)),
+              expectedResponseLength: 0,
+          })
+      }
   }
 
   yield send({
@@ -696,7 +762,7 @@ function hasScriptHashInAddressParams(tx: ParsedTransaction) {
         AddressType.REWARD_SCRIPT,
     ]
     return tx.outputs.some(o =>
-        o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
+        o.destination.type === (TxOutputDestinationType.DEVICE_OWNED || TxOutputDestinationType.DEVICE_OWNED_MAP) &&
         scriptAddressTypes.includes(o.destination.addressParams.type)
     )
 }
@@ -722,7 +788,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    const hasDatumHashInOutputs = request.tx.outputs.some(o => o.datumHashHex != null)
+    const hasDatumHashInOutputs = request.tx.outputs.some(o => o.type !==TxOutputType.MAP_BABBAGE && o.datumHashHex != null)
     if (hasDatumHashInOutputs && !getCompatibility(version).supportsAlonzo) {
         throw new DeviceVersionUnsupported(`Datum hash in output not supported by Ledger app version ${getVersionString(version)}.`)
     }

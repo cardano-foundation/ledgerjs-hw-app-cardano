@@ -1,4 +1,17 @@
-import { AddressType, CertificateType, NativeScriptType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, RelayType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType } from './public'
+import {
+    AddressType,
+    CertificateType,
+    Datum,
+    NativeScriptType,
+    PoolKeyType,
+    PoolOwnerType,
+    PoolRewardAccountType,
+    RelayType,
+    TransactionSigningMode,
+    TxAuxiliaryDataType,
+    TxOutputDestinationType,
+    TxOutputType,
+} from './public'
 
 // Basic primitives
 export type VarlenAsciiString = string & { __type: 'ascii' }
@@ -345,15 +358,34 @@ export type OutputDestination = {
 } | {
     type: TxOutputDestinationType.DEVICE_OWNED;
     addressParams: ParsedAddressParams;
+} | {
+    type: TxOutputDestinationType.THIRD_PARTY_MAP;
+    addressHex: HexString;
+} | {
+    type: TxOutputDestinationType.DEVICE_OWNED_MAP;
+    addressParams: ParsedAddressParams;
 }
 
 export type DatumHash = FixlenHexString<typeof DATUM_HASH_LENGTH>
 
-export type ParsedOutput = {
+export type ParsedOutput = ParsedOutputAlonzoArray | ParsedOutputBabbageMap;
+
+export type ParsedOutputAlonzoArray = {
+    type?: TxOutputType.ARRAY_LEGACY;
     amount: Uint64_str;
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
     destination: OutputDestination;
     datumHashHex?: DatumHash | null;
+}
+
+
+export type ParsedOutputBabbageMap = {
+    type: TxOutputType.MAP_BABBAGE;
+    amount: Uint64_str;
+    tokenBundle: ParsedAssetGroup<Uint64_str>[];
+    destination: OutputDestination;
+    datum?: Datum;
+    scriptHex?: string | null;
 }
 
 export const ASSET_NAME_LENGTH_MAX = 32

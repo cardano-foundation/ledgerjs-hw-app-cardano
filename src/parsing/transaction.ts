@@ -1,9 +1,28 @@
-import { InvalidData } from "../errors"
-import { InvalidDataReason } from "../errors/invalidDataReason"
-import type { OutputDestination, ParsedAssetGroup, ParsedCertificate, ParsedInput, ParsedOutput, ParsedRequiredSigner, ParsedSigningRequest, ParsedToken, ParsedTransaction, ParsedWithdrawal} from "../types/internal"
-import { KEY_HASH_LENGTH,RequiredSignerType } from "../types/internal"
-import { StakeCredentialType } from "../types/internal"
-import { ASSET_NAME_LENGTH_MAX, CertificateType, SCRIPT_DATA_HASH_LENGTH,SpendingDataSourceType, TOKEN_POLICY_LENGTH, TX_HASH_LENGTH } from "../types/internal"
+import {InvalidData} from "../errors"
+import {InvalidDataReason} from "../errors/invalidDataReason"
+import type {
+    OutputDestination,
+    ParsedAssetGroup,
+    ParsedCertificate,
+    ParsedInput,
+    ParsedOutput,
+    ParsedRequiredSigner,
+    ParsedSigningRequest,
+    ParsedToken,
+    ParsedTransaction,
+    ParsedWithdrawal,
+} from "../types/internal"
+import {
+    ASSET_NAME_LENGTH_MAX,
+    CertificateType,
+    KEY_HASH_LENGTH,
+    RequiredSignerType,
+    SCRIPT_DATA_HASH_LENGTH,
+    SpendingDataSourceType,
+    StakeCredentialType,
+    TOKEN_POLICY_LENGTH,
+    TX_HASH_LENGTH,
+} from "../types/internal"
 import type {
     AssetGroup,
     Certificate,
@@ -20,22 +39,30 @@ import type {
 import {
     AddressType,
     PoolKeyType,
-} from "../types/public"
-import {
     PoolOwnerType,
     TransactionSigningMode,
     TxOutputDestinationType,
+    TxOutputType,
     TxRequiredSignerType,
 } from "../types/public"
-import { unreachable } from '../utils/assert'
-import { isArray, parseBIP32Path, parseStakeCredential,validate } from "../utils/parse"
-import { parseHexString, parseHexStringOfLength, parseInt64_str, parseUint32_t, parseUint64_str } from "../utils/parse"
-import { hex_to_buf } from "../utils/serialize"
-import { parseAddress } from "./address"
-import { parseCertificate } from "./certificate"
-import { ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX } from "./constants"
-import { parseNetwork } from "./network"
-import { parseTxAuxiliaryData } from "./txAuxiliaryData"
+import {unreachable} from '../utils/assert'
+import {
+    isArray,
+    parseBIP32Path,
+    parseHexString,
+    parseHexStringOfLength,
+    parseInt64_str,
+    parseStakeCredential,
+    parseUint32_t,
+    parseUint64_str,
+    validate,
+} from "../utils/parse"
+import {hex_to_buf} from "../utils/serialize"
+import {parseAddress} from "./address"
+import {parseCertificate} from "./certificate"
+import {ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX} from "./constants"
+import {parseNetwork} from "./network"
+import {parseTxAuxiliaryData} from "./txAuxiliaryData"
 
 function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertificate> {
     validate(isArray(certificates), InvalidDataReason.CERTIFICATES_NOT_ARRAY)
@@ -47,7 +74,7 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
 
 
 type ParseTokenAmountFn<T> = (val: unknown, constraints: { min?: string | undefined; max?: string | undefined },
-                              errMsg: InvalidDataReason) => T
+    errMsg: InvalidDataReason) => T
 
 function parseToken<T>(token: Token, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedToken<T> {
     const assetNameHex = parseHexString(token.assetNameHex, InvalidDataReason.MULTIASSET_INVALID_ASSET_NAME)
@@ -76,7 +103,7 @@ function parseAssetGroup<T>(assetGroup: AssetGroup, parseTokenAmountFn: ParseTok
     const assetNamesHex = parsedAssetGroup.tokens.map(t => t.assetNameHex)
     validate(assetNamesHex.length === new Set(assetNamesHex).size, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE)
 
-    const sortedAssetNames = [...assetNamesHex].sort( (n1, n2) => {
+    const sortedAssetNames = [...assetNamesHex].sort((n1, n2) => {
         if (n1.length === n2.length) return n1.localeCompare(n2)
         else return n1.length - n2.length
     })
@@ -116,7 +143,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     const outputs = tx.outputs.map(o => parseTxOutput(o, tx.network))
 
     // fee
-    const fee = parseUint64_str(tx.fee, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.FEE_INVALID)
+    const fee = parseUint64_str(tx.fee, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.FEE_INVALID)
 
     //  ttl
     const ttl = tx.ttl == null
@@ -191,31 +218,32 @@ function parseTxInput(input: TxInput): ParsedInput {
 
 function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     return {
-        amount: parseUint64_str(params.amount, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT),
+        amount: parseUint64_str(params.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT),
         stakeCredential: parseStakeCredential(params.stakeCredential, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL),
     }
 }
 
 function parseTxDestination(
     network: Network,
-    destination: TxOutputDestination
+    destination: TxOutputDestination,
+    txtype?: TxOutputType
 ): OutputDestination {
     switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY: {
+    case TxOutputDestinationType.THIRD_PARTY || TxOutputDestinationType.THIRD_PARTY_MAP: {
         const params = destination.params
         const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
         validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
         return {
-            type: TxOutputDestinationType.THIRD_PARTY,
+            type: txtype !== TxOutputType.MAP_BABBAGE ? TxOutputDestinationType.THIRD_PARTY : TxOutputDestinationType.THIRD_PARTY_MAP,
             addressHex,
         }
     }
-    case TxOutputDestinationType.DEVICE_OWNED: {
+    case TxOutputDestinationType.DEVICE_OWNED || TxOutputDestinationType.DEVICE_OWNED_MAP: {
         const params = destination.params
         const addressParams = parseAddress(network, params)
         validate(addressParams.spendingDataSource.type == SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)
         return {
-            type: TxOutputDestinationType.DEVICE_OWNED,
+            type: txtype !== TxOutputType.MAP_BABBAGE ? TxOutputDestinationType.DEVICE_OWNED : TxOutputDestinationType.DEVICE_OWNED_MAP,
             addressParams: addressParams,
         }
     }
@@ -229,12 +257,14 @@ function parseTxDestination(
 function addressAllowsDatum(destination: OutputDestination): boolean {
     let type: AddressType
     switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY: {
+    case TxOutputDestinationType.THIRD_PARTY :
+    case TxOutputDestinationType.THIRD_PARTY_MAP:{
         const addressBytes: Buffer = hex_to_buf(destination.addressHex)
         type = (addressBytes[0] & 0b11110000) >> 4
         break
     }
     case TxOutputDestinationType.DEVICE_OWNED:
+    case TxOutputDestinationType.DEVICE_OWNED_MAP:
         type = destination.addressParams.type
         break
     }
@@ -253,23 +283,35 @@ function parseTxOutput(
     output: TxOutput,
     network: Network,
 ): ParsedOutput {
-    const amount = parseUint64_str(output.amount, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
+    const type = output.type
+
+    const amount = parseUint64_str(output.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
 
     const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
 
-    const destination = parseTxDestination(network, output.destination)
+    const destination = parseTxDestination(network, output.destination, output.type)
 
-    const datumHashHex = output.datumHashHex == null
-        ? null
-        : parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
-    validate(!datumHashHex || addressAllowsDatum(destination),
-        InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
-
-    return {
-        amount,
-        tokenBundle,
-        destination,
-        datumHashHex,
+    if (output.type !== TxOutputType.MAP_BABBAGE) {
+        const datumHashHex = output.datumHashHex == null ? null
+            : parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
+        validate(!datumHashHex || addressAllowsDatum(destination),
+            InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
+        return {
+            type,
+            amount,
+            tokenBundle,
+            destination,
+            datumHashHex,
+        }
+    } else {
+        const datum = output.datum
+        return {
+            type,
+            amount,
+            tokenBundle,
+            destination,
+            datum,
+        }
     }
 }
 
@@ -352,7 +394,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
     case TransactionSigningMode.MULTISIG_TRANSACTION: {
         // only third-party outputs
         validate(
-            tx.outputs.every(output => output.destination.type === TxOutputDestinationType.THIRD_PARTY),
+            tx.outputs.every(output => output.destination.type === (TxOutputDestinationType.THIRD_PARTY || TxOutputDestinationType.THIRD_PARTY_MAP)),
             InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
         )
         // pool registrations have separate signing modes
@@ -405,13 +447,13 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         )
         // cannot have change output in the tx, all is paid by the pool operator
         validate(
-            tx.outputs.every(out => out.destination.type === TxOutputDestinationType.THIRD_PARTY),
+            tx.outputs.every(out => out.destination.type === (TxOutputDestinationType.THIRD_PARTY || TxOutputDestinationType.THIRD_PARTY_MAP)),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED
         )
 
         // no datum in outputs
         validate(
-            tx.outputs.every(out => out.datumHashHex == null),
+            tx.outputs.every(out => out.type !== TxOutputType.MAP_BABBAGE? (out.datumHashHex == null) : (out.datum == null)),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED
         )
 
@@ -475,7 +517,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // no datum in outputs
         validate(
-            tx.outputs.every(out => out.datumHashHex == null),
+            tx.outputs.every(out => out.type !== TxOutputType.MAP_BABBAGE? (out.datumHashHex == null) : (out.datum == null)),
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED
         )
 

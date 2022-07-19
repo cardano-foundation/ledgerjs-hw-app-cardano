@@ -315,7 +315,7 @@ export enum TxOutputType {
  * Serializes as a tuple.
  */
 export type TxOutputAlonzo = {
-    type: TxOutputType.ARRAY_LEGACY;
+    type?: TxOutputType.ARRAY_LEGACY;
     /**
      * Destination address of the output
      */
@@ -397,6 +397,10 @@ export enum TxOutputDestinationType {
      * @see [[DeviceOwnedAddress]]
      */
     DEVICE_OWNED = 'device_owned',
+
+    THIRD_PARTY_MAP = 'third_party_map',
+
+    DEVICE_OWNED_MAP = 'device_owned_map',
 }
 
 /**
@@ -422,6 +426,12 @@ export type TxOutputDestination = {
     params: ThirdPartyAddressParams;
 } | {
     type: TxOutputDestinationType.DEVICE_OWNED;
+    params: DeviceOwnedAddress;
+} | {
+    type: TxOutputDestinationType.THIRD_PARTY_MAP;
+    params: ThirdPartyAddressParams;
+} | {
+    type: TxOutputDestinationType.DEVICE_OWNED_MAP;
     params: DeviceOwnedAddress;
 }
 
@@ -1171,7 +1181,7 @@ export type Transaction = {
     /**
      * Reference inputs (UTxOs). Visible to Plutus scripts, but not spent.
      */
-    referenceInputs: Array<TxInput>;
+    referenceInputs?: Array<TxInput>;
 }
 
 /**
