@@ -354,53 +354,53 @@ export const testsAlonzo: SignTxTestcase[] = [
 ]
 
 export const testsBabbage: SignTxTestcase[] = [
-    // {
-    //     testname: "Sign tx with script data hash ",
-    //     tx: {
-    //         ...mainnetFeeTtl,
-    //         inputs: [inputs.utxoShelley],
-    //         outputs: [],
-    //         scriptDataHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
-    //         includeNetworkId: true,
-    //     },
-    //     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-    //     additionalWitnessPaths: [],
-    //     txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880f01",
-    //     expectedResult: {
-    //         txHashHex: "7c5aac719dd3e0888deef0c59d6daba9e578d0dc27f82ff4978fc2893cdc2202",
-    //         witnesses: [
-    //             {
-    //                 path: str_to_path("1852'/1815'/0'/0/0"),
-    //                 witnessSignatureHex: "5c66a4f75359a62b4b32751fe30a1adbf7ed2839fd4cb762e9a4d2b086de82fca2310bcf07efc2b03086211faa19941dbe059bbfb747e128863f339720e71304",
-    //             },
-    //         ],
-    //         auxiliaryDataSupplement: null,
-    //     },
-    // },
-    // {
-    //     // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-    //     testname: "Sign tx with change output (Plutus) MAP",
-    //     tx: {
-    //         ...mainnetFeeTtl,
-    //         inputs: [inputs.utxoShelley],
-    //         outputs: [outputs.internalBaseWithStakingPathMap],
-    //     },
-    //     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
-    //     additionalWitnessPaths: [],
-    //     txBody: "A400818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A20058390114C16D7F43243BD81478E68B9DB53A8528FD4FB1078D58D54A7F11241D227AEFA4B773149170885AADBA30AAB3127CC611DDBC4999DEF61C011A006CA79302182A030A",
-    //     expectedResult: {
-    //         txHashHex: "0318d9550a6de08e565a8882891ea7fbbfae1b9c3083e53aa3cf301153044d58",
-    //         witnesses: [
-    //             {
-    //                 path: str_to_path("1852'/1815'/0'/0/0"),
-    //                 witnessSignatureHex: "5a74df477b9a6e8995693994732c5f7a7fb8aad1c240a04358a8e40bc611c24c2ff3df0e64ce5a4022ea3a691d824e483fadaec3b246760ace5511749056890a",
-    //             },
-    //         ],
-    //         auxiliaryDataSupplement: null,
-    //     },
-    // },
     {
-        testname: "Sign tx with datum hash in output",
+        testname: "Sign tx with script data hash ",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [],
+            scriptDataHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+            includeNetworkId: true,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a0b5820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880f01",
+        expectedResult: {
+            txHashHex: "7c5aac719dd3e0888deef0c59d6daba9e578d0dc27f82ff4978fc2893cdc2202",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "5c66a4f75359a62b4b32751fe30a1adbf7ed2839fd4cb762e9a4d2b086de82fca2310bcf07efc2b03086211faa19941dbe059bbfb747e128863f339720e71304",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) MAP",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a",
+        expectedResult: {
+            txHashHex: "0318d9550a6de08e565a8882891ea7fbbfae1b9c3083e53aa3cf301153044d58",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "5a74df477b9a6e8995693994732c5f7a7fb8aad1c240a04358a8e40bc611c24c2ff3df0e64ce5a4022ea3a691d824e483fadaec3b246760ace5511749056890a",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with datum hash in output in Babbage format",
         tx: {
             ...mainnetFeeTtl,
             network: Networks.Testnet,
@@ -415,78 +415,32 @@ export const testsBabbage: SignTxTestcase[] = [
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "a528a2574a5fdfff39102c00c8ff73ee295e68d50822b1173751bb6e183b96f4032e2b4e10df405bd9053f27631b69cbf0902e83bdfd5578f1fac0c749599e00",
+                    witnessSignatureHex: "087d9a41ab06689f8c8679adac619545cfefb90bf2b8b370292b1c96bc29870a1eee912eda2714a8f73a59d4e837d3b366b3c926998943499d831d9c05c4400f",
                 },
             ],
             auxiliaryDataSupplement: null,
         },
     },
-    //Legders txbody output:a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a300583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18802182a030a
-    // {
-    //     testname: "Sign tx with datum hash in output with tokens",
-    //     tx: {
-    //         ...mainnetFeeTtl,
-    //         network: Networks.Testnet,
-    //         inputs: [inputs.utxoShelley],
-    //         outputs: [outputs.datumHashWithTokens],
-    //     },
-    //     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-    //     additionalWitnessPaths: [],
-    //     txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018183583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e821a006ca793a1581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a2487564247542686911182f4875642475426869121a007838625820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18802182a030a",
-    //     expectedResult: {
-    //         txHashHex: "baa2a49cb3a39a186823174d83816395f5ff47d9d86251b5274bd902cd209a8f",
-    //         witnesses: [
-    //             {
-    //                 path: str_to_path("1852'/1815'/0'/0/0"),
-    //                 witnessSignatureHex: "f0bfc7765ef2556c4efe8b7dc7851703ff5b985bb2e6389f0a344afedcdbec869d6139e8ee566c3ffd8ccfbe2b7a7158f305ac9944384096c2d64c19d0099d02",
-    //             },
-    //         ],
-    //         auxiliaryDataSupplement: null,
-    //     },
-    // },
-    // {
-    //     testname: "Sign tx with datum hash in output",
-    //     tx: {
-    //         ...mainnetFeeTtl,
-    //         network: Networks.Testnet,
-    //         inputs: [inputs.utxoShelley],
-    //         outputs: [outputs.datumHashExternalMap],
-    //     },
-    //     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-    //     additionalWitnessPaths: [],
-    //     txBody: "A400818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A3005839105E2F080EB93BAD86D401545E0CE5F2221096D6477E11E6643922FA8D2ED495234DC0D667C1316FF84E572310E265EDB31330448B36B7179E011A006CA7930282005820FFD4D009F554BA4FD8ED1F1D703244819861A9D34FD4753BCF3FF32F043CE18802182A030A",
-    //     expectedResult: {
-    //         txHashHex: "ebdafe8cac49e39d96a9532c58e3e55713ec3e37897d576fcfdf1f25a70bd0f8",
-    //         witnesses: [
-    //             {
-    //                 path: str_to_path("1852'/1815'/0'/0/0"),
-    //                 witnessSignatureHex: "a528a2574a5fdfff39102c00c8ff73ee295e68d50822b1173751bb6e183b96f4032e2b4e10df405bd9053f27631b69cbf0902e83bdfd5578f1fac0c749599e00",
-    //             },
-    //         ],
-    //         auxiliaryDataSupplement: null,
-    //     },
-    // },
-    // {
-    //     // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-    //     testname: "Sign tx with change output (Plutus) MAP WIth new elements",
-    //     tx: {
-    //         ...mainnetFeeTtl,
-    //         inputs: [inputs.utxoShelley],
-    //         outputs: [outputs.internalBaseWithStakingPathMap],
-    //     },
-    //     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
-    //     additionalWitnessPaths: [],
-    //     txBody: "A400818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A20058390114C16D7F43243BD81478E68B9DB53A8528FD4FB1078D58D54A7F11241D227AEFA4B773149170885AADBA30AAB3127CC611DDBC4999DEF61C011A006CA79302182A030A",
-    //     expectedResult: {
-    //         txHashHex: "0318d9550a6de08e565a8882891ea7fbbfae1b9c3083e53aa3cf301153044d58",
-    //         witnesses: [
-    //             {
-    //                 path: str_to_path("1852'/1815'/0'/0/0"),
-    //                 witnessSignatureHex: "5a74df477b9a6e8995693994732c5f7a7fb8aad1c240a04358a8e40bc611c24c2ff3df0e64ce5a4022ea3a691d824e483fadaec3b246760ace5511749056890a",
-    //             },
-    //         ],
-    //         auxiliaryDataSupplement: null,
-    //     },
-    // },
-
+    {
+        testname: "Sign tx with datum hash in output with tokens Babbage format",
+        tx: {
+            ...mainnetFeeTtl,
+            network: Networks.Testnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.datumHashWithTokensMap],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a3005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e01821a006ca793a1581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a2487564247542686911182f4875642475426869121a007838620282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18802182a030a",
+        expectedResult: {
+            txHashHex: "77c4e9441b6b5bc5a1157b2b54ac6c0165e6959ffbc378f0528fafd4e5d9ba64",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "ec6d5db61abe1daa9d43ea0e4e89b9151227b3e5937cb304fa5d7823d555625327b19f71d890ddc73401e3dcad61903c32d889241643f64fb218f98828643f08",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
 ]

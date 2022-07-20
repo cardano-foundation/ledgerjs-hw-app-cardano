@@ -1,8 +1,8 @@
+import {TxOutputType} from "../../../dist/types/public"
 import type { AssetGroup, TxInput, TxOutput, TxOutputDestination} from "../../../src/types/public"
 import {AddressType, DatumType, TxOutputDestinationType} from "../../../src/types/public"
 import utils, { str_to_path } from "../../../src/utils"
 import { bech32_to_hex, Networks } from "../../test_utils"
-import {TxOutputType} from "../../../dist/types/public"
 
 export const inputs: Record<
   | 'utxoByron'
@@ -353,6 +353,7 @@ export const outputs: Record<
   | 'datumHashStakePathExternal'
   | 'internalBaseWithStakingPathMap'
   | 'datumHashExternalMap'
+  | 'datumHashWithTokensMap'
   , TxOutput
 > = {
     externalByronMainnet: {
@@ -714,6 +715,31 @@ export const outputs: Record<
         datum: {
             type: DatumType.HASH,
             datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+        },
+    },
+    datumHashWithTokensMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                    {
+                        assetNameHex: "7564247542686912",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+        datum: {
+            type:DatumType.HASH,
+            datumHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+
         },
     },
 }
