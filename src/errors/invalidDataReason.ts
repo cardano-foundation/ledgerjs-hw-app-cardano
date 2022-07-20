@@ -17,6 +17,7 @@ export enum InvalidDataReason {
   INPUT_INVALID_UTXO_INDEX = "invalid input utxo index",
 
   OUTPUTS_NOT_ARRAY = "outputs not an array",
+  OUTPUT_INVALID_FORMAT = "invalid output format",
   OUTPUT_INVALID_AMOUNT = "invalid amount in an output",
   OUTPUT_INVALID_ADDRESS = "invalid address in an output",
   OUTPUT_INVALID_ADDRESS_PARAMS = "change address must have path as payment part",

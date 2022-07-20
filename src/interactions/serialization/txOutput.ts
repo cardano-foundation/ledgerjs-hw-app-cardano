@@ -1,9 +1,11 @@
-import type {OutputDestination, ParsedOutput, Uint32_t, Uint8_t} from "../../types/internal"
+import {InvalidDataReason} from "../../errors"
+import type {OutputDestination, ParsedOutput, Uint8_t,Uint32_t} from "../../types/internal"
 import {TxOutputDestinationType} from "../../types/internal"
 import type {Version} from "../../types/public"
 import {DatumType, TxOutputType} from "../../types/public"
 import {unreachable} from "../../utils/assert"
-import {hex_to_buf, serializeOptionFlag, uint32_to_buf, uint64_to_buf, uint8_to_buf} from "../../utils/serialize"
+import {parseUint8_t} from "../../utils/parse"
+import {hex_to_buf, serializeOptionFlag, uint8_to_buf,uint32_to_buf, uint64_to_buf} from "../../utils/serialize"
 import {getCompatibility} from "../getVersion"
 import {serializeAddressParams} from "./addressParams"
 
@@ -42,6 +44,7 @@ export function serializeTxOutputBasicParams(
         : Buffer.from([])
 
     return Buffer.concat([
+        uint8_to_buf(parseUint8_t(output.type === undefined? TxOutputType.ARRAY_LEGACY : output.type, InvalidDataReason.OUTPUT_INVALID_FORMAT)),
         serializeTxOutputDestination(output.destination, version),
         uint64_to_buf(output.amount),
         uint32_to_buf(output.tokenBundle.length as Uint32_t),
