@@ -23,8 +23,8 @@ import {
     witnessRejectTestcases,
 } from "./__fixtures__/signTxRejects"
 
-// describeSignTxPositiveTest("signTxAlonzo", testsAlonzo)
-describeSignTxPositiveTest("signTxBabbage", testsBabbage)
+describeSignTxPositiveTest("signTxAlonzo", testsAlonzo)
+// describeSignTxPositiveTest("signTxBabbage", testsBabbage)
 // describeSignTxPositiveTest("signTxByron", testsByron)
 // describeSignTxPositiveTest("signTxShelleyNoCertificates", testsShelleyNoCertificates)
 // describeSignTxPositiveTest("signTxShelleyWithCertificates", testsShelleyWithCertificates)

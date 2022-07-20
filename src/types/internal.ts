@@ -1,7 +1,9 @@
+import type {
+    Datum,
+    TxOutputType} from './public'
 import {
     AddressType,
     CertificateType,
-    Datum,
     NativeScriptType,
     PoolKeyType,
     PoolOwnerType,
@@ -10,7 +12,6 @@ import {
     TransactionSigningMode,
     TxAuxiliaryDataType,
     TxOutputDestinationType,
-    TxOutputType,
 } from './public'
 
 // Basic primitives
@@ -357,12 +358,6 @@ export type OutputDestination = {
     addressHex: HexString;
 } | {
     type: TxOutputDestinationType.DEVICE_OWNED;
-    addressParams: ParsedAddressParams;
-} | {
-    type: TxOutputDestinationType.THIRD_PARTY_MAP;
-    addressHex: HexString;
-} | {
-    type: TxOutputDestinationType.DEVICE_OWNED_MAP;
     addressParams: ParsedAddressParams;
 }
 

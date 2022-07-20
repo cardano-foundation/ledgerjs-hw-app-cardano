@@ -229,21 +229,21 @@ function parseTxDestination(
     txtype?: TxOutputType
 ): OutputDestination {
     switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY || TxOutputDestinationType.THIRD_PARTY_MAP: {
+    case TxOutputDestinationType.THIRD_PARTY:{
         const params = destination.params
         const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
         validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
         return {
-            type: txtype !== TxOutputType.MAP_BABBAGE ? TxOutputDestinationType.THIRD_PARTY : TxOutputDestinationType.THIRD_PARTY_MAP,
+            type: TxOutputDestinationType.THIRD_PARTY,
             addressHex,
         }
     }
-    case TxOutputDestinationType.DEVICE_OWNED || TxOutputDestinationType.DEVICE_OWNED_MAP: {
+    case TxOutputDestinationType.DEVICE_OWNED:{
         const params = destination.params
         const addressParams = parseAddress(network, params)
         validate(addressParams.spendingDataSource.type == SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)
         return {
-            type: txtype !== TxOutputType.MAP_BABBAGE ? TxOutputDestinationType.DEVICE_OWNED : TxOutputDestinationType.DEVICE_OWNED_MAP,
+            type: TxOutputDestinationType.DEVICE_OWNED,
             addressParams: addressParams,
         }
     }
@@ -257,14 +257,12 @@ function parseTxDestination(
 function addressAllowsDatum(destination: OutputDestination): boolean {
     let type: AddressType
     switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY :
-    case TxOutputDestinationType.THIRD_PARTY_MAP:{
+    case TxOutputDestinationType.THIRD_PARTY :{
         const addressBytes: Buffer = hex_to_buf(destination.addressHex)
         type = (addressBytes[0] & 0b11110000) >> 4
         break
     }
     case TxOutputDestinationType.DEVICE_OWNED:
-    case TxOutputDestinationType.DEVICE_OWNED_MAP:
         type = destination.addressParams.type
         break
     }
@@ -394,7 +392,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
     case TransactionSigningMode.MULTISIG_TRANSACTION: {
         // only third-party outputs
         validate(
-            tx.outputs.every(output => output.destination.type === (TxOutputDestinationType.THIRD_PARTY || TxOutputDestinationType.THIRD_PARTY_MAP)),
+            tx.outputs.every(output => output.destination.type === TxOutputDestinationType.THIRD_PARTY),
             InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
         )
         // pool registrations have separate signing modes
@@ -447,7 +445,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         )
         // cannot have change output in the tx, all is paid by the pool operator
         validate(
-            tx.outputs.every(out => out.destination.type === (TxOutputDestinationType.THIRD_PARTY || TxOutputDestinationType.THIRD_PARTY_MAP)),
+            tx.outputs.every(out => out.destination.type === TxOutputDestinationType.THIRD_PARTY),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED
         )
 

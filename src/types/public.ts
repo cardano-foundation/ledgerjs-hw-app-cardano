@@ -305,8 +305,8 @@ export type Datum = {
 };
 
 export enum TxOutputType {
-    ARRAY_LEGACY,
-    MAP_BABBAGE,
+    ARRAY_LEGACY = 0 ,
+    MAP_BABBAGE = 1,
 }
 
 /**
@@ -397,10 +397,6 @@ export enum TxOutputDestinationType {
      * @see [[DeviceOwnedAddress]]
      */
     DEVICE_OWNED = 'device_owned',
-
-    THIRD_PARTY_MAP = 'third_party_map',
-
-    DEVICE_OWNED_MAP = 'device_owned_map',
 }
 
 /**
@@ -426,12 +422,6 @@ export type TxOutputDestination = {
     params: ThirdPartyAddressParams;
 } | {
     type: TxOutputDestinationType.DEVICE_OWNED;
-    params: DeviceOwnedAddress;
-} | {
-    type: TxOutputDestinationType.THIRD_PARTY_MAP;
-    params: ThirdPartyAddressParams;
-} | {
-    type: TxOutputDestinationType.DEVICE_OWNED_MAP;
     params: DeviceOwnedAddress;
 }
 

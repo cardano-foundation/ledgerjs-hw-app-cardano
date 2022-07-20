@@ -13,20 +13,16 @@ function serializeTxOutputDestination(
     const typeEncoding = {
         [TxOutputDestinationType.THIRD_PARTY]: 1 as Uint8_t,
         [TxOutputDestinationType.DEVICE_OWNED]: 2 as Uint8_t,
-        [TxOutputDestinationType.THIRD_PARTY_MAP]: 3 as Uint8_t,
-        [TxOutputDestinationType.DEVICE_OWNED_MAP]: 4 as Uint8_t,
     }
 
     switch (destination.type) {
     case TxOutputDestinationType.THIRD_PARTY:
-    case TxOutputDestinationType.THIRD_PARTY_MAP:
         return Buffer.concat([
             uint8_to_buf(typeEncoding[destination.type]),
             uint32_to_buf(destination.addressHex.length / 2 as Uint32_t),
             hex_to_buf(destination.addressHex),
         ])
     case TxOutputDestinationType.DEVICE_OWNED:
-    case TxOutputDestinationType.DEVICE_OWNED_MAP:
         return Buffer.concat([
             uint8_to_buf(typeEncoding[destination.type]),
             serializeAddressParams(destination.addressParams, version),

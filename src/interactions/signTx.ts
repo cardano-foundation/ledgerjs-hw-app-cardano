@@ -38,6 +38,7 @@ import {
 } from "../types/public"
 import {getVersionString} from "../utils"
 import {assert} from "../utils/assert"
+import {parseHexStringOfLength} from "../utils/parse"
 import {buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf} from "../utils/serialize"
 import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
@@ -74,7 +75,6 @@ import {
     serializeTxWitnessRequest,
 } from "./serialization/txOther"
 import {serializeTxOutputBasicParams} from "./serialization/txOutput"
-import {parseHexStringOfLength} from "../utils/parse"
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
 const enum P1 {
@@ -763,7 +763,7 @@ function hasScriptHashInAddressParams(tx: ParsedTransaction) {
         AddressType.REWARD_SCRIPT,
     ]
     return tx.outputs.some(o =>
-        o.destination.type === (TxOutputDestinationType.DEVICE_OWNED || TxOutputDestinationType.DEVICE_OWNED_MAP) &&
+        o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
         scriptAddressTypes.includes(o.destination.addressParams.type)
     )
 }
