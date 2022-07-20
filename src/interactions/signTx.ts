@@ -142,6 +142,7 @@ function* signTx_addOutput(
   const enum P2 {
     BASIC_DATA = 0x30,
     DATUM_HASH = 0x34,
+    DATUM_OPTION = 0x35,
     CONFIRM = 0x33,
   }
 
@@ -167,8 +168,8 @@ function* signTx_addOutput(
       if (output.datum?.type === DatumType.HASH) {
           yield send({
               p1: P1.STAGE_OUTPUTS,
-              p2: P2.DATUM_HASH,
-              data: hex_to_buf(parseHexStringOfLength(output.datum.datumHashHex, DATUM_HASH_LENGTH,InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)),
+              p2: P2.DATUM_OPTION,
+              data: hex_to_buf(parseHexStringOfLength( '00'+ output.datum.datumHashHex, DATUM_HASH_LENGTH+1, InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)),
               expectedResponseLength: 0,
           })
       }

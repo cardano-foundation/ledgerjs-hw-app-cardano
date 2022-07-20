@@ -409,7 +409,7 @@ export const testsBabbage: SignTxTestcase[] = [
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         additionalWitnessPaths: [],
-        txBody: "A400818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A3005839105E2F080EB93BAD86D401545E0CE5F2221096D6477E11E6643922FA8D2ED495234DC0D667C1316FF84E572310E265EDB31330448B36B7179E011A006CA7930282005820FFD4D009F554BA4FD8ED1F1D703244819861A9D34FD4753BCF3FF32F043CE18802182A030A",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a3005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18802182a030a",
         expectedResult: {
             txHashHex: "ebdafe8cac49e39d96a9532c58e3e55713ec3e37897d576fcfdf1f25a70bd0f8",
             witnesses: [
@@ -421,6 +421,7 @@ export const testsBabbage: SignTxTestcase[] = [
             auxiliaryDataSupplement: null,
         },
     },
+    //Legders txbody output:a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a300583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18802182a030a
     // {
     //     testname: "Sign tx with datum hash in output with tokens",
     //     tx: {
@@ -443,4 +444,49 @@ export const testsBabbage: SignTxTestcase[] = [
     //         auxiliaryDataSupplement: null,
     //     },
     // },
+    // {
+    //     testname: "Sign tx with datum hash in output",
+    //     tx: {
+    //         ...mainnetFeeTtl,
+    //         network: Networks.Testnet,
+    //         inputs: [inputs.utxoShelley],
+    //         outputs: [outputs.datumHashExternalMap],
+    //     },
+    //     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    //     additionalWitnessPaths: [],
+    //     txBody: "A400818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A3005839105E2F080EB93BAD86D401545E0CE5F2221096D6477E11E6643922FA8D2ED495234DC0D667C1316FF84E572310E265EDB31330448B36B7179E011A006CA7930282005820FFD4D009F554BA4FD8ED1F1D703244819861A9D34FD4753BCF3FF32F043CE18802182A030A",
+    //     expectedResult: {
+    //         txHashHex: "ebdafe8cac49e39d96a9532c58e3e55713ec3e37897d576fcfdf1f25a70bd0f8",
+    //         witnesses: [
+    //             {
+    //                 path: str_to_path("1852'/1815'/0'/0/0"),
+    //                 witnessSignatureHex: "a528a2574a5fdfff39102c00c8ff73ee295e68d50822b1173751bb6e183b96f4032e2b4e10df405bd9053f27631b69cbf0902e83bdfd5578f1fac0c749599e00",
+    //             },
+    //         ],
+    //         auxiliaryDataSupplement: null,
+    //     },
+    // },
+    // {
+    //     // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+    //     testname: "Sign tx with change output (Plutus) MAP WIth new elements",
+    //     tx: {
+    //         ...mainnetFeeTtl,
+    //         inputs: [inputs.utxoShelley],
+    //         outputs: [outputs.internalBaseWithStakingPathMap],
+    //     },
+    //     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    //     additionalWitnessPaths: [],
+    //     txBody: "A400818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A20058390114C16D7F43243BD81478E68B9DB53A8528FD4FB1078D58D54A7F11241D227AEFA4B773149170885AADBA30AAB3127CC611DDBC4999DEF61C011A006CA79302182A030A",
+    //     expectedResult: {
+    //         txHashHex: "0318d9550a6de08e565a8882891ea7fbbfae1b9c3083e53aa3cf301153044d58",
+    //         witnesses: [
+    //             {
+    //                 path: str_to_path("1852'/1815'/0'/0/0"),
+    //                 witnessSignatureHex: "5a74df477b9a6e8995693994732c5f7a7fb8aad1c240a04358a8e40bc611c24c2ff3df0e64ce5a4022ea3a691d824e483fadaec3b246760ace5511749056890a",
+    //             },
+    //         ],
+    //         auxiliaryDataSupplement: null,
+    //     },
+    // },
+
 ]
