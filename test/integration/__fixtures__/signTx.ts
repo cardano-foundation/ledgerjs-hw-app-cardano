@@ -123,13 +123,13 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         additionalWitnessPaths: [],
-        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a030a",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a",
         expectedResult: {
-            txHashHex: "97e40841b9b494d4c63993c35038484a72e70f0d5356471e9f1e3e311663b67e",
+            txHashHex: "5268bdedcdbd3e2bad037cd292b3832ff2c77c8c628c37485da2dd930f5fc32a",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "5137e748df308525b46deaef18e61e04994f6658c32ada286b06d32b99d6676aef94f36895a51b9025d94b2ab0776749eedc7451ac1f0e61bef8b9cf5ec0240e",
+                    witnessSignatureHex: "ef73b0838e831dc86278e450ef36fecf4b7ad712dabb901f0d8470b6046ced8246cd086a15ad4c723c0cf01b685d8113e72a01511a5ceba374ebb8f4417afd0a",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -568,13 +568,13 @@ export const testsMultisig: SignTxTestcase[] = [
         },
         signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
         additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0")],
-        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583d105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e28dd419e0102182a030a",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e0102182a030a",
         expectedResult: {
-            txHashHex: "23d82edc8fbd2d55237cba955a2280161ebd5643b23844e9b5abdc843b966e62",
+            txHashHex: "1e994755bafebf435f91e34655ba6a66ee92de64529dc811dce7001d92b0a44a",
             witnesses: [
                 {
                     path: str_to_path("1854'/1815'/0'/0/0"),
-                    witnessSignatureHex: "38472a39eead64017e449be5affcf4bf5e20260a92004d6ea2a6eac5dab9fcaf274031f4988df4a6e5f88b9194db05e24b5f3fa0d26bbf308cd2111505260603",
+                    witnessSignatureHex: "9c06b237c35be528a3f550e469e38c32c29a58417d489d8d4f1276a2111b2f6feca9b84d658f5e51ee7921512fe935e11defc7a1ff6152f76ea590baca04f307",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -714,13 +714,13 @@ export const testsAllegra: SignTxTestcase[] = [
             validityIntervalStart: null,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a300818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a",
+        txBody: "a300818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a",
         expectedResult: {
-            txHashHex: "971dc8ccbc34fde78028b9642352ac84b6c8867cfd72ca9bc92d68203d7ed86f",
+            txHashHex: "cbb6ee600297d0b5067b1e79cf1dc6361de4e5e731eacc57c42765944381ff18",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "6dc4da7a0bee07e4ecc687b0d1b9e73d772dfb6a09b2bf435fe1e3d481ed8214f8d751ceff0e9fa41ef0ad7318ea9ca561c9b773e5673adb8049569c380f5301",
+                    witnessSignatureHex: "4f6e3a61b48921fa0c3f67856fc955e754d16d210f0725ff31d959c53f830ddef354663040bc0bc4306127c3549f0c5339cc5a604512090a4fe26ebadc80550f",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -737,13 +737,13 @@ export const testsAllegra: SignTxTestcase[] = [
             validityIntervalStart: 47,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f34611140102182a08182f",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a08182f",
         expectedResult: {
-            txHashHex: "bfe53d40c5eb0cd04b53d555b85be4474168adbc1d8f82cf5c9792854234cf70",
+            txHashHex: "9fbc15167cfdf408998b0348ff6e69e63f404d1f0acf65763a057003f8a3a93b",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "b1bc7a4b110523f8b0a1a3aa0ae0f45a718faf7beb648a021d0d777755ab214ba1b079d79d8517a275ebb74c79aa244600f0877c611ca00383d67fc447074003",
+                    witnessSignatureHex: "e245b89938ad182361d696dafb0644b6b93bcfa3e631716afb5f73b6b6d6852c9313d7fd34a4a404e4b345b64d9b29ddef406197911106593000cd2fd18b900f",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -826,13 +826,13 @@ export const testsMary: SignTxTestcase[] = [
             outputs: [outputs.externalShelleyBaseKeyhashKeyhash, outputs.multiassetChange],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825841017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09da61d425f3461114018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09018258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1a0078386202182a030a",
         expectedResult: {
-            txHashHex: "23bd1070aa86ef2aeb988089bccd839649580ae8d4f451bd395627e1675194e4",
+            txHashHex: "005b324472b13e181f72a9c5eb1f05351a22b103ce35517768bab1d3bfe4a114",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "16e78cec61bf6d6b37ad3a4b80fce55b92daf180c42505a5999aa5ec92e369acf88b4b0777ef8c059ae97791d7c2a04aac15d820c845644994258d774042720c",
+                    witnessSignatureHex: "7d437d698a9a8f06f1e0ced7378c22b864b4a3dd8bba575e5cc497f55fcee984724549a34cb6e5ea11acf4749544ddabf2118c0545c668c5f75251a6be443905",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -870,7 +870,7 @@ export const testsMary: SignTxTestcase[] = [
             fee: 33,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a09a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249503a0034bf14581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2",
+        txBody: "a300818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249501a0034bf15581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2021821",
         expectedResult: {
             txHashHex: "a36c270c8ee52c8f5b9cc47ccad0869ad72f00dd1ac1510b682752e09738a27f",
             "witnesses": [
@@ -925,9 +925,9 @@ export const testsMary: SignTxTestcase[] = [
             mint: mints.mintWithDecimalPlaces,
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a09a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249503a0034bf14581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2",
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182109a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249503a0034bf14581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2",
         expectedResult: {
-            txHashHex: "f15863b8ade43da43d14cc2d519982fa3402d4024de272b2d16111cfa99985bc",
+            txHashHex: "a96b68158758496044fbf91d7abaaa59e1cc426315c4fc2a1c4fa2c5db432807",
             "witnesses": [
                 {
                     "path": [
@@ -937,7 +937,7 @@ export const testsMary: SignTxTestcase[] = [
                         0,
                         0,
                     ],
-                    "witnessSignatureHex": "906fc532008b75ad6f77db60ef4c661983a6310527a0f44203f7e476480395a8d415ccd764051d31bcfae1db50288d7559caf2977c4126113e9be5f9b7c63a02",
+                    "witnessSignatureHex": "11b9ed90e2923c01869627ed5bc49ea66874fbef2418a2184437e19a30738a8bb52d7569113984617d73144e304be5cf84a30c21bd8b1c4cfe93cc434ed3db04",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -995,7 +995,7 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
             },
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec926081807",
+        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec9260807",
         txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a10158400ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af240630eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e80",
         expectedResult: {
             txHashHex: "9941060a76f5702e72b43c382f77b143ed0e328ac3977a0791f08a5f0e0149cd",
@@ -1029,7 +1029,7 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
             },
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb081807",
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb",
         txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a10158401514b6bbc582b33edcf5fa30ec04dcaa62128de8755c786768ae5922132c2aa50b9ba17be28072de979f45b0f429c7f5d489c549a1e22bc8e7d0b2445c10360980",
         expectedResult: {
             txHashHex: "90ab18ad3a25cb9f48470cb16a51e1fe04181b96f639d939c51ca81ab4c0fa23",
