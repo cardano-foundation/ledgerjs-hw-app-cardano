@@ -188,6 +188,11 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? false
         : parseBoolean(tx.includeNetworkId, InvalidDataReason.NETWORK_ID_INCLUDE_INVALID)
 
+    //total collateral
+    const totalCollateral = tx.totalCollateral == null
+        ? null
+        : parseUint64_str(tx.totalCollateral, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.TOTAL_COLLATERAL_NOT_VALID)
+
     return {
         network,
         inputs,
@@ -203,6 +208,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         collaterals,
         requiredSigners,
         includeNetworkId,
+        totalCollateral,
     }
 }
 

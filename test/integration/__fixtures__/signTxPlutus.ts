@@ -443,4 +443,27 @@ export const testsBabbage: SignTxTestcase[] = [
             auxiliaryDataSupplement: null,
         },
     },
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) and Total collateral MAP",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+            totalCollateral: 10,
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a110a",
+        expectedResult: {
+            txHashHex: "54b8acbf5c3d28c68d37e3c3b639a7c1f808663f5a9868f786db49e7c12d25f3",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "79f0ea0a193158b7b85058ba09291f3b733a09df8cc99a83ac1998623d53a45cb34ec6599fae27acffea866ab8b466bd19d354b2b709a5168e5552a74c4fc90e",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
 ]

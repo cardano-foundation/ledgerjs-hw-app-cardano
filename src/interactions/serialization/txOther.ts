@@ -101,3 +101,11 @@ export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner) {
         ])
     }
 }
+
+export function serializeTotalCollateral(
+    totalCollateral: Uint64_str
+) {
+    return Buffer.concat([
+        uint64_to_buf(totalCollateral),
+    ])
+}

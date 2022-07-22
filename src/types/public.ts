@@ -1167,7 +1167,7 @@ export type Transaction = {
     /**
      * Total collateral (in Lovelace).
      */
-    totalCollateral?: bigint_like;
+    totalCollateral?: bigint_like | null;
     /**
      * Reference inputs (UTxOs). Visible to Plutus scripts, but not spent.
      */

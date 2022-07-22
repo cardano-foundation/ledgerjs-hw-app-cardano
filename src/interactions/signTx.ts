@@ -66,7 +66,7 @@ import {
     serializeAssetGroup,
     serializeMintBasicParams,
     serializeRequiredSigner,
-    serializeToken,
+    serializeToken, serializeTotalCollateral,
     serializeTxFee,
     serializeTxInput,
     serializeTxTtl,
@@ -91,6 +91,7 @@ const enum P1 {
   STAGE_SCRIPT_DATA_HASH = 0x0c,
   STAGE_COLLATERALS = 0x0d,
   STAGE_REQUIRED_SIGNERS = 0x0e,
+  STAGE_TOTAL_COLLATERAL = 0x10,
   STAGE_CONFIRM = 0x0a,
   STAGE_WITNESSES = 0x0f,
 }
@@ -608,6 +609,20 @@ function* signTx_addRequiredSigner(
   })
 }
 
+function* signTx_addTotalCollateral(
+    totalCollateral: Uint64_str
+): Interaction<void> {
+    const enum P2 {
+        UNUSED = 0x00,
+    }
+    yield send({
+        p1: P1.STAGE_TOTAL_COLLATERAL,
+        p2: P2.UNUSED,
+        data: serializeTotalCollateral(totalCollateral),
+        expectedResponseLength: 0,
+    })
+}
+
 function* signTx_awaitConfirm(
 ): Interaction<{ txHashHex: string }> {
   const enum P2 {
@@ -949,6 +964,11 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     // required signers
     for (const input of tx.requiredSigners) {
         yield* signTx_addRequiredSigner(input)
+    }
+
+    // totalCollateral
+    if (tx.totalCollateral != null) {
+        yield* signTx_addTotalCollateral(tx.totalCollateral)
     }
 
     // confirm

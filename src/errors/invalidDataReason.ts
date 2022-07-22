@@ -144,6 +144,8 @@ export enum InvalidDataReason {
   UNKNOWN_REQUIRED_SIGNER_TYPE = "unknown required signer type",
   REQUIRED_SIGNER_INVALID_PATH = "invalid path for required signer",
 
+  TOTAL_COLLATERAL_NOT_VALID = "total collateral not valid",
+
   SIGN_MODE_UNKNOWN = "unknown signing mode",
 
   SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED =
