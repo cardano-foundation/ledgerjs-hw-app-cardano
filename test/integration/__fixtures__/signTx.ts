@@ -1143,4 +1143,199 @@ export const testsAlonzoTrezorComparison: SignTxTestcase[] = [
             auxiliaryDataSupplement: null,
         },
     },
+    {
+        testname: "Full test for trezor feature parity Babbage new elements",
+        tx: {
+            // "protocol_magic": 764824073,
+            // "network_id": 1,
+            // if Networks.Mainnet differs, the test should just explicitly give these
+            network: Networks.Mainnet,
+            inputs: [inputs.utxoMultisig],
+            outputs: [outputs.trezorParityBabbage, outputs.trezorParityDatumHashBabbage],
+            fee: 42,
+            ttl: 10,
+            validityIntervalStart: 47,
+            certificates: [
+                {
+                    type: CertificateType.STAKE_REGISTRATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.SCRIPT_HASH,
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        },
+                    },
+                },
+                {
+                    type: CertificateType.STAKE_DEREGISTRATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.SCRIPT_HASH,
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        },
+                    },
+                },
+                {
+                    type: CertificateType.STAKE_DELEGATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.SCRIPT_HASH,
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        },
+                        poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
+                    },
+                },
+            ],
+            withdrawals: [
+                {
+                    stakeCredential: {
+                        type: StakeCredentialParamsType.SCRIPT_HASH,
+                        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                    },
+                    amount: 1000,
+                },
+            ],
+            mint: [
+                {
+                    policyIdHex: "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                    tokens: [
+                        {
+                            assetNameHex: "74657374436f696e",
+                            amount: 7878754,
+                        },
+                        {
+                            assetNameHex: "75657374436f696e",
+                            amount: -7878754,
+                        },
+                    ],
+                },
+            ],
+            auxiliaryData: {
+                type: TxAuxiliaryDataType.ARBITRARY_HASH,
+                params: {
+                    hashHex: "58ec01578fcdfdc376f09631a7b2adc608eaf57e3720484c7ff37c13cff90fdf",
+                },
+            },
+            scriptDataHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralInputs: [inputs.utxoByron],
+            includeNetworkId: true,
+            collateralOutput: outputs.externalByronMainnet,
+            totalCollateral: 10,
+            referenceInputs: [inputs.utxoByron],
+
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0"), str_to_path("1854'/1815'/0'/2/0")],
+        txBody: "af00818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a200583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff01821a001e8480a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a00783862a300581d71477e52b3116b62fe8cd34a312615f5fcd678c94e1d6cdb86c1a3964c010102820058203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702182a030a048382008201581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd82018201581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd83028201581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb497305a1581df129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd1903e807582058ec01578fcdfdc376f09631a7b2adc608eaf57e3720484c7ff37c13cff90fdf08182f09a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a24874657374436f696e1a007838624875657374436f696e3a007838610b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70d818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc000f011082582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e8110a12818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc00",
+        expectedResult: {
+            txHashHex: "90f97464c6e2d1f7f4b18c588fd3587f7d17ae1f1745739cb8b1419e5a814def",
+            witnesses: [
+                {
+                    path: str_to_path("44'/1815'/0'/0/0"),
+                    witnessSignatureHex: "f58fa4d613b47e9812ff57ad8379ce029a33361a023d1fd46b085706354013a04909a8a8b5d52e0570d86ec91b80e357558b320a6fd8afe794f222f48bbd310d",
+                },
+                {
+                    path: str_to_path("1854'/1815'/0'/0/0"),
+                    witnessSignatureHex: "913de4a3293b3cc0e3e9e06acbe1ed2485105f78476abbba0f69136da30fc7971ddd1fb485c681f266d181d26728c5885fb002fed294fb20a6e05e440177bd0f",
+                },
+                {
+                    path: str_to_path("1854'/1815'/0'/2/0"),
+                    witnessSignatureHex: "f64ce23e5c467775b64ffd7f18a2fda1dab92ddf2b6266d809bd014fd35f15a87d8451da7fd439b10ec763f9a2b120e520cc52abe0a92aa8295684f0b4c9f50d",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Full test for trezor feature parity Babbage inline datum and script reference",
+        tx: {
+            // "protocol_magic": 764824073,
+            // "network_id": 1,
+            // if Networks.Mainnet differs, the test should just explicitly give these
+            network: Networks.Mainnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.trezorParityBabbageOutputs],
+            fee: 42,
+            ttl: 10,
+            validityIntervalStart: 47,
+            certificates: [
+                {
+                    type: CertificateType.STAKE_REGISTRATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.SCRIPT_HASH,
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        },
+                    },
+                },
+                {
+                    type: CertificateType.STAKE_DEREGISTRATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.SCRIPT_HASH,
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        },
+                    },
+                },
+                {
+                    type: CertificateType.STAKE_DELEGATION,
+                    params: {
+                        stakeCredential: {
+                            type: StakeCredentialParamsType.SCRIPT_HASH,
+                            scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                        },
+                        poolKeyHashHex: "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
+                    },
+                },
+            ],
+            withdrawals: [
+                {
+                    stakeCredential: {
+                        type: StakeCredentialParamsType.SCRIPT_HASH,
+                        scriptHashHex: "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                    },
+                    amount: 1000,
+                },
+            ],
+            mint: [
+                {
+                    policyIdHex: "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                    tokens: [
+                        {
+                            assetNameHex: "74657374436f696e",
+                            amount: 7878754,
+                        },
+                        {
+                            assetNameHex: "75657374436f696e",
+                            amount: -7878754,
+                        },
+                    ],
+                },
+            ],
+            auxiliaryData: {
+                type: TxAuxiliaryDataType.ARBITRARY_HASH,
+                params: {
+                    hashHex: "58ec01578fcdfdc376f09631a7b2adc608eaf57e3720484c7ff37c13cff90fdf",
+                },
+            },
+            scriptDataHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            includeNetworkId: true,
+        },
+        signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
+        additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0"), str_to_path("1854'/1815'/0'/2/0")],
+        txBody: "ab00818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a400581d71477e52b3116b62fe8cd34a312615f5fcd678c94e1d6cdb86c1a3964c0101028201565579657420616e6f746865722063686f636f6c6174650358390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427702182a030a048382008201581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd82018201581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd83028201581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb497305a1581df129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd1903e807582058ec01578fcdfdc376f09631a7b2adc608eaf57e3720484c7ff37c13cff90fdf08182f09a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a24874657374436f696e1a007838624875657374436f696e3a007838610b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70f01",
+        expectedResult: {
+            txHashHex: "fbd87f405111e364b06a8316f9d98c87dcac73a83a25ffdd73ac3ed52e6f8942",
+            witnesses: [
+                {
+                    path: str_to_path("1854'/1815'/0'/0/0"),
+                    witnessSignatureHex: "3a7b4554e70faf6a5b15d808a1a4a91102fd3cb98678e2981181999e4adb652fc83c114fb9dbdacf623d69b703d898bd123729b3a8a12ea037cecaa8b2f73a08",
+                },
+                {
+                    path: str_to_path("1854'/1815'/0'/2/0"),
+                    witnessSignatureHex: "c4f135e83fe7c590f63d731fce1d4c01b0bb4cd1beb5ac798885d1d28511e3316910f4b128f9179dd3f0beffb8f39cbcfece53d456e2ec4acae5d0485f230803",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
 ]

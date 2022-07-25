@@ -346,7 +346,10 @@ export const outputs: Record<
   | 'multiassetInvalidTokenOrderingDifferentLengths'
   | 'multiassetTokensNotUnique'
   | 'trezorParity'
+  | 'trezorParityBabbage'
   | 'trezorParityDatumHash'
+  | 'trezorParityDatumHashBabbage'
+  | 'trezorParityBabbageOutputs'
   | 'datumHashInternal'
   | 'datumHashExternal'
   | 'datumHashWithTokens'
@@ -733,6 +736,22 @@ export const outputs: Record<
             },
         ],
     },
+    trezorParityBabbage: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.multiassetThirdParty,
+        amount: 2000000,
+        tokenBundle: [
+            {
+                policyIdHex: "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                tokens: [
+                    {
+                        assetNameHex: "74657374436f696e",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+    },
     trezorParityDatumHash: {
         destination: {
             type: TxOutputDestinationType.THIRD_PARTY,
@@ -744,6 +763,39 @@ export const outputs: Record<
         },
         amount: 1,
         datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+    },
+    trezorParityDatumHashBabbage: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: {
+            type: TxOutputDestinationType.THIRD_PARTY,
+            params: {
+                addressHex: bech32_to_hex(
+                    "addr1w9rhu54nz94k9l5v6d9rzfs47h7dv7xffcwkekuxcx3evnqpvuxu0"
+                ),
+            },
+        },
+        amount: 1,
+        datum:{
+            type: DatumType.HASH,
+            datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+        } ,
+    },
+    trezorParityBabbageOutputs: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: {
+            type: TxOutputDestinationType.THIRD_PARTY,
+            params: {
+                addressHex: bech32_to_hex(
+                    "addr1w9rhu54nz94k9l5v6d9rzfs47h7dv7xffcwkekuxcx3evnqpvuxu0"
+                ),
+            },
+        },
+        amount: 1,
+        datum:{
+            type: DatumType.INLINE,
+            datumHex: "5579657420616e6f746865722063686f636f6c617465",
+        } ,
+        scriptHex: "0080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
     },
     datumHashInternal: {
         destination: destinations.internalBaseWithStakingScript,
