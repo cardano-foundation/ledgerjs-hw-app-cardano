@@ -1,8 +1,7 @@
-import {TxOutputType} from "../../../dist/types/public"
-import type { AssetGroup, TxInput, TxOutput, TxOutputDestination} from "../../../src/types/public"
-import {AddressType, DatumType, TxOutputDestinationType} from "../../../src/types/public"
-import utils, { str_to_path } from "../../../src/utils"
-import { bech32_to_hex, Networks } from "../../test_utils"
+import type {AssetGroup, TxInput, TxOutput, TxOutputDestination} from "../../../src/types/public"
+import {AddressType, DatumType, TxOutputDestinationType, TxOutputType} from "../../../src/types/public"
+import utils, {str_to_path} from "../../../src/utils"
+import {bech32_to_hex, Networks} from "../../test_utils"
 
 export const inputs: Record<
   | 'utxoByron'
@@ -330,11 +329,14 @@ export const outputs: Record<
   | 'externalShelleyBaseScripthashKeyhash'
   | 'internalBaseWithStakingKeyHash'
   | 'internalBaseWithStakingPath'
+  | 'internalBaseWithStakingPathBabbage'
   | 'internalBaseWithStakingPathNonReasonable'
   | 'internalEnterprise'
   | 'internalPointer'
   | 'multiassetOneToken'
   | 'multiassetManyTokens'
+  | 'multiassetManyTokensBabbage'
+  | 'multiassetManyTokensInlineDatumBabbage'
   | 'multiassetDecimalPlaces'
   | 'multiassetChange'
   | 'multiassetBigNumber'
@@ -354,6 +356,8 @@ export const outputs: Record<
   | 'internalBaseWithStakingPathMap'
   | 'datumHashExternalMap'
   | 'datumHashWithTokensMap'
+  | 'inlineDatumWithTokensMap'
+  | 'inlineDatumLongerWithTokensMap'
   , TxOutput
 > = {
     externalByronMainnet: {
@@ -381,6 +385,11 @@ export const outputs: Record<
         destination: destinations.internalBaseWithStakingKeyHash,
     },
     internalBaseWithStakingPath: {
+        destination: destinations.internalBaseWithStakingPath,
+        amount: 7120787,
+    },
+    internalBaseWithStakingPathBabbage: {
+        type: TxOutputType.MAP_BABBAGE,
         destination: destinations.internalBaseWithStakingPath,
         amount: 7120787,
     },
@@ -450,6 +459,92 @@ export const outputs: Record<
                 ],
             },
         ],
+    },
+    multiassetManyTokensBabbage: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.multiassetThirdParty,
+        amount: "1234",
+        tokenBundle: [
+            {
+                // fingerprints taken from CIP 14 draft
+                policyIdHex: "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373",
+                tokens: [
+                    {
+                        // fingerprint: asset1rjklcrnsdzqp65wjgrg55sy9723kw09mlgvlc3
+                        assetNameHex: "",
+                        amount: "3",
+                    },
+                    {
+                        // fingerprint: asset17jd78wukhtrnmjh3fngzasxm8rck0l2r4hhyyt
+                        assetNameHex: "1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209",
+                        amount: "1",
+                    },
+                    {
+                        // fingerprint: asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w
+                        assetNameHex: "0000000000000000000000000000000000000000000000000000000000000000",
+                        amount: "2",
+                    },
+                ],
+            },
+            {
+                policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "456c204e69c3b16f",
+                        amount: "1234",
+                    },
+                    {
+                        assetNameHex: "74652474436f696e",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+    },
+    multiassetManyTokensInlineDatumBabbage: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.multiassetThirdParty,
+        amount: "1234",
+        tokenBundle: [
+            {
+                // fingerprints taken from CIP 14 draft
+                policyIdHex: "7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373",
+                tokens: [
+                    {
+                        // fingerprint: asset1rjklcrnsdzqp65wjgrg55sy9723kw09mlgvlc3
+                        assetNameHex: "",
+                        amount: "3",
+                    },
+                    {
+                        // fingerprint: asset17jd78wukhtrnmjh3fngzasxm8rck0l2r4hhyyt
+                        assetNameHex: "1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209",
+                        amount: "1",
+                    },
+                    {
+                        // fingerprint: asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w
+                        assetNameHex: "0000000000000000000000000000000000000000000000000000000000000000",
+                        amount: "2",
+                    },
+                ],
+            },
+            {
+                policyIdHex: "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "456c204e69c3b16f",
+                        amount: "1234",
+                    },
+                    {
+                        assetNameHex: "74652474436f696e",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+        datum: {
+            type:DatumType.INLINE,
+            datumHex: "5579657420616e6f746865722063686f636f6c617465",
+        },
     },
     multiassetDecimalPlaces: {
         destination: destinations.multiassetThirdParty,
@@ -739,6 +834,56 @@ export const outputs: Record<
         datum: {
             type:DatumType.HASH,
             datumHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+
+        },
+    },
+    inlineDatumWithTokensMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                    {
+                        assetNameHex: "7564247542686912",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+        datum: {
+            type: DatumType.INLINE,
+            datumHex: "5579657420616e6f746865722063686f636f6c617465",
+
+        },
+    },
+    inlineDatumLongerWithTokensMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                    {
+                        assetNameHex: "7564247542686912",
+                        amount: "7878754",
+                    },
+                ],
+            },
+        ],
+        datum: {
+            type: DatumType.INLINE,
+            datumHex: "5579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c617465",
 
         },
     },

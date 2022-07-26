@@ -514,4 +514,68 @@ export const testsBabbage: SignTxTestcase[] = [
             auxiliaryDataSupplement: null,
         },
     },
+    //Multiasset TODO maybe move somewhere else, not a plutus test
+    {
+        testname: "Sign tx with a complex multiasset output Babbage",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.multiassetManyTokensBabbage, outputs.internalBaseWithStakingPathBabbage],
+            validityIntervalStart: 7,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a200583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff01821904d2a2581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a34003581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209015820000000000000000000000000000000000000000000000000000000000000000002581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a248456c204e69c3b16f1904d24874652474436f696e1a00783862a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a0807",
+        expectedResult: {
+            txHashHex: "c0f070b69c71a042622bb2187c400087be2ad0c1587c528834adea0308155169",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "6d31e18be58b2f5c8a2ea10e83d370418b51ef29e3f142f6605f3918d09fd78b5b520eb03332465d6304617b1a037cd4606e11f8ce4824038507d68bea5c6f02",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with inline datum in output with tokens in Babbage format",
+        tx: {
+            ...mainnetFeeTtl,
+            network: Networks.Testnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.inlineDatumWithTokensMap],
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a3005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e01821a006ca793a1581c75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a2487564247542686911182f4875642475426869121a00783862028201565579657420616e6f746865722063686f636f6c61746502182a030a\n",
+        expectedResult: {
+            txHashHex: "8f7d9439b875c6059c0903a52179f890f263320f3061907d9016920a0f80542e",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "c8a3ff359e5886fab3314133f738f2838d7e1f885632d3328d5c4f7671007c2cd16aab3ee4eec6d4f40d8cbf77ff1b9b395aaae845dfb1fb9c2e437cc000b405",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with long inline datum in output with tokens in Babbage format",
+        tx: {
+            ...mainnetFeeTtl,
+            network: Networks.Testnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.inlineDatumLongerWithTokensMap],
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a200583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff01821904d2a2581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a34003581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209015820000000000000000000000000000000000000000000000000000000000000000002581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a248456c204e69c3b16f1904d24874652474436f696e1a00783862a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a0807",
+        expectedResult: {
+            txHashHex: "c0f070b69c71a042622bb2187c400087be2ad0c1587c528834adea0308155169",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "6d31e18be58b2f5c8a2ea10e83d370418b51ef29e3f142f6605f3918d09fd78b5b520eb03332465d6304617b1a037cd4606e11f8ce4824038507d68bea5c6f02",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
 ]

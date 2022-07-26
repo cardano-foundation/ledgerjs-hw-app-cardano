@@ -1,4 +1,4 @@
-import {DeviceVersionUnsupported, InvalidDataReason} from "../errors"
+import {DeviceVersionUnsupported} from "../errors"
 import type {
     Int64_str,
     ParsedAssetGroup,
@@ -18,7 +18,6 @@ import type {
 import {
     AUXILIARY_DATA_HASH_LENGTH,
     CertificateType,
-    DATUM_HASH_LENGTH,
     ED25519_SIGNATURE_LENGTH,
     PoolOwnerType,
     RequiredSignerType,
@@ -28,7 +27,6 @@ import {
 import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
 import {
     AddressType,
-    DatumType,
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -38,7 +36,6 @@ import {
 } from "../types/public"
 import {getVersionString} from "../utils"
 import {assert} from "../utils/assert"
-import {parseHexStringOfLength} from "../utils/parse"
 import {buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf} from "../utils/serialize"
 import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
@@ -75,7 +72,7 @@ import {
     serializeTxWithdrawal,
     serializeTxWitnessRequest,
 } from "./serialization/txOther"
-import {serializeTxOutputBasicParams} from "./serialization/txOutput"
+import {serializeTxOutputBasicParams, serializeTxOutputDatum} from "./serialization/txOutput"
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
 const enum P1 {
@@ -144,8 +141,8 @@ function* signTx_addOutput(
 ): Interaction<void> {
   const enum P2 {
     BASIC_DATA = 0x30,
-    DATUM_HASH = 0x34,
-    DATUM_OPTION = 0x35,
+    DATUM_OPTION = 0x34,
+    DATUM_CHUNK= 0x35,
     CONFIRM = 0x33,
   }
 
@@ -158,25 +155,17 @@ function* signTx_addOutput(
   })
 
   yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
-  if (output.type !== TxOutputType.MAP_BABBAGE) {
-      if (output.datumHashHex != null) {
-          yield send({
-              p1: P1.STAGE_OUTPUTS,
-              p2: P2.DATUM_HASH,
-              data: hex_to_buf(output.datumHashHex),
-              expectedResponseLength: 0,
-          })
-      }
-  } else {
-      if (output.datum?.type === DatumType.HASH) {
-          yield send({
-              p1: P1.STAGE_OUTPUTS,
-              p2: P2.DATUM_OPTION,
-              data: hex_to_buf(parseHexStringOfLength( '00'+ output.datum.datumHashHex, DATUM_HASH_LENGTH+1, InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)),
-              expectedResponseLength: 0,
-          })
-      }
+
+  if ((output.type !== TxOutputType.MAP_BABBAGE && output.datumHashHex)
+      || (output.type === TxOutputType.MAP_BABBAGE && output.datum)) {
+      yield send({
+          p1: P1.STAGE_OUTPUTS,
+          p2: P2.DATUM_OPTION,
+          data: serializeTxOutputDatum(output, version),
+          expectedResponseLength: 0,
+      })
   }
+
 
   yield send({
       p1: P1.STAGE_OUTPUTS,
