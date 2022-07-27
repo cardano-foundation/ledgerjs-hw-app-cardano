@@ -156,6 +156,8 @@ export enum InvalidDataReason {
   "withdrawal must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED =
   "collaterals not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED =
+  "reference inputs not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
 
   SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED =
   "pool registration is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
@@ -169,6 +171,8 @@ export enum InvalidDataReason {
   "withdrawal must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED =
   "collaterals not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED =
+  "reference inputs not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
 
   SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
@@ -192,6 +196,8 @@ export enum InvalidDataReason {
   "third party pool key is required in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED =
   "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__REFERENCE_INPUTS_NOT_ALLOWED =
+  "reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
 
   SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED =
   "single pool registration certificate is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
@@ -211,6 +217,8 @@ export enum InvalidDataReason {
   "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED =
   "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED =
+  "reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
 
   SIGN_MODE_PLUTUS__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",

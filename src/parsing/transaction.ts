@@ -193,6 +193,11 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseUint64_str(tx.totalCollateral, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.TOTAL_COLLATERAL_NOT_VALID)
 
+    //reference Inputs
+    const referenceInputs = tx.referenceInputs == undefined
+        ? []
+        : tx.referenceInputs.map(inp => parseTxInput(inp))
+
     return {
         network,
         inputs,
@@ -209,6 +214,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         requiredSigners,
         includeNetworkId,
         totalCollateral,
+        referenceInputs,
     }
 }
 
@@ -232,7 +238,6 @@ function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
 function parseTxDestination(
     network: Network,
     destination: TxOutputDestination,
-    txtype?: TxOutputType
 ): OutputDestination {
     switch (destination.type) {
     case TxOutputDestinationType.THIRD_PARTY:{
@@ -287,13 +292,15 @@ function parseTxOutput(
     output: TxOutput,
     network: Network,
 ): ParsedOutput {
-    const type = output.type
+    const type = output.type === TxOutputType.MAP_BABBAGE 
+        ? TxOutputType.MAP_BABBAGE
+        : TxOutputType.ARRAY_LEGACY
 
     const amount = parseUint64_str(output.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
 
     const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
 
-    const destination = parseTxDestination(network, output.destination, output.type)
+    const destination = parseTxDestination(network, output.destination)
 
     if (output.type !== TxOutputType.MAP_BABBAGE) {
         const datumHashHex = output.datumHashHex == null ? null
@@ -392,6 +399,12 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED
         )
 
+        // cannot have reference input in the tx
+        validate(
+            tx.referenceInputs.length === 0,
+            InvalidDataReason.SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED
+        )
+
         break
     }
 
@@ -434,6 +447,12 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         validate(
             tx.collaterals.length === 0,
             InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED
+        )
+
+        // cannot have reference input in the tx
+        validate(
+            tx.referenceInputs.length === 0,
+            InvalidDataReason.SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED
         )
 
         break
@@ -511,6 +530,13 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED
         )
 
+        // cannot have reference input in the tx
+        validate(
+            tx.referenceInputs.length === 0,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_INPUTS_NOT_ALLOWED
+        )
+
+
         break
     }
 
@@ -575,6 +601,11 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED
         )
 
+        // cannot have reference input in the tx
+        validate(
+            tx.referenceInputs.length === 0,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED
+        )
         break
     }
 

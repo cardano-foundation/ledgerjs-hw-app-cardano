@@ -407,6 +407,65 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED,
     },
+
+    // reference inputs included
+    {
+        testname: "Ordinary tx - reference inputs included",
+        tx: {
+            ...shelleyBase,
+            referenceInputs: [inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED,
+    },
+    {
+        testname: "Multisig tx - reference inputs included",
+        tx: {
+            ...shelleyBase,
+            referenceInputs: [inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool registration (operator) - reference inputs included",
+        tx: {
+            ...shelleyBase,
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: poolRegParamOperator,
+                },
+            ],
+            referenceInputs: [inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool registration (owner) - reference inputs included",
+        tx: {
+            ...shelleyBase,
+            inputs: [inputs.utxoMultisig],
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: poolRegParamOwner,
+                },
+            ],
+            referenceInputs: [inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_INPUTS_NOT_ALLOWED,
+    },
 ]
 
 export const addressBytesRejectTestcases: TestcaseRejectShelley[] = [

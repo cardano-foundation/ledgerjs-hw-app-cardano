@@ -140,6 +140,7 @@ export type ParsedTransaction = {
     requiredSigners: ParsedRequiredSigner[];
     includeNetworkId: boolean;
     totalCollateral: Uint64_str | null;
+    referenceInputs: ParsedInput[];
 }
 
 export type ParsedSigningRequest = {
@@ -367,7 +368,7 @@ export type DatumHash = FixlenHexString<typeof DATUM_HASH_LENGTH>
 export type ParsedOutput = ParsedOutputAlonzoArray | ParsedOutputBabbageMap;
 
 export type ParsedOutputAlonzoArray = {
-    type?: TxOutputType.ARRAY_LEGACY;
+    type: TxOutputType.ARRAY_LEGACY;
     amount: Uint64_str;
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
     destination: OutputDestination;

@@ -355,7 +355,7 @@ export const testsAlonzo: SignTxTestcase[] = [
 
 export const testsBabbage: SignTxTestcase[] = [
     {
-        testname: "Sign tx with script data hash ",
+        testname: "Sign tx with script data hash",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -379,7 +379,7 @@ export const testsBabbage: SignTxTestcase[] = [
     },
     {
         // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-        testname: "Sign tx with change output (Plutus) MAP",
+        testname: "Sign tx with change output (Plutus) Babbage format",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -422,7 +422,7 @@ export const testsBabbage: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with datum hash in output with tokens Babbage format",
+        testname: "Sign tx with datum hash in output with tokens in Babbage format",
         tx: {
             ...mainnetFeeTtl,
             network: Networks.Testnet,
@@ -445,7 +445,7 @@ export const testsBabbage: SignTxTestcase[] = [
     },
     {
         // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-        testname: "Sign tx with change output (Plutus) and Total collateral MAP",
+        testname: "Sign tx with change output (Plutus) in Babbage format and Total Collateral",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -461,6 +461,54 @@ export const testsBabbage: SignTxTestcase[] = [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
                     witnessSignatureHex: "79f0ea0a193158b7b85058ba09291f3b733a09df8cc99a83ac1998623d53a45cb34ec6599fae27acffea866ab8b466bd19d354b2b709a5168e5552a74c4fc90e",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) in Babbage format and Reference Input",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+            collaterals: [inputs.utxoShelley],
+            referenceInputs: [inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "A600818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7000181A20058390114C16D7F43243BD81478E68B9DB53A8528FD4FB1078D58D54A7F11241D227AEFA4B773149170885AADBA30AAB3127CC611DDBC4999DEF61C011A006CA79302182A030A0D818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B70012818258203B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B700",
+        expectedResult: {
+            txHashHex: "fb7091c4663cb54099a292945a4259680bca9beed060568dd93a6d0d5d37a7c1",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "5a0960fc89422aa07bd2c25742cf35894b2047d42d542db0f29d5f22489cd137b5dce422ae4fcfbbbd915bc58b82f55441e04db6ee818fe9415028234893c001",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) in Babbage format and multiple Reference Inputs",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+            collaterals: [inputs.utxoShelley],
+            referenceInputs: [inputs.utxoShelley,inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a0d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70012828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7008258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700\n",
+        expectedResult: {
+            txHashHex: "a1cf02dafe36567a46276def8293afa77bc000331fafc5463297f94e7410605e",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "4c2398b4e4852eee1c3d381cb82ef245fb1a9d401a99cf7c95de52527a621a65705cb9d369aebaf49ebdaf09402d8e735cab8f3de8d93c34156e4ad83eb62907",
                 },
             ],
             auxiliaryDataSupplement: null,

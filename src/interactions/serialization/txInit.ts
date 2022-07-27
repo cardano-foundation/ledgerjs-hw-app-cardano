@@ -60,8 +60,9 @@ export function serializeTxInit(
         uint32_to_buf(tx.outputs.length as Uint32_t),
         uint32_to_buf(tx.certificates.length as Uint32_t),
         uint32_to_buf(tx.withdrawals.length as Uint32_t),
-        uint32_to_buf(numWitnesses as Uint32_t),
         collateralsBuffer,
         requiredSignersBuffer,
+        uint32_to_buf(tx.referenceInputs.length as Uint32_t),
+        uint32_to_buf(numWitnesses as Uint32_t),
     ])
 }
