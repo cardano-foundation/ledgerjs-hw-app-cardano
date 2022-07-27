@@ -1,4 +1,4 @@
-import {DeviceVersionUnsupported} from "../errors"
+import {DeviceVersionUnsupported, InvalidDataReason} from "../errors"
 import type {
     Int64_str,
     ParsedAssetGroup,
@@ -17,7 +17,7 @@ import type {
 } from "../types/internal"
 import {
     AUXILIARY_DATA_HASH_LENGTH,
-    CertificateType,
+    CertificateType, DATUM_HASH_LENGTH,
     ED25519_SIGNATURE_LENGTH,
     PoolOwnerType,
     RequiredSignerType,
@@ -26,7 +26,7 @@ import {
 } from "../types/internal"
 import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
 import {
-    AddressType,
+    AddressType, DatumType,
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -36,6 +36,7 @@ import {
 } from "../types/public"
 import {getVersionString} from "../utils"
 import {assert} from "../utils/assert"
+import {parseHexStringOfLength} from "../utils/parse"
 import {buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf} from "../utils/serialize"
 import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
@@ -89,6 +90,7 @@ const enum P1 {
   STAGE_SCRIPT_DATA_HASH = 0x0c,
   STAGE_COLLATERALS = 0x0d,
   STAGE_REQUIRED_SIGNERS = 0x0e,
+  STAGE_COLLATERAL_RETURN = 0x12,
   STAGE_TOTAL_COLLATERAL = 0x10,
   STAGE_REFERENCE_INPUTS = 0x11,
   STAGE_CONFIRM = 0x0a,
@@ -600,6 +602,33 @@ function* signTx_addRequiredSigner(
   })
 }
 
+function* signTx_addCollateralReturn(
+    collRet: ParsedOutput,
+    version: Version,
+): Interaction<void> {
+    const enum P2 {
+        BASIC_DATA = 0x30,
+        CONFIRM = 0x33,
+    }
+
+    // Basic data
+    yield send({
+        p1: P1.STAGE_COLLATERAL_RETURN,
+        p2: P2.BASIC_DATA,
+        data: serializeTxOutputBasicParams(collRet, version),
+        expectedResponseLength: 0,
+    })
+
+    yield* signTx_addTokenBundle(collRet.tokenBundle, P1.STAGE_COLLATERAL_RETURN, uint64_to_buf)
+
+    yield send({
+        p1: P1.STAGE_COLLATERAL_RETURN,
+        p2: P2.CONFIRM,
+        data: Buffer.alloc(0),
+        expectedResponseLength: 0,
+    })
+}
+
 function* signTx_addTotalCollateral(
     totalCollateral: Uint64_str
 ): Interaction<void> {
@@ -971,7 +1000,12 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
         yield* signTx_addRequiredSigner(input)
     }
 
-    // total collateral
+    // collateral output
+    if (tx.collateralReturn != null) {
+        yield* signTx_addCollateralReturn(tx.collateralReturn, version)
+    }
+
+    // totalCollateral
     if (tx.totalCollateral != null) {
         yield* signTx_addTotalCollateral(tx.totalCollateral)
     }

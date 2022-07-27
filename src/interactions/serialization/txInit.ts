@@ -41,6 +41,9 @@ export function serializeTxInit(
     const includeNetworkIdBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(tx.includeNetworkId)
         : Buffer.from([])
+    const includeCollateralReturnBuffer = getCompatibility(version).supportsAlonzo
+        ? serializeOptionFlag(tx.collateralReturn != null)
+        : Buffer.from([])
     const includeTotalCollateralBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(tx.totalCollateral != null)
         : Buffer.from([])
@@ -54,6 +57,7 @@ export function serializeTxInit(
         mintBuffer,
         scriptDataHashBuffer,
         includeNetworkIdBuffer,
+        includeCollateralReturnBuffer,
         includeTotalCollateralBuffer,
         _serializeSigningMode(signingMode),
         uint32_to_buf(tx.inputs.length as Uint32_t),

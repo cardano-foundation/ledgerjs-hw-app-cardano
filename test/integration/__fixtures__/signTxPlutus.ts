@@ -445,29 +445,6 @@ export const testsBabbage: SignTxTestcase[] = [
     },
     {
         // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-        testname: "Sign tx with change output (Plutus) in Babbage format and Total Collateral",
-        tx: {
-            ...mainnetFeeTtl,
-            inputs: [inputs.utxoShelley],
-            outputs: [outputs.internalBaseWithStakingPathMap],
-            totalCollateral: 10,
-        },
-        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
-        additionalWitnessPaths: [],
-        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a110a",
-        expectedResult: {
-            txHashHex: "54b8acbf5c3d28c68d37e3c3b639a7c1f808663f5a9868f786db49e7c12d25f3",
-            witnesses: [
-                {
-                    path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "79f0ea0a193158b7b85058ba09291f3b733a09df8cc99a83ac1998623d53a45cb34ec6599fae27acffea866ab8b466bd19d354b2b709a5168e5552a74c4fc90e",
-                },
-            ],
-            auxiliaryDataSupplement: null,
-        },
-    },
-    {
-        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
         testname: "Sign tx with change output (Plutus) in Babbage format and Reference Input",
         tx: {
             ...mainnetFeeTtl,
@@ -514,7 +491,79 @@ export const testsBabbage: SignTxTestcase[] = [
             auxiliaryDataSupplement: null,
         },
     },
-    //Multiasset TODO maybe move somewhere else, not a plutus test
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) in Babbage format and Total Collateral",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+            totalCollateral: 10,
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a110a",
+        expectedResult: {
+            txHashHex: "54b8acbf5c3d28c68d37e3c3b639a7c1f808663f5a9868f786db49e7c12d25f3",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "79f0ea0a193158b7b85058ba09291f3b733a09df8cc99a83ac1998623d53a45cb34ec6599fae27acffea866ab8b466bd19d354b2b709a5168e5552a74c4fc90e",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    //Collateral Return
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) in Babbage format and Collateral Return",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+            collRet: outputs.externalByronMainnet,
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "\n",
+        expectedResult: {
+            txHashHex: "a1cf02dafe36567a46276def8293afa77bc000331fafc5463297f94e7410605e",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "4c2398b4e4852eee1c3d381cb82ef245fb1a9d401a99cf7c95de52527a621a65705cb9d369aebaf49ebdaf09402d8e735cab8f3de8d93c34156e4ad83eb62907",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
+        testname: "Sign tx with change output (Plutus) in Babbage format and multiple reference inputs and Collateral return MAP",
+        tx: {
+            ...mainnetFeeTtl,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.internalBaseWithStakingPathMap],
+            collaterals: [inputs.utxoShelley],
+            collRet: outputs.externalByronMainnet,
+            referenceInputs: [inputs.utxoShelley,inputs.utxoShelley],
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a0d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70012828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7008258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700\n",
+        expectedResult: {
+            txHashHex: "a1cf02dafe36567a46276def8293afa77bc000331fafc5463297f94e7410605e",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "4c2398b4e4852eee1c3d381cb82ef245fb1a9d401a99cf7c95de52527a621a65705cb9d369aebaf49ebdaf09402d8e735cab8f3de8d93c34156e4ad83eb62907",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    // Multiasset TODO maybe move somewhere else, not a plutus test
     {
         testname: "Sign tx with a complex multiasset output Babbage",
         tx: {
