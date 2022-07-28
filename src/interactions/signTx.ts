@@ -1,5 +1,7 @@
 import {DeviceVersionUnsupported} from "../errors"
+import {MAX_DATUM_CHUNK_SIZE} from "../parsing/constants"
 import type {
+    HexString,
     Int64_str,
     ParsedAssetGroup,
     ParsedCertificate,
@@ -11,6 +13,7 @@ import type {
     ParsedTxAuxiliaryData,
     ParsedWithdrawal,
     ScriptDataHash,
+    Uint32_t,
     Uint64_str,
     ValidBIP32Path,
     Version,
@@ -27,6 +30,7 @@ import {
 import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
 import {
     AddressType,
+
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -36,7 +40,7 @@ import {
 } from "../types/public"
 import {getVersionString} from "../utils"
 import {assert} from "../utils/assert"
-import {buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf} from "../utils/serialize"
+import {buf_to_hex, hex_to_buf, int64_to_buf, uint32_to_buf, uint64_to_buf} from "../utils/serialize"
 import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
 import {ensureLedgerAppVersionCompatible, getCompatibility} from "./getVersion"
@@ -140,40 +144,69 @@ function* signTx_addOutput(
     output: ParsedOutput,
     version: Version,
 ): Interaction<void> {
-  const enum P2 {
-    BASIC_DATA = 0x30,
-    DATUM_OPTION = 0x34,
-    DATUM_CHUNK= 0x35,
-    CONFIRM = 0x33,
-  }
+    const enum P2 {
+        BASIC_DATA = 0x30,
+        DATUM_OPTION = 0x34,
+        DATUM_CHUNK = 0x35,
+        CONFIRM = 0x33,
+    }
 
-  // Basic data
-  yield send({
-      p1: P1.STAGE_OUTPUTS,
-      p2: P2.BASIC_DATA,
-      data: serializeTxOutputBasicParams(output, version),
-      expectedResponseLength: 0,
-  })
+    // Basic data
+    yield send({
+        p1: P1.STAGE_OUTPUTS,
+        p2: P2.BASIC_DATA,
+        data: serializeTxOutputBasicParams(output, version),
+        expectedResponseLength: 0,
+    })
 
-  yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
+    yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
 
-  if ((output.type !== TxOutputType.MAP_BABBAGE && output.datumHashHex)
-      || (output.type === TxOutputType.MAP_BABBAGE && output.datum)) {
-      yield send({
-          p1: P1.STAGE_OUTPUTS,
-          p2: P2.DATUM_OPTION,
-          data: serializeTxOutputDatum(output, version),
-          expectedResponseLength: 0,
-      })
-  }
+    // Datum
+    if ((output.type !== TxOutputType.MAP_BABBAGE && output.datumHashHex)
+        || (output.type === TxOutputType.MAP_BABBAGE && output.datum)) {
+        yield send({
+            p1: P1.STAGE_OUTPUTS,
+            p2: P2.DATUM_OPTION,
+            data: serializeTxOutputDatum(output, version),
+            expectedResponseLength: 0,
+        })
 
+    }
 
-  yield send({
-      p1: P1.STAGE_OUTPUTS,
-      p2: P2.CONFIRM,
-      data: Buffer.alloc(0),
-      expectedResponseLength: 0,
-  })
+    // Datum Chunks
+    if (output.type === TxOutputType.MAP_BABBAGE
+        && output.datum?.type === DatumType.INLINE
+        && output.datum.datumHex.length / 2 > MAX_DATUM_CHUNK_SIZE) {
+
+        let start = MAX_DATUM_CHUNK_SIZE * 2
+        let end = start
+
+        while (start < output.datum.datumHex.length) {
+            end = start + (MAX_DATUM_CHUNK_SIZE * 2) > output.datum.datumHex.length
+                ? end = output.datum.datumHex.length
+                : start + (MAX_DATUM_CHUNK_SIZE * 2)
+
+            let chunk = output.datum.datumHex.substring(start, end)
+
+            yield send({
+                p1: P1.STAGE_OUTPUTS,
+                p2: P2.DATUM_CHUNK,
+                data: Buffer.concat([
+                    uint32_to_buf(chunk.length / 2 as Uint32_t),
+                    hex_to_buf(chunk as HexString),
+                ]),
+                expectedResponseLength: 0,
+            })
+            start = end
+        }
+    }
+
+    yield send({
+        p1: P1.STAGE_OUTPUTS,
+        p2: P2.CONFIRM,
+        data: Buffer.alloc(0),
+        expectedResponseLength: 0,
+    })
 }
 
 export type SerializeTokenAmountFn<T> = (val: T) => Buffer
