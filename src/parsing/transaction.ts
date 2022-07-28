@@ -317,7 +317,7 @@ function parseTxOutput(
     //TODO:  use parseDatum function and unify ParsedDatum types?
     if (output.type === TxOutputType.MAP_BABBAGE) {
         let datum : ParsedDatum | null
-        
+
         switch (output.datum?.type) {
         case DatumType.HASH:
             datum = {
