@@ -134,10 +134,10 @@ export type ParsedTransaction = {
     validityIntervalStart: Uint64_str | null;
     mint: Array<ParsedAssetGroup<Int64_str>> | null;
     scriptDataHashHex: ScriptDataHash | null;
-    collaterals: ParsedInput[];
+    collateralInputs: ParsedInput[];
     requiredSigners: ParsedRequiredSigner[];
     includeNetworkId: boolean;
-    collateralReturn: ParsedOutput | null;
+    collateralOutput: ParsedOutput | null;
     totalCollateral: Uint64_str | null;
     referenceInputs: ParsedInput[];
 }

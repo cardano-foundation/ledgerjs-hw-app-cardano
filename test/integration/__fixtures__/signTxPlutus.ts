@@ -119,12 +119,12 @@ export const testsAlonzo: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with collaterals",
+        testname: "Sign tx with collateral inputs",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [],
-            collaterals: [inputs.utxoByron],
+            collateralInputs: [inputs.utxoByron],
             includeNetworkId: true,
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
@@ -450,7 +450,7 @@ export const testsBabbage: SignTxTestcase[] = [
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPathMap],
-            collaterals: [inputs.utxoShelley],
+            collateralInputs: [inputs.utxoShelley],
             referenceInputs: [inputs.utxoShelley],
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
@@ -474,7 +474,7 @@ export const testsBabbage: SignTxTestcase[] = [
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPathMap],
-            collaterals: [inputs.utxoShelley],
+            collateralInputs: [inputs.utxoShelley],
             referenceInputs: [inputs.utxoShelley,inputs.utxoShelley],
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
@@ -517,12 +517,12 @@ export const testsBabbage: SignTxTestcase[] = [
     // Collateral Return
     {
         // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-        testname: "Sign tx with change output (Plutus) in Babbage format and Collateral Return",
+        testname: "Sign tx with change output (Plutus) in Babbage format and Collateral Output",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPathMap],
-            collRet: outputs.externalByronMainnet,
+            collateralOutput: outputs.externalByronMainnet,
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
         additionalWitnessPaths: [],
@@ -539,12 +539,12 @@ export const testsBabbage: SignTxTestcase[] = [
         },
     },
     {   // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-        testname: "Sign tx with change output (Plutus) and Collateral Return both in Babbage format ",
+        testname: "Sign tx with change output (Plutus) and Collateral Output both in Babbage format ",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPathMap],
-            collRet: outputs.internalBaseWithStakingPathMap,
+            collateralOutput: outputs.internalBaseWithStakingPathMap,
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
         additionalWitnessPaths: [],
@@ -562,13 +562,13 @@ export const testsBabbage: SignTxTestcase[] = [
     },
     {
         // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-        testname: "Sign tx with change output (Plutus) in Babbage format and multiple reference inputs and Collateral Return",
+        testname: "Sign tx with change output (Plutus) in Babbage format and multiple reference inputs and Collateral Output",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
             outputs: [outputs.internalBaseWithStakingPathMap],
-            collaterals: [inputs.utxoShelley],
-            collRet: outputs.externalByronMainnet,
+            collateralInputs: [inputs.utxoShelley],
+            collateralOutput: outputs.externalByronMainnet,
             referenceInputs: [inputs.utxoShelley, inputs.utxoShelley],
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,

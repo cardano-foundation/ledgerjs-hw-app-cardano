@@ -177,32 +177,35 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseTokenBundle(tx.mint, false, parseInt64_str)
 
+    // script data hex
     const scriptDataHashHex = tx.scriptDataHashHex == null
         ? null
         : parseHexStringOfLength(tx.scriptDataHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
 
-    validate(isArray(tx.collaterals ?? []), InvalidDataReason.COLLATERALS_NOT_ARRAY)
-    const collaterals = (tx.collaterals ?? []).map(inp => parseTxInput(inp))
+    // collateral inputs
+    validate(isArray(tx.collateralInputs ?? []), InvalidDataReason.COLLATERALS_NOT_ARRAY)
+    const collateralInputs = (tx.collateralInputs ?? []).map(inp => parseTxInput(inp))
 
+    // required signers
     validate(isArray(tx.requiredSigners ?? []), InvalidDataReason.REQUIRED_SIGNERS_NOT_ARRAY)
     const requiredSigners = (tx.requiredSigners ?? []).map(rs => parseRequiredSigner(rs))
 
+    // include network ID
     const includeNetworkId = tx.includeNetworkId == null
         ? false
         : parseBoolean(tx.includeNetworkId, InvalidDataReason.NETWORK_ID_INCLUDE_INVALID)
 
-    // collateral return
-    // validate(isArray(tx.collRet), InvalidDataReason.OUTPUTS_NOT_ARRAY)
-    const collateralReturn = tx.collRet == null
+    // collateral output
+    const collateralOutput = tx.collateralOutput == null
         ? null
-        : parseTxOutput(tx.collRet, tx.network)
+        : parseTxOutput(tx.collateralOutput, tx.network)
 
     //total collateral
     const totalCollateral = tx.totalCollateral == null
         ? null
         : parseUint64_str(tx.totalCollateral, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.TOTAL_COLLATERAL_NOT_VALID)
 
-    //reference Inputs
+    //reference inputs
     const referenceInputs = tx.referenceInputs == undefined
         ? []
         : tx.referenceInputs.map(inp => parseTxInput(inp))
@@ -219,10 +222,10 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         fee,
         mint,
         scriptDataHashHex,
-        collaterals,
+        collateralInputs,
         requiredSigners,
         includeNetworkId,
-        collateralReturn,
+        collateralOutput,
         totalCollateral,
         referenceInputs,
     }
@@ -423,9 +426,9 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH),
             InvalidDataReason.SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH,
         )
-        // cannot have collaterals in the tx
+        // cannot have collateralInputs in the tx
         validate(
-            tx.collaterals.length === 0,
+            tx.collateralInputs.length === 0,
             InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED
         )
 
@@ -473,9 +476,9 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.withdrawals.every(withdrawal => withdrawal.stakeCredential.type === StakeCredentialType.SCRIPT_HASH),
             InvalidDataReason.SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT,
         )
-        // cannot have collaterals in the tx
+        // cannot have collateralInputs in the tx
         validate(
-            tx.collaterals.length === 0,
+            tx.collateralInputs.length === 0,
             InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED
         )
 
@@ -548,9 +551,9 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_POOL_OWNER__SCRIPT_DATA_HASH_NOT_ALLOWED
         )
 
-        // cannot have collaterals in the tx
+        // cannot have collateralInputs in the tx
         validate(
-            tx.collaterals.length === 0,
+            tx.collateralInputs.length === 0,
             InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED
         )
 
@@ -619,9 +622,9 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SCRIPT_DATA_HASH_NOT_ALLOWED
         )
 
-        // cannot have collaterals in the tx
+        // cannot have collateralInputs in the tx
         validate(
-            tx.collaterals.length === 0,
+            tx.collateralInputs.length === 0,
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERALS_NOT_ALLOWED
         )
 

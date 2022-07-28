@@ -32,8 +32,8 @@ export function serializeTxInit(
     const scriptDataHashBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(tx.scriptDataHashHex != null)
         : Buffer.from([])
-    const collateralsBuffer = getCompatibility(version).supportsAlonzo
-        ? uint32_to_buf(tx.collaterals.length as Uint32_t)
+    const collateralInputsBuffer = getCompatibility(version).supportsAlonzo
+        ? uint32_to_buf(tx.collateralInputs.length as Uint32_t)
         : Buffer.from([])
     const requiredSignersBuffer = getCompatibility(version).supportsAlonzo
         ? uint32_to_buf(tx.requiredSigners.length as Uint32_t)
@@ -41,8 +41,8 @@ export function serializeTxInit(
     const includeNetworkIdBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(tx.includeNetworkId)
         : Buffer.from([])
-    const includeCollateralReturnBuffer = getCompatibility(version).supportsAlonzo
-        ? serializeOptionFlag(tx.collateralReturn != null)
+    const includeCollateralOutputBuffer = getCompatibility(version).supportsAlonzo
+        ? serializeOptionFlag(tx.collateralOutput != null)
         : Buffer.from([])
     const includeTotalCollateralBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(tx.totalCollateral != null)
@@ -57,14 +57,14 @@ export function serializeTxInit(
         mintBuffer,
         scriptDataHashBuffer,
         includeNetworkIdBuffer,
-        includeCollateralReturnBuffer,
+        includeCollateralOutputBuffer,
         includeTotalCollateralBuffer,
         _serializeSigningMode(signingMode),
         uint32_to_buf(tx.inputs.length as Uint32_t),
         uint32_to_buf(tx.outputs.length as Uint32_t),
         uint32_to_buf(tx.certificates.length as Uint32_t),
         uint32_to_buf(tx.withdrawals.length as Uint32_t),
-        collateralsBuffer,
+        collateralInputsBuffer,
         requiredSignersBuffer,
         uint32_to_buf(tx.referenceInputs.length as Uint32_t),
         uint32_to_buf(numWitnesses as Uint32_t),

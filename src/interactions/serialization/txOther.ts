@@ -87,6 +87,7 @@ export function serializeMintBasicParams(mint: Array<ParsedAssetGroup<Int64_str>
         uint32_to_buf(mint.length as Uint32_t),
     ])
 }
+
 export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner) {
     switch (requiredSigner.type) {
     case RequiredSignerType.PATH:

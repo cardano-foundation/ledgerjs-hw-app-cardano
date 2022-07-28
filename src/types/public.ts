@@ -1149,9 +1149,9 @@ export type Transaction = {
      */
     scriptDataHashHex?: string | null;
     /**
-     * Collaterals (if any)
+     * Collateral Inputs (if any)
      */
-    collaterals?: Array<TxInput> | null;
+    collateralInputs?: Array<TxInput> | null;
     /**
      * Required Signers by key (if any)
      */
@@ -1163,7 +1163,7 @@ export type Transaction = {
     /**
      * Collateral return output
      */
-    collRet?: TxOutput;
+    collateralOutput?: TxOutput;
     /**
      * Total collateral (in Lovelace).
      */

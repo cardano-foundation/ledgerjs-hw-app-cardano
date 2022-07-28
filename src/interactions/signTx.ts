@@ -88,9 +88,9 @@ const enum P1 {
   STAGE_VALIDITY_INTERVAL_START = 0x09,
   STAGE_MINT = 0x0b,
   STAGE_SCRIPT_DATA_HASH = 0x0c,
-  STAGE_COLLATERALS = 0x0d,
+  STAGE_COLLATERAL_INPUTS = 0x0d,
   STAGE_REQUIRED_SIGNERS = 0x0e,
-  STAGE_COLLATERAL_RETURN = 0x12,
+  STAGE_COLLATERAL_OUTPUT = 0x12,
   STAGE_TOTAL_COLLATERAL = 0x10,
   STAGE_REFERENCE_INPUTS = 0x11,
   STAGE_CONFIRM = 0x0a,
@@ -572,17 +572,17 @@ function* signTx_setScriptDataHash(
   })
 }
 
-function* signTx_addCollateral(
-    input: ParsedInput
+function* signTx_addCollateralInput(
+    collateralInput: ParsedInput
 ): Interaction<void> {
   const enum P2 {
     UNUSED = 0x00,
   }
 
   yield send({
-      p1: P1.STAGE_COLLATERALS,
+      p1: P1.STAGE_COLLATERAL_INPUTS,
       p2: P2.UNUSED,
-      data: serializeTxInput(input),
+      data: serializeTxInput(collateralInput),
       expectedResponseLength: 0,
   })
 }
@@ -602,8 +602,8 @@ function* signTx_addRequiredSigner(
   })
 }
 
-function* signTx_addCollateralReturn(
-    collRet: ParsedOutput,
+function* signTx_addCollateralOutput(
+    collateralOutput: ParsedOutput,
     version: Version,
 ): Interaction<void> {
     const enum P2 {
@@ -613,16 +613,16 @@ function* signTx_addCollateralReturn(
 
     // Basic data
     yield send({
-        p1: P1.STAGE_COLLATERAL_RETURN,
+        p1: P1.STAGE_COLLATERAL_OUTPUT,
         p2: P2.BASIC_DATA,
-        data: serializeTxOutputBasicParams(collRet, version),
+        data: serializeTxOutputBasicParams(collateralOutput, version),
         expectedResponseLength: 0,
     })
 
-    yield* signTx_addTokenBundle(collRet.tokenBundle, P1.STAGE_COLLATERAL_RETURN, uint64_to_buf)
+    yield* signTx_addTokenBundle(collateralOutput.tokenBundle, P1.STAGE_COLLATERAL_OUTPUT, uint64_to_buf)
 
     yield send({
-        p1: P1.STAGE_COLLATERAL_RETURN,
+        p1: P1.STAGE_COLLATERAL_OUTPUT,
         p2: P2.CONFIRM,
         data: Buffer.alloc(0),
         expectedResponseLength: 0,
@@ -772,7 +772,7 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
         }
 
         // collateral inputs witnesses
-        for (const collateral of tx.collaterals) {
+        for (const collateral of tx.collateralInputs) {
             if (collateral.path != null) {
                 witnessPaths.push(collateral.path)
             }
@@ -889,7 +889,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Script data hash not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.tx.collaterals.length != 0 && !getCompatibility(version).supportsAlonzo) {
+    if (request.tx.collateralInputs.length != 0 && !getCompatibility(version).supportsAlonzo) {
         throw new DeviceVersionUnsupported(`Collaterals not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
@@ -991,8 +991,8 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     }
 
     // collateral inputs
-    for (const input of tx.collaterals) {
-        yield* signTx_addCollateral(input)
+    for (const input of tx.collateralInputs) {
+        yield* signTx_addCollateralInput(input)
     }
 
     // required signers
@@ -1001,8 +1001,8 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     }
 
     // collateral output
-    if (tx.collateralReturn != null) {
-        yield* signTx_addCollateralReturn(tx.collateralReturn, version)
+    if (tx.collateralOutput != null) {
+        yield* signTx_addCollateralOutput(tx.collateralOutput, version)
     }
 
     // totalCollateral
