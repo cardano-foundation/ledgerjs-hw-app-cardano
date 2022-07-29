@@ -1,4 +1,4 @@
-import {DeviceVersionUnsupported, InvalidDataReason} from "../errors"
+import {DeviceVersionUnsupported} from "../errors"
 import type {
     Int64_str,
     ParsedAssetGroup,
@@ -17,7 +17,7 @@ import type {
 } from "../types/internal"
 import {
     AUXILIARY_DATA_HASH_LENGTH,
-    CertificateType, DATUM_HASH_LENGTH,
+    CertificateType,
     ED25519_SIGNATURE_LENGTH,
     PoolOwnerType,
     RequiredSignerType,
@@ -26,7 +26,7 @@ import {
 } from "../types/internal"
 import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
 import {
-    AddressType, DatumType,
+    AddressType,
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -36,7 +36,6 @@ import {
 } from "../types/public"
 import {getVersionString} from "../utils"
 import {assert} from "../utils/assert"
-import {parseHexStringOfLength} from "../utils/parse"
 import {buf_to_hex, hex_to_buf, int64_to_buf, uint64_to_buf} from "../utils/serialize"
 import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
@@ -624,7 +623,7 @@ function* signTx_addCollateralOutput(
     yield send({
         p1: P1.STAGE_COLLATERAL_OUTPUT,
         p2: P2.CONFIRM,
-        data: Buffer.alloc(0),
+        data: Buffer.concat([]),
         expectedResponseLength: 0,
     })
 }

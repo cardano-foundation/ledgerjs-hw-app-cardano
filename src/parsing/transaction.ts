@@ -177,7 +177,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseTokenBundle(tx.mint, false, parseInt64_str)
 
-    // script data hex
+    // script data hash hex
     const scriptDataHashHex = tx.scriptDataHashHex == null
         ? null
         : parseHexStringOfLength(tx.scriptDataHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
@@ -206,9 +206,8 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         : parseUint64_str(tx.totalCollateral, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.TOTAL_COLLATERAL_NOT_VALID)
 
     //reference inputs
-    const referenceInputs = tx.referenceInputs == undefined
-        ? []
-        : tx.referenceInputs.map(inp => parseTxInput(inp))
+    validate(isArray(tx.referenceInputs ?? []), InvalidDataReason.REFERENCE_INPUTS_NOT_ARRAY)
+    const referenceInputs = (tx.referenceInputs ?? []).map(ri => parseTxInput(ri))
 
     return {
         network,

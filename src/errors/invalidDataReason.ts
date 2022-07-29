@@ -147,6 +147,7 @@ export enum InvalidDataReason {
   REQUIRED_SIGNER_INVALID_PATH = "invalid path for required signer",
 
   TOTAL_COLLATERAL_NOT_VALID = "total collateral not valid",
+  REFERENCE_INPUTS_NOT_ARRAY = "reference inputs not an array",
 
   SIGN_MODE_UNKNOWN = "unknown signing mode",
 
