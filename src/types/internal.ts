@@ -1,6 +1,4 @@
-import type {
-    Datum,
-    TxOutputType} from './public'
+import type {DatumType, TxOutputType} from './public'
 import {
     AddressType,
     CertificateType,
@@ -365,6 +363,14 @@ export type OutputDestination = {
 
 export type DatumHash = FixlenHexString<typeof DATUM_HASH_LENGTH>
 
+export type ParsedDatum = {
+    type: DatumType.HASH;
+    datumHashHex: FixlenHexString<typeof DATUM_HASH_LENGTH>;
+} | {
+    type: DatumType.INLINE;
+    datumHex: HexString;
+}
+
 export type ParsedOutput = ParsedOutputAlonzoArray | ParsedOutputBabbageMap;
 
 export type ParsedOutputAlonzoArray = {
@@ -381,7 +387,7 @@ export type ParsedOutputBabbageMap = {
     amount: Uint64_str;
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
     destination: OutputDestination;
-    datum?: Datum;
+    datum?: ParsedDatum | null;
     scriptHex?: string | null;
 }
 

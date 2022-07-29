@@ -1,9 +1,11 @@
 import {InvalidData} from "../errors"
 import {InvalidDataReason} from "../errors/invalidDataReason"
 import type {
+    DatumHash,
     OutputDestination,
     ParsedAssetGroup,
     ParsedCertificate,
+    ParsedDatum,
     ParsedInput,
     ParsedOutput,
     ParsedRequiredSigner,
@@ -38,6 +40,7 @@ import type {
 } from "../types/public"
 import {
     AddressType,
+    DatumType,
     PoolKeyType,
     PoolOwnerType,
     TransactionSigningMode,
@@ -302,8 +305,37 @@ function parseTxOutput(
 
     const destination = parseTxDestination(network, output.destination)
 
-    if (output.type !== TxOutputType.MAP_BABBAGE) {
-        const datumHashHex = output.datumHashHex == null ? null
+    //TODO:  use parseDatum function and unify ParsedDatum types?
+    if (output.type === TxOutputType.MAP_BABBAGE) {
+        let datum : ParsedDatum | null
+        
+        switch (output.datum?.type) {
+        case DatumType.HASH:
+            datum = {
+                type: DatumType.HASH,
+                datumHashHex: parseHexStringOfLength(output.datum.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+            }
+            break
+        case DatumType.INLINE:
+            datum = {
+                type: DatumType.INLINE,
+                datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+            }
+            break
+        default:
+            datum = null
+            break
+        }
+        return {
+            type,
+            amount,
+            tokenBundle,
+            destination,
+            datum,
+        }
+    } else { // Alonzo
+        const datumHashHex : DatumHash | null = output.datumHashHex == null
+            ? null
             : parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
         validate(!datumHashHex || addressAllowsDatum(destination),
             InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
@@ -313,15 +345,6 @@ function parseTxOutput(
             tokenBundle,
             destination,
             datumHashHex,
-        }
-    } else {
-        const datum = output.datum
-        return {
-            type,
-            amount,
-            tokenBundle,
-            destination,
-            datum,
         }
     }
 }
