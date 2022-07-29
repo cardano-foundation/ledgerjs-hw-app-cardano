@@ -1,7 +1,6 @@
 import {InvalidData} from "../errors"
 import {InvalidDataReason} from "../errors/invalidDataReason"
 import type {
-    DatumHash,
     OutputDestination,
     ParsedAssetGroup,
     ParsedCertificate,
@@ -128,6 +127,39 @@ function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed:
     validate(JSON.stringify(policyIds) === JSON.stringify(sortedPolicyIds), InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING)
 
     return parsedTokenBundle
+}
+
+function parseDatum(output: TxOutput): ParsedDatum | null {
+    let datum: ParsedDatum | null
+    if (output.type === TxOutputType.MAP_BABBAGE) {
+
+        switch (output.datum?.type) {
+        case DatumType.HASH:
+            datum = {
+                type: DatumType.HASH,
+                datumHashHex: parseHexStringOfLength(output.datum.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+            }
+            break
+        case DatumType.INLINE:
+            datum = {
+                type: DatumType.INLINE,
+                datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+            }
+            break/**/
+        default:
+            datum = null
+            break
+        }
+
+    } else { // Alonzo
+        datum = output.datumHashHex == null
+            ? null
+            : {
+                type: DatumType.HASH,
+                datumHashHex: parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+            }
+    }
+    return datum
 }
 
 function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
@@ -314,47 +346,15 @@ function parseTxOutput(
 
     const destination = parseTxDestination(network, output.destination)
 
-    //TODO:  use parseDatum function and unify ParsedDatum types?
-    if (output.type === TxOutputType.MAP_BABBAGE) {
-        let datum : ParsedDatum | null
+    let datum : ParsedDatum | null = parseDatum(output)
+    validate(!datum || addressAllowsDatum(destination), InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
 
-        switch (output.datum?.type) {
-        case DatumType.HASH:
-            datum = {
-                type: DatumType.HASH,
-                datumHashHex: parseHexStringOfLength(output.datum.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
-            }
-            break
-        case DatumType.INLINE:
-            datum = {
-                type: DatumType.INLINE,
-                datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
-            }
-            break
-        default:
-            datum = null
-            break
-        }
-        return {
-            type,
-            amount,
-            tokenBundle,
-            destination,
-            datum,
-        }
-    } else { // Alonzo
-        const datumHashHex : DatumHash | null = output.datumHashHex == null
-            ? null
-            : parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
-        validate(!datumHashHex || addressAllowsDatum(destination),
-            InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
-        return {
-            type,
-            amount,
-            tokenBundle,
-            destination,
-            datumHashHex,
-        }
+    return {
+        type,
+        amount,
+        tokenBundle,
+        destination,
+        datum,
     }
 }
 
@@ -508,7 +508,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // no datum in outputs
         validate(
-            tx.outputs.every(out => out.type !== TxOutputType.MAP_BABBAGE? (out.datumHashHex == null) : (out.datum == null)),
+            tx.outputs.every(out => (out.datum == null)),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED
         )
 
@@ -579,7 +579,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // no datum in outputs
         validate(
-            tx.outputs.every(out => out.type !== TxOutputType.MAP_BABBAGE? (out.datumHashHex == null) : (out.datum == null)),
+            tx.outputs.every(out => (out.datum == null)),
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED
         )
 

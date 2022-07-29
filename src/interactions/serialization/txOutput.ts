@@ -1,10 +1,10 @@
 import {MAX_DATUM_CHUNK_SIZE} from "../../parsing/constants"
-import type {HexString, OutputDestination, ParsedOutput, Uint32_t, Uint8_t} from "../../types/internal"
+import type {HexString, OutputDestination, ParsedOutput, Uint8_t,Uint32_t} from "../../types/internal"
 import {TxOutputDestinationType} from "../../types/internal"
 import type {Version} from "../../types/public"
 import {DatumType, TxOutputType} from "../../types/public"
 import {unreachable} from "../../utils/assert"
-import {hex_to_buf, serializeOptionFlag, uint32_to_buf, uint64_to_buf, uint8_to_buf} from "../../utils/serialize"
+import {hex_to_buf, serializeOptionFlag, uint8_to_buf,uint32_to_buf, uint64_to_buf} from "../../utils/serialize"
 import {getCompatibility} from "../getVersion"
 import {serializeAddressParams} from "./addressParams"
 
@@ -37,9 +37,7 @@ export function serializeTxOutputBasicParams(
     output: ParsedOutput,
     version: Version,
 ): Buffer {
-    const hasDatum = output.type === TxOutputType.MAP_BABBAGE
-        ? output.datum != null
-        : output.datumHashHex != null
+    const hasDatum = output.datum != null
 
     const datumOptionBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(hasDatum)
@@ -96,10 +94,10 @@ export function serializeTxOutputDatum(
         }
 
     } else {    //  Alonzo Format
-        if (output.datumHashHex) {
+        if (output.datum?.type === DatumType.HASH) {
             return Buffer.concat([
                 uint8_to_buf(DatumType.HASH as Uint8_t),
-                hex_to_buf(output.datumHashHex),
+                hex_to_buf(output.datum.datumHashHex),
             ])
         } else {
             return Buffer.concat([])

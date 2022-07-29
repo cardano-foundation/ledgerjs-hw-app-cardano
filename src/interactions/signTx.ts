@@ -30,7 +30,7 @@ import {
 import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
 import {
     AddressType,
-
+    DatumType,
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -162,49 +162,43 @@ function* signTx_addOutput(
     yield* signTx_addTokenBundle(output.tokenBundle, P1.STAGE_OUTPUTS, uint64_to_buf)
 
     // Datum
-    if ((output.type !== TxOutputType.MAP_BABBAGE && output.datumHashHex)
-        || (output.type === TxOutputType.MAP_BABBAGE && output.datum)) {
+    if (output.datum) {
         yield send({
             p1: P1.STAGE_OUTPUTS,
             p2: P2.DATUM_OPTION,
             data: serializeTxOutputDatum(output, version),
             expectedResponseLength: 0,
         })
+        // Datum Chunks
+        if (output.datum.type === DatumType.INLINE
+            && output.datum.datumHex.length / 2 > MAX_DATUM_CHUNK_SIZE) {
 
-    }
+            //First chunk is already sent with previous APDU, so we start with 2nd chunk
+            let start = MAX_DATUM_CHUNK_SIZE * 2
+            let end = start
 
-    // Datum Chunks
-    if (output.type === TxOutputType.MAP_BABBAGE
-        && output.datum?.type === DatumType.INLINE
-        && output.datum.datumHex.length / 2 > MAX_DATUM_CHUNK_SIZE) {
+            while (start < output.datum.datumHex.length) {
+                end = Math.min(output.datum.datumHex.length, start + (MAX_DATUM_CHUNK_SIZE * 2))
+                let chunk = output.datum.datumHex.substring(start, end)
 
-        let start = MAX_DATUM_CHUNK_SIZE * 2
-        let end = start
-
-        while (start < output.datum.datumHex.length) {
-            end = start + (MAX_DATUM_CHUNK_SIZE * 2) > output.datum.datumHex.length
-                ? end = output.datum.datumHex.length
-                : start + (MAX_DATUM_CHUNK_SIZE * 2)
-
-            let chunk = output.datum.datumHex.substring(start, end)
-
-            yield send({
-                p1: P1.STAGE_OUTPUTS,
-                p2: P2.DATUM_CHUNK,
-                data: Buffer.concat([
-                    uint32_to_buf(chunk.length / 2 as Uint32_t),
-                    hex_to_buf(chunk as HexString),
-                ]),
-                expectedResponseLength: 0,
-            })
-            start = end
+                yield send({
+                    p1: P1.STAGE_OUTPUTS,
+                    p2: P2.DATUM_CHUNK,
+                    data: Buffer.concat([
+                        uint32_to_buf(chunk.length / 2 as Uint32_t),
+                        hex_to_buf(chunk as HexString),
+                    ]),
+                    expectedResponseLength: 0,
+                })
+                start = end
+            }
         }
     }
 
     yield send({
         p1: P1.STAGE_OUTPUTS,
         p2: P2.CONFIRM,
-        data: Buffer.alloc(0),
+        data: Buffer.concat([]),
         expectedResponseLength: 0,
     })
 }
@@ -870,7 +864,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    const hasDatumHashInOutputs = request.tx.outputs.some(o => o.type !==TxOutputType.MAP_BABBAGE && o.datumHashHex != null)
+    const hasDatumHashInOutputs = request.tx.outputs.some(o => o.datum != null)
     if (hasDatumHashInOutputs && !getCompatibility(version).supportsAlonzo) {
         throw new DeviceVersionUnsupported(`Datum hash in output not supported by Ledger app version ${getVersionString(version)}.`)
     }

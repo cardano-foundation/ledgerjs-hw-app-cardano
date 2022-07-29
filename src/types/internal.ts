@@ -372,23 +372,12 @@ export type ParsedDatum = {
     datumHex: HexString;
 }
 
-export type ParsedOutput = ParsedOutputAlonzoArray | ParsedOutputBabbageMap;
-
-export type ParsedOutputAlonzoArray = {
-    type: TxOutputType.ARRAY_LEGACY;
+export type ParsedOutput = {
+    type: TxOutputType;
     amount: Uint64_str;
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
     destination: OutputDestination;
-    datumHashHex?: DatumHash | null;
-}
-
-
-export type ParsedOutputBabbageMap = {
-    type: TxOutputType.MAP_BABBAGE;
-    amount: Uint64_str;
-    tokenBundle: ParsedAssetGroup<Uint64_str>[];
-    destination: OutputDestination;
-    datum?: ParsedDatum | null;
+    datum: ParsedDatum | null;
     scriptHex?: string | null;
 }
 
