@@ -864,9 +864,24 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    const hasDatumHashInOutputs = request.tx.outputs.some(o => o.datum != null)
-    if (hasDatumHashInOutputs && !getCompatibility(version).supportsAlonzo) {
-        throw new DeviceVersionUnsupported(`Datum hash in output not supported by Ledger app version ${getVersionString(version)}.`)
+    const hasMapFormatInOutputs = request.tx.outputs.some(o => o.type === TxOutputType.MAP_BABBAGE)
+    if (hasMapFormatInOutputs && !getCompatibility(version).supportsBabbage) {
+        throw new DeviceVersionUnsupported(`Outputs with map format not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    const hasDatumInOutputs = request.tx.outputs.some(o => o.datum != null)
+    if (hasDatumInOutputs && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Datum in output not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    const hasInlineDatumInOutputs = request.tx.outputs.some(o => o.datum?.type === DatumType.INLINE)
+    if (hasInlineDatumInOutputs && !getCompatibility(version).supportsBabbage) {
+        throw new DeviceVersionUnsupported(`Inline datum in output not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    const hasReferenceScriptInOutputs = request.tx.outputs.some(o => o.scriptHex != null)
+    if (hasReferenceScriptInOutputs && !getCompatibility(version).supportsBabbage) {
+        throw new DeviceVersionUnsupported(`Reference Script in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
     if (request.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
@@ -937,6 +952,18 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
 
     if (request.tx.includeNetworkId && !getCompatibility(version).supportsAlonzo) {
         throw new DeviceVersionUnsupported(`Network id in tx body not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.collateralOutput && !getCompatibility(version).supportsBabbage) {
+        throw new DeviceVersionUnsupported(`Collateral output not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.totalCollateral && !getCompatibility(version).supportsBabbage) {
+        throw new DeviceVersionUnsupported(`Total collateral not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+
+    if (request.tx.referenceInputs.length !=0 && !getCompatibility(version).supportsBabbage) {
+        throw new DeviceVersionUnsupported(`Reference inputs not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
     // catalyst voting registration is a specific type of auxiliary data that requires a HW wallet signature

@@ -1,8 +1,8 @@
-import type { ParsedTransaction, Uint8_t, Uint32_t, Version } from "../../types/internal"
-import { TransactionSigningMode } from "../../types/internal"
-import { assert } from "../../utils/assert"
-import { serializeOptionFlag, uint8_to_buf, uint32_to_buf } from "../../utils/serialize"
-import { getCompatibility } from "../getVersion"
+import type {ParsedTransaction, Uint8_t, Uint32_t, Version} from "../../types/internal"
+import {TransactionSigningMode} from "../../types/internal"
+import {assert} from "../../utils/assert"
+import {serializeOptionFlag, uint8_to_buf,uint32_to_buf} from "../../utils/serialize"
+import {getCompatibility} from "../getVersion"
 
 const _serializeSigningMode = (
     mode: TransactionSigningMode
@@ -41,11 +41,22 @@ export function serializeTxInit(
     const includeNetworkIdBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(tx.includeNetworkId)
         : Buffer.from([])
-    const includeCollateralOutputBuffer = getCompatibility(version).supportsAlonzo
+    const includeCollateralOutputBuffer = getCompatibility(version).supportsBabbage
         ? serializeOptionFlag(tx.collateralOutput != null)
         : Buffer.from([])
-    const includeTotalCollateralBuffer = getCompatibility(version).supportsAlonzo
+    const includeTotalCollateralBuffer = getCompatibility(version).supportsBabbage
         ? serializeOptionFlag(tx.totalCollateral != null)
+        : Buffer.from([])
+    const referenceInputsBuffer = getCompatibility(version).supportsBabbage
+        ? uint32_to_buf(tx.referenceInputs.length as Uint32_t)
+        : Buffer.from([])
+
+    //  we have re-ordered numWitnesses in wireDataBuffer since Babbage
+    const witnessBufferLegacy = getCompatibility(version).supportsBabbage
+        ? Buffer.from([])
+        : uint32_to_buf(numWitnesses as Uint32_t)
+    const witnessBufferBabbage = getCompatibility(version).supportsBabbage
+        ? uint32_to_buf(numWitnesses as Uint32_t)
         : Buffer.from([])
 
     return Buffer.concat([
@@ -64,9 +75,10 @@ export function serializeTxInit(
         uint32_to_buf(tx.outputs.length as Uint32_t),
         uint32_to_buf(tx.certificates.length as Uint32_t),
         uint32_to_buf(tx.withdrawals.length as Uint32_t),
+        witnessBufferLegacy,
         collateralInputsBuffer,
         requiredSignersBuffer,
-        uint32_to_buf(tx.referenceInputs.length as Uint32_t),
-        uint32_to_buf(numWitnesses as Uint32_t),
+        referenceInputsBuffer,
+        witnessBufferBabbage,
     ])
 }

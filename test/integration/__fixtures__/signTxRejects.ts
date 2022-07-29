@@ -314,7 +314,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         errCls: DeviceStatusError,
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED,
+        rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
         testname: "Multisig tx - collaterals included",
@@ -325,7 +325,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
         errCls: DeviceStatusError,
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED,
+        rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
         testname: "Pool registration (operator) - collaterals included",
@@ -342,7 +342,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
         errCls: DeviceStatusError,
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERALS_NOT_ALLOWED,
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
         testname: "Pool registration (owner) - collaterals included",
@@ -360,7 +360,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         errCls: DeviceStatusError,
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED,
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
         testname: "Pool registration (operator) - required signers included",

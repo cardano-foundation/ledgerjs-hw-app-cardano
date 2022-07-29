@@ -44,6 +44,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
     const v3_0 = isLedgerAppVersionAtLeast(version, 3, 0) && isLedgerAppVersionAtMost(version, 4, Infinity)
     const v4_0_Alonzo = isLedgerAppVersionAtLeast(version, 4, 0) && isLedgerAppVersionAtMost(version, 4, Infinity)
     const v4_1 = isLedgerAppVersionAtLeast(version, 4, 1) && isLedgerAppVersionAtMost(version, 4, Infinity)
+    const v4_2 = isLedgerAppVersionAtLeast(version, 4, 2) && isLedgerAppVersionAtMost(version, 4, Infinity)
 
     return {
         isCompatible: v2_2,
@@ -58,6 +59,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsMint: v3_0,
         supportsAlonzo: v4_0_Alonzo,
         supportsReqSignersInOrdinaryTx: v4_1,
+        supportsBabbage: v4_2,
     }
 }
 

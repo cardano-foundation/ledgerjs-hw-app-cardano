@@ -37,17 +37,18 @@ export function serializeTxOutputBasicParams(
     output: ParsedOutput,
     version: Version,
 ): Buffer {
+    const serializationFormatBuffer = getCompatibility(version).supportsBabbage
+        ? uint8_to_buf(output.type as Uint8_t)
+        : Buffer.from([])
+
     const hasDatum = output.datum != null
 
     const datumOptionBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(hasDatum)
         : Buffer.from([])
 
-    const serializationFormat = output.type as Uint8_t
-    //TODO: maybe null for unsupported version?
-
     return Buffer.concat([
-        uint8_to_buf(serializationFormat),
+        serializationFormatBuffer,
         serializeTxOutputDestination(output.destination, version),
         uint64_to_buf(output.amount),
         uint32_to_buf(output.tokenBundle.length as Uint32_t),
@@ -95,8 +96,13 @@ export function serializeTxOutputDatum(
 
     } else {    //  Alonzo Format
         if (output.datum?.type === DatumType.HASH) {
+            // Do not include datum option for legacy version
+            const datumOptionBuffer = getCompatibility(version).supportsBabbage
+                ? uint8_to_buf(DatumType.HASH as Uint8_t)
+                : Buffer.concat([])
+
             return Buffer.concat([
-                uint8_to_buf(DatumType.HASH as Uint8_t),
+                datumOptionBuffer,
                 hex_to_buf(output.datum.datumHashHex),
             ])
         } else {

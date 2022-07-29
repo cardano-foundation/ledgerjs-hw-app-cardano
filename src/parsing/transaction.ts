@@ -217,7 +217,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         : parseHexStringOfLength(tx.scriptDataHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH)
 
     // collateral inputs
-    validate(isArray(tx.collateralInputs ?? []), InvalidDataReason.COLLATERALS_NOT_ARRAY)
+    validate(isArray(tx.collateralInputs ?? []), InvalidDataReason.COLLATERAL_INPUTS_NOT_ARRAY)
     const collateralInputs = (tx.collateralInputs ?? []).map(inp => parseTxInput(inp))
 
     // required signers
@@ -430,7 +430,19 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         // cannot have collateralInputs in the tx
         validate(
             tx.collateralInputs.length === 0,
-            InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED
+            InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED
+        )
+
+        // cannot have collateral output in the tx
+        validate(
+            tx.collateralOutput === null,
+            InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED
+        )
+
+        // cannot have total collateral in the tx
+        validate(
+            tx.totalCollateral === null,
+            InvalidDataReason.SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
         // cannot have reference input in the tx
@@ -480,7 +492,19 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         // cannot have collateralInputs in the tx
         validate(
             tx.collateralInputs.length === 0,
-            InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED
+            InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED
+        )
+
+        // cannot have collateral output in the tx
+        validate(
+            tx.collateralOutput === null,
+            InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED
+        )
+
+        // cannot have total collateral in the tx
+        validate(
+            tx.totalCollateral === null,
+            InvalidDataReason.SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
         // cannot have reference input in the tx
@@ -555,13 +579,25 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         // cannot have collateralInputs in the tx
         validate(
             tx.collateralInputs.length === 0,
-            InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED
         )
 
         // cannot have required signers in the tx
         validate(
             tx.requiredSigners.length === 0,
             InvalidDataReason.SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED
+        )
+
+        // cannot have collateral output in the tx
+        validate(
+            tx.collateralOutput === null,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED
+        )
+
+        // cannot have total collateral in the tx
+        validate(
+            tx.totalCollateral === null,
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
         // cannot have reference input in the tx
@@ -626,7 +662,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         // cannot have collateralInputs in the tx
         validate(
             tx.collateralInputs.length === 0,
-            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERALS_NOT_ALLOWED
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED
         )
 
         // cannot have required signers in the tx
@@ -635,11 +671,24 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED
         )
 
+        // cannot have collateral output in the tx
+        validate(
+            tx.collateralOutput === null,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED
+        )
+
+        // cannot have total collateral in the tx
+        validate(
+            tx.totalCollateral === null,
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED
+        )
+
         // cannot have reference input in the tx
         validate(
             tx.referenceInputs.length === 0,
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED
         )
+
         break
     }
 

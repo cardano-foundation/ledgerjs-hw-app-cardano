@@ -139,7 +139,7 @@ export enum InvalidDataReason {
 
   SCRIPT_DATA_HASH_WRONG_LENGTH = "script data hash not 32 bytes long",
 
-  COLLATERALS_NOT_ARRAY = "collaterals not an array",
+  COLLATERAL_INPUTS_NOT_ARRAY = "collateral inputs not an array",
 
   REQUIRED_SIGNERS_NOT_ARRAY = "required signers not an array",
   VKEY_HASH_WRONG_LENGTH = "vkey hash not 28 bytes long",
@@ -157,8 +157,12 @@ export enum InvalidDataReason {
   "certificate stake credential must be given as a staking path in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH =
   "withdrawal must be given as a path in TransactionSigningMode.ORDINARY_TRANSACTION",
-  SIGN_MODE_ORDINARY__COLLATERALS_NOT_ALLOWED =
-  "collaterals not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED =
+  "collateral inputs not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED =
+  "no collateral output allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED =
+  "total collateral not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED =
   "reference inputs not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
 
@@ -172,13 +176,19 @@ export enum InvalidDataReason {
   "certificate stake credential must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT =
   "withdrawal must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
-  SIGN_MODE_MULTISIG__COLLATERALS_NOT_ALLOWED =
-  "collaterals not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED =
+  "collateral inputs not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED =
+  "no collateral output allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED =
+  "total collateral not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED =
   "reference inputs not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
 
   SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED =
+  "datum in outputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__INPUT_WITH_PATH_NOT_ALLOWED =
   "inputs with path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED =
@@ -191,14 +201,17 @@ export enum InvalidDataReason {
   "no mint allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__SCRIPT_DATA_HASH_NOT_ALLOWED =
   "no script data hash allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
-  SIGN_MODE_POOL_OWNER__COLLATERALS_NOT_ALLOWED =
-  "no collaterals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED =
+  "no collateral inputs allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+   SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED =
+  "total collateral not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED =
   "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED =
   "third party pool key is required in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
-  SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED =
-  "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+
+  SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED =
+  "reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__REFERENCE_INPUTS_NOT_ALLOWED =
   "reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
 
@@ -214,12 +227,16 @@ export enum InvalidDataReason {
   "no mint allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__SCRIPT_DATA_HASH_NOT_ALLOWED =
   "no script data hash allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
-  SIGN_MODE_POOL_OPERATOR__COLLATERALS_NOT_ALLOWED =
-  "no collaterals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED =
+  "no collateral inputs allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED =
   "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED =
   "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED =
+  "no collateral output allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED =
+  "total collateral not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED =
   "reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
 

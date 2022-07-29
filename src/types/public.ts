@@ -898,6 +898,10 @@ export type DeviceCompatibility = {
      * Whether we support required signers in ordinary and multisig transactions
      */
      supportsReqSignersInOrdinaryTx: boolean;
+    /**
+     * Whether we support Babbage features
+     */
+     supportsBabbage: boolean;
 }
 
 /**
