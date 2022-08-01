@@ -1,6 +1,7 @@
 import {InvalidData} from "../errors"
 import {InvalidDataReason} from "../errors/invalidDataReason"
 import type {
+    HexString,
     OutputDestination,
     ParsedAssetGroup,
     ParsedCertificate,
@@ -163,6 +164,14 @@ function parseDatum(output: TxOutput): ParsedDatum | null {
             : parseDatumHash(output.datumHashHex)
     }
     return datum
+}
+
+function parseScriptHex(output: TxOutput): HexString | null {
+    if (output.type === TxOutputType.MAP_BABBAGE && output.scriptHex) {
+        return parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
+    } else { // Alonzo
+        return null
+    }
 }
 
 function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
@@ -352,12 +361,15 @@ function parseTxOutput(
     const datum = parseDatum(output)
     validate(!datum || addressAllowsDatum(destination), InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
 
+    const scriptHex = parseScriptHex(output)
+
     return {
         type,
         amount,
         tokenBundle,
         destination,
         datum,
+        scriptHex,
     }
 }
 

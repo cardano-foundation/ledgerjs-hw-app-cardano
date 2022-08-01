@@ -711,4 +711,70 @@ export const testsBabbage: SignTxTestcase[] = [
             auxiliaryDataSupplement: null,
         },
     },
+    {
+        testname: "Sign tx with datum hash and script reference in output in Babbage format",
+        tx: {
+            ...mainnetFeeTtl,
+            network: Networks.Testnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.datumHashScriptRefExternalMap],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a4005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce1880354deadbeefdeadbeefdeadbeefdeadbeefdeadbeef02182a030a",
+        expectedResult: {
+            txHashHex: "39fa3c08e173ccbf98f7e73fcbd8853daec14763fb7c8711d3972174588ad5a7",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "606b11e0585eb7583fce9b937292bac0940beb265b7f79f1a75078b1e0eddd4295331473fc13613a6f4198116ca31c7864dfbea12fdad5886ebe9bebce0c2a05",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with datum hash and script reference 300 in output in Babbage format",
+        tx: {
+            ...mainnetFeeTtl,
+            network: Networks.Testnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.datumHashScriptRef300ExternalMap],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a4005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188035896deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdead02182a030a",
+        expectedResult: {
+            txHashHex: "2327cf864d886433f1a27a7c745d38c31c63a41c3dfd77eb4b726ba012b2ae58",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "c042497c33be1184690fb29c6b012afe5cd11175d69d47e57d357310bf30079bf713a1f5e91969081ffadc81f84e4a67cfaf15e45821794711471e825c5f8200",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
+    {
+        testname: "Sign tx with datum hash and script reference 608 in output in Babbage format",
+        tx: {
+            ...mainnetFeeTtl,
+            network: Networks.Testnet,
+            inputs: [inputs.utxoShelley],
+            outputs: [outputs.datumHashScriptRef608ExternalMap],
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        additionalWitnessPaths: [],
+        txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a4005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce18803590130deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeaddeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeaddeadbeef02182a030a",
+        expectedResult: {
+            txHashHex: "2211ae3e93304e7cb9677ba6b7b58871301d77e37877c9aa0470fa2a6875dd70",
+            witnesses: [
+                {
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "085dda576780abdc68a1d70a99e2107d680309a452062b329604fe49d7459c2005a432c737c51648a9b679d3b706cbcb8198e2144cdaae7230df46b2fa670006",
+                },
+            ],
+            auxiliaryDataSupplement: null,
+        },
+    },
 ]

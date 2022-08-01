@@ -1,4 +1,4 @@
-import {MAX_DATUM_CHUNK_SIZE} from "../../parsing/constants"
+import {MAX_CHUNK_SIZE} from "../../parsing/constants"
 import type {HexString, OutputDestination, ParsedOutput, Uint8_t,Uint32_t} from "../../types/internal"
 import {TxOutputDestinationType} from "../../types/internal"
 import type {Version} from "../../types/public"
@@ -47,12 +47,17 @@ export function serializeTxOutputBasicParams(
         ? serializeOptionFlag(hasDatum)
         : Buffer.from([])
 
+    const scriptHexBuffer = getCompatibility(version).supportsBabbage
+        ? serializeOptionFlag(output.scriptHex != null)
+        : Buffer.from([])
+
     return Buffer.concat([
         serializationFormatBuffer,
         serializeTxOutputDestination(output.destination, version),
         uint64_to_buf(output.amount),
         uint32_to_buf(output.tokenBundle.length as Uint32_t),
         datumOptionBuffer,
+        scriptHexBuffer,
     ])
 }
 
@@ -75,8 +80,8 @@ export function serializeTxOutputDatum(
             const totalDatumSize = output.datum.datumHex.length / 2
             let chunkHex: HexString
 
-            if (totalDatumSize > MAX_DATUM_CHUNK_SIZE) {
-                chunkHex = output.datum.datumHex.substr(0, MAX_DATUM_CHUNK_SIZE * 2) as HexString
+            if (totalDatumSize > MAX_CHUNK_SIZE) {
+                chunkHex = output.datum.datumHex.substr(0, MAX_CHUNK_SIZE * 2) as HexString
             } else {
                 chunkHex = output.datum.datumHex
             }
@@ -111,3 +116,28 @@ export function serializeTxOutputDatum(
     }
 }
 
+export function serializeTxOutputScriptHex(
+    output: ParsedOutput,
+): Buffer {
+
+    if (output.type === TxOutputType.MAP_BABBAGE && output.scriptHex != null) {
+        const totalScriptHexSize = output.scriptHex.length / 2
+        let scriptHex: HexString
+
+        if (totalScriptHexSize > MAX_CHUNK_SIZE) {
+            scriptHex = output.scriptHex.substr(0, MAX_CHUNK_SIZE * 2) as HexString
+        } else {
+            scriptHex = output.scriptHex
+        }
+        const chunkSize = scriptHex.length / 2
+
+        return Buffer.concat([
+            uint32_to_buf(totalScriptHexSize as Uint32_t),
+            uint32_to_buf(chunkSize as Uint32_t), //First chunk
+            hex_to_buf(scriptHex),
+        ])
+
+    } else {    //  Alonzo Format
+        return Buffer.concat([])
+    }
+}

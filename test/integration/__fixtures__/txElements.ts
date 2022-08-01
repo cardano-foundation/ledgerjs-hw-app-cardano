@@ -355,6 +355,9 @@ export const outputs: Record<
   | 'datumHashStakePathExternal'
   | 'internalBaseWithStakingPathMap'
   | 'datumHashExternalMap'
+  | 'datumHashScriptRefExternalMap'
+  | 'datumHashScriptRef300ExternalMap'
+  | 'datumHashScriptRef608ExternalMap'
   | 'datumHashWithTokensMap'
   | 'inlineDatumWithTokensMap'
   | 'inlineDatum300Map'
@@ -814,6 +817,36 @@ export const outputs: Record<
             type: DatumType.HASH,
             datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
         },
+    },
+    datumHashScriptRefExternalMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        datum: {
+            type: DatumType.HASH,
+            datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+        },
+        scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    },
+    datumHashScriptRef300ExternalMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        datum: {
+            type: DatumType.HASH,
+            datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+        },
+        scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdead",
+    },
+    datumHashScriptRef608ExternalMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        datum: {
+            type: DatumType.HASH,
+            datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+        },
+        scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeaddeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeaddeadbeef",
     },
     datumHashWithTokensMap: {
         type: TxOutputType.MAP_BABBAGE,

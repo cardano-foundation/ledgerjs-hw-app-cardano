@@ -1,5 +1,5 @@
 import {DeviceVersionUnsupported} from "../errors"
-import {MAX_DATUM_CHUNK_SIZE} from "../parsing/constants"
+import {MAX_CHUNK_SIZE} from "../parsing/constants"
 import type {
     HexString,
     Int64_str,
@@ -76,7 +76,11 @@ import {
     serializeTxWithdrawal,
     serializeTxWitnessRequest,
 } from "./serialization/txOther"
-import {serializeTxOutputBasicParams, serializeTxOutputDatum} from "./serialization/txOutput"
+import {
+    serializeTxOutputBasicParams,
+    serializeTxOutputDatum,
+    serializeTxOutputScriptHex,
+} from "./serialization/txOutput"
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
 const enum P1 {
@@ -140,6 +144,29 @@ function* signTx_addInput(
   })
 }
 
+function* signTx_addOutput_sendChunks(hex: HexString, p2: number) {
+
+    //First chunk is already sent with previous APDU, so we start with 2nd chunk
+    let start = MAX_CHUNK_SIZE * 2
+    let end = start
+
+    while (start < hex.length) {
+        end = Math.min(hex.length, start + (MAX_CHUNK_SIZE * 2))
+        let chunk = hex.substring(start, end)
+
+        yield send({
+            p1: P1.STAGE_OUTPUTS,
+            p2: p2,
+            data: Buffer.concat([
+                uint32_to_buf(chunk.length / 2 as Uint32_t),
+                hex_to_buf(chunk as HexString),
+            ]),
+            expectedResponseLength: 0,
+        })
+        start = end
+    }
+}
+
 function* signTx_addOutput(
     output: ParsedOutput,
     version: Version,
@@ -148,6 +175,8 @@ function* signTx_addOutput(
         BASIC_DATA = 0x30,
         DATUM = 0x34,
         DATUM_CHUNK = 0x35,
+        SCRIPT = 0x36,
+        SCRIPT_CHUNK = 0x37,
         CONFIRM = 0x33,
     }
 
@@ -171,27 +200,22 @@ function* signTx_addOutput(
         })
         // Datum Chunks
         if (output.datum.type === DatumType.INLINE
-            && output.datum.datumHex.length / 2 > MAX_DATUM_CHUNK_SIZE) {
+            && output.datum.datumHex.length / 2 > MAX_CHUNK_SIZE) {
+            yield* signTx_addOutput_sendChunks(output.datum.datumHex, P2.DATUM_CHUNK)
+        }
+    }
 
-            //First chunk is already sent with previous APDU, so we start with 2nd chunk
-            let start = MAX_DATUM_CHUNK_SIZE * 2
-            let end = start
-
-            while (start < output.datum.datumHex.length) {
-                end = Math.min(output.datum.datumHex.length, start + (MAX_DATUM_CHUNK_SIZE * 2))
-                let chunk = output.datum.datumHex.substring(start, end)
-
-                yield send({
-                    p1: P1.STAGE_OUTPUTS,
-                    p2: P2.DATUM_CHUNK,
-                    data: Buffer.concat([
-                        uint32_to_buf(chunk.length / 2 as Uint32_t),
-                        hex_to_buf(chunk as HexString),
-                    ]),
-                    expectedResponseLength: 0,
-                })
-                start = end
-            }
+    // Reference Script
+    if (output.scriptHex) {
+        yield send({
+            p1: P1.STAGE_OUTPUTS,
+            p2: P2.SCRIPT,
+            data: serializeTxOutputScriptHex(output),
+            expectedResponseLength: 0,
+        })
+        // Script chunks
+        if (output.scriptHex.length / 2 > MAX_CHUNK_SIZE) {
+            yield* signTx_addOutput_sendChunks(output.scriptHex, P2.SCRIPT_CHUNK)
         }
     }
 

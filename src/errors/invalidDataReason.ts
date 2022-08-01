@@ -24,6 +24,7 @@ export enum InvalidDataReason {
   OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH = "datum hash is only allowed when the output address contains a payment script hash",
   OUTPUT_INVALID_DATUM_HASH = "invalid datum hash",
   OUTPUT_INVALID_INLINE_DATUM = "invalid inline datum",
+  OUTPUT_INVALID_SCRIPT_HEX = "invalid script hex",
 
   MULTIASSET_INVALID_POLICY_NAME = "invalid policy id in a multiasset token bundle",
   MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid multiasset token bundle - asset groups not an array",
