@@ -16,6 +16,7 @@ import type {
 import {
     ASSET_NAME_LENGTH_MAX,
     CertificateType,
+    DATUM_HASH_LENGTH,
     KEY_HASH_LENGTH,
     RequiredSignerType,
     SCRIPT_DATA_HASH_LENGTH,
@@ -131,8 +132,8 @@ function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed:
 
 function parseDatumHash(datumHashHex: string): ParsedDatum | null {
     return {
-        type: DatumType.HASH, 
-        datumHashHex: parseHexStringOfLength(datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+        type: DatumType.HASH,
+        datumHashHex: parseHexStringOfLength(datumHashHex, DATUM_HASH_LENGTH, InvalidDataReason.OUTPUT_INVALID_DATUM_HASH),
     }
 }
 
@@ -148,7 +149,7 @@ function parseDatum(output: TxOutput): ParsedDatum | null {
         case DatumType.INLINE:
             datum = {
                 type: DatumType.INLINE,
-                datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+                datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.OUTPUT_INVALID_INLINE_DATUM),
             }
             break/**/
         default:
@@ -348,7 +349,7 @@ function parseTxOutput(
 
     const destination = parseTxDestination(network, output.destination)
 
-    let datum : ParsedDatum | null = parseDatum(output)
+    const datum = parseDatum(output)
     validate(!datum || addressAllowsDatum(destination), InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
 
     return {
