@@ -1,5 +1,4 @@
 import {DeviceVersionUnsupported} from "../errors"
-import {MAX_CHUNK_SIZE} from "../parsing/constants"
 import type {
     HexString,
     Int64_str,
@@ -22,6 +21,7 @@ import {
     AUXILIARY_DATA_HASH_LENGTH,
     CertificateType,
     ED25519_SIGNATURE_LENGTH,
+    MAX_CHUNK_SIZE,
     PoolOwnerType,
     RequiredSignerType,
     StakeCredentialType,
@@ -79,7 +79,7 @@ import {
 import {
     serializeTxOutputBasicParams,
     serializeTxOutputDatum,
-    serializeTxOutputScriptHex,
+    serializeTxOutputScriptRef,
 } from "./serialization/txOutput"
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
@@ -195,7 +195,7 @@ function* signTx_addOutput(
         yield send({
             p1: P1.STAGE_OUTPUTS,
             p2: P2.DATUM,
-            data: serializeTxOutputDatum(output, version),
+            data: serializeTxOutputDatum(output.datum, version),
             expectedResponseLength: 0,
         })
         // Datum Chunks
@@ -210,7 +210,7 @@ function* signTx_addOutput(
         yield send({
             p1: P1.STAGE_OUTPUTS,
             p2: P2.SCRIPT,
-            data: serializeTxOutputScriptHex(output),
+            data: serializeTxOutputScriptRef(output.scriptHex),
             expectedResponseLength: 0,
         })
         // Script chunks
@@ -986,7 +986,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Total collateral not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.tx.referenceInputs.length !=0 && !getCompatibility(version).supportsBabbage) {
+    if (request.tx.referenceInputs.length > 0 && !getCompatibility(version).supportsBabbage) {
         throw new DeviceVersionUnsupported(`Reference inputs not supported by Ledger app version ${getVersionString(version)}.`)
     }
 

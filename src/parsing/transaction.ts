@@ -152,7 +152,7 @@ function parseDatum(output: TxOutput): ParsedDatum | null {
                 type: DatumType.INLINE,
                 datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.OUTPUT_INVALID_INLINE_DATUM),
             }
-            break/**/
+            break
         default:
             datum = null
             break
@@ -164,14 +164,6 @@ function parseDatum(output: TxOutput): ParsedDatum | null {
             : parseDatumHash(output.datumHashHex)
     }
     return datum
-}
-
-function parseScriptHex(output: TxOutput): HexString | null {
-    if (output.type === TxOutputType.MAP_BABBAGE && output.scriptHex) {
-        return parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
-    } else { // Alonzo
-        return null
-    }
 }
 
 function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
@@ -361,7 +353,9 @@ function parseTxOutput(
     const datum = parseDatum(output)
     validate(!datum || addressAllowsDatum(destination), InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
 
-    const scriptHex = parseScriptHex(output)
+    const scriptHex = output.type === TxOutputType.MAP_BABBAGE && output.scriptHex
+        ? parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
+        : null
 
     return {
         type,
