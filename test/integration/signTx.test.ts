@@ -1,7 +1,7 @@
 import { describeSignTxPositiveTest,describeSignTxRejects  } from "../test_utils"
 import {
     testsAllegra,
-    testsAlonzoTrezorComparison,
+    testsAlonzoTrezorComparison, testsBabbageTrezorComparison,
     testsByron,
     testsCatalystRegistration,
     testsMary,
@@ -33,6 +33,7 @@ describeSignTxPositiveTest("signTxAllegra", testsAllegra)
 describeSignTxPositiveTest("signTxMary", testsMary)
 describeSignTxPositiveTest("signTxCatalyst", testsCatalystRegistration)
 describeSignTxPositiveTest("signTxTrezorComparison", testsAlonzoTrezorComparison)
+describeSignTxPositiveTest("signTxBabbageTrezorComparison", testsBabbageTrezorComparison)
 
 describeSignTxRejects("signTxInitPolicyRejects", transactionInitRejectTestcases)
 describeSignTxRejects("signTxAddressBytesPolicyRejects", addressBytesRejectTestcases)
