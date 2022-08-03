@@ -72,20 +72,20 @@ export function serializeTxOutputDatum(
 
         case DatumType.INLINE: {
             const totalDatumSize = output.datum.datumHex.length / 2
-            let datumHex: HexString
+            let chunkHex: HexString
 
             if (totalDatumSize > MAX_DATUM_CHUNK_SIZE) {
-                datumHex = output.datum.datumHex.substr(0, MAX_DATUM_CHUNK_SIZE * 2) as HexString
+                chunkHex = output.datum.datumHex.substr(0, MAX_DATUM_CHUNK_SIZE * 2) as HexString
             } else {
-                datumHex = output.datum.datumHex
+                chunkHex = output.datum.datumHex
             }
-            const chunkSize = datumHex.length / 2
+            const chunkSize = chunkHex.length / 2
 
             return Buffer.concat([
                 uint8_to_buf(DatumType.INLINE as Uint8_t),
                 uint32_to_buf(totalDatumSize as Uint32_t),
                 uint32_to_buf(chunkSize as Uint32_t), //First chunk
-                hex_to_buf(datumHex),
+                hex_to_buf(chunkHex),
             ])
         }
 

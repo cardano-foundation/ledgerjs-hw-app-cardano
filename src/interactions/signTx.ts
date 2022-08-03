@@ -146,7 +146,7 @@ function* signTx_addOutput(
 ): Interaction<void> {
     const enum P2 {
         BASIC_DATA = 0x30,
-        DATUM_OPTION = 0x34,
+        DATUM = 0x34,
         DATUM_CHUNK = 0x35,
         CONFIRM = 0x33,
     }
@@ -165,7 +165,7 @@ function* signTx_addOutput(
     if (output.datum) {
         yield send({
             p1: P1.STAGE_OUTPUTS,
-            p2: P2.DATUM_OPTION,
+            p2: P2.DATUM,
             data: serializeTxOutputDatum(output, version),
             expectedResponseLength: 0,
         })

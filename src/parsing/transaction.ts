@@ -129,16 +129,21 @@ function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed:
     return parsedTokenBundle
 }
 
+function parseDatumHash(datumHashHex: string): ParsedDatum | null {
+    return {
+        type: DatumType.HASH, 
+        datumHashHex: parseHexStringOfLength(datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
+    }
+}
+
+
 function parseDatum(output: TxOutput): ParsedDatum | null {
     let datum: ParsedDatum | null
     if (output.type === TxOutputType.MAP_BABBAGE) {
 
         switch (output.datum?.type) {
         case DatumType.HASH:
-            datum = {
-                type: DatumType.HASH,
-                datumHashHex: parseHexStringOfLength(output.datum.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
-            }
+            datum = parseDatumHash(output.datum?.datumHashHex)
             break
         case DatumType.INLINE:
             datum = {
@@ -154,10 +159,7 @@ function parseDatum(output: TxOutput): ParsedDatum | null {
     } else { // Alonzo
         datum = output.datumHashHex == null
             ? null
-            : {
-                type: DatumType.HASH,
-                datumHashHex: parseHexStringOfLength(output.datumHashHex, SCRIPT_DATA_HASH_LENGTH, InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH),
-            }
+            : parseDatumHash(output.datumHashHex)
     }
     return datum
 }
