@@ -738,7 +738,7 @@ export const outputs: Record<
     },
     trezorParityBabbage: {
         type: TxOutputType.MAP_BABBAGE,
-        destination: destinations.multiassetThirdParty,
+        destination: destinations.externalShelleyBaseKeyhashKeyhash,
         amount: 2000000,
         tokenBundle: [
             {
