@@ -468,52 +468,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
     },
 ]
 
-export const addressBytesRejectTestcases: TestcaseRejectShelley[] = [
-    {
-        testname: "Datum for address with payment key hash, staking key hash",
-        tx: {
-            ...shelleyBase,
-            outputs: [{
-                ...outputs.datumHashInternal,
-                destination: destinations.externalShelleyBaseKeyhashKeyhash,
-            }],
-        },
-        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        errCls: DeviceStatusError,
-        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH,
-    },
-    {
-        testname: "Datum for address with payment key hash, staking script hash",
-        tx: {
-            ...shelleyBase,
-            outputs: [{
-                ...outputs.datumHashInternal,
-                destination: destinations.externalShelleyBaseKeyhashScripthash,
-            }],
-        },
-        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        errCls: DeviceStatusError,
-        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH,
-    },
-]
-
 export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
-    {
-        testname: "Datum for address with payment key path",
-        tx: {
-            ...shelleyBase,
-            outputs: [{
-                ...outputs.datumHashInternal,
-                destination: destinations.internalBaseWithStakingPath,
-            }],
-        },
-        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        errCls: DeviceStatusError,
-        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH,
-    },
     {
         testname: "Reward address - key",
         tx: {

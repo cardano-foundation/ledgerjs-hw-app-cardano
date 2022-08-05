@@ -11,7 +11,6 @@ import {
 } from "./__fixtures__/signTx"
 import { testsAlonzo, testsBabbage} from "./__fixtures__/signTxPlutus"
 import {
-    addressBytesRejectTestcases,
     addressParamsRejectTestcases,
     certificateRejectTestcases,
     certificateStakePoolRetirementRejectTestcases,
@@ -36,7 +35,6 @@ describeSignTxPositiveTest("signTxTrezorComparison", testsAlonzoTrezorComparison
 describeSignTxPositiveTest("signTxBabbageTrezorComparison", testsBabbageTrezorComparison)
 
 describeSignTxRejects("signTxInitPolicyRejects", transactionInitRejectTestcases)
-describeSignTxRejects("signTxAddressBytesPolicyRejects", addressBytesRejectTestcases)
 describeSignTxRejects("signTxAddressParamsPolicyRejects", addressParamsRejectTestcases)
 describeSignTxRejects("signTxCertificatePolicyRejects", certificateRejectTestcases)
 describeSignTxRejects("signTxCertificateStakingPolicyRejects", certificateStakingRejectTestcases)

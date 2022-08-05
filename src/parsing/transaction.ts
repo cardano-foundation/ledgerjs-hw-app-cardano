@@ -1,7 +1,6 @@
 import {InvalidData} from "../errors"
 import {InvalidDataReason} from "../errors/invalidDataReason"
 import type {
-    HexString,
     OutputDestination,
     ParsedAssetGroup,
     ParsedCertificate,

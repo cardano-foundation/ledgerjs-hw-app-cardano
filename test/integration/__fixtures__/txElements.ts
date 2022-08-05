@@ -357,6 +357,7 @@ export const outputs: Record<
   | 'datumHashStakePath'
   | 'datumHashStakePathExternal'
   | 'internalBaseWithStakingPathMap'
+  | 'internalBaseWithTokensMap'
   | 'datumHashExternalMap'
   | 'datumHashScriptRefExternalMap'
   | 'datumHashScriptRef300ExternalMap'
@@ -857,6 +858,22 @@ export const outputs: Record<
         type: TxOutputType.MAP_BABBAGE,
         destination: destinations.internalBaseWithStakingPath,
         amount: 7120787,
+    },
+    internalBaseWithTokensMap: {
+        type: TxOutputType.MAP_BABBAGE,
+        destination: destinations.internalBaseWithStakingPath,
+        amount: 7120787,
+        tokenBundle: [
+            {
+                policyIdHex: "75a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                tokens: [
+                    {
+                        assetNameHex: "7564247542686911",
+                        amount: "47",
+                    },
+                ],
+            },
+        ],
     },
     datumHashExternalMap: {
         type: TxOutputType.MAP_BABBAGE,
