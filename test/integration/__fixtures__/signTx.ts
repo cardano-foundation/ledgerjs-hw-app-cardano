@@ -1058,7 +1058,7 @@ export const testsAlonzoTrezorComparison: SignTxTestcase[] = [
             // if Networks.Mainnet differs, the test should just explicitly give these
             network: Networks.Mainnet,
             inputs: [inputs.utxoMultisig],
-            outputs: [outputs.trezorParity, outputs.trezorParityDatumHash],
+            outputs: [outputs.trezorParity1, outputs.trezorParityDatumHash1],
             fee: 42,
             ttl: 10,
             validityIntervalStart: 47,
@@ -1152,7 +1152,7 @@ export const testsBabbageTrezorComparison: SignTxTestcase[] = [
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
-            outputs: [outputs.trezorParityBabbage, outputs.trezorParityDatumHashBabbage],
+            outputs: [outputs.trezorParity2, outputs.trezorParityDatumHash2],
             fee: 42,
             ttl: 10,
             validityIntervalStart: 47,
@@ -1169,8 +1169,8 @@ export const testsBabbageTrezorComparison: SignTxTestcase[] = [
             txHashHex: "3e0c44577b78d0b9628167ca03bfe56d2730e3291b0992d0316e6eebabf0685e",
             witnesses: [
                 {
-                    path: str_to_path("44'/1815'/0'/0/0"),
-                    witnessSignatureHex: "f58fa4d613b47e9812ff57ad8379ce029a33361a023d1fd46b085706354013a04909a8a8b5d52e0570d86ec91b80e357558b320a6fd8afe794f222f48bbd310d",
+                    path: str_to_path("1852'/1815'/0'/0/0"),
+                    witnessSignatureHex: "b6625562153024a481503905b9d05b9e3b6c1b5267f2cce6531e93a14052a1c7db6cc799d77c3ce4f1efd5b7b199c28af4aca6ca59d0d1423eac476e748a8901",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -1194,7 +1194,7 @@ export const testsBabbageTrezorComparison: SignTxTestcase[] = [
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "a948c77aa71619bd6d619ba23f804bc4669a7342ab14ee4fda8e68fc940fae6482711268cc40dd8658e68a18788b8a68b26216d58b93d2ac2619f21ba6a5fc00",
+                    witnessSignatureHex: "a655f96ffc6fe56c5f9287dc28474805a97a46b85def8002cb1d4ee975fe69ae89a4a24c317db9cc3c7390410465ded89f349d081de5fd757689af9b6c125609",
                 },
             ],
             auxiliaryDataSupplement: null,

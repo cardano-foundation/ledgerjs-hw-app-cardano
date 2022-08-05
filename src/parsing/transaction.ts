@@ -340,7 +340,7 @@ function parseTxOutput(
     output: TxOutput,
     network: Network,
 ): ParsedOutput {
-    const type = output.type === TxOutputType.MAP_BABBAGE 
+    const type = output.type === TxOutputType.MAP_BABBAGE
         ? TxOutputType.MAP_BABBAGE
         : TxOutputType.ARRAY_LEGACY
 

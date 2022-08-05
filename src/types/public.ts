@@ -312,7 +312,7 @@ export enum TxOutputType {
 /**
  * Corresponds to legacy_transaction_output in
  * https://github.com/input-output-hk/cardano-ledger/blob/master/eras/babbage/test-suite/cddl-files/babbage.cddl
- * Serializes as a tuple.
+ * Serializes as an array.
  */
 export type TxOutputAlonzo = {
     type?: TxOutputType.ARRAY_LEGACY;

@@ -345,10 +345,10 @@ export const outputs: Record<
   | 'multiassetInvalidTokenOrderingSameLength'
   | 'multiassetInvalidTokenOrderingDifferentLengths'
   | 'multiassetTokensNotUnique'
-  | 'trezorParity'
-  | 'trezorParityBabbage'
-  | 'trezorParityDatumHash'
-  | 'trezorParityDatumHashBabbage'
+  | 'trezorParity1'
+  | 'trezorParity2'
+  | 'trezorParityDatumHash1'
+  | 'trezorParityDatumHash2'
   | 'trezorParityBabbageOutputs'
   | 'datumHashInternal'
   | 'datumHashExternal'
@@ -721,7 +721,7 @@ export const outputs: Record<
             },
         ],
     },
-    trezorParity: {
+    trezorParity1: {
         destination: destinations.multiassetThirdParty,
         amount: 2000000,
         tokenBundle: [
@@ -736,8 +736,8 @@ export const outputs: Record<
             },
         ],
     },
-    trezorParityBabbage: {
-        type: TxOutputType.MAP_BABBAGE,
+    trezorParity2: {
+        type: TxOutputType.ARRAY_LEGACY,
         destination: destinations.externalShelleyBaseKeyhashKeyhash,
         amount: 2000000,
         tokenBundle: [
@@ -752,7 +752,7 @@ export const outputs: Record<
             },
         ],
     },
-    trezorParityDatumHash: {
+    trezorParityDatumHash1: {
         destination: {
             type: TxOutputDestinationType.THIRD_PARTY,
             params: {
@@ -764,8 +764,8 @@ export const outputs: Record<
         amount: 1,
         datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     },
-    trezorParityDatumHashBabbage: {
-        type: TxOutputType.MAP_BABBAGE,
+    trezorParityDatumHash2: {
+        type: TxOutputType.ARRAY_LEGACY,
         destination: {
             type: TxOutputDestinationType.THIRD_PARTY,
             params: {
@@ -775,10 +775,7 @@ export const outputs: Record<
             },
         },
         amount: 1,
-        datum:{
-            type: DatumType.HASH,
-            datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
-        } ,
+        datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     },
     trezorParityBabbageOutputs: {
         type: TxOutputType.MAP_BABBAGE,
