@@ -39,7 +39,6 @@ import type {
     Withdrawal,
 } from "../types/public"
 import {
-    AddressType,
     DatumType,
     PoolKeyType,
     PoolOwnerType,
@@ -60,7 +59,6 @@ import {
     parseUint64_str,
     validate,
 } from "../utils/parse"
-import {hex_to_buf} from "../utils/serialize"
 import {parseAddress} from "./address"
 import {parseCertificate} from "./certificate"
 import {ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX} from "./constants"
@@ -310,31 +308,6 @@ function parseTxDestination(
     }
 }
 
-// a HW wallet cannot distinguish between native script hash and Plutus script hash
-// so allows datum hash whenever the payment part is script
-function addressAllowsDatum(destination: OutputDestination): boolean {
-    let type: AddressType
-    switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY :{
-        const addressBytes: Buffer = hex_to_buf(destination.addressHex)
-        type = (addressBytes[0] & 0b11110000) >> 4
-        break
-    }
-    case TxOutputDestinationType.DEVICE_OWNED:
-        type = destination.addressParams.type
-        break
-    }
-    switch (type) {
-    case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
-    case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
-    case AddressType.POINTER_SCRIPT:
-    case AddressType.ENTERPRISE_SCRIPT:
-        return true
-    default:
-        return false
-    }
-}
-
 function parseTxOutput(
     output: TxOutput,
     network: Network,
@@ -350,11 +323,16 @@ function parseTxOutput(
     const destination = parseTxDestination(network, output.destination)
 
     const datum = parseDatum(output)
-    validate(!datum || addressAllowsDatum(destination), InvalidDataReason.OUTPUT_INVALID_DATUM_HASH_WITHOUT_SCRIPT_HASH)
+    if (datum?.type === DatumType.INLINE) {
+        validate(output.type === TxOutputType.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
+    }
 
     const scriptHex = output.type === TxOutputType.MAP_BABBAGE && output.scriptHex
         ? parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
         : null
+    if (scriptHex != null) {
+        validate(output.type === TxOutputType.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_SCRIPT)
+    }
 
     return {
         type,

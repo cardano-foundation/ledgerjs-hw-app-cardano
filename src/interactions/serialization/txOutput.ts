@@ -39,7 +39,7 @@ export function serializeTxOutputBasicParams(
     const serializationFormatBuffer = getCompatibility(version).supportsBabbage
         ? uint8_to_buf(output.type as Uint8_t)
         : Buffer.from([])
-    
+
     const datumOptionBuffer = getCompatibility(version).supportsAlonzo
         ? serializeOptionFlag(output.datum != null)
         : Buffer.from([])
@@ -81,7 +81,7 @@ export function serializeTxOutputDatum(
         let chunkHex: HexString
 
         if (totalDatumSize > MAX_CHUNK_SIZE) {
-            chunkHex = datum.datumHex.substr(0, MAX_CHUNK_SIZE * 2) as HexString
+            chunkHex = datum.datumHex.substring(0, MAX_CHUNK_SIZE * 2) as HexString
         } else {
             chunkHex = datum.datumHex
         }
@@ -107,7 +107,7 @@ export function serializeTxOutputScriptRef(
     let chunkHex: HexString
 
     if (totalScriptHexSize > MAX_CHUNK_SIZE) {
-        chunkHex = scriptHex.substr(0, MAX_CHUNK_SIZE * 2) as HexString
+        chunkHex = scriptHex.substring(0, MAX_CHUNK_SIZE * 2) as HexString
     } else {
         chunkHex = scriptHex
     }

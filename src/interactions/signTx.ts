@@ -199,9 +199,11 @@ function* signTx_addOutput(
             expectedResponseLength: 0,
         })
         // Datum Chunks
-        if (output.datum.type === DatumType.INLINE
-            && output.datum.datumHex.length / 2 > MAX_CHUNK_SIZE) {
-            yield* signTx_addOutput_sendChunks(output.datum.datumHex, P2.DATUM_CHUNK)
+        if (output.datum.type === DatumType.INLINE) {
+            const additionalChunksNeeded = output.datum.datumHex.length / 2 > MAX_CHUNK_SIZE
+            if (additionalChunksNeeded) {
+                yield* signTx_addOutput_sendChunks(output.datum.datumHex, P2.DATUM_CHUNK)
+            }
         }
     }
 
