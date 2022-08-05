@@ -1,7 +1,8 @@
-import type {DatumType, TxOutputType} from './public'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import {
     AddressType,
     CertificateType,
+    DatumType,
     NativeScriptType,
     PoolKeyType,
     PoolOwnerType,
@@ -10,6 +11,7 @@ import {
     TransactionSigningMode,
     TxAuxiliaryDataType,
     TxOutputDestinationType,
+    TxOutputType,
 } from './public'
 
 // Basic primitives
@@ -29,7 +31,7 @@ export type Int64_str = string & { __type: 'int64_t' }
 export type ValidBIP32Path = Array<Uint32_t> & { __type: 'bip32_path' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType }
+export { AddressType, CertificateType, DatumType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType, TxOutputType }
 export { Version, DeviceCompatibility, NativeScriptHashDisplayFormat } from './public'
 // Our types
 export const EXTENDED_PUBLIC_KEY_LENGTH = 64
