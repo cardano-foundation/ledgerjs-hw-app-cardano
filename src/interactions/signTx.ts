@@ -890,24 +890,15 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Script hash in address parameters in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    const hasMapFormatInOutputs = request.tx.outputs.some(o => o.type === TxOutputType.MAP_BABBAGE)
-    if (hasMapFormatInOutputs && !getCompatibility(version).supportsBabbage) {
-        throw new DeviceVersionUnsupported(`Outputs with map format not supported by Ledger app version ${getVersionString(version)}.`)
-    }
-
     const hasDatumInOutputs = request.tx.outputs.some(o => o.datum != null)
     if (hasDatumInOutputs && !getCompatibility(version).supportsAlonzo) {
         throw new DeviceVersionUnsupported(`Datum in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    const hasInlineDatumInOutputs = request.tx.outputs.some(o => o.datum?.type === DatumType.INLINE)
-    if (hasInlineDatumInOutputs && !getCompatibility(version).supportsBabbage) {
-        throw new DeviceVersionUnsupported(`Inline datum in output not supported by Ledger app version ${getVersionString(version)}.`)
-    }
-
-    const hasReferenceScriptInOutputs = request.tx.outputs.some(o => o.scriptHex != null)
-    if (hasReferenceScriptInOutputs && !getCompatibility(version).supportsBabbage) {
-        throw new DeviceVersionUnsupported(`Reference Script in output not supported by Ledger app version ${getVersionString(version)}.`)
+    const hasMapFormatInOutputs = request.tx.outputs.some(o => o.type === TxOutputType.MAP_BABBAGE)
+    if (hasMapFormatInOutputs && !getCompatibility(version).supportsBabbage) {
+        // this captures presence of inline datum and reference script, both are supported since Babbage
+        throw new DeviceVersionUnsupported(`Outputs with map format not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
     if (request.tx?.ttl === "0" && !getCompatibility(version).supportsZeroTtl) {
@@ -956,11 +947,11 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Script data hash not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.tx.collateralInputs.length != 0 && !getCompatibility(version).supportsAlonzo) {
-        throw new DeviceVersionUnsupported(`Collaterals not supported by Ledger app version ${getVersionString(version)}.`)
+    if (request.tx.collateralInputs.length > 0 && !getCompatibility(version).supportsAlonzo) {
+        throw new DeviceVersionUnsupported(`Collateral inputs not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    if (request.tx.requiredSigners.length != 0) {
+    if (request.tx.requiredSigners.length > 0) {
         if (!getCompatibility(version).supportsAlonzo) {
             throw new DeviceVersionUnsupported(`Required signers not supported by Ledger app version ${getVersionString(version)}.`)
         }
