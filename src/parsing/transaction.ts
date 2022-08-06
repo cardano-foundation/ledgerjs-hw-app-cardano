@@ -521,6 +521,11 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
             tx.outputs.every(out => (out.datum == null)),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED
         )
+        // no reference script in outputs
+        validate(
+            tx.outputs.every(out => (out.scriptHex == null)),
+            InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED
+        )
 
         // only a single certificate that is pool registration
         validate(
@@ -603,6 +608,11 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         validate(
             tx.outputs.every(out => (out.datum == null)),
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED
+        )
+        // no reference script in outputs
+        validate(
+            tx.outputs.every(out => (out.scriptHex == null)),
+            InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED
         )
 
         // only a single certificate that is pool registration

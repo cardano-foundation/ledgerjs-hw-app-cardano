@@ -191,6 +191,8 @@ export enum InvalidDataReason {
   "outputs given by path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED =
   "datum in outputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED =
+  "reference script in outputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__INPUT_WITH_PATH_NOT_ALLOWED =
   "inputs with path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED =
@@ -235,6 +237,8 @@ export enum InvalidDataReason {
   "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED =
   "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED =
+  "reference script in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED =
   "no collateral output allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED =
