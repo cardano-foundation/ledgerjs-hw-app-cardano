@@ -74,8 +74,11 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
 }
 
 
-type ParseTokenAmountFn<T> = (val: unknown, constraints: { min?: string | undefined; max?: string | undefined },
-    errMsg: InvalidDataReason) => T
+type ParseTokenAmountFn<T> = (
+    val: unknown,
+    constraints: { min?: string | undefined; max?: string | undefined },
+    errMsg: InvalidDataReason
+) => T
 
 function parseToken<T>(token: Token, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedToken<T> {
     const assetNameHex = parseHexString(token.assetNameHex, InvalidDataReason.MULTIASSET_INVALID_ASSET_NAME)
@@ -135,32 +138,28 @@ function parseDatumHash(datumHashHex: string): ParsedDatum | null {
     }
 }
 
-
 function parseDatum(output: TxOutput): ParsedDatum | null {
-    let datum: ParsedDatum | null
     if (output.type === TxOutputType.MAP_BABBAGE) {
 
         switch (output.datum?.type) {
         case DatumType.HASH:
-            datum = parseDatumHash(output.datum?.datumHashHex)
-            break
+            return parseDatumHash(output.datum?.datumHashHex)
+
         case DatumType.INLINE:
-            datum = {
+            return {
                 type: DatumType.INLINE,
                 datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.OUTPUT_INVALID_INLINE_DATUM),
             }
-            break
+
         default:
-            datum = null
-            break
+            return null
         }
 
     } else { // Alonzo
-        datum = output.datumHashHex == null
+        return output.datumHashHex == null
             ? null
             : parseDatumHash(output.datumHashHex)
     }
-    return datum
 }
 
 function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
