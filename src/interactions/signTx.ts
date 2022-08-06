@@ -21,7 +21,6 @@ import {
     AUXILIARY_DATA_HASH_LENGTH,
     CertificateType,
     ED25519_SIGNATURE_LENGTH,
-    MAX_CHUNK_SIZE,
     PoolOwnerType,
     RequiredSignerType,
     StakeCredentialType,
@@ -77,9 +76,10 @@ import {
     serializeTxWitnessRequest,
 } from "./serialization/txOther"
 import {
+    MAX_CHUNK_SIZE,
     serializeTxOutputBasicParams,
     serializeTxOutputDatum,
-    serializeTxOutputScriptRef,
+    serializeTxOutputRefScript,
 } from "./serialization/txOutput"
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
@@ -212,7 +212,7 @@ function* signTx_addOutput(
         yield send({
             p1: P1.STAGE_OUTPUTS,
             p2: P2.SCRIPT,
-            data: serializeTxOutputScriptRef(output.scriptHex),
+            data: serializeTxOutputRefScript(output.scriptHex),
             expectedResponseLength: 0,
         })
         // Script chunks

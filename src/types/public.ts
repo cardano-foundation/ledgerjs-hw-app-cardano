@@ -1153,11 +1153,11 @@ export type Transaction = {
      */
     scriptDataHashHex?: string | null;
     /**
-     * Collateral Inputs (if any)
+     * Collateral inputs (if any)
      */
     collateralInputs?: Array<TxInput> | null;
     /**
-     * Required Signers by key (if any)
+     * Required signers by key (if any)
      */
     requiredSigners?: Array<RequiredSigner> | null;
     /**

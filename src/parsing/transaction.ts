@@ -233,12 +233,12 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseTxOutput(tx.collateralOutput, tx.network)
 
-    //total collateral
+    // total collateral
     const totalCollateral = tx.totalCollateral == null
         ? null
         : parseUint64_str(tx.totalCollateral, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.TOTAL_COLLATERAL_NOT_VALID)
 
-    //reference inputs
+    // reference inputs
     validate(isArray(tx.referenceInputs ?? []), InvalidDataReason.REFERENCE_INPUTS_NOT_ARRAY)
     const referenceInputs = (tx.referenceInputs ?? []).map(ri => parseTxInput(ri))
 
@@ -285,7 +285,7 @@ function parseTxDestination(
     destination: TxOutputDestination,
 ): OutputDestination {
     switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY:{
+    case TxOutputDestinationType.THIRD_PARTY: {
         const params = destination.params
         const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
         validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
@@ -294,7 +294,7 @@ function parseTxDestination(
             addressHex,
         }
     }
-    case TxOutputDestinationType.DEVICE_OWNED:{
+    case TxOutputDestinationType.DEVICE_OWNED: {
         const params = destination.params
         const addressParams = parseAddress(network, params)
         validate(addressParams.spendingDataSource.type == SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)

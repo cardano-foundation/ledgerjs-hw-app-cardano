@@ -45,7 +45,6 @@ export const REWARD_ACCOUNT_HEX_LENGTH = 29
 export const ED25519_SIGNATURE_LENGTH = 64
 export const SCRIPT_DATA_HASH_LENGTH = 32
 export const DATUM_HASH_LENGTH = 32
-export const MAX_CHUNK_SIZE = 150
 
 export const enum StakeCredentialType {
     // enum values are affected by backwards-compatibility

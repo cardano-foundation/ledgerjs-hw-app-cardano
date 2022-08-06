@@ -306,7 +306,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED,
     },
     {
-        testname: "Ordinary tx - collaterals included",
+        testname: "Ordinary tx - collateral inputs included",
         tx: {
             ...shelleyBase,
             collateralInputs: [inputs.utxoShelley],
@@ -317,7 +317,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
-        testname: "Multisig tx - collaterals included",
+        testname: "Multisig tx - collateral inputs included",
         tx: {
             ...shelleyBase,
             collateralInputs: [inputs.utxoShelley],
@@ -328,7 +328,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
-        testname: "Pool registration (operator) - collaterals included",
+        testname: "Pool registration (operator) - collateral inputs included",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -345,7 +345,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
     {
-        testname: "Pool registration (owner) - collaterals included",
+        testname: "Pool registration (owner) - collateral inputs included",
         tx: {
             ...shelleyBase,
             inputs: [inputs.utxoMultisig],
