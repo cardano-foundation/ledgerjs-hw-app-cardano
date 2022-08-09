@@ -76,7 +76,7 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
 
 type ParseTokenAmountFn<T> = (
     val: unknown,
-    constraints: { min?: string | undefined; max?: string | undefined },
+    constraints: { min?: string; max?: string },
     errMsg: InvalidDataReason
 ) => T
 

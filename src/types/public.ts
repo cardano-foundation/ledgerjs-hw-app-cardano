@@ -369,7 +369,7 @@ export type TxOutputBabbage = {
     /**
      * Optional datum hash or inline datum
      */
-    datum?: Datum;
+    datum?: Datum | null;
     /**
      * Optional reference script
      * (without the #6.24 tag)
@@ -1168,11 +1168,11 @@ export type Transaction = {
     /**
      * True if network id should be included in the transaction body; false or not given otherwise
      */
-    includeNetworkId?: boolean;
+    includeNetworkId?: boolean | null;
     /**
      * Collateral return output
      */
-    collateralOutput?: TxOutput;
+    collateralOutput?: TxOutput | null;
     /**
      * Total collateral (in Lovelace).
      */
@@ -1180,7 +1180,7 @@ export type Transaction = {
     /**
      * Reference inputs (UTxOs). Visible to Plutus scripts, but not spent.
      */
-    referenceInputs?: Array<TxInput>;
+    referenceInputs?: Array<TxInput> | null;
 }
 
 /**
