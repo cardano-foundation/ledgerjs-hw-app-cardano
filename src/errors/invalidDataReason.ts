@@ -154,7 +154,7 @@ export enum InvalidDataReason {
   SIGN_MODE_UNKNOWN = "unknown signing mode",
 
   SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED =
-  "pool registration is not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  "pool registration not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH =
   "certificate stake credential must be given as a staking path in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH =
@@ -162,18 +162,18 @@ export enum InvalidDataReason {
   SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED =
   "collateral inputs not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED =
-  "no collateral output allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
+  "collateral output not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED =
   "total collateral not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
   SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED =
   "reference inputs not allowed in TransactionSigningMode.ORDINARY_TRANSACTION",
 
   SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED =
-  "pool registration is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  "pool registration not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__POOL_RETIREMENT_NOT_ALLOWED =
-  "pool retirement is not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  "pool retirement not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
-  "outputs given by path are not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  "outputs given by path not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT =
   "certificate stake credential must be given as a script hash in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT =
@@ -181,7 +181,7 @@ export enum InvalidDataReason {
   SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED =
   "collateral inputs not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED =
-  "no collateral output allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
+  "collateral output not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED =
   "total collateral not allowed in TransactionSigningMode.MULTISIG_TRANSACTION",
   SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED =
@@ -194,23 +194,23 @@ export enum InvalidDataReason {
   SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED =
   "reference script in outputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__INPUT_WITH_PATH_NOT_ALLOWED =
-  "inputs with path are not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  "inputs with path not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED =
   "single pool registration certificate is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED =
   "single device-owned pool owner is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED =
-  "no withdrawals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  "withdrawals not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED =
-  "no mint allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  "mint not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__SCRIPT_DATA_HASH_NOT_ALLOWED =
-  "no script data hash allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  "script data hash not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED =
-  "no collateral inputs allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  "collateral inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
    SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED =
   "total collateral not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED =
-  "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
+  "required signers not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
   SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED =
   "third party pool key is required in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER",
 
@@ -224,32 +224,32 @@ export enum InvalidDataReason {
   SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_KEY_REQUIRED =
   "device owned pool key is required in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_OWNER_NOT_ALLOWED =
-  "no device-owned pool owner is expected in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "device-owned pool owner not expected in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED =
-  "no withdrawals allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "withdrawals not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__MINT_NOT_ALLOWED =
-  "no mint allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "mint not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__SCRIPT_DATA_HASH_NOT_ALLOWED =
-  "no script data hash allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "script data hash not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED =
-  "no collateral inputs allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "collateral inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED =
-  "no required signers allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "required signers not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED =
   "datum in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED =
   "reference script in ouputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED =
-  "no collateral output allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
+  "collateral output not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED =
   "total collateral not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
   SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED =
   "reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR",
 
   SIGN_MODE_PLUTUS__DEVICE_OWNED_ADDRESS_NOT_ALLOWED =
-  "outputs given by path are not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",
+  "outputs given by path not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",
   SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED =
-  "pool registration is not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",
+  "pool registration not allowed in TransactionSigningMode.PLUTUS_TRANSACTION",
 
   ADDITIONAL_WITNESSES_NOT_ARRAY = "additional witnesses not an array",
 
