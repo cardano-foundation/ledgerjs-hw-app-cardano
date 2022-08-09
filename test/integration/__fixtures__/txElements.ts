@@ -1,5 +1,5 @@
 import type {AssetGroup, TxInput, TxOutput, TxOutputDestination} from "../../../src/types/public"
-import {AddressType, DatumType, TxOutputDestinationType, TxOutputType} from "../../../src/types/public"
+import {AddressType, DatumType, TxOutputDestinationType, TxOutputFormat} from "../../../src/types/public"
 import utils, {str_to_path} from "../../../src/utils"
 import {bech32_to_hex, Networks} from "../../test_utils"
 
@@ -399,7 +399,7 @@ export const outputs: Record<
         amount: 7120787,
     },
     internalBaseWithStakingPathBabbage: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.internalBaseWithStakingPath,
         amount: 7120787,
     },
@@ -471,7 +471,7 @@ export const outputs: Record<
         ],
     },
     multiassetManyTokensBabbage: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.multiassetThirdParty,
         amount: "1234",
         tokenBundle: [
@@ -512,7 +512,7 @@ export const outputs: Record<
         ],
     },
     multiassetManyTokensInlineDatumBabbage: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.multiassetThirdParty,
         amount: "1234",
         tokenBundle: [
@@ -738,7 +738,7 @@ export const outputs: Record<
         ],
     },
     trezorParity2: {
-        type: TxOutputType.ARRAY_LEGACY,
+        format: TxOutputFormat.ARRAY_LEGACY,
         destination: destinations.externalShelleyBaseKeyhashKeyhash,
         amount: 2000000,
         tokenBundle: [
@@ -766,7 +766,7 @@ export const outputs: Record<
         datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     },
     trezorParityDatumHash2: {
-        type: TxOutputType.ARRAY_LEGACY,
+        format: TxOutputFormat.ARRAY_LEGACY,
         destination: {
             type: TxOutputDestinationType.THIRD_PARTY,
             params: {
@@ -779,7 +779,7 @@ export const outputs: Record<
         datumHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
     },
     trezorParityBabbageOutputs: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: {
             type: TxOutputDestinationType.THIRD_PARTY,
             params: {
@@ -855,12 +855,12 @@ export const outputs: Record<
         datumHashHex: "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
     },
     internalBaseWithStakingPathMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.internalBaseWithStakingPath,
         amount: 7120787,
     },
     internalBaseWithTokensMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.internalBaseWithStakingPath,
         amount: 7120787,
         tokenBundle: [
@@ -876,7 +876,7 @@ export const outputs: Record<
         ],
     },
     datumHashExternalMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -885,7 +885,7 @@ export const outputs: Record<
         },
     },
     datumHashScriptRefExternalMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -895,7 +895,7 @@ export const outputs: Record<
         scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
     },
     datumHashScriptRef300ExternalMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -905,7 +905,7 @@ export const outputs: Record<
         scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdead",
     },
     datumHashScriptRef608ExternalMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -915,7 +915,7 @@ export const outputs: Record<
         scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeaddeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeaddeadbeef",
     },
     datumHashWithTokensMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         tokenBundle: [
@@ -940,7 +940,7 @@ export const outputs: Record<
         },
     },
     inlineDatumWithTokensMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         tokenBundle: [
@@ -965,7 +965,7 @@ export const outputs: Record<
         },
     },
     inlineDatum300Map: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -974,7 +974,7 @@ export const outputs: Record<
         },
     },
     inlineDatum308Map: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -984,7 +984,7 @@ export const outputs: Record<
         },
     },
     inlineDatum600Map: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
@@ -993,7 +993,7 @@ export const outputs: Record<
         },
     },
     inlineDatum608WithTokensMap: {
-        type: TxOutputType.MAP_BABBAGE,
+        format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         tokenBundle: [

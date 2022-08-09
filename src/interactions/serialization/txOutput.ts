@@ -39,7 +39,7 @@ export function serializeTxOutputBasicParams(
     version: Version,
 ): Buffer {
     const serializationFormatBuffer = getCompatibility(version).supportsBabbage
-        ? uint8_to_buf(output.type as Uint8_t)
+        ? uint8_to_buf(output.format as Uint8_t)
         : Buffer.from([])
 
     const includeDatumBuffer = getCompatibility(version).supportsAlonzo

@@ -304,8 +304,13 @@ export type Datum = {
     datumHex: string;
 };
 
-export enum TxOutputType {
-    ARRAY_LEGACY = 0 ,
+/**
+ * Serialization format of transaction outputs.
+ *
+ * Changed from array to map in Babbage.
+ */
+export enum TxOutputFormat {
+    ARRAY_LEGACY = 0,
     MAP_BABBAGE = 1,
 }
 
@@ -315,7 +320,7 @@ export enum TxOutputType {
  * Serializes as an array.
  */
 export type TxOutputAlonzo = {
-    type?: TxOutputType.ARRAY_LEGACY;
+    format?: TxOutputFormat.ARRAY_LEGACY;
     /**
      * Destination address of the output
      */
@@ -344,7 +349,7 @@ export type TxOutputAlonzo = {
  * Serializes as a map.
  */
 export type TxOutputBabbage = {
-    type: TxOutputType.MAP_BABBAGE;
+    format: TxOutputFormat.MAP_BABBAGE;
     /**
      * Destination address of the output
      */

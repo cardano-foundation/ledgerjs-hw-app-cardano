@@ -35,7 +35,7 @@ import {
     TxAuxiliaryDataSupplementType,
     TxAuxiliaryDataType,
     TxOutputDestinationType,
-    TxOutputType,
+    TxOutputFormat,
 } from "../types/public"
 import {getVersionString} from "../utils"
 import {assert} from "../utils/assert"
@@ -895,7 +895,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Datum in output not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    const hasMapFormatInOutputs = request.tx.outputs.some(o => o.type === TxOutputType.MAP_BABBAGE)
+    const hasMapFormatInOutputs = request.tx.outputs.some(o => o.format === TxOutputFormat.MAP_BABBAGE)
     if (hasMapFormatInOutputs && !getCompatibility(version).supportsBabbage) {
         // this captures presence of inline datum and reference script, both are supported since Babbage
         throw new DeviceVersionUnsupported(`Outputs with map format not supported by Ledger app version ${getVersionString(version)}.`)

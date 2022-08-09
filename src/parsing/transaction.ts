@@ -44,7 +44,7 @@ import {
     PoolOwnerType,
     TransactionSigningMode,
     TxOutputDestinationType,
-    TxOutputType,
+    TxOutputFormat,
     TxRequiredSignerType,
 } from "../types/public"
 import {unreachable} from '../utils/assert'
@@ -139,7 +139,7 @@ function parseDatumHash(datumHashHex: string): ParsedDatum | null {
 }
 
 function parseDatum(output: TxOutput): ParsedDatum | null {
-    if (output.type === TxOutputType.MAP_BABBAGE) {
+    if (output.format === TxOutputFormat.MAP_BABBAGE) {
 
         switch (output.datum?.type) {
         case DatumType.HASH:
@@ -311,9 +311,9 @@ function parseTxOutput(
     output: TxOutput,
     network: Network,
 ): ParsedOutput {
-    const type = output.type === TxOutputType.MAP_BABBAGE
-        ? TxOutputType.MAP_BABBAGE
-        : TxOutputType.ARRAY_LEGACY
+    const format = output.format === TxOutputFormat.MAP_BABBAGE
+        ? TxOutputFormat.MAP_BABBAGE
+        : TxOutputFormat.ARRAY_LEGACY
 
     const amount = parseUint64_str(output.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
 
@@ -323,18 +323,18 @@ function parseTxOutput(
 
     const datum = parseDatum(output)
     if (datum?.type === DatumType.INLINE) {
-        validate(output.type === TxOutputType.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
+        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
     }
 
-    const scriptHex = output.type === TxOutputType.MAP_BABBAGE && output.scriptHex
+    const scriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.scriptHex
         ? parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
         : null
     if (scriptHex != null) {
-        validate(output.type === TxOutputType.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_SCRIPT)
+        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_SCRIPT)
     }
 
     return {
-        type,
+        format,
         amount,
         tokenBundle,
         destination,

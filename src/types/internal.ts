@@ -11,7 +11,7 @@ import {
     TransactionSigningMode,
     TxAuxiliaryDataType,
     TxOutputDestinationType,
-    TxOutputType,
+    TxOutputFormat,
 } from './public'
 
 // Basic primitives
@@ -31,7 +31,7 @@ export type Int64_str = string & { __type: 'int64_t' }
 export type ValidBIP32Path = Array<Uint32_t> & { __type: 'bip32_path' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, DatumType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType, TxOutputType }
+export { AddressType, CertificateType, DatumType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType, TxOutputFormat }
 export { Version, DeviceCompatibility, NativeScriptHashDisplayFormat } from './public'
 // Our types
 export const EXTENDED_PUBLIC_KEY_LENGTH = 64
@@ -375,7 +375,7 @@ export type ParsedDatum = {
 }
 
 export type ParsedOutput = {
-    type: TxOutputType;
+    format: TxOutputFormat;
     amount: Uint64_str;
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
     destination: OutputDestination;
