@@ -599,11 +599,11 @@ export const testsBabbage: SignTxTestcase[] = [
         additionalWitnessPaths: [],
         txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a10a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793",
         expectedResult: {
-            txHashHex: "add3fb35b806b64158195b830df4cc15ee05931fcc03048636233ea3e1969e85",
+            txHashHex: "ad44aad52c32b6123220ec15548b3902b091f73c4ccfb229700a32bc6958eb6f",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "c418237b156b15a31fdc83626b983e518be77bb059109f3e1ca9aeeaac843288226822b152ba9653bdde37026f0d67f85f0dbf52d00a5130b3226c540113a501",
+                    witnessSignatureHex: "0d71240327d12b951d5953e7936dc87f91d10554aa7f476e82681d9584f95c50705ebf7d2f7f484ca552bbe385b4d09de1957d895a35e4f015c6a95bbb7c0707",
                 },
             ],
             auxiliaryDataSupplement: null,
@@ -624,11 +624,11 @@ export const testsBabbage: SignTxTestcase[] = [
         additionalWitnessPaths: [],
         txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a10a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793",
         expectedResult: {
-            txHashHex: "c472b192536b7f668f7a7214e34d5f84cd4f90a550aed6d77d8db5c305558b09",
+            txHashHex: "ae45aaab5ceb5234a46d1a9173fdcfa965cdd5ebc37054c18a1ac22ad5d4904e",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "1633c4fb5936f242e214f99a2c32dbe344d55c5f0976e2b8642e759e14a018ed2afdd2ced7af8c9fa175c43493377f3f297d8e3146f732661486e8ab60376b06",
+                    witnessSignatureHex: "f0048a529b21431fb4a4b39991b3301ff2c73994990da91b84484284f0681a8c0693e48b1c5bccd61c5c3533fdad2d89a481a85134b3a4e3c0805fdf05aa7f07",
                 },
             ],
             auxiliaryDataSupplement: null,
