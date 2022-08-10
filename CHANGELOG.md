@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [5.0.1](TBD) - [April 5th 2022]
+## [5.1.0](TBD) - [TBD]
+
+Support for Babbage era
+
+### Added
+
+- support for new Babbage transaction body elements (total collateral, collateral return output, reference inputs)
+- support for post\_alonzo\_transaction_output (as described in https://github.com/input-output-hk/cardano-ledger/blob/master/eras/babbage/test-suite/cddl-files/babbage.cddl)
 
 ### Fixed
 
