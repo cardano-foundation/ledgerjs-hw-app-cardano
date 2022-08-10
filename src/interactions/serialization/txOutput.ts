@@ -7,7 +7,8 @@ import {hex_to_buf, serializeOptionFlag, uint8_to_buf,uint32_to_buf, uint64_to_b
 import {getCompatibility} from "../getVersion"
 import {serializeAddressParams} from "./addressParams"
 
-export const MAX_CHUNK_SIZE = 150
+// should be the same as in the Ledger app
+export const MAX_CHUNK_SIZE = 240
 
 function serializeTxOutputDestination(
     destination: OutputDestination,

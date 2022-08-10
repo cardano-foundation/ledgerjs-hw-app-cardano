@@ -310,34 +310,34 @@ export const testsBabbage: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with long inline datum (600 B) in output",
+        testname: "Sign tx with long inline datum (480 B) in output",
         tx: {
             ...mainnetFeeTtl,
             network: Networks.Testnet,
             inputs: [inputs.utxoShelley],
-            outputs: [outputs.inlineDatum600Map],
+            outputs: [outputs.inlineDatum480Map],
             scriptDataHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
         txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a3005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a006ca79302820159012c5579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f74686572206302182a030a",
         expectedResult: {
-            txHashHex: "a8f9121d866453b96535bb06b737b8a7ad3100299c041d483688a58006c8aa83",
+            txHashHex: "0cccea3eb974bd362720a460d84d4970e89c523b2145cbe29bb56f36cec4b826",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "fc7641365e323b90b74284e24f252a44735e984f44a3b15bdb73cb0d4ea49be33741ddcc592f7d1091420b1694dae7c0f2c4581c712213c4273e83264c602d02",
+                    witnessSignatureHex: "9b45eae3e9e59f501adbe22ce7f22fbacce7c36623f28e1aa4fdb0942e58e839b02e21a6808a13c7490cbb70e9a174279b4c845dba3ee99b8d458cfa9d349908",
                 },
             ],
             auxiliaryDataSupplement: null,
         },
     },
     {
-        testname: "Sign tx with long inline datum (608 B) in output with tokens",
+        testname: "Sign tx with long inline datum (304 B) in output with tokens",
         tx: {
             ...mainnetFeeTtl,
             network: Networks.Testnet,
             inputs: [inputs.utxoShelley],
-            outputs: [outputs.inlineDatum608WithTokensMap],
+            outputs: [outputs.inlineDatum304WithTokensMap],
             scriptDataHashHex: "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
         },
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
@@ -377,34 +377,34 @@ export const testsBabbage: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with datum hash and ref. script (300 B) in output in Babbage format",
+        testname: "Sign tx with datum hash and ref. script (240 B) in output in Babbage format",
         tx: {
             ...mainnetFeeTtl,
             network: Networks.Testnet,
             inputs: [inputs.utxoShelley],
-            outputs: [outputs.datumHashScriptRef300ExternalMap],
+            outputs: [outputs.datumHashScriptRef240ExternalMap],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         additionalWitnessPaths: [],
         txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a4005839105e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a006ca7930282005820ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188035896deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdead02182a030a",
         expectedResult: {
-            txHashHex: "eb49388cebb4036eb7a1357e67997136b596abac2de1e34a8c958bd70b846094",
+            txHashHex: "88ba739a1ac160afc2cfb75d7132431a534665a928e3ed27c90efdd3c15a6eea",
             witnesses: [
                 {
                     path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "914591b05da171528a225e5ce76280de76ea51b82adf637168cee132949551d8fe31d32cbc26f0f3745fc54ec6796560bdad08cf5fe286a7775890418e3e2a0f",
+                    witnessSignatureHex: "64d1ef5a3e8a074ad9ef34e0d6c19d313c09122f8cbbd54f3e46024b492e2d523a0ad1e132fc0fbf5ca4b2ddd2e72f110a9f669fef2f921a037553262aaffe06",
                 },
             ],
             auxiliaryDataSupplement: null,
         },
     },
     {
-        testname: "Sign tx with datum hash and script reference in output as map",
+        testname: "Sign tx with datum hash and script reference (304 B) in output as map",
         tx: {
             ...mainnetFeeTtl,
             network: Networks.Testnet,
             inputs: [inputs.utxoShelley],
-            outputs: [outputs.datumHashScriptRef608ExternalMap],
+            outputs: [outputs.datumHashScriptRef304ExternalMap],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         additionalWitnessPaths: [],

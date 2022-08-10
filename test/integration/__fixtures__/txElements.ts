@@ -360,14 +360,12 @@ export const outputs: Record<
   | 'internalBaseWithTokensMap'
   | 'datumHashExternalMap'
   | 'datumHashScriptRefExternalMap'
-  | 'datumHashScriptRef300ExternalMap'
-  | 'datumHashScriptRef608ExternalMap'
+  | 'datumHashScriptRef240ExternalMap'
+  | 'datumHashScriptRef304ExternalMap'
   | 'datumHashWithTokensMap'
   | 'inlineDatumWithTokensMap'
-  | 'inlineDatum300Map'
-  | 'inlineDatum308Map'
-  | 'inlineDatum600Map'
-  | 'inlineDatum608WithTokensMap'
+  | 'inlineDatum480Map'
+  | 'inlineDatum304WithTokensMap'
   , TxOutput
 > = {
     externalByronMainnet: {
@@ -894,7 +892,7 @@ export const outputs: Record<
         },
         scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
     },
-    datumHashScriptRef300ExternalMap: {
+    datumHashScriptRef240ExternalMap: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
@@ -902,9 +900,9 @@ export const outputs: Record<
             type: DatumType.HASH,
             datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
         },
-        scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdead",
+        scriptHex: "4784392787cc567ac21d7b5346a4a89ae112b7ff7610e402284042aa4e6efca7956a53c3f5cb3ec6745f5e21150f2a77bd71a2adc3f8b9539e9bab41934b477f60a8b302584d1a619ed9b178b5ce6fcad31adc0d6fc17023ede474c09f29fdbfb290a5b30b5240fae5de71168036201772c0d272ae90220181f9bf8c3198e79fc2ae32b076abf4d0e10d3166923ce56994b25c00909e3faab8ef1358c136cd3b197488efc883a7c6cfa3ac63ca9cebc62121c6e22f594420c2abd54e78282adec20ee7dba0e6de65554adb8ee8314f23f86cf7cf0906d4b6c643966baf6c54240c19f4131374e298f38a626a4ad63e61",
     },
-    datumHashScriptRef608ExternalMap: {
+    datumHashScriptRef304ExternalMap: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
@@ -964,35 +962,16 @@ export const outputs: Record<
 
         },
     },
-    inlineDatum300Map: {
+    inlineDatum480Map: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
         datum: {
             type: DatumType.INLINE,
-            datumHex: "5579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f",
+            datumHex: "12b8240c5470b47c159597b6f71d78c7fc99d1d8d911cb19b8f50211938ef361a22d30cd8f6354ec50e99a7d3cf3e06797ed4af3d358e01b2a957caa4010da328720b9fbe7a3a6d10209a13d2eb11933eb1bf2ab02713117e421b6dcc66297c41b95ad32d3457a0e6b44d8482385f311465964c3daff226acfb7bbda47011f1a6531db30e5b5977143c48f8b8eb739487f87dc13896f58529cfb48e415fc6123e708cdc3cb15cc1900ecf88c5fc9ff66d8ad6dae18c79e4a3c392a0df4d16ffa3e370f4dad8d8e9d171c5656bb317c78a2711057e7ae0beb1dc66ba01aa69d0c0db244e6742d7758ce8da00dfed6225d4aed4b01c42a0352688ed5803f3fd64873f11355305d9db309f4a2a6673cc408a06b8827a5edef7b0fd8742627fb8aa102a084b7db72fcb5c3d1bf437e2a936b738902a9c0258b462b9f2e9befd2c6bcfc036143bb34342b9124888a5b29fa5d60909c81319f034c11542b05ca3ff6c64c7642ff1e2b25fb60dc9bb6f5c914dd4149f31896955d4d204d822deddc46f852115a479edf7521cdf4ce596805875011855158fd303c33a2a7916a9cb7acaaf5aeca7e6efb75960e9597cd845bd9a93610bf1ab47ab0de943e8a96e26a24c4996f7b07fad437829fee5bc3496192608d4c04ac642cdec7bdbb8a948ad1d434",
         },
     },
-    inlineDatum308Map: {
-        format: TxOutputFormat.MAP_BABBAGE,
-        destination: destinations.externalShelleyBaseScripthashKeyhash,
-        amount: 7120787,
-        datum: {
-            type: DatumType.INLINE,
-            datumHex: "5579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c617465",
-
-        },
-    },
-    inlineDatum600Map: {
-        format: TxOutputFormat.MAP_BABBAGE,
-        destination: destinations.externalShelleyBaseScripthashKeyhash,
-        amount: 7120787,
-        datum: {
-            type: DatumType.INLINE,
-            datumHex: "5579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063686f636f6c6174655579657420616e6f746865722063",
-        },
-    },
-    inlineDatum608WithTokensMap: {
+    inlineDatum304WithTokensMap: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
