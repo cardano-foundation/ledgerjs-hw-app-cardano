@@ -15,6 +15,7 @@ import {
     certificateRejectTestcases,
     certificateStakePoolRetirementRejectTestcases,
     certificateStakingRejectTestcases,
+    collateralOutputRejectTestcases,
     singleAccountRejectTestcases,
     testsInvalidTokenBundleOrdering,
     transactionInitRejectTestcases,
@@ -43,3 +44,4 @@ describeSignTxRejects("signTxWithdrawalRejects", withdrawalRejectTestcases)
 describeSignTxRejects("signTxWitnessRejects", witnessRejectTestcases)
 describeSignTxRejects("signTxInvalidMultiassetRejects", testsInvalidTokenBundleOrdering)
 describeSignTxRejects("signTxSingleAccountRejects", singleAccountRejectTestcases)
+describeSignTxRejects("signTxCollateralOutputRejects", collateralOutputRejectTestcases)

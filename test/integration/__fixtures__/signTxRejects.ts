@@ -1789,3 +1789,39 @@ export const singleAccountRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.LEDGER_POLICY,
     },
 ]
+
+export const collateralOutputRejectTestcases: TestcaseRejectShelley[] = [
+    {
+        testname: "Collateral output with datum hash",
+        tx: {
+            ...shelleyBase,
+            collateralOutput: outputs.datumHashExternal,
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
+    },
+    {
+        testname: "Collateral output with inline datum",
+        tx: {
+            ...shelleyBase,
+            collateralOutput: outputs.inlineDatum480Map,
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
+    },
+    {
+        testname: "Collateral output with reference script",
+        tx: {
+            ...shelleyBase,
+            collateralOutput: outputs.refScriptExternalMap,
+        },
+        signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REF_SCRIPT,
+    },
+]

@@ -208,16 +208,16 @@ function* signTx_addOutput(
     }
 
     // Reference Script
-    if (output.scriptHex) {
+    if (output.refScriptHex) {
         yield send({
             p1: P1.STAGE_OUTPUTS,
             p2: P2.SCRIPT,
-            data: serializeTxOutputRefScript(output.scriptHex),
+            data: serializeTxOutputRefScript(output.refScriptHex),
             expectedResponseLength: 0,
         })
         // Script chunks
-        if (output.scriptHex.length / 2 > MAX_CHUNK_SIZE) {
-            yield* signTx_addOutput_sendChunks(output.scriptHex, P2.SCRIPT_CHUNK)
+        if (output.refScriptHex.length / 2 > MAX_CHUNK_SIZE) {
+            yield* signTx_addOutput_sendChunks(output.refScriptHex, P2.SCRIPT_CHUNK)
         }
     }
 

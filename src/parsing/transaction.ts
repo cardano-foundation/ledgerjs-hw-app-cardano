@@ -231,6 +231,8 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
     const collateralOutput = tx.collateralOutput == null
         ? null
         : parseTxOutput(tx.collateralOutput, tx.network)
+    validate(collateralOutput?.datum == null, InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM)
+    validate(collateralOutput?.refScriptHex == null, InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REF_SCRIPT)
 
     // total collateral
     const totalCollateral = tx.totalCollateral == null
@@ -326,10 +328,10 @@ function parseTxOutput(
         validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
     }
 
-    const scriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.scriptHex
-        ? parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
+    const refScriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.refScriptHex
+        ? parseHexString(output.refScriptHex, InvalidDataReason.OUTPUT_INVALID_REF_SCRIPT_HEX)
         : null
-    if (scriptHex != null) {
+    if (refScriptHex != null) {
         validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REF_SCRIPT)
     }
 
@@ -339,7 +341,7 @@ function parseTxOutput(
         tokenBundle,
         destination,
         datum,
-        scriptHex,
+        refScriptHex,
     }
 }
 
@@ -522,7 +524,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         )
         // no reference script in outputs
         validate(
-            tx.outputs.every(out => (out.scriptHex == null)),
+            tx.outputs.every(out => (out.refScriptHex == null)),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED
         )
 
@@ -610,7 +612,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         )
         // no reference script in outputs
         validate(
-            tx.outputs.every(out => (out.scriptHex == null)),
+            tx.outputs.every(out => (out.refScriptHex == null)),
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED
         )
 
