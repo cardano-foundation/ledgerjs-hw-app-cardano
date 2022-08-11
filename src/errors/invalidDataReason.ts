@@ -25,7 +25,7 @@ export enum InvalidDataReason {
   OUTPUT_INVALID_INLINE_DATUM = "invalid inline datum",
   OUTPUT_INVALID_SCRIPT_HEX = "invalid script hex",
   OUTPUT_INCONSISTENT_DATUM = "datum is not consistent with output type",
-  OUTPUT_INCONSISTENT_SCRIPT = "reference script is not consistent with output type",
+  OUTPUT_INCONSISTENT_REF_SCRIPT = "reference script is not consistent with output type",
 
   MULTIASSET_INVALID_POLICY_NAME = "invalid policy id in a multiasset token bundle",
   MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid multiasset token bundle - asset groups not an array",

@@ -359,9 +359,10 @@ export const outputs: Record<
   | 'internalBaseWithStakingPathMap'
   | 'internalBaseWithTokensMap'
   | 'datumHashExternalMap'
-  | 'datumHashScriptRefExternalMap'
-  | 'datumHashScriptRef240ExternalMap'
-  | 'datumHashScriptRef304ExternalMap'
+  | 'refScriptExternalMap'
+  | 'datumHashRefScriptExternalMap'
+  | 'datumHashRefScript240ExternalMap'
+  | 'datumHashRefScript304ExternalMap'
   | 'datumHashWithTokensMap'
   | 'inlineDatumWithTokensMap'
   | 'inlineDatum480Map'
@@ -882,7 +883,13 @@ export const outputs: Record<
             datumHashHex:"ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
         },
     },
-    datumHashScriptRefExternalMap: {
+    refScriptExternalMap: {
+        format: TxOutputFormat.MAP_BABBAGE,
+        destination: destinations.externalShelleyBaseScripthashKeyhash,
+        amount: 7120787,
+        scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    },
+    datumHashRefScriptExternalMap: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
@@ -892,7 +899,7 @@ export const outputs: Record<
         },
         scriptHex: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
     },
-    datumHashScriptRef240ExternalMap: {
+    datumHashRefScript240ExternalMap: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,
@@ -902,7 +909,7 @@ export const outputs: Record<
         },
         scriptHex: "4784392787cc567ac21d7b5346a4a89ae112b7ff7610e402284042aa4e6efca7956a53c3f5cb3ec6745f5e21150f2a77bd71a2adc3f8b9539e9bab41934b477f60a8b302584d1a619ed9b178b5ce6fcad31adc0d6fc17023ede474c09f29fdbfb290a5b30b5240fae5de71168036201772c0d272ae90220181f9bf8c3198e79fc2ae32b076abf4d0e10d3166923ce56994b25c00909e3faab8ef1358c136cd3b197488efc883a7c6cfa3ac63ca9cebc62121c6e22f594420c2abd54e78282adec20ee7dba0e6de65554adb8ee8314f23f86cf7cf0906d4b6c643966baf6c54240c19f4131374e298f38a626a4ad63e61",
     },
-    datumHashScriptRef304ExternalMap: {
+    datumHashRefScript304ExternalMap: {
         format: TxOutputFormat.MAP_BABBAGE,
         destination: destinations.externalShelleyBaseScripthashKeyhash,
         amount: 7120787,

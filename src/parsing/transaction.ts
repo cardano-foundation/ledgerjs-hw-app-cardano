@@ -330,7 +330,7 @@ function parseTxOutput(
         ? parseHexString(output.scriptHex, InvalidDataReason.OUTPUT_INVALID_SCRIPT_HEX)
         : null
     if (scriptHex != null) {
-        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_SCRIPT)
+        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REF_SCRIPT)
     }
 
     return {

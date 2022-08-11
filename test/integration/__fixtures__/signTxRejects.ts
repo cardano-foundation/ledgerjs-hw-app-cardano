@@ -305,6 +305,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED,
     },
+    // collateral inputs
     {
         testname: "Ordinary tx - collateral inputs included",
         tx: {
@@ -362,6 +363,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED,
     },
+    // required signers
     {
         testname: "Pool registration (operator) - required signers included",
         tx: {
@@ -407,7 +409,122 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED,
     },
-
+    // collateral return output included
+    {
+        testname: "Ordinary tx - collateral output included",
+        tx: {
+            ...shelleyBase,
+            collateralOutput: outputs.externalShelleyBaseKeyhashKeyhash,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED,
+    },
+    {
+        testname: "Multisig tx - collateral output included",
+        tx: {
+            ...shelleyBase,
+            collateralOutput: outputs.externalShelleyBaseKeyhashKeyhash,
+        },
+        signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool registration (operator) - collateral output included",
+        tx: {
+            ...shelleyBase,
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: poolRegParamOperator,
+                },
+            ],
+            collateralOutput: outputs.externalShelleyBaseKeyhashKeyhash,
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool registration (owner) - collateral output included",
+        tx: {
+            ...shelleyBase,
+            inputs: [inputs.utxoMultisig],
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: poolRegParamOwner,
+                },
+            ],
+            collateralOutput: outputs.externalShelleyBaseKeyhashKeyhash,
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED,
+    },
+    // total collateral included
+    {
+        testname: "Ordinary tx - total collateral included",
+        tx: {
+            ...shelleyBase,
+            totalCollateral: 8,
+        },
+        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED,
+    },
+    {
+        testname: "Multisig tx - total collateral included",
+        tx: {
+            ...shelleyBase,
+            totalCollateral: 8,
+        },
+        signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool registration (operator) - total collateral included",
+        tx: {
+            ...shelleyBase,
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: poolRegParamOperator,
+                },
+            ],
+            totalCollateral: 8,
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool registration (owner) - total collateral included",
+        tx: {
+            ...shelleyBase,
+            inputs: [inputs.utxoMultisig],
+            certificates: [
+                {
+                    type: CertificateType.STAKE_POOL_REGISTRATION,
+                    params: poolRegParamOwner,
+                },
+            ],
+            totalCollateral: 8,
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED,
+    },
     // reference inputs included
     {
         testname: "Ordinary tx - reference inputs included",

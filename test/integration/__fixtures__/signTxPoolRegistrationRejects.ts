@@ -5,6 +5,7 @@ import { str_to_path } from "../../../src/utils/address"
 import { DontRunOnLedger } from '../../test_utils'
 import { certificates, defaultPoolRegistration, inputs, outputs, poolOwnerVariationSet, relayVariationSet } from './signTxPoolRegistration'
 import type { TestcaseRejectShelley } from "./signTxRejects"
+import { outputs as outputs2 } from "./txElements"
 
 const txBase: Transaction = {
     network: Networks.Mainnet,
@@ -368,3 +369,71 @@ export const stakePoolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] 
     },
 ]
 
+export const outputRejectTestCases: TestcaseRejectShelley[] = [
+    {
+        testname: "Pool operator - datum hash",
+        tx: {
+            ...txBase,
+            outputs: [outputs2.datumHashExternalMap],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool operator - datum inline",
+        tx: {
+            ...txBase,
+            outputs: [outputs2.inlineDatum480Map],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool operator - reference script",
+        tx: {
+            ...txBase,
+            outputs: [outputs2.refScriptExternalMap],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool owner - datum hash",
+        tx: {
+            ...txBase,
+            outputs: [outputs2.datumHashExternalMap],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool owner - datum inline",
+        tx: {
+            ...txBase,
+            outputs: [outputs2.inlineDatum480Map],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
+    },
+    {
+        testname: "Pool owner - reference script",
+        tx: {
+            ...txBase,
+            outputs: [outputs2.refScriptExternalMap],
+        },
+        signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+        errCls: DeviceStatusError,
+        errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+        rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED,
+    },
+]
