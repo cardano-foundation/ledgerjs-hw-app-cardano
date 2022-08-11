@@ -1822,6 +1822,6 @@ export const collateralOutputRejectTestcases: TestcaseRejectShelley[] = [
         signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
         errCls: DeviceStatusError,
         errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
-        rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REF_SCRIPT,
+        rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REFERENCE_SCRIPT,
     },
 ]

@@ -48,7 +48,7 @@ export function serializeTxOutputBasicParams(
         : Buffer.from([])
 
     const includeScriptBuffer = getCompatibility(version).supportsBabbage
-        ? serializeOptionFlag(output.refScriptHex != null)
+        ? serializeOptionFlag(output.referenceScriptHex != null)
         : Buffer.from([])
 
     return Buffer.concat([
@@ -104,15 +104,15 @@ export function serializeTxOutputDatum(
 }
 
 export function serializeTxOutputRefScript(
-    refScriptHex: HexString,
+    referenceScriptHex: HexString,
 ): Buffer {
-    const totalScriptSize = refScriptHex.length / 2
+    const totalScriptSize = referenceScriptHex.length / 2
     let chunkHex: HexString
 
     if (totalScriptSize > MAX_CHUNK_SIZE) {
-        chunkHex = refScriptHex.substring(0, MAX_CHUNK_SIZE * 2) as HexString
+        chunkHex = referenceScriptHex.substring(0, MAX_CHUNK_SIZE * 2) as HexString
     } else {
-        chunkHex = refScriptHex
+        chunkHex = referenceScriptHex
     }
     const chunkSize = chunkHex.length / 2
 

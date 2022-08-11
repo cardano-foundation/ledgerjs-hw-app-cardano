@@ -232,7 +232,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         ? null
         : parseTxOutput(tx.collateralOutput, tx.network)
     validate(collateralOutput?.datum == null, InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM)
-    validate(collateralOutput?.refScriptHex == null, InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REF_SCRIPT)
+    validate(collateralOutput?.referenceScriptHex == null, InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REFERENCE_SCRIPT)
 
     // total collateral
     const totalCollateral = tx.totalCollateral == null
@@ -328,11 +328,11 @@ function parseTxOutput(
         validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
     }
 
-    const refScriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.refScriptHex
-        ? parseHexString(output.refScriptHex, InvalidDataReason.OUTPUT_INVALID_REF_SCRIPT_HEX)
+    const referenceScriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.referenceScriptHex
+        ? parseHexString(output.referenceScriptHex, InvalidDataReason.OUTPUT_INVALID_REFERENCE_SCRIPT_HEX)
         : null
-    if (refScriptHex != null) {
-        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REF_SCRIPT)
+    if (referenceScriptHex != null) {
+        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REFERENCE_SCRIPT)
     }
 
     return {
@@ -341,7 +341,7 @@ function parseTxOutput(
         tokenBundle,
         destination,
         datum,
-        refScriptHex,
+        referenceScriptHex,
     }
 }
 
@@ -524,7 +524,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         )
         // no reference script in outputs
         validate(
-            tx.outputs.every(out => (out.refScriptHex == null)),
+            tx.outputs.every(out => (out.referenceScriptHex == null)),
             InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED
         )
 
@@ -612,7 +612,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         )
         // no reference script in outputs
         validate(
-            tx.outputs.every(out => (out.refScriptHex == null)),
+            tx.outputs.every(out => (out.referenceScriptHex == null)),
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED
         )
 

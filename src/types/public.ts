@@ -374,7 +374,7 @@ export type TxOutputBabbage = {
      * Optional reference script
      * (without the #6.24 tag)
      */
-    refScriptHex?: string | null;
+    referenceScriptHex?: string | null;
 };
 
 /**

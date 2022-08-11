@@ -380,7 +380,7 @@ export type ParsedOutput = {
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
     destination: OutputDestination;
     datum: ParsedDatum | null;
-    refScriptHex: HexString | null;
+    referenceScriptHex: HexString | null;
 }
 
 export const ASSET_NAME_LENGTH_MAX = 32

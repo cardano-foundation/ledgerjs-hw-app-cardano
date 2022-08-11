@@ -23,9 +23,9 @@ export enum InvalidDataReason {
   OUTPUT_INVALID_ADDRESS_PARAMS = "change address must have path as payment part",
   OUTPUT_INVALID_DATUM_HASH = "invalid datum hash",
   OUTPUT_INVALID_INLINE_DATUM = "invalid inline datum",
-  OUTPUT_INVALID_REF_SCRIPT_HEX = "invalid script hex",
+  OUTPUT_INVALID_REFERENCE_SCRIPT_HEX = "invalid script hex",
   OUTPUT_INCONSISTENT_DATUM = "datum is not consistent with output type",
-  OUTPUT_INCONSISTENT_REF_SCRIPT = "reference script is not consistent with output type",
+  OUTPUT_INCONSISTENT_REFERENCE_SCRIPT = "reference script is not consistent with output type",
 
   MULTIASSET_INVALID_POLICY_NAME = "invalid policy id in a multiasset token bundle",
   MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY = "invalid multiasset token bundle - asset groups not an array",
@@ -149,7 +149,7 @@ export enum InvalidDataReason {
   REQUIRED_SIGNER_INVALID_PATH = "invalid path for required signer",
 
   COLLATERAL_INPUT_CONTAINS_DATUM = "collateral return output contains datum",
-  COLLATERAL_INPUT_CONTAINS_REF_SCRIPT = "collateral return output contains reference script",
+  COLLATERAL_INPUT_CONTAINS_REFERENCE_SCRIPT = "collateral return output contains reference script",
 
   TOTAL_COLLATERAL_NOT_VALID = "total collateral not valid",
 
