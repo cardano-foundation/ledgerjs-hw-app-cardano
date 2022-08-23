@@ -103,3 +103,33 @@ export const testsColdKeys: TestCase[] = [
         },
     },
 ]
+
+export const testsGovernanceVotingKeys: TestCase[] = [
+    {
+        path: "1694'/1815'/0'/0/1",
+        expected: {
+            publicKey:
+        "aac861247bd24cae705bca1d1c9763f19c19188fb0faf257c50ed69b8157bced",
+            chainCode:
+        "f23595dd3207b7dde477347fa25d3fd6291c3363df43b54a9cf523d2c7683c10",
+        },
+    },
+    {
+        path: "1694'/1815'/100'",
+        expected: {
+            publicKey:
+        "ff451db773898b80488d892b248acdc634f6ec79d923f12aae9feb2563513b63",
+            chainCode:
+        "47478097ef56dcef686f8dcbd7d0c1d073740cde65a48e5615799096f67a144f",
+        },
+    },
+    {
+        path: "1694'/1815'/101'",
+        expected: {
+            publicKey:
+        "c7adc69b6dd29c48d29edb089c1aecbe218fdb9cfa59c325afcd2c5fa3844be1",
+            chainCode:
+        "ffa9953f6c77fccc15c000db494177d84e218f2740ddd44cfcbea0455cc6a6be",
+        },
+    },
+]

@@ -5,7 +5,8 @@ import type Ada from "../../src/Ada"
 import { DeviceStatusError } from "../../src/Ada"
 import { str_to_path } from "../../src/utils/address"
 import { getAda } from "../test_utils"
-import type { TestCase } from "./__fixtures__/getExtendedPublicKey"
+import type { TestCase} from "./__fixtures__/getExtendedPublicKey"
+import { testsGovernanceVotingKeys } from "./__fixtures__/getExtendedPublicKey"
 import { testsByron, testsColdKeys, testsShelleyUnusual, testsShelleyUsual } from "./__fixtures__/getExtendedPublicKey"
 chai.use(chaiAsPromised)
 
@@ -44,6 +45,9 @@ describe("getExtendedPublicKey", async () => {
         it('get a single extended public key --- cold keys', async () => {
             await test(testsColdKeys)
         })
+        it('get a single extended public key --- governance voting keys', async () => {
+            await test(testsGovernanceVotingKeys)
+        })
     })
 
     describe("Should successfully get several extended public keys", async () => {
@@ -60,7 +64,7 @@ describe("getExtendedPublicKey", async () => {
         }
 
         it('starting with a usual one', async () => {
-            await test([...testsByron, ...testsShelleyUsual, ...testsColdKeys])
+            await test([...testsByron, ...testsShelleyUsual, ...testsColdKeys, ...testsGovernanceVotingKeys])
         })
 
         it('starting with an unusual one', async () => {
@@ -76,6 +80,20 @@ describe("getExtendedPublicKey", async () => {
 
         it('path not matching cold key structure', async () => {
             const promise = ada.getExtendedPublicKey({ path: str_to_path("1853'/1900'/0'/0/0") })
+            await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
+        })
+
+        // governance voting
+        it('invalid governance voting key path 1', async () => {
+            const promise = ada.getExtendedPublicKey({ path: str_to_path("1694'/1815'/0'/1/0") })
+            await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
+        })
+        it('invalid governance voting key path 2', async () => {
+            const promise = ada.getExtendedPublicKey({ path: str_to_path("1694'/1815'/17") })
+            await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
+        })
+        it('invalid governance voting key path 3', async () => {
+            const promise = ada.getExtendedPublicKey({ path: str_to_path("1694'/1815'/0'/1") })
             await expect(promise).to.be.rejectedWith(DeviceStatusError, "Action rejected by Ledger's security policy")
         })
     })
