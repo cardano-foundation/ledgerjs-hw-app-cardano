@@ -1,10 +1,9 @@
-import type { DeviceOwnedAddress, Transaction } from "../../../src/Ada"
-import { TxAuxiliaryDataSupplementType } from "../../../src/Ada"
+import type { Transaction } from "../../../src/Ada"
 import { CertificateType, Networks, TxAuxiliaryDataType } from "../../../src/Ada"
 import type { BIP32Path, SignedTransactionData} from '../../../src/types/public'
 import { StakeCredentialParamsType, TransactionSigningMode } from '../../../src/types/public'
 import { str_to_path } from "../../../src/utils/address"
-import { destinations, inputs, mainnetFeeTtl, mints, outputs, shelleyBase, testnetFeeTtl } from "./txElements"
+import { inputs, mainnetFeeTtl, mints, outputs, shelleyBase, testnetFeeTtl } from "./txElements"
 
 export type SignTxTestcase = {
     testname: string;
@@ -971,79 +970,6 @@ export const testsMary: SignTxTestcase[] = [
                 },
             ],
             auxiliaryDataSupplement: null,
-        },
-    },
-]
-
-
-export const testsCatalystRegistration: SignTxTestcase[] = [
-    {
-        testname: "Sign tx with Catalyst voting key registration metadata with base address",
-        tx: {
-            ...mainnetFeeTtl,
-            inputs: [inputs.utxoShelley],
-            outputs: [outputs.internalBaseWithStakingPath],
-            validityIntervalStart: 7,
-            auxiliaryData: {
-                type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
-                params: {
-                    votingPublicKeyHex: "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
-                    stakingPath: str_to_path("1852'/1815'/0'/2/0"),
-                    nonce: 1454448,
-                    rewardsDestination: destinations.internalBaseWithStakingPath.params as DeviceOwnedAddress,
-                },
-            },
-        },
-        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec9260807",
-        txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a10158400ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af240630eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e80",
-        expectedResult: {
-            txHashHex: "9941060a76f5702e72b43c382f77b143ed0e328ac3977a0791f08a5f0e0149cd",
-            witnesses: [
-                {
-                    path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "b0bc6b3ddc0ab65e5b2e83cfdedbbf76619c3a833705f634f1c8c335dc7c1c5372ec7ebb8199d6d18204da4a0168a172c41c6dd53f45235225f5e62b672ca709",
-                },
-            ],
-            auxiliaryDataSupplement: {
-                type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
-                auxiliaryDataHashHex: "e9141b460aea0abb69ce113c7302c7c03690267736d6a382ee62d2a53c2ec926",
-                catalystRegistrationSignatureHex: "0ca3bb69cad5f471ddd32097a8501e3956e4ae0c2bf523625d1686b123dcc04af240630eb93bf1069c607b59bbe7d521fb8dd14a4312788bc0b72b7473ee160e",
-            },
-        },
-    },
-    {
-        testname: "Sign tx with Catalyst voting key registration metadata with stake address",
-        tx: {
-            ...mainnetFeeTtl,
-            inputs: [inputs.utxoShelley],
-            outputs: [outputs.internalBaseWithStakingPath],
-            auxiliaryData: {
-                type: TxAuxiliaryDataType.CATALYST_REGISTRATION,
-                params: {
-                    votingPublicKeyHex: "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
-                    stakingPath: str_to_path("1852'/1815'/0'/2/0"),
-                    nonce: 1454448,
-                    rewardsDestination: destinations.rewardsKeyPath.params as DeviceOwnedAddress,
-                },
-            },
-        },
-        signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-        txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a006ca79302182a030a075820d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb",
-        txAuxiliaryData: "82a219ef64a40158204b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c02582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a0016317019ef65a10158401514b6bbc582b33edcf5fa30ec04dcaa62128de8755c786768ae5922132c2aa50b9ba17be28072de979f45b0f429c7f5d489c549a1e22bc8e7d0b2445c10360980",
-        expectedResult: {
-            txHashHex: "90ab18ad3a25cb9f48470cb16a51e1fe04181b96f639d939c51ca81ab4c0fa23",
-            witnesses: [
-                {
-                    path: str_to_path("1852'/1815'/0'/0/0"),
-                    witnessSignatureHex: "138afde8640bd8d1a08309455f604d842d65a85e5ce2f584974f004e9043dea670ead5de3e4895a320f94033d5476d56ccf7147f327156cc30aef8304c66c006",
-                },
-            ],
-            auxiliaryDataSupplement: {
-                type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
-                auxiliaryDataHashHex: "d19f7cb4d48a6ae8d370c64d2a42fca1f61d6b2cf3d0c0c02801541811338deb",
-                catalystRegistrationSignatureHex: "1514b6bbc582b33edcf5fa30ec04dcaa62128de8755c786768ae5922132c2aa50b9ba17be28072de979f45b0f429c7f5d489c549a1e22bc8e7d0b2445c103609",
-            },
         },
     },
 ]

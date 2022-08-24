@@ -867,9 +867,13 @@ export type DeviceCompatibility = {
      */
     supportsMary: boolean;
     /**
-     * Whether we support Catalyst registration
+     * Whether we support Catalyst voting registration according to CIP-15
      */
     supportsCatalystRegistration: boolean;
+    /**
+     * Whether we support governance voting registration according to CIP-36
+     */
+    supportsGovernanceVoting: boolean;
     /**
      * Whether we support transactions with zero TTL
      * (useful for dummy transactions to ensure invalidity)
@@ -974,10 +978,10 @@ export type Witness = {
  * @see [[TxAuxiliaryDataType]]
  */
 export enum TxAuxiliaryDataSupplementType {
-    /** Supplementary information for the caller to assemble the Catalyst voting registration
+    /** Supplementary information for the caller to assemble the governance voting registration
      * they sent to be signed.
      */
-    CATALYST_REGISTRATION = 'catalyst_registration',
+    GOVERNANCE_VOTING_REGISTRATION = 'governance_voting_registration',
 }
 
 /**
@@ -987,11 +991,11 @@ export enum TxAuxiliaryDataSupplementType {
  * @see [[SignedTransactionData]]
  */
 export type TxAuxiliaryDataSupplement = {
-    type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION;
-    /** Hash of the auxiliary data including the Catalyst registration */
+    type: TxAuxiliaryDataSupplementType.GOVERNANCE_VOTING_REGISTRATION;
+    /** Hash of the auxiliary data containing the governance voting registration */
     auxiliaryDataHashHex: string;
-    /** Signature of the Catalyst registration payload by the staking key that was supplied */
-    catalystRegistrationSignatureHex: string;
+    /** Signature of the governance voting registration payload by the staking key that was supplied */
+    governanceVotingRegistrationSignatureHex: string;
 };
 
 /**
@@ -1024,10 +1028,11 @@ export enum TxAuxiliaryDataType {
     /** Auxiliary data is supplied as raw hash value */
     ARBITRARY_HASH = 'arbitrary_hash',
     /**
-     * Auxiliary data representing a Catalyst registration. Ledger serializes the auxiliary data
-     * as `[<catalyst registration metadata>, []]` (a.k.a. Mary-era format)
+     * Auxiliary data representing a Catalyst (CIP-15) or governance voting registration (CIP-36).
+     * Ledger serializes the auxiliary data as
+     * `[<registration metadata>, []]` (a.k.a. Mary-era format)
      */
-    CATALYST_REGISTRATION = 'catalyst_registration',
+    GOVERNANCE_VOTING_REGISTRATION = 'governance_voting_registration',
 }
 
 /**
@@ -1041,8 +1046,8 @@ export type TxAuxiliaryData =
         type: TxAuxiliaryDataType.ARBITRARY_HASH;
         params: TxAuxiliaryDataArbitraryHashParams;
     } | {
-        type: TxAuxiliaryDataType.CATALYST_REGISTRATION;
-        params: CatalystRegistrationParams;
+        type: TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION;
+        params: GovernanceVotingRegistrationParams;
     }
 
 /**
@@ -1055,15 +1060,44 @@ export type TxAuxiliaryDataArbitraryHashParams = {
 }
 
 /**
- * Parameters needed for Ledger to assemble and sign the Catalyst voting registration metadata.
+ * Serialization format for transaction metadata for Catalyst / governance voting registration.
+ * @category Basic types
+ * @see [[GovernanceVotingRegistrationParams]]
+ */
+export enum GovernanceVotingRegistrationFormat {
+    CIP_15 = 'cip_15',
+    CIP_36 = 'cip_36',
+}
+
+/**
+ * Parameters needed for Ledger to assemble and sign the governance voting registration metadata
+ * (according to CIP-15 or CIP-36).
  * Ledger will display the voting registration parameters and overall metadata hash.
  * @see [[TxAuxiliaryData]]
  */
-export type CatalystRegistrationParams = {
+export type GovernanceVotingRegistrationParams = {
     /**
-     * Voting key to be registered given in hex
+     * Format for metadata serialization (CIP-15 or CIP-36).
      */
-    votingPublicKeyHex: string;
+    format: GovernanceVotingRegistrationFormat;
+
+    /**
+     * Voting key to be registered given in hex,
+     * for voting_pub_key in CIP-15 and legacy_key_registration in CIP-36.
+     * Mutually exclusive with delegations and votingPublicKeyPath.
+     */
+    votingPublicKeyHex?: string;
+    /**
+     * Derivation path describing the voting key to be registered,
+     * for legacy_key_registration in CIP-36.
+     * Mutually exclusive with delegations and votingPublicKeyHex.
+     */
+     votingPublicKeyPath?: BIP32Path;
+     /**
+     * Delegations be registered, see CIP-36.
+     * Mutually exclusive with votingPublicKeyHex and votingPublicKeyPath.
+     */
+    delegations?: Array<GovernanceVotingDelegation>;
 
     /**
      * Path to the staking key to which voting rights would be associated
@@ -1073,12 +1107,32 @@ export type CatalystRegistrationParams = {
     /**
      * Address for receiving voting rewards, Byron-era addresses not supported
      */
-    rewardsDestination: DeviceOwnedAddress;
+    rewardsDestination: TxOutputDestination;
 
     /**
      * Nonce value
      */
     nonce: bigint_like;
+
+    /**
+     * Voting purpose
+     */
+     votingPurpose?: bigint_like;
+}
+
+export enum GovernanceVotingDelegationType {
+    PATH = 'governance_voting_key_path',
+    KEY = 'governance_voting_key_keyhex',
+}
+
+export type GovernanceVotingDelegation = {
+    type: GovernanceVotingDelegationType.PATH;
+    votingKeyPath: BIP32Path;
+    weight: bigint_like;
+} | {
+    type: GovernanceVotingDelegationType.KEY;
+    votingPublicKeyHex: string;
+    weight: bigint_like;
 }
 
 export enum TxRequiredSignerType {

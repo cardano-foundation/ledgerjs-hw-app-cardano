@@ -59,7 +59,7 @@ export function describeWithoutValidation(title: string, test: () => void) {
 
 const ProtocolMagics = {
     MAINNET: 764824073,
-    TESTNET: 42, // never used in an actual testnet, just for our integration tests
+    TESTNET: 42, // used in our integration tests
     TESTNET_LEGACY: 1097911063,
     TESTNET_PREPROD: 1,
     TESTNET_PREVIEW: 2,

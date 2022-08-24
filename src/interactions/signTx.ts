@@ -26,10 +26,13 @@ import {
     StakeCredentialType,
     TX_HASH_LENGTH,
 } from "../types/internal"
-import type {SignedTransactionData, TxAuxiliaryDataSupplement} from "../types/public"
+import type {
+    SignedTransactionData,
+    TxAuxiliaryDataSupplement} from "../types/public"
 import {
     AddressType,
     DatumType,
+    GovernanceVotingRegistrationFormat,
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -44,11 +47,14 @@ import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
 import {ensureLedgerAppVersionCompatible, getCompatibility} from "./getVersion"
 import {
-    serializeCatalystRegistrationNonce,
-    serializeCatalystRegistrationRewardsDestination,
-    serializeCatalystRegistrationStakingPath,
-    serializeCatalystRegistrationVotingKey,
-} from "./serialization/catalystRegistration"
+    serializeGovernanceVotingRegistrationDelegation,
+    serializeGovernanceVotingRegistrationInit,
+    serializeGovernanceVotingRegistrationNonce,
+    serializeGovernanceVotingRegistrationRewardsDestination,
+    serializeGovernanceVotingRegistrationStakingPath,
+    serializeGovernanceVotingRegistrationVotingKey,
+    serializeGovernanceVotingRegistrationVotingPurpose,
+} from "./serialization/governanceVotingRegistration"
 import {
     serializeFinancials,
     serializePoolInitialParams,
@@ -480,7 +486,7 @@ function* signTx_setAuxiliaryData(
 
   const supportedAuxiliaryDataTypes = [
       TxAuxiliaryDataType.ARBITRARY_HASH,
-      TxAuxiliaryDataType.CATALYST_REGISTRATION,
+      TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION,
   ]
 
   assert(supportedAuxiliaryDataTypes.includes(auxiliaryData.type), 'Auxiliary data type not implemented')
@@ -492,42 +498,73 @@ function* signTx_setAuxiliaryData(
       expectedResponseLength: 0,
   })
 
-  if (auxiliaryData.type === TxAuxiliaryDataType.CATALYST_REGISTRATION) {
+  if (auxiliaryData.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION) {
       const params = auxiliaryData.params
 
     const enum P2 {
+      INIT = 0x36,
       VOTING_KEY = 0x30,
+      DELEGATION = 0x37,
       STAKING_KEY = 0x31,
       VOTING_REWARDS_ADDRESS = 0x32,
       NONCE = 0x33,
+      VOTING_PURPOSE = 0x35,
       CONFIRM = 0x34,
     }
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
-        p2: P2.VOTING_KEY,
-        data: serializeCatalystRegistrationVotingKey(params.votingPublicKey),
+        p2: P2.INIT,
+        data: serializeGovernanceVotingRegistrationInit(auxiliaryData.params),
         expectedResponseLength: 0,
     })
+
+    if (params.votingPublicKey || params.votingPublicKeyPath) {
+        yield send({
+            p1: P1.STAGE_AUX_DATA,
+            p2: P2.VOTING_KEY,
+            data: serializeGovernanceVotingRegistrationVotingKey(params.votingPublicKey, params.votingPublicKeyPath),
+            expectedResponseLength: 0,
+        })
+    } else if (params.delegations) {
+        for (const delegation of params.delegations) {
+            yield send({
+                p1: P1.STAGE_AUX_DATA,
+                p2: P2.DELEGATION,
+                data: serializeGovernanceVotingRegistrationDelegation(delegation),
+                expectedResponseLength: 0,
+            })
+        }
+    } else {
+        // should have been caught by previous validation
+        throw Error('wrong governance registration params')
+    }
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.STAKING_KEY,
-        data: serializeCatalystRegistrationStakingPath(params.stakingPath),
+        data: serializeGovernanceVotingRegistrationStakingPath(params.stakingPath),
         expectedResponseLength: 0,
     })
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.VOTING_REWARDS_ADDRESS,
-        data: serializeCatalystRegistrationRewardsDestination(params.rewardsDestination, version),
+        data: serializeGovernanceVotingRegistrationRewardsDestination(params.rewardsDestination, version),
         expectedResponseLength: 0,
     })
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.NONCE,
-        data: serializeCatalystRegistrationNonce(params.nonce),
+        data: serializeGovernanceVotingRegistrationNonce(params.nonce),
+        expectedResponseLength: 0,
+    })
+
+    yield send({
+        p1: P1.STAGE_AUX_DATA,
+        p2: P2.VOTING_PURPOSE,
+        data: serializeGovernanceVotingRegistrationVotingPurpose(params.votingPurpose),
         expectedResponseLength: 0,
     })
 
@@ -541,12 +578,12 @@ function* signTx_setAuxiliaryData(
     })
 
     const auxDataHash = response.slice(0, AUXILIARY_DATA_HASH_LENGTH)
-    const catalystSignature = response.slice(AUXILIARY_DATA_HASH_LENGTH, AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH)
+    const signature = response.slice(AUXILIARY_DATA_HASH_LENGTH, AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH)
 
     return {
-        type: TxAuxiliaryDataSupplementType.CATALYST_REGISTRATION,
+        type: TxAuxiliaryDataSupplementType.GOVERNANCE_VOTING_REGISTRATION,
         auxiliaryDataHashHex: auxDataHash.toString('hex'),
-        catalystRegistrationSignatureHex: catalystSignature.toString('hex'),
+        governanceVotingRegistrationSignatureHex: signature.toString('hex'),
     }
   }
 
@@ -983,12 +1020,17 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Reference inputs not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    // catalyst voting registration is a specific type of auxiliary data that requires a HW wallet signature
+    // catalyst/governance voting registration is a specific type of auxiliary data that requires a HW wallet signature
     const auxiliaryData = request.tx?.auxiliaryData
-    const hasCatalystRegistration = auxiliaryData?.type === TxAuxiliaryDataType.CATALYST_REGISTRATION
-
-    if (hasCatalystRegistration && !getCompatibility(version).supportsCatalystRegistration) {
+    const hasCIP15Registration = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
+        && auxiliaryData.params.format === GovernanceVotingRegistrationFormat.CIP_15
+    if (hasCIP15Registration && !getCompatibility(version).supportsCatalystRegistration) {
         throw new DeviceVersionUnsupported(`Catalyst registration not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+    const hasCIP36Registration = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
+        && auxiliaryData.params.format === GovernanceVotingRegistrationFormat.CIP_36
+    if (hasCIP36Registration && !getCompatibility(version).supportsGovernanceVoting) {
+        throw new DeviceVersionUnsupported(`Governance voting registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
 
@@ -996,7 +1038,8 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     ensureLedgerAppVersionCompatible(version)
     ensureRequestSupportedByAppVersion(version, request)
 
-    const isCatalystRegistrationSupported = getCompatibility(version).supportsCatalystRegistration
+    const auxDataBeforeTxBody = getCompatibility(version).supportsCatalystRegistration
+        || getCompatibility(version).supportsGovernanceVoting
 
     const { tx, signingMode } = request
     const witnessPaths = gatherWitnessPaths(request)
@@ -1008,7 +1051,7 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
 
     // auxiliary data
     let auxiliaryDataSupplement = null
-    if (isCatalystRegistrationSupported && tx.auxiliaryData != null) {
+    if (auxDataBeforeTxBody && tx.auxiliaryData != null) {
         auxiliaryDataSupplement = yield* signTx_setAuxiliaryData(tx.auxiliaryData, version)
     }
 
@@ -1041,7 +1084,7 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     }
 
     // auxiliary data before Ledger app version 2.3.x
-    if (!isCatalystRegistrationSupported && tx.auxiliaryData != null) {
+    if (!auxDataBeforeTxBody && tx.auxiliaryData != null) {
         auxiliaryDataSupplement = yield* signTx_setAuxiliaryData_before_v2_3(tx.auxiliaryData)
     }
 

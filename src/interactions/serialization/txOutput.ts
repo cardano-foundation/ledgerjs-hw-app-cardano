@@ -1,4 +1,4 @@
-import type {HexString, OutputDestination, ParsedDatum, ParsedOutput, Uint8_t,Uint32_t} from "../../types/internal"
+import type {HexString, ParsedDatum, ParsedOutput, ParsedOutputDestination, Uint8_t,Uint32_t} from "../../types/internal"
 import {TxOutputDestinationType} from "../../types/internal"
 import type {Version} from "../../types/public"
 import {DatumType} from "../../types/public"
@@ -10,8 +10,8 @@ import {serializeAddressParams} from "./addressParams"
 // should be the same as in the Ledger app
 export const MAX_CHUNK_SIZE = 240
 
-function serializeTxOutputDestination(
-    destination: OutputDestination,
+export function serializeTxOutputDestination(
+    destination: ParsedOutputDestination,
     version: Version,) {
     const typeEncoding = {
         [TxOutputDestinationType.THIRD_PARTY]: 1 as Uint8_t,

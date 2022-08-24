@@ -5,10 +5,10 @@ import { hex_to_buf, uint8_to_buf } from "../../utils/serialize"
 
 export function serializeTxAuxiliaryData(
     auxiliaryData: ParsedTxAuxiliaryData,
-) {
+): Buffer {
     const auxiliaryDataTypesEncoding = {
         [TxAuxiliaryDataType.ARBITRARY_HASH]: 0x00,
-        [TxAuxiliaryDataType.CATALYST_REGISTRATION]: 0x01,
+        [TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION]: 0x01,
     } as const
 
     switch (auxiliaryData.type) {
@@ -18,7 +18,7 @@ export function serializeTxAuxiliaryData(
             hex_to_buf(auxiliaryData.hashHex),
         ])
     }
-    case TxAuxiliaryDataType.CATALYST_REGISTRATION: {
+    case TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION: {
         return Buffer.concat([
             uint8_to_buf(auxiliaryDataTypesEncoding[auxiliaryData.type] as Uint8_t),
         ])

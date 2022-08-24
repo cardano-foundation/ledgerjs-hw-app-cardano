@@ -38,19 +38,22 @@ export function* getVersion(): Interaction<Version> {
 
 export function getCompatibility(version: Version): DeviceCompatibility {
     // We restrict forward compatibility only to backward-compatible semver changes
-    const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 5, Infinity)
-    const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 5, Infinity)
-    const v2_4 = isLedgerAppVersionAtLeast(version, 2, 4) && isLedgerAppVersionAtMost(version, 5, Infinity)
-    const v3_0 = isLedgerAppVersionAtLeast(version, 3, 0) && isLedgerAppVersionAtMost(version, 5, Infinity)
-    const v4_0_Alonzo = isLedgerAppVersionAtLeast(version, 4, 0) && isLedgerAppVersionAtMost(version, 5, Infinity)
-    const v4_1 = isLedgerAppVersionAtLeast(version, 4, 1) && isLedgerAppVersionAtMost(version, 5, Infinity)
-    const v5_0 = isLedgerAppVersionAtLeast(version, 5, 0) && isLedgerAppVersionAtMost(version, 5, Infinity)
+    const v2_2 = isLedgerAppVersionAtLeast(version, 2, 2) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v2_4 = isLedgerAppVersionAtLeast(version, 2, 4) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v3_0 = isLedgerAppVersionAtLeast(version, 3, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v4_0_Alonzo = isLedgerAppVersionAtLeast(version, 4, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v4_1 = isLedgerAppVersionAtLeast(version, 4, 1) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v5_0 = isLedgerAppVersionAtLeast(version, 5, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    // TODO update minimum to 6
+    const v6_0 = isLedgerAppVersionAtLeast(version, 5, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
 
     return {
         isCompatible: v2_2,
-        recommendedVersion: v2_2 ? null : '5.0',
+        recommendedVersion: v2_2 ? null : '5.0', // TODO update to 6.0
         supportsMary: v2_2,
         supportsCatalystRegistration: v2_3,
+        supportsGovernanceVoting: v6_0,
         supportsZeroTtl: v2_3,
         supportsPoolRegistrationAsOperator: v2_4,
         supportsPoolRetirement: v2_4,

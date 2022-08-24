@@ -26,6 +26,7 @@ describe("getVersion", async () => {
             supportsMint: true,
             supportsMultisigTransaction: true,
             supportsCatalystRegistration: true,
+            supportsGovernanceVoting: true,
             supportsZeroTtl: true,
             supportsPoolRegistrationAsOperator: true,
             supportsPoolRetirement: true,

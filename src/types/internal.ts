@@ -3,6 +3,8 @@ import {
     AddressType,
     CertificateType,
     DatumType,
+    GovernanceVotingDelegationType,
+    GovernanceVotingRegistrationFormat,
     NativeScriptType,
     PoolKeyType,
     PoolOwnerType,
@@ -31,7 +33,7 @@ export type Int64_str = string & { __type: 'int64_t' }
 export type ValidBIP32Path = Array<Uint32_t> & { __type: 'bip32_path' }
 
 // Reexport blockchain spec
-export { AddressType, CertificateType, DatumType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, TxOutputDestinationType, TxOutputFormat }
+export { AddressType, CertificateType, DatumType, NativeScriptType, RelayType, PoolKeyType, PoolOwnerType, PoolRewardAccountType, TransactionSigningMode, TxAuxiliaryDataType, GovernanceVotingDelegationType, TxOutputDestinationType, TxOutputFormat }
 export { Version, DeviceCompatibility, NativeScriptHashDisplayFormat } from './public'
 // Our types
 export const EXTENDED_PUBLIC_KEY_LENGTH = 64
@@ -104,24 +106,37 @@ export type ParsedNetwork = {
     networkId: Uint8_t;
 }
 
-export const CATALYST_VOTING_PUBLIC_KEY_LENGTH = 32
+export const GOVERNANCE_VOTING_PUBLIC_KEY_LENGTH = 32
 
-export type CatalystVotingPublicKey = FixlenHexString<typeof CATALYST_VOTING_PUBLIC_KEY_LENGTH>
+export type GovernanceVotingPublicKey = FixlenHexString<typeof GOVERNANCE_VOTING_PUBLIC_KEY_LENGTH>
 
 export type ParsedTxAuxiliaryData = {
     type: TxAuxiliaryDataType.ARBITRARY_HASH;
     hashHex: FixlenHexString<typeof AUXILIARY_DATA_HASH_LENGTH>;
 } | {
-    type: TxAuxiliaryDataType.CATALYST_REGISTRATION;
-    params: ParsedCatalystRegistrationParams;
+    type: TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION;
+    params: ParsedGovernanceVotingRegistrationParams;
 }
 
-export type ParsedCatalystRegistrationParams = {
-    type: TxAuxiliaryDataType.CATALYST_REGISTRATION;
-    votingPublicKey: CatalystVotingPublicKey;
+export type ParsedGovernanceVotingRegistrationParams = {
+    format: GovernanceVotingRegistrationFormat;
+    votingPublicKey: GovernanceVotingPublicKey | null;
+    votingPublicKeyPath: ValidBIP32Path | null;
+    delegations: Array<ParsedGovernanceVotingDelegation> | null;
     stakingPath: ValidBIP32Path;
-    rewardsDestination: ShelleyAddressParams;
+    rewardsDestination: ParsedOutputDestination;
     nonce: Uint64_str;
+    votingPurpose: Uint64_str | null;
+}
+
+export type ParsedGovernanceVotingDelegation = {
+    type: GovernanceVotingDelegationType.PATH;
+    votingKeyPath: ValidBIP32Path;
+    weight: Uint32_t;
+} | {
+    type: GovernanceVotingDelegationType.KEY;
+    votingPublicKey: GovernanceVotingPublicKey;
+    weight: Uint32_t;
 }
 
 export type ParsedTransaction = {
@@ -356,7 +371,7 @@ export type ShelleyAddressParams = {
 
 export type ParsedAddressParams = ByronAddressParams | ShelleyAddressParams
 
-export type OutputDestination = {
+export type ParsedOutputDestination = {
     type: TxOutputDestinationType.THIRD_PARTY;
     addressHex: HexString;
 } | {
@@ -378,7 +393,7 @@ export type ParsedOutput = {
     format: TxOutputFormat;
     amount: Uint64_str;
     tokenBundle: ParsedAssetGroup<Uint64_str>[];
-    destination: OutputDestination;
+    destination: ParsedOutputDestination;
     datum: ParsedDatum | null;
     referenceScriptHex: HexString | null;
 }

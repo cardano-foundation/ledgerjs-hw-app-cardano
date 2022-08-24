@@ -1,12 +1,12 @@
 import {InvalidData} from "../errors"
 import {InvalidDataReason} from "../errors/invalidDataReason"
 import type {
-    OutputDestination,
     ParsedAssetGroup,
     ParsedCertificate,
     ParsedDatum,
     ParsedInput,
     ParsedOutput,
+    ParsedOutputDestination,
     ParsedRequiredSigner,
     ParsedSigningRequest,
     ParsedToken,
@@ -281,10 +281,16 @@ function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     }
 }
 
-function parseTxDestination(
+/*
+ * Typically, destination is used in output, where we forbid reward addresses.
+ * In some other places, we allow them. The parameter 'validateAsTxOutput'
+ * is used to control this validation.
+ */
+export function parseTxDestination(
     network: Network,
     destination: TxOutputDestination,
-): OutputDestination {
+    validateAsTxOutput: boolean,
+): ParsedOutputDestination {
     switch (destination.type) {
     case TxOutputDestinationType.THIRD_PARTY: {
         const params = destination.params
@@ -298,7 +304,13 @@ function parseTxDestination(
     case TxOutputDestinationType.DEVICE_OWNED: {
         const params = destination.params
         const addressParams = parseAddress(network, params)
-        validate(addressParams.spendingDataSource.type === SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)
+        if (validateAsTxOutput) {
+            validate(
+                // a reward address cannot be used in tx output
+                addressParams.spendingDataSource.type === SpendingDataSourceType.PATH,
+                InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS
+            )
+        }
         return {
             type: TxOutputDestinationType.DEVICE_OWNED,
             addressParams: addressParams,
@@ -321,7 +333,7 @@ function parseTxOutput(
 
     const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
 
-    const destination = parseTxDestination(network, output.destination)
+    const destination = parseTxDestination(network, output.destination, true)
 
     const datum = parseDatum(output)
     if (datum?.type === DatumType.INLINE) {
@@ -502,7 +514,7 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
     }
 
     case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER: {
-        // all these restictions are due to fact that pool owner signature *might* accidentally/maliciously sign another part of tx
+        // all these restrictions are due to fact that pool owner signature *might* accidentally/maliciously sign another part of tx
         // but we are not showing these parts to the user
 
         // input should not be given with a path

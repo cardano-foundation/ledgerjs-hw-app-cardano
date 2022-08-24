@@ -3,7 +3,6 @@ import {
     testsAllegra,
     testsAlonzoTrezorComparison, testsBabbageTrezorComparison,
     testsByron,
-    testsCatalystRegistration,
     testsMary,
     testsMultisig,
     testsShelleyNoCertificates,
@@ -31,7 +30,6 @@ describeSignTxPositiveTest("signTxShelleyWithCertificates", testsShelleyWithCert
 describeSignTxPositiveTest("signTxMultisig", testsMultisig)
 describeSignTxPositiveTest("signTxAllegra", testsAllegra)
 describeSignTxPositiveTest("signTxMary", testsMary)
-describeSignTxPositiveTest("signTxCatalyst", testsCatalystRegistration)
 describeSignTxPositiveTest("signTxTrezorComparison", testsAlonzoTrezorComparison)
 describeSignTxPositiveTest("signTxBabbageTrezorComparison", testsBabbageTrezorComparison)
 
