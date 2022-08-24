@@ -48,7 +48,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
 
     return {
         isCompatible: v2_2,
-        recommendedVersion: v2_2 ? null : '4.0',
+        recommendedVersion: v2_2 ? null : '5.0',
         supportsMary: v2_2,
         supportsCatalystRegistration: v2_3,
         supportsZeroTtl: v2_3,
