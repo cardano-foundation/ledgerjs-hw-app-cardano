@@ -298,7 +298,7 @@ function parseTxDestination(
     case TxOutputDestinationType.DEVICE_OWNED: {
         const params = destination.params
         const addressParams = parseAddress(network, params)
-        validate(addressParams.spendingDataSource.type == SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)
+        validate(addressParams.spendingDataSource.type === SpendingDataSourceType.PATH, InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS)
         return {
             type: TxOutputDestinationType.DEVICE_OWNED,
             addressParams: addressParams,
@@ -420,13 +420,13 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // cannot have collateral output in the tx
         validate(
-            tx.collateralOutput === null,
+            tx.collateralOutput == null,
             InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED
         )
 
         // cannot have total collateral in the tx
         validate(
-            tx.totalCollateral === null,
+            tx.totalCollateral == null,
             InvalidDataReason.SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
@@ -482,13 +482,13 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // cannot have collateral output in the tx
         validate(
-            tx.collateralOutput === null,
+            tx.collateralOutput == null,
             InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED
         )
 
         // cannot have total collateral in the tx
         validate(
-            tx.totalCollateral === null,
+            tx.totalCollateral == null,
             InvalidDataReason.SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
@@ -580,13 +580,13 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // cannot have collateral output in the tx
         validate(
-            tx.collateralOutput === null,
+            tx.collateralOutput == null,
             InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED
         )
 
         // cannot have total collateral in the tx
         validate(
-            tx.totalCollateral === null,
+            tx.totalCollateral == null,
             InvalidDataReason.SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
@@ -668,13 +668,13 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
 
         // cannot have collateral output in the tx
         validate(
-            tx.collateralOutput === null,
+            tx.collateralOutput == null,
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED
         )
 
         // cannot have total collateral in the tx
         validate(
-            tx.totalCollateral === null,
+            tx.totalCollateral == null,
             InvalidDataReason.SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED
         )
 
