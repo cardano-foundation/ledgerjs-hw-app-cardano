@@ -26,20 +26,23 @@ import { getSerial } from "./interactions/getSerial"
 import { getCompatibility, getVersion } from "./interactions/getVersion"
 import { runTests } from "./interactions/runTests"
 import { showAddress } from "./interactions/showAddress"
+import { signGovernanceVote } from "./interactions/signGovernanceVote"
 import { signOperationalCertificate } from "./interactions/signOperationalCertificate"
 import { signTransaction } from "./interactions/signTx"
 import { parseAddress } from './parsing/address'
+import { parseGovernanceVote } from "./parsing/governanceVote"
 import { parseNativeScript, parseNativeScriptHashDisplayFormat } from "./parsing/nativeScript"
 import { parseOperationalCertificate } from "./parsing/operationalCertificate"
 import { parseSignTransactionRequest } from "./parsing/transaction"
 import type {
     ParsedAddressParams,
+    ParsedGovernanceVote,
     ParsedNativeScript,
     ParsedOperationalCertificate,
     ParsedSigningRequest,
     ValidBIP32Path,
 } from './types/internal'
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public'
+import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, GovernanceVote, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedGovernanceVoteData, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public'
 import { AddressType, CertificateType, NativeScriptType, RelayType, TransactionSigningMode } from "./types/public"
 import utils from "./utils"
 import { assert } from './utils/assert'
@@ -324,6 +327,20 @@ export class Ada {
       return yield* signOperationalCertificate(version, request)
   }
 
+  async signGovernanceVote(
+      request: SignGovernanceVoteRequest
+  ): Promise<SignGovernanceVoteResponse> {
+      const parsedGovernanceVote = parseGovernanceVote(request)
+
+      return interact(this._signGovernanceVote(parsedGovernanceVote), this._send)
+  }
+
+  /** @ignore */
+  * _signGovernanceVote(request: ParsedGovernanceVote): Interaction<SignedGovernanceVoteData> {
+      const version = yield* getVersion()
+      return yield* signGovernanceVote(version, request)
+  }
+
   /**
    * Derive a native script hash for the specified native script and display
    * it on Ledger in the specified format. The hash is returned in raw hex
@@ -437,6 +454,19 @@ export type SignOperationalCertificateRequest = OperationalCertificate
  * @see [[SignOperationalCertificateRequest]]
  */
 export type SignOperationalCertificateResponse = OperationalCertificateSignature
+
+/**
+ * Sign governance vote ([[Ada.signGovernanceVote]]) request data
+ * @category Main
+ * @see [[SignGovernanceVoteResponse]]
+ */
+export type SignGovernanceVoteRequest = GovernanceVote
+/**
+  * Sign governance vote ([[Ada.signGovernanceVote]]) response data
+  * @category Main
+  * @see [[SignGovernanceVoteRequest]]
+  */
+export type SignGovernanceVoteResponse = SignedGovernanceVoteData
 
 /**
  * Derive native script hash ([[Ada.deriveNativeScriptHash]]) request data

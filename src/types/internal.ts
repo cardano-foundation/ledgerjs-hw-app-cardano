@@ -407,6 +407,11 @@ export type ParsedOperationalCertificate = {
     coldKeyPath: ValidBIP32Path;
 }
 
+export type ParsedGovernanceVote = {
+    voteCastDataHex: HexString;
+    witnessPath: ValidBIP32Path;
+}
+
 export const NATIVE_SCRIPT_HASH_LENGTH = 28
 
 export type ParsedSimpleNativeScript = {

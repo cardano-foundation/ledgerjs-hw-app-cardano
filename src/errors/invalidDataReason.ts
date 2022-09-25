@@ -277,6 +277,9 @@ export enum InvalidDataReason {
   OPERATIONAL_CERTIFICATE_INVALID_COLD_KEY_PATH =
   "invalid operational certificate cold key path",
 
+  GOVERNANCE_VOTE_INVALID_VOTECAST_DATA = "invalid votecast data for governance voting",
+  GOVERNANCE_VOTE_INVALID_WITNESS = "invalid witness for governance voting",
+
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_DATA = "invalid native script input",
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_KEY_PATH = "invalid key path param",
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_KEY_HASH = "invalid key hash param",

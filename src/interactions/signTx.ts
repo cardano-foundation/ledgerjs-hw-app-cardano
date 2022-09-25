@@ -127,7 +127,7 @@ function* signTx_init(
   const enum P2 {
     UNUSED = 0x00,
   }
-  const _response = yield send({
+  yield send({
       p1: P1.STAGE_INIT,
       p2: P2.UNUSED,
       data: serializeTxInit(tx, signingMode, witnessPaths.length, version),

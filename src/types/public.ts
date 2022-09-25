@@ -239,6 +239,18 @@ export type OperationalCertificate = {
     coldKeyPath: BIP32Path;
 }
 
+/** Governance vote
+ *
+ * @category Basic types
+ */
+export type GovernanceVote = {
+    // bytestring to sign in hex
+    voteCastDataHex: string;
+
+    // the witness path for which we need a signature
+    witnessPath: BIP32Path;
+}
+
 /**
  * Describes single transaction input (i.e. UTxO)
  * @category Basic types
@@ -953,6 +965,23 @@ export type ExtendedPublicKey = {
 export type OperationalCertificateSignature = {
     signatureHex: string;
 }
+
+/**
+ * Result of signing a governance vote.
+ * @category Basic types
+ * @see [[Ada.signGovernanceVote]]
+ */
+export type SignedGovernanceVoteData = {
+    /**
+     * The hash being signed. Useful to callers to detect a mismatch.
+     */
+    dataHashHex: string;
+    /**
+     * Witness key derivation path and signature.
+     */
+    witnessPath: BIP32Path;
+    witnessSignatureHex: string;
+};
 
 /**
  * Transaction witness.
