@@ -512,18 +512,21 @@ function* signTx_setAuxiliaryData(
       CONFIRM = 0x34,
     }
 
-    yield send({
-        p1: P1.STAGE_AUX_DATA,
-        p2: P2.INIT,
-        data: serializeGovernanceVotingRegistrationInit(auxiliaryData.params),
-        expectedResponseLength: 0,
-    })
+    if (getCompatibility(version).supportsGovernanceVoting) {
+        // this APDU was not used previously for Catalyst
+        yield send({
+            p1: P1.STAGE_AUX_DATA,
+            p2: P2.INIT,
+            data: serializeGovernanceVotingRegistrationInit(auxiliaryData.params),
+            expectedResponseLength: 0,
+        })
+    }
 
     if (params.votingPublicKey || params.votingPublicKeyPath) {
         yield send({
             p1: P1.STAGE_AUX_DATA,
             p2: P2.VOTING_KEY,
-            data: serializeGovernanceVotingRegistrationVotingKey(params.votingPublicKey, params.votingPublicKeyPath),
+            data: serializeGovernanceVotingRegistrationVotingKey(params.votingPublicKey, params.votingPublicKeyPath, version),
             expectedResponseLength: 0,
         })
     } else if (params.delegations) {
@@ -561,12 +564,15 @@ function* signTx_setAuxiliaryData(
         expectedResponseLength: 0,
     })
 
-    yield send({
-        p1: P1.STAGE_AUX_DATA,
-        p2: P2.VOTING_PURPOSE,
-        data: serializeGovernanceVotingRegistrationVotingPurpose(params.votingPurpose),
-        expectedResponseLength: 0,
-    })
+    if (getCompatibility(version).supportsGovernanceVoting) {
+        // this APDU was not used previously for Catalyst
+        yield send({
+            p1: P1.STAGE_AUX_DATA,
+            p2: P2.VOTING_PURPOSE,
+            data: serializeGovernanceVotingRegistrationVotingPurpose(params.votingPurpose),
+            expectedResponseLength: 0,
+        })
+    }
 
     const ED25519_SIGNATURE_LENGTH = 64
 
@@ -1031,6 +1037,16 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         && auxiliaryData.params.format === GovernanceVotingRegistrationFormat.CIP_36
     if (hasCIP36Registration && !getCompatibility(version).supportsGovernanceVoting) {
         throw new DeviceVersionUnsupported(`Governance voting registration not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+    const hasKeyPath = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
+        && auxiliaryData.params.votingPublicKeyPath != null
+    if (hasKeyPath && !getCompatibility(version).supportsGovernanceVoting) {
+        throw new DeviceVersionUnsupported(`Voting key derivation path in governance voting registration not supported by Ledger app version ${getVersionString(version)}.`)
+    }
+    const thirdPartyRewards = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
+        && auxiliaryData.params.rewardsDestination.type != TxOutputDestinationType.DEVICE_OWNED
+    if (thirdPartyRewards && !getCompatibility(version).supportsGovernanceVoting) {
+        throw new DeviceVersionUnsupported(`Catalyst reward addresses not owned by the device not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
 

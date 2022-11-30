@@ -1,9 +1,12 @@
+import { getCompatibility } from "../../interactions/getVersion"
 import type { GovernanceVotingPublicKey, ParsedGovernanceVotingDelegation, ParsedGovernanceVotingRegistrationParams, ParsedOutputDestination,Uint8_t,Uint32_t, Uint64_str,ValidBIP32Path } from "../../types/internal"
 import type { Version } from "../../types/public"
+import { TxOutputDestinationType } from "../../types/public"
 import { GovernanceVotingDelegationType } from "../../types/public"
 import { GovernanceVotingRegistrationFormat } from "../../types/public"
 import { assert, unreachable } from "../../utils/assert"
 import { hex_to_buf, path_to_buf, serializeOptionFlag,uint8_to_buf,uint32_to_buf,uint64_to_buf } from "../../utils/serialize"
+import { serializeAddressParams } from "./addressParams"
 import { serializeTxOutputDestination } from "./txOutput"
 
 export function serializeGovernanceVotingRegistrationInit(params: ParsedGovernanceVotingRegistrationParams): Buffer {
@@ -35,15 +38,23 @@ function serializeDelegationType(type: GovernanceVotingDelegationType): Buffer {
 export function serializeGovernanceVotingRegistrationVotingKey(
     votingPublicKey: GovernanceVotingPublicKey | null,
     votingPublicKeyPath: ValidBIP32Path | null,
+    version: Version
 ): Buffer {
     if (votingPublicKey != null) {
         assert(votingPublicKeyPath == null, "redundant governance registration voting key path")
+
+        const delegationTypeBuffer = (getCompatibility(version).supportsGovernanceVoting)
+            ? serializeDelegationType(GovernanceVotingDelegationType.KEY)
+            : Buffer.from([])
+
         return Buffer.concat([
-            serializeDelegationType(GovernanceVotingDelegationType.KEY),
+            delegationTypeBuffer,
             hex_to_buf(votingPublicKey),
         ])
     } else {
         assert(votingPublicKeyPath != null, "missing governance registration voting key")
+        assert(getCompatibility(version).supportsGovernanceVoting, "key derivation path not supported for Catalyst not supported by the device")
+
         return Buffer.concat([
             serializeDelegationType(GovernanceVotingDelegationType.PATH),
             path_to_buf(votingPublicKeyPath),
@@ -86,7 +97,13 @@ export function serializeGovernanceVotingRegistrationRewardsDestination(
     rewardsDestination: ParsedOutputDestination,
     version: Version,
 ): Buffer {
-    return serializeTxOutputDestination(rewardsDestination, version)
+    if (getCompatibility(version).supportsGovernanceVoting) {
+        return serializeTxOutputDestination(rewardsDestination, version)
+    } else {
+        // older ledger versions with only Catalyst as in CIP-15
+        assert(rewardsDestination.type === TxOutputDestinationType.DEVICE_OWNED, "wrong destination for reward address in Catalyst")
+        return serializeAddressParams(rewardsDestination.addressParams, version)
+    }
 }
 
 export function serializeGovernanceVotingRegistrationNonce(nonce: Uint64_str): Buffer {
