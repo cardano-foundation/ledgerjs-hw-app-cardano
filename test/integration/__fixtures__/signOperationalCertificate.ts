@@ -2,14 +2,14 @@ import type { OperationalCertificate, OperationalCertificateSignature } from "..
 import { str_to_path } from "../../../src/utils"
 
 export type TestCase = {
-  testname: string;
+  testName: string;
   operationalCertificate: OperationalCertificate;
   expected: OperationalCertificateSignature;
 }
 
 export const tests: TestCase[] = [
     {
-        testname: "Should correctly sign a basic operational certificate",
+        testName: "Should correctly sign a basic operational certificate",
         operationalCertificate: {
             kesPublicKeyHex: "3d24bc547388cf2403fd978fc3d3a93d1f39acf68a9c00e40512084dc05f2822",
             kesPeriod: "47",

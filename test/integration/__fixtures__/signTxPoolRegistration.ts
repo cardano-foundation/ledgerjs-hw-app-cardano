@@ -361,7 +361,7 @@ export const certificates: Record<
 
 export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
     {
-        testname: "Witness valid multiple mixed owners all relays pool registration",
+        testName: "Witness valid multiple mixed owners all relays pool registration",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
@@ -382,7 +382,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness valid single path owner ipv4 relay pool registration",
+        testName: "Witness valid single path owner ipv4 relay pool registration",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationDefault],
@@ -403,7 +403,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness valid multiple mixed owners ipv4 relay pool registration",
+        testName: "Witness valid multiple mixed owners ipv4 relay pool registration",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationMixedOwners],
@@ -424,7 +424,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness valid multiple mixed owners mixed ipv4, single host relays pool registration",
+        testName: "Witness valid multiple mixed owners mixed ipv4, single host relays pool registration",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationMixedOwnersIpv4SingleHostRelays],
@@ -445,7 +445,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration",
+        testName: "Witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationMixedOwnersIpv4Ipv6Relays],
@@ -466,7 +466,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness valid single path owner no relays pool registration",
+        testName: "Witness valid single path owner no relays pool registration",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationNoRelays],
@@ -488,7 +488,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
     },
     {
         // works as a private pool not visible in yoroi, daedalus, etc.
-        testname: "Witness pool registration with no metadata",
+        testName: "Witness pool registration with no metadata",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationNoMetadata],
@@ -509,7 +509,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness pool registration without outputs",
+        testName: "Witness pool registration without outputs",
         tx: {
             ...txBase,
             outputs: [],
@@ -534,7 +534,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
 
 export const poolRegistrationOperatorTestcases: SignTxTestcase[] = [
     {
-        testname: "Witness pool registration as operator with no owners and no relays",
+        testName: "Witness pool registration as operator with no owners and no relays",
         tx: {
             ...txBase,
             inputs: [inputs.utxoWithPath0],
@@ -561,7 +561,7 @@ export const poolRegistrationOperatorTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness pool registration as operator with one owner and no relays",
+        testName: "Witness pool registration as operator with one owner and no relays",
         tx: {
             ...txBase,
             inputs: [inputs.utxoWithPath0],
@@ -588,7 +588,7 @@ export const poolRegistrationOperatorTestcases: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Witness pool registration as operator with multiple owners and all relays",
+        testName: "Witness pool registration as operator with multiple owners and all relays",
         tx: {
             ...txBase,
             inputs: [inputs.utxoWithPath0],

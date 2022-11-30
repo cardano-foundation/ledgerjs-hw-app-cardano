@@ -514,7 +514,8 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
     }
 
     case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER: {
-        // all these restrictions are due to fact that pool owner signature *might* accidentally/maliciously sign another part of tx
+        // all these restrictions are due to the fact that pool owner signature
+        // *might* accidentally/maliciously sign another part of tx
         // but we are not showing these parts to the user
 
         // input should not be given with a path

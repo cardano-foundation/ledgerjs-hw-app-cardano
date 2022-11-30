@@ -11,7 +11,7 @@ import { destinations, inputs, mainnetFeeTtl, outputs, shelleyBase } from "./txE
 
 export const testsCatalystRegistration: SignTxTestcase[] = [
     {
-        testname: "Sign tx with Catalyst voting key registration metadata with base address",
+        testName: "Sign tx with Catalyst voting key registration metadata with base address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -47,7 +47,7 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with Catalyst voting key registration metadata with stake address",
+        testName: "Sign tx with Catalyst voting key registration metadata with stake address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -85,7 +85,7 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
 
 export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
     {
-        testname: "Sign tx with governance voting registration CIP36 with voting key hex",
+        testName: "Sign tx with governance voting registration CIP36 with voting key hex",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -120,7 +120,7 @@ export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with governance voting registration CIP36 with voting key path",
+        testName: "Sign tx with governance voting registration CIP36 with voting key path",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -156,7 +156,7 @@ export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with governance voting registration CIP36 with unusual voting key path",
+        testName: "Sign tx with governance voting registration CIP36 with unusual voting key path",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -192,7 +192,7 @@ export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with governance voting registration CIP36 with third-party reward address",
+        testName: "Sign tx with governance voting registration CIP36 with third-party reward address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -228,7 +228,7 @@ export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with governance voting registration CIP36 with voting purpose",
+        testName: "Sign tx with governance voting registration CIP36 with voting purpose",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -265,7 +265,7 @@ export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with governance voting registration CIP36 with delegations",
+        testName: "Sign tx with governance voting registration CIP36 with delegations",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -316,7 +316,7 @@ export const testsGovernanceVotingRegistrationCIP36: SignTxTestcase[] = [
 
 export const testsGovernanceVotingRegistrationRejects: TestcaseRejectShelley[] = [
     {
-        testname: "Governance voting CIP-15 with delegation",
+        testName: "Governance voting CIP-15 with delegation",
         tx: {
             ...shelleyBase,
             auxiliaryData: {
@@ -342,7 +342,7 @@ export const testsGovernanceVotingRegistrationRejects: TestcaseRejectShelley[] =
         rejectReason: InvalidDataReason.GOVERNANCE_VOTING_REGISTRATION_INCONSISTENT_WITH_CIP15,
     },
     {
-        testname: "Governance voting CIP-15 with voting purpose",
+        testName: "Governance voting CIP-15 with voting purpose",
         tx: {
             ...shelleyBase,
             auxiliaryData: {

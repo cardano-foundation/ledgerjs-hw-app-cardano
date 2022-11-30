@@ -6,7 +6,7 @@ import { str_to_path } from "../../../src/utils/address"
 import { Networks } from "../../test_utils"
 
 type ByronTestcase = {
-    testname: string;
+    testName: string;
     network: Network;
     addressParams: DeviceOwnedAddress;
     result: string;
@@ -15,7 +15,7 @@ type ByronTestcase = {
 export const byronTestcases: ByronTestcase[] = [
     // Mainnet
     {
-        testname: "mainnet 1",
+        testName: "mainnet 1",
         network: Networks.Mainnet,
         addressParams: {
             type: AddressType.BYRON,
@@ -26,7 +26,7 @@ export const byronTestcases: ByronTestcase[] = [
         result: "Ae2tdPwUPEZELF6oijm8VFmhWpujnNzyG2zCf4RxfhmWqQKHo2drRD5Uhah",
     },
     {
-        testname: "mainnet 2",
+        testName: "mainnet 2",
         network: Networks.Mainnet,
         addressParams: {
             type: AddressType.BYRON,
@@ -37,7 +37,7 @@ export const byronTestcases: ByronTestcase[] = [
         result: "Ae2tdPwUPEYyiPZzoMSN9GJMNZnn3S6ZAErrezee9s1bH6tjaX6m9Cyf3Wy",
     },
     {
-        testname: "mainnet 3",
+        testName: "mainnet 3",
         network: Networks.Mainnet,
         addressParams: {
             type: AddressType.BYRON,
@@ -48,7 +48,7 @@ export const byronTestcases: ByronTestcase[] = [
         result: "Ae2tdPwUPEZ8DtpNK9twc8YXCoJ39Uwzc2FWqo1KvGsB8Kvhk14buuESy6g",
     },
     {
-        testname: "mainnet 4",
+        testName: "mainnet 4",
         network: Networks.Mainnet,
         addressParams: {
             type: AddressType.BYRON,
@@ -60,7 +60,7 @@ export const byronTestcases: ByronTestcase[] = [
     },
     // Testnet
     {
-        testname: "testnet 1",
+        testName: "testnet 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BYRON,
@@ -75,14 +75,14 @@ export const byronTestcases: ByronTestcase[] = [
 const Pointer = (blockIndex: number, txIndex: number, certificateIndex: number) => ({ blockIndex, txIndex, certificateIndex })
 
 type ShelleyTestcase = {
-    testname: string;
+    testName: string;
     network: Network;
     addressParams: DeviceOwnedAddress;
     result: string;
 }
 export const shelleyTestcases: ShelleyTestcase[] = [
     {
-        testname: "base address path/path 1",
+        testName: "base address path/path 1",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -94,7 +94,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqdquehe",
     },
     {
-        testname: "base address path/path 2",
+        testName: "base address path/path 2",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -106,7 +106,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4",
     },
     {
-        testname: "base address path/path unusual spending path account",
+        testName: "base address path/path unusual spending path account",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -118,7 +118,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1qv6dcymepkghuyt0za9jxg5hn89art9y8yjcvhxclxdhndsayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqdqq9xn",
     },
     {
-        testname: "base address path/path unusual spending path address index",
+        testName: "base address path/path unusual spending path address index",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -130,7 +130,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1q08rwk27cdm6vcp272pqcwq3t3gzea0q5xws2z84zzejrkcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2cxp3q",
     },
     {
-        testname: "base address path/path unusual staking path account",
+        testName: "base address path/path unusual staking path account",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -142,7 +142,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1qwpug24twgud02405vncq9gmthq3r8e3a6l3855r8jpkgjnfwjwuljn5a0p37d4yvxevnte42mffrpmf4823vcdq62xqm8xq3j",
     },
     {
-        testname: "base address path/path unusual staking path account",
+        testName: "base address path/path unusual staking path account",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -154,7 +154,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vmfwjwuljn5a0p37d4yvxevnte42mffrpmf4823vcdq62xq3kdpkj",
     },
     {
-        testname: "base address path/keyHash 1",
+        testName: "base address path/keyHash 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -167,7 +167,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4",
     },
     {
-        testname: "base address path/keyHash 2",
+        testName: "base address path/keyHash 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -180,7 +180,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmswz93l5",
     },
     {
-        testname: "base address path/keyHash unusual account",
+        testName: "base address path/keyHash unusual account",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -193,7 +193,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1qq6dcymepkghuyt0za9jxg5hn89art9y8yjcvhxclxdhndsayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9n0t8l",
     },
     {
-        testname: "base address path/keyHash unusual address index",
+        testName: "base address path/keyHash unusual address index",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -206,7 +206,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1qppn39wu9az8zv5c6k59ke0j2udmjzy42uelpsjjcadf0fgayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwqelwlvz",
     },
     {
-        testname: "base address scriptHash/path",
+        testName: "base address scriptHash/path",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
@@ -218,7 +218,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1zvfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq8dxrpu",
     },
     {
-        testname: "base address scriptHash/path unusual account",
+        testName: "base address scriptHash/path unusual account",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
@@ -230,7 +230,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1zqfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yaad7dqp9clvjdu902n5app3d70rnkax3wjy8n78fz29uhfqzs7q26",
     },
     {
-        testname: "base address path/scriptHash",
+        testName: "base address path/scriptHash",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
@@ -242,7 +242,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1ydd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmssu7w24",
     },
     {
-        testname: "base address path/scriptHash unusual account",
+        testName: "base address path/scriptHash unusual account",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
@@ -254,7 +254,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1yq6dcymepkghuyt0za9jxg5hn89art9y8yjcvhxclxdhndsj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsc0du6n",
     },
     {
-        testname: "base address path/scriptHash unusual address index",
+        testName: "base address path/scriptHash unusual address index",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
@@ -266,7 +266,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1yppn39wu9az8zv5c6k59ke0j2udmjzy42uelpsjjcadf0fgj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsyrvg3w",
     },
     {
-        testname: "base address scriptHash/scriptHash",
+        testName: "base address scriptHash/scriptHash",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
@@ -278,7 +278,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1xvfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfms63y5us",
     },
     {
-        testname: "enterprise path 1",
+        testName: "enterprise path 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.ENTERPRISE_KEY,
@@ -289,7 +289,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1vpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vc7t2fks",
     },
     {
-        testname: "enterprise path 2",
+        testName: "enterprise path 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.ENTERPRISE_KEY,
@@ -300,7 +300,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1vdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vc9wh7em",
     },
     {
-        testname: "enterprise path unusual account",
+        testName: "enterprise path unusual account",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.ENTERPRISE_KEY,
@@ -311,7 +311,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1vv6dcymepkghuyt0za9jxg5hn89art9y8yjcvhxclxdhnds25ctky",
     },
     {
-        testname: "enterprise script 1",
+        testName: "enterprise script 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.ENTERPRISE_SCRIPT,
@@ -322,7 +322,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1wqfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacn4n6n2",
     },
     {
-        testname: "enterprise script 2",
+        testName: "enterprise script 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.ENTERPRISE_SCRIPT,
@@ -333,7 +333,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1wvfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacgswdup",
     },
     {
-        testname: "pointer path 1",
+        testName: "pointer path 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -345,7 +345,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1gpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcpqgpsg6s2p6",
     },
     {
-        testname: "pointer path 2",
+        testName: "pointer path 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -357,7 +357,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vuph3wczvf288aeyu",
     },
     {
-        testname: "pointer path 3",
+        testName: "pointer path 3",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -369,7 +369,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr1gdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcqqqqqnnd32q",
     },
     {
-        testname: "pointer address unusual account",
+        testName: "pointer address unusual account",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -381,7 +381,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1gq8vvh30wke6m5wl2xgwg5luus7zl0pr8kewjzq0wyyga6gpqqqqze3mqg",
     },
     {
-        testname: "pointer address unusual address index",
+        testName: "pointer address unusual address index",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -393,7 +393,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test1gppn39wu9az8zv5c6k59ke0j2udmjzy42uelpsjjcadf0fgqquqqpn6uug",
     },
     {
-        testname: "pointer script 1",
+        testName: "pointer script 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.POINTER_SCRIPT,
@@ -405,7 +405,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr_test12qfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacpqgpsrwzzw9",
     },
     {
-        testname: "pointer script 2",
+        testName: "pointer script 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.POINTER_SCRIPT,
@@ -417,7 +417,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr12vfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yauph3wczvf2sykph7",
     },
     {
-        testname: "pointer script 3",
+        testName: "pointer script 3",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.POINTER_SCRIPT,
@@ -429,7 +429,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "addr12vfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacqqqqqc8le9l",
     },
     {
-        testname: "reward path 1",
+        testName: "reward path 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.REWARD_KEY,
@@ -440,7 +440,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "stake_test1uqwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8q8mmqwc",
     },
     {
-        testname: "reward path 2",
+        testName: "reward path 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.REWARD_KEY,
@@ -451,7 +451,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "stake1uvwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8qqucf2t",
     },
     {
-        testname: "reward path unusual account",
+        testName: "reward path unusual account",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.REWARD_KEY,
@@ -462,7 +462,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "stake1u08h6dxajsaatnakylrd4pdhfrv7z3lkzgsq60fhvejux0gpcrd2j",
     },
     {
-        testname: "reward script 1",
+        testName: "reward script 1",
         network: Networks.Testnet,
         addressParams: {
             type: AddressType.REWARD_SCRIPT,
@@ -473,7 +473,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
         result: "stake_test17qfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacnadzyq",
     },
     {
-        testname: "reward script 2",
+        testName: "reward script 2",
         network: Networks.Fake,
         addressParams: {
             type: AddressType.REWARD_SCRIPT,
@@ -487,7 +487,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
 
 
 type RejectTestcase = {
-    testname: string;
+    testName: string;
     network: Network;
     addressParams: DeviceOwnedAddress;
     errCls: new (...args: any[]) => ErrorBase;
@@ -502,7 +502,7 @@ const rejectTestcaseBase = {
 
 export const RejectTestcases: RejectTestcase[] = [
     {
-        testname: "path too short",
+        testName: "path too short",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BYRON,
@@ -512,7 +512,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "invalid path",
+        testName: "invalid path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BYRON,
@@ -522,7 +522,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "Byron with Shelley path",
+        testName: "Byron with Shelley path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BYRON,
@@ -532,7 +532,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "base key/key with Byron spending path",
+        testName: "base key/key with Byron spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -543,7 +543,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "base key/key with wrong spending path",
+        testName: "base key/key with wrong spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -554,7 +554,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "base key/key with wrong staking path 1",
+        testName: "base key/key with wrong staking path 1",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -565,7 +565,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "base key/key with wrong staking path 2",
+        testName: "base key/key with wrong staking path 2",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
@@ -576,7 +576,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "base key/script with Byron spending path",
+        testName: "base key/script with Byron spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
@@ -587,7 +587,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "base address scripthash/keyhash not allowed",
+        testName: "base address scripthash/keyhash not allowed",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
@@ -598,7 +598,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "pointer with Byron spending path",
+        testName: "pointer with Byron spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -609,7 +609,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "pointer with wrong spending path",
+        testName: "pointer with wrong spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.POINTER_KEY,
@@ -620,7 +620,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "enterprise with Byron spending path",
+        testName: "enterprise with Byron spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.ENTERPRISE_KEY,
@@ -630,7 +630,7 @@ export const RejectTestcases: RejectTestcase[] = [
         },
     },
     {
-        testname: "enterprise with wrong spending path",
+        testName: "enterprise with wrong spending path",
         ...rejectTestcaseBase,
         addressParams: {
             type: AddressType.ENTERPRISE_KEY,

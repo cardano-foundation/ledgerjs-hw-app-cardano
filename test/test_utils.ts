@@ -111,8 +111,8 @@ export function describeSignTxRejects(name: string, testList: any) {
             await (ada as any).t.close()
         })
 
-        for (const {testname, tx, additionalWitnessPaths, signingMode, rejectReason } of testList) {
-            it(`${testname} [${signingMode}]`, async() => {
+        for (const { testName, tx, additionalWitnessPaths, signingMode, rejectReason } of testList) {
+            it(`${testName} [${signingMode}]`, async() => {
                 if (rejectReason === InvalidDataReason.LEDGER_POLICY) {
                     return
                 }
@@ -137,8 +137,8 @@ export function describeSignTxRejects(name: string, testList: any) {
             await (ada as any).t.close()
         })
 
-        for (const {testname, tx, additionalWitnessPaths, signingMode, errCls, errMsg } of testList) {
-            it(`${testname} [${signingMode}]`, async() => {
+        for (const { testName, tx, additionalWitnessPaths, signingMode, errCls, errMsg } of testList) {
+            it(`${testName} [${signingMode}]`, async() => {
                 if (errMsg === DontRunOnLedger) {
                     return
                 }
@@ -165,12 +165,12 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
             await (ada as any).t.close()
         })
 
-        for (const { testname, tx, signingMode, additionalWitnessPaths, txBody, expectedResult } of tests) {
-            it(`${testname} [${signingMode}]`, async () => {
+        for (const { testName, tx, signingMode, additionalWitnessPaths, txBody, expectedResult } of tests) {
+            it(`${testName} [${signingMode}]`, async () => {
                 if (!txBody) {
-                    console.log("WARNING --- No tx body given: " + testname)
+                    console.log("WARNING --- No tx body given: " + testName)
                 } else if (hashTxBody(txBody) !== expectedResult.txHashHex) {
-                    console.log("WARNING --- Tx body hash mismatch: " + testname)
+                    console.log("WARNING --- Tx body hash mismatch: " + testName)
                 }
                 const response = await ada.signTransaction({
                     tx,

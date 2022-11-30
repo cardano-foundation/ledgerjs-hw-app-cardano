@@ -20,8 +20,8 @@ describe("deriveNativeScriptHash", async () => {
     })
 
     describe("Valid native scripts", async () => {
-        for (const { testname, script, displayFormat, hashHex: expectedHash } of ValidNativeScriptTestcases) {
-            it(testname, async () => {
+        for (const { testName, script, displayFormat, hashHex: expectedHash } of ValidNativeScriptTestcases) {
+            it(testName, async () => {
                 const { scriptHashHex } = await ada.deriveNativeScriptHash({
                     script,
                     displayFormat,
@@ -33,8 +33,8 @@ describe("deriveNativeScriptHash", async () => {
     })
 
     describeWithoutValidation("Ledger should not permit invalid scripts", async () => {
-        for (const { testname, script } of InvalidOnLedgerScriptTestcases) {
-            it(testname, async () => {
+        for (const { testName, script } of InvalidOnLedgerScriptTestcases) {
+            it(testName, async () => {
                 const promise = ada.deriveNativeScriptHash({
                     script,
                     displayFormat: NativeScriptHashDisplayFormat.BECH32,
@@ -45,8 +45,8 @@ describe("deriveNativeScriptHash", async () => {
     })
 
     describe("Ledgerjs should not permit invalid scripts", async () => {
-        for (const { testname, script, invalidDataReason: expectedInvalidDataReason } of InvalidScriptTestcases) {
-            it(testname, async () => {
+        for (const { testName, script, invalidDataReason: expectedInvalidDataReason } of InvalidScriptTestcases) {
+            it(testName, async () => {
                 const promise = ada.deriveNativeScriptHash({
                     script,
                     displayFormat: NativeScriptHashDisplayFormat.BECH32,

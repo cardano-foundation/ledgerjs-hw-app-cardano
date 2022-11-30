@@ -22,9 +22,9 @@ describe("deriveAddress", async () => {
         await (ada as any).t.close()
     })
 
-    describe("Should succesfully derive Byron address", async () => {
-        for (const { testname, network, addressParams, result: expectedResult } of byronTestcases) {
-            it(testname, async () => {
+    describe("Should successfully derive Byron address", async () => {
+        for (const { testName, network, addressParams, result: expectedResult } of byronTestcases) {
+            it(testName, async () => {
                 const { addressHex } = await ada.deriveAddress({
                     network,
                     address: addressParams,
@@ -35,9 +35,9 @@ describe("deriveAddress", async () => {
         }
     })
 
-    describe("Should succesfully derive Shelley address", async () => {
-        for (const { testname, network, addressParams, result: expectedResult } of shelleyTestcases) {
-            it(testname, async () => {
+    describe("Should successfully derive Shelley address", async () => {
+        for (const { testName, network, addressParams, result: expectedResult } of shelleyTestcases) {
+            it(testName, async () => {
                 const { addressHex } = await ada.deriveAddress({ network, address: addressParams })
 
                 expect(utils.bech32_encodeAddress(utils.hex_to_buf(addressHex as any))).to.equal(
@@ -48,8 +48,8 @@ describe("deriveAddress", async () => {
     }).timeout(60000)
 
     describe("Should reject address derive", async () => {
-        for (const { testname, network, addressParams, errCls, errMsg } of RejectTestcases) {
-            it(testname, async () => {
+        for (const { testName, network, addressParams, errCls, errMsg } of RejectTestcases) {
+            it(testName, async () => {
                 const promise = ada.deriveAddress({
                     network,
                     address: addressParams,
@@ -59,18 +59,18 @@ describe("deriveAddress", async () => {
         }
     })
 
-    describe("Should succesfully show Byron address", async () => {
-        for (const { testname, network, addressParams } of byronTestcases) {
-            it(testname, async () => {
+    describe("Should successfully show Byron address", async () => {
+        for (const { testName, network, addressParams } of byronTestcases) {
+            it(testName, async () => {
                 const result = await ada.showAddress({ network, address: addressParams })
                 expect(result).to.equal(undefined)
             })
         }
     })
 
-    describe("Should succesfully show Shelley address", async () => {
-        for (const { testname, network, addressParams } of shelleyTestcases) {
-            it(testname, async () => {
+    describe("Should successfully show Shelley address", async () => {
+        for (const { testName, network, addressParams } of shelleyTestcases) {
+            it(testName, async () => {
                 const result = await ada.showAddress({ network, address: addressParams })
                 expect(result).to.equal(undefined)
             })
@@ -78,8 +78,8 @@ describe("deriveAddress", async () => {
     }).timeout(60000)
 
     describe("Should reject address show", async () => {
-        for (const { testname, network, addressParams, errCls, errMsg } of RejectTestcases) {
-            it(testname, async () => {
+        for (const { testName, network, addressParams, errCls, errMsg } of RejectTestcases) {
+            it(testName, async () => {
                 const promise = ada.showAddress({
                     network,
                     address: addressParams,

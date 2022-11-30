@@ -17,8 +17,8 @@ describe("signOperationalCertificate", async () => {
         await (ada as any).t.close()
     })
 
-    for (const { testname, operationalCertificate, expected } of tests) {
-        it(testname, async () => {
+    for (const { testName, operationalCertificate, expected } of tests) {
+        it(testName, async () => {
             const response = await ada.signOperationalCertificate(operationalCertificate)
 
             expect(response).to.deep.equal(expected)

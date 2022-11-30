@@ -6,7 +6,7 @@ import { str_to_path } from "../../../src/utils/address"
 import { inputs, mainnetFeeTtl, mints, outputs, shelleyBase, testnetFeeTtl } from "./txElements"
 
 export type SignTxTestcase = {
-    testname: string;
+    testName: string;
     tx: Transaction;
     signingMode: TransactionSigningMode;
     additionalWitnessPaths?: BIP32Path[];
@@ -18,7 +18,7 @@ export type SignTxTestcase = {
 
 export const testsByron: SignTxTestcase[] = [
     {
-        testname: "Sign tx with third-party Byron mainnet output",
+        testName: "Sign tx with third-party Byron mainnet output",
         tx: {
             inputs: [inputs.utxoByron],
             fee: 42,
@@ -40,7 +40,7 @@ export const testsByron: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with third-party Byron Daedalus mainnet output",
+        testName: "Sign tx with third-party Byron Daedalus mainnet output",
         tx: {
             inputs: [inputs.utxoByron],
             fee: 42,
@@ -62,7 +62,7 @@ export const testsByron: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with third-party Byron testnet output",
+        testName: "Sign tx with third-party Byron testnet output",
         tx: {
             inputs: [inputs.utxoByron],
             fee: 42,
@@ -93,7 +93,7 @@ export const testsByron: SignTxTestcase[] = [
 
 export const testsShelleyNoCertificates: SignTxTestcase[] = [
     {
-        testname: "Sign tx without outputs",
+        testName: "Sign tx without outputs",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -114,7 +114,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx without change address",
+        testName: "Sign tx without change address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -135,7 +135,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with change base address with staking path",
+        testName: "Sign tx with change base address with staking path",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoByron],
@@ -156,7 +156,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with change base address with staking key hash",
+        testName: "Sign tx with change base address with staking key hash",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -177,7 +177,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with enterprise change address",
+        testName: "Sign tx with enterprise change address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -198,7 +198,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with pointer change address",
+        testName: "Sign tx with pointer change address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -219,7 +219,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with non-reasonable account and address",
+        testName: "Sign tx with non-reasonable account and address",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoNonReasonable],
@@ -246,7 +246,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with path based withdrawal",
+        testName: "Sign tx with path based withdrawal",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -280,7 +280,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with auxiliary data hash",
+        testName: "Sign tx with auxiliary data hash",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -311,7 +311,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
 
 export const testsShelleyWithCertificates: SignTxTestcase[] = [
     {
-        testname: "Sign tx with a stake registration path certificate",
+        testName: "Sign tx with a stake registration path certificate",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -341,7 +341,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a stake delegation path certificate",
+        testName: "Sign tx with a stake delegation path certificate",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -376,7 +376,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a stake deregistration path certificate",
+        testName: "Sign tx with a stake deregistration path certificate",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -410,7 +410,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx and filter out witnesses with duplicate paths",
+        testName: "Sign tx and filter out witnesses with duplicate paths",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -453,7 +453,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with pool retirement combined with stake registration",
+        testName: "Sign tx with pool retirement combined with stake registration",
         tx: {
             ...shelleyBase,
             inputs: [
@@ -502,7 +502,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with pool retirement combined with stake deregistration",
+        testName: "Sign tx with pool retirement combined with stake deregistration",
         tx: {
             ...shelleyBase,
             inputs: [
@@ -559,7 +559,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
 
 export const testsMultisig: SignTxTestcase[] = [
     {
-        testname: "Sign tx without change address with Shelley scripthash output",
+        testName: "Sign tx without change address with Shelley scripthash output",
         tx: {
             ...testnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -580,7 +580,7 @@ export const testsMultisig: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with script based withdrawal",
+        testName: "Sign tx with script based withdrawal",
         tx: {
             ...shelleyBase,
             withdrawals: [
@@ -608,7 +608,7 @@ export const testsMultisig: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a stake registration script certificate",
+        testName: "Sign tx with a stake registration script certificate",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -638,7 +638,7 @@ export const testsMultisig: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a stake delegation script certificate",
+        testName: "Sign tx with a stake delegation script certificate",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -669,7 +669,7 @@ export const testsMultisig: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a stake deregistration script certificate",
+        testName: "Sign tx with a stake deregistration script certificate",
         tx: {
             ...shelleyBase,
             certificates: [
@@ -703,7 +703,7 @@ export const testsMultisig: SignTxTestcase[] = [
 
 export const testsAllegra: SignTxTestcase[] = [
     {
-        testname: "Sign tx with no ttl and no validity interval start",
+        testName: "Sign tx with no ttl and no validity interval start",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
@@ -726,7 +726,7 @@ export const testsAllegra: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with no ttl, but with validity interval start",
+        testName: "Sign tx with no ttl, but with validity interval start",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
@@ -753,7 +753,7 @@ export const testsAllegra: SignTxTestcase[] = [
 
 export const testsMary: SignTxTestcase[] = [
     {
-        testname: "Sign tx with a multiasset output",
+        testName: "Sign tx with a multiasset output",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -774,7 +774,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a complex multiasset output",
+        testName: "Sign tx with a complex multiasset output",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -795,7 +795,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with big numbers",
+        testName: "Sign tx with big numbers",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -818,7 +818,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with a multiasset change output",
+        testName: "Sign tx with a multiasset change output",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -838,7 +838,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with zero fee, TTL and validity interval start",
+        testName: "Sign tx with zero fee, TTL and validity interval start",
         tx: {
             network: Networks.Mainnet,
             fee: 0,
@@ -861,7 +861,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with output with decimal places",
+        testName: "Sign tx with output with decimal places",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
@@ -888,7 +888,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with mint fields with various amounts",
+        testName: "Sign tx with mint fields with various amounts",
         tx: {
             ...mainnetFeeTtl,
             inputs: [inputs.utxoShelley],
@@ -915,7 +915,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with mint with decimal places",
+        testName: "Sign tx with mint with decimal places",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
@@ -943,7 +943,7 @@ export const testsMary: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Sign tx with mint fields among other fields",
+        testName: "Sign tx with mint fields among other fields",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
@@ -977,7 +977,7 @@ export const testsMary: SignTxTestcase[] = [
 
 export const testsAlonzoTrezorComparison: SignTxTestcase[] = [
     {
-        testname: "Full test for trezor feature parity",
+        testName: "Full test for trezor feature parity",
         tx: {
             // "protocol_magic": 764824073,
             // "network_id": 1,
@@ -1074,7 +1074,7 @@ export const testsAlonzoTrezorComparison: SignTxTestcase[] = [
 
 export const testsBabbageTrezorComparison: SignTxTestcase[] = [
     {
-        testname: "Full test for trezor feature parity - Babbage elements (Plutus)",
+        testName: "Full test for trezor feature parity - Babbage elements (Plutus)",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],
@@ -1103,7 +1103,7 @@ export const testsBabbageTrezorComparison: SignTxTestcase[] = [
         },
     },
     {
-        testname: "Full test for trezor feature parity - Babbage elements (ordinary)",
+        testName: "Full test for trezor feature parity - Babbage elements (ordinary)",
         tx: {
             network: Networks.Mainnet,
             inputs: [inputs.utxoShelley],

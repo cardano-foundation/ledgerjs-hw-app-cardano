@@ -17,7 +17,7 @@ const txBase: Transaction = {
 
 export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
     {
-        testname: "Different index",
+        testName: "Different index",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
@@ -29,7 +29,7 @@ export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.LEDGER_POLICY,
     },
     {
-        testname: "Different prefix",
+        testName: "Different prefix",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
@@ -41,7 +41,7 @@ export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.LEDGER_POLICY,
     },
     {
-        testname: "No path given",
+        testName: "No path given",
         tx: {
             ...txBase,
             certificates: [
@@ -62,7 +62,7 @@ export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
     },
     {
-        testname: "Invalid numerator-denominator relationship",
+        testName: "Invalid numerator-denominator relationship",
         tx: {
             ...txBase,
             certificates: [certificates.poolRegistrationWrongMargin],
@@ -77,7 +77,7 @@ export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
 
 export const invalidCertificates: TestcaseRejectShelley[] = [
     {
-        testname: "pool registration with multiple path owners",
+        testName: "pool registration with multiple path owners",
         tx: {
             ...txBase,
             certificates: [
@@ -97,7 +97,7 @@ export const invalidCertificates: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
     },
     {
-        testname: "pool registration with no owners",
+        testName: "pool registration with no owners",
         tx: {
             ...txBase,
             certificates: [
@@ -121,7 +121,7 @@ export const invalidCertificates: TestcaseRejectShelley[] = [
 export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     // Invalid url
     {
-        testname: "pool metadata url too long",
+        testName: "pool metadata url too long",
         tx: {
             ...txBase,
             certificates: [
@@ -143,7 +143,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
     },
     {
-        testname: "pool metadata invalid url",
+        testName: "pool metadata invalid url",
         tx: {
             ...txBase,
             certificates: [
@@ -165,7 +165,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
     },
     {
-        testname: "pool metadata missing url",
+        testName: "pool metadata missing url",
         tx: {
             ...txBase,
             certificates: [
@@ -187,7 +187,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     },
     // Invalid hash
     {
-        testname: "pool metadata invalid hash length",
+        testName: "pool metadata invalid hash length",
         tx: {
             ...txBase,
             certificates: [
@@ -209,7 +209,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH,
     },
     {
-        testname: "pool metadata missing hash",
+        testName: "pool metadata missing hash",
         tx: {
             ...txBase,
             certificates: [
@@ -233,7 +233,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
 
 export const invalidRelayTestcases: TestcaseRejectShelley[] = [
     {
-        testname: "SingleHostHostname missing dns",
+        testName: "SingleHostHostname missing dns",
         tx: {
             ...txBase,
             certificates: [
@@ -260,7 +260,7 @@ export const invalidRelayTestcases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
     },
     {
-        testname: "MultiHost missing dns",
+        testName: "MultiHost missing dns",
         tx: {
             ...txBase,
             certificates: [
@@ -289,7 +289,7 @@ export const invalidRelayTestcases: TestcaseRejectShelley[] = [
 
 export const stakePoolRegistrationPoolIdRejectTestcases: TestcaseRejectShelley[] = [
     {
-        testname: "Path sent in for Pool Registration Owner Tx",
+        testName: "Path sent in for Pool Registration Owner Tx",
         tx: {
             ...txBase,
             inputs: [inputs.utxoNoPath],
@@ -314,7 +314,7 @@ export const stakePoolRegistrationPoolIdRejectTestcases: TestcaseRejectShelley[]
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED,
     },
     {
-        testname: "Hash sent in for Pool Registration Operator Tx",
+        testName: "Hash sent in for Pool Registration Operator Tx",
         tx: {
             ...txBase,
             certificates: [
@@ -341,7 +341,7 @@ export const stakePoolRegistrationPoolIdRejectTestcases: TestcaseRejectShelley[]
 
 export const stakePoolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
     {
-        testname: "Non-staking path for Pool Registration Owner Tx",
+        testName: "Non-staking path for Pool Registration Owner Tx",
         tx: {
             ...txBase,
             inputs: [inputs.utxoNoPath],
@@ -371,7 +371,7 @@ export const stakePoolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] 
 
 export const outputRejectTestCases: TestcaseRejectShelley[] = [
     {
-        testname: "Pool operator - datum hash",
+        testName: "Pool operator - datum hash",
         tx: {
             ...txBase,
             outputs: [outputs2.datumHashExternalMap],
@@ -382,7 +382,7 @@ export const outputRejectTestCases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
     },
     {
-        testname: "Pool operator - datum inline",
+        testName: "Pool operator - datum inline",
         tx: {
             ...txBase,
             outputs: [outputs2.inlineDatum480Map],
@@ -393,7 +393,7 @@ export const outputRejectTestCases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
     },
     {
-        testname: "Pool operator - reference script",
+        testName: "Pool operator - reference script",
         tx: {
             ...txBase,
             outputs: [outputs2.refScriptExternalMap],
@@ -404,7 +404,7 @@ export const outputRejectTestCases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED,
     },
     {
-        testname: "Pool owner - datum hash",
+        testName: "Pool owner - datum hash",
         tx: {
             ...txBase,
             outputs: [outputs2.datumHashExternalMap],
@@ -415,7 +415,7 @@ export const outputRejectTestCases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
     },
     {
-        testname: "Pool owner - datum inline",
+        testName: "Pool owner - datum inline",
         tx: {
             ...txBase,
             outputs: [outputs2.inlineDatum480Map],
@@ -426,7 +426,7 @@ export const outputRejectTestCases: TestcaseRejectShelley[] = [
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
     },
     {
-        testname: "Pool owner - reference script",
+        testName: "Pool owner - reference script",
         tx: {
             ...txBase,
             outputs: [outputs2.refScriptExternalMap],

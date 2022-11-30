@@ -17,8 +17,8 @@ describe("signGovernanceVote", async () => {
         await (ada as any).t.close()
     })
 
-    for (const { testname, governanceVote, expected } of tests) {
-        it(testname, async () => {
+    for (const { testName, governanceVote, expected } of tests) {
+        it(testName, async () => {
             const response = await ada.signGovernanceVote(governanceVote)
 
             expect(response).to.deep.equal(expected)
