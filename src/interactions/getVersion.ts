@@ -42,15 +42,14 @@ export function getCompatibility(version: Version): DeviceCompatibility {
     const v2_3 = isLedgerAppVersionAtLeast(version, 2, 3) && isLedgerAppVersionAtMost(version, 6, Infinity)
     const v2_4 = isLedgerAppVersionAtLeast(version, 2, 4) && isLedgerAppVersionAtMost(version, 6, Infinity)
     const v3_0 = isLedgerAppVersionAtLeast(version, 3, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
-    const v4_0_Alonzo = isLedgerAppVersionAtLeast(version, 4, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v4_0 = isLedgerAppVersionAtLeast(version, 4, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
     const v4_1 = isLedgerAppVersionAtLeast(version, 4, 1) && isLedgerAppVersionAtMost(version, 6, Infinity)
     const v5_0 = isLedgerAppVersionAtLeast(version, 5, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
-    // TODO update minimum to 6
-    const v6_0 = isLedgerAppVersionAtLeast(version, 5, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
+    const v6_0 = isLedgerAppVersionAtLeast(version, 6, 0) && isLedgerAppVersionAtMost(version, 6, Infinity)
 
     return {
         isCompatible: v2_2,
-        recommendedVersion: v2_2 ? null : '5.0', // TODO update to 6.0
+        recommendedVersion: v2_2 ? null : '6.0',
         supportsMary: v2_2,
         supportsCatalystRegistration: v2_3,
         supportsGovernanceVoting: v6_0,
@@ -60,7 +59,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsNativeScriptHashDerivation: v3_0,
         supportsMultisigTransaction: v3_0,
         supportsMint: v3_0,
-        supportsAlonzo: v4_0_Alonzo,
+        supportsAlonzo: v4_0,
         supportsReqSignersInOrdinaryTx: v4_1,
         supportsBabbage: v5_0,
     }
