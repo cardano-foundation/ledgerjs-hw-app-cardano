@@ -51,8 +51,8 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         isCompatible: v2_2,
         recommendedVersion: v2_2 ? null : '6.0',
         supportsMary: v2_2,
-        supportsCatalystRegistration: v2_3,
-        supportsGovernanceVoting: v6_0,
+        supportsCatalystRegistration: v2_3, // CIP-15
+        supportsCIP36: v6_0,
         supportsZeroTtl: v2_3,
         supportsPoolRegistrationAsOperator: v2_4,
         supportsPoolRetirement: v2_4,
@@ -62,6 +62,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsAlonzo: v4_0,
         supportsReqSignersInOrdinaryTx: v4_1,
         supportsBabbage: v5_0,
+        supportsGovernanceVoting: v6_0,
     }
 }
 

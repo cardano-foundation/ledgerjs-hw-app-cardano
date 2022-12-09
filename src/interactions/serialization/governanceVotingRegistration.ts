@@ -43,7 +43,7 @@ export function serializeGovernanceVotingRegistrationVotingKey(
     if (votingPublicKey != null) {
         assert(votingPublicKeyPath == null, "redundant governance registration voting key path")
 
-        const delegationTypeBuffer = (getCompatibility(version).supportsGovernanceVoting)
+        const delegationTypeBuffer = (getCompatibility(version).supportsCIP36)
             ? serializeDelegationType(GovernanceVotingDelegationType.KEY)
             : Buffer.from([])
 
@@ -53,7 +53,7 @@ export function serializeGovernanceVotingRegistrationVotingKey(
         ])
     } else {
         assert(votingPublicKeyPath != null, "missing governance registration voting key")
-        assert(getCompatibility(version).supportsGovernanceVoting, "key derivation path not supported for Catalyst not supported by the device")
+        assert(getCompatibility(version).supportsGovernanceVoting, "key derivation path for governance voting keys not supported by the device")
 
         return Buffer.concat([
             serializeDelegationType(GovernanceVotingDelegationType.PATH),
@@ -97,7 +97,7 @@ export function serializeGovernanceVotingRegistrationRewardsDestination(
     rewardsDestination: ParsedOutputDestination,
     version: Version,
 ): Buffer {
-    if (getCompatibility(version).supportsGovernanceVoting) {
+    if (getCompatibility(version).supportsCIP36) {
         return serializeTxOutputDestination(rewardsDestination, version)
     } else {
         // older ledger versions with only Catalyst as in CIP-15

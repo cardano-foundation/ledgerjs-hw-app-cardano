@@ -512,7 +512,7 @@ function* signTx_setAuxiliaryData(
       CONFIRM = 0x34,
     }
 
-    if (getCompatibility(version).supportsGovernanceVoting) {
+    if (getCompatibility(version).supportsCIP36) {
         // this APDU was not used previously for Catalyst
         yield send({
             p1: P1.STAGE_AUX_DATA,
@@ -564,7 +564,7 @@ function* signTx_setAuxiliaryData(
         expectedResponseLength: 0,
     })
 
-    if (getCompatibility(version).supportsGovernanceVoting) {
+    if (getCompatibility(version).supportsCIP36) {
         // this APDU was not used previously for Catalyst
         yield send({
             p1: P1.STAGE_AUX_DATA,
@@ -1035,7 +1035,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
     }
     const hasCIP36Registration = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
         && auxiliaryData.params.format === GovernanceVotingRegistrationFormat.CIP_36
-    if (hasCIP36Registration && !getCompatibility(version).supportsGovernanceVoting) {
+    if (hasCIP36Registration && !getCompatibility(version).supportsCIP36) {
         throw new DeviceVersionUnsupported(`Governance voting registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
     const hasKeyPath = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
@@ -1045,7 +1045,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
     }
     const thirdPartyRewards = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
         && auxiliaryData.params.rewardsDestination.type != TxOutputDestinationType.DEVICE_OWNED
-    if (thirdPartyRewards && !getCompatibility(version).supportsGovernanceVoting) {
+    if (thirdPartyRewards && !getCompatibility(version).supportsCIP36) {
         throw new DeviceVersionUnsupported(`Catalyst reward addresses not owned by the device not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
@@ -1055,7 +1055,7 @@ export function* signTransaction(version: Version, request: ParsedSigningRequest
     ensureRequestSupportedByAppVersion(version, request)
 
     const auxDataBeforeTxBody = getCompatibility(version).supportsCatalystRegistration
-        || getCompatibility(version).supportsGovernanceVoting
+        || getCompatibility(version).supportsCIP36
 
     const { tx, signingMode } = request
     const witnessPaths = gatherWitnessPaths(request)

@@ -26,7 +26,7 @@ describe("getVersion", async () => {
             supportsMint: true,
             supportsMultisigTransaction: true,
             supportsCatalystRegistration: true,
-            supportsGovernanceVoting: true,
+            supportsCIP36: true,
             supportsZeroTtl: true,
             supportsPoolRegistrationAsOperator: true,
             supportsPoolRetirement: true,
@@ -34,6 +34,7 @@ describe("getVersion", async () => {
             supportsAlonzo: true,
             supportsReqSignersInOrdinaryTx: true,
             supportsBabbage: true,
+            supportsGovernanceVoting: true,
         })
     })
 })

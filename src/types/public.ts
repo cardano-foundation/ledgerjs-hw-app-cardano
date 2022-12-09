@@ -885,7 +885,7 @@ export type DeviceCompatibility = {
     /**
      * Whether we support governance voting registration according to CIP-36
      */
-    supportsGovernanceVoting: boolean;
+    supportsCIP36: boolean;
     /**
      * Whether we support transactions with zero TTL
      * (useful for dummy transactions to ensure invalidity)
@@ -918,11 +918,15 @@ export type DeviceCompatibility = {
     /**
      * Whether we support required signers in ordinary and multisig transactions
      */
-     supportsReqSignersInOrdinaryTx: boolean;
+    supportsReqSignersInOrdinaryTx: boolean;
     /**
      * Whether we support Babbage features
      */
-     supportsBabbage: boolean;
+    supportsBabbage: boolean;
+    /**
+     * Whether we support governance voting (signing vote-casts by HW devices)
+     */
+    supportsGovernanceVoting: boolean;
 }
 
 /**
