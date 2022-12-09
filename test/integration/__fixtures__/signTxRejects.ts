@@ -793,7 +793,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
     },
     {
@@ -810,7 +810,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
     },
     {
@@ -826,7 +826,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
     },
     {
@@ -843,7 +843,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
     },
     {
@@ -859,7 +859,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
     },
     {
@@ -876,7 +876,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
     },
     {
@@ -892,7 +892,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
     },
     {
@@ -909,7 +909,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
         },
         signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         errCls: TypeError,
-        errMsg: "Cannot read property 'poolKey' of undefined",
+        errMsg: "Cannot read properties of undefined (reading 'poolKey')",
         rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
     },
 ]
