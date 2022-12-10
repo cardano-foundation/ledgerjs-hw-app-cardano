@@ -128,11 +128,14 @@ async function interact<T>(
  * @category Main
  */
 export class Ada {
-  /** @ignore */
+  // we generate flow type annotations for the package
+  // and it does not work for Transport, so we suppress the error
+  /** $FlowIgnore[value-as-type] */
   transport: Transport;
   /** @ignore */
   _send: SendFn;
 
+  /** $FlowIgnore[value-as-type] */
   constructor(transport: Transport, scrambleKey: string = "ADA") {
       this.transport = transport
       // Note: this is list of methods that should "lock" the transport to avoid concurrent use
