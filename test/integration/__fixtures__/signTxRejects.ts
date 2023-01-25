@@ -592,7 +592,7 @@ export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
             ...shelleyBase,
             outputs: [{
                 amount: 10,
-                destination: destinations.rewardsKeyPath,
+                destination: destinations.paymentKeyPath,
             }],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
@@ -606,7 +606,7 @@ export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
             ...shelleyBase,
             outputs: [{
                 amount: 10,
-                destination: destinations.rewardsScriptHash,
+                destination: destinations.paymentScriptHash,
             }],
         },
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,

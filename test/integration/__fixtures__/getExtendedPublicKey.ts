@@ -104,7 +104,7 @@ export const testsColdKeys: TestCase[] = [
     },
 ]
 
-export const testsGovernanceVotingKeys: TestCase[] = [
+export const testsCVoteKeys: TestCase[] = [
     {
         path: "1694'/1815'/0'/0/1",
         expected: {

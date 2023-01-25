@@ -26,23 +26,23 @@ import { getSerial } from "./interactions/getSerial"
 import { getCompatibility, getVersion } from "./interactions/getVersion"
 import { runTests } from "./interactions/runTests"
 import { showAddress } from "./interactions/showAddress"
-import { signGovernanceVote } from "./interactions/signGovernanceVote"
+import { signCVote } from "./interactions/signCVote"
 import { signOperationalCertificate } from "./interactions/signOperationalCertificate"
 import { signTransaction } from "./interactions/signTx"
 import { parseAddress } from './parsing/address'
-import { parseGovernanceVote } from "./parsing/governanceVote"
+import { parseCVote } from "./parsing/cVote"
 import { parseNativeScript, parseNativeScriptHashDisplayFormat } from "./parsing/nativeScript"
 import { parseOperationalCertificate } from "./parsing/operationalCertificate"
 import { parseSignTransactionRequest } from "./parsing/transaction"
 import type {
     ParsedAddressParams,
-    ParsedGovernanceVote,
+    ParsedCVote,
     ParsedNativeScript,
     ParsedOperationalCertificate,
     ParsedSigningRequest,
     ValidBIP32Path,
 } from './types/internal'
-import type { BIP32Path, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, GovernanceVote, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedGovernanceVoteData, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public'
+import type { BIP32Path, CIP36Vote, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedCIP36VoteData, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public'
 import { AddressType, CertificateType, NativeScriptType, RelayType, TransactionSigningMode } from "./types/public"
 import utils from "./utils"
 import { assert } from './utils/assert'
@@ -330,18 +330,18 @@ export class Ada {
       return yield* signOperationalCertificate(version, request)
   }
 
-  async signGovernanceVote(
-      request: SignGovernanceVoteRequest
-  ): Promise<SignGovernanceVoteResponse> {
-      const parsedGovernanceVote = parseGovernanceVote(request)
+  async signCIP36Vote(
+      request: SignCIP36VoteRequest
+  ): Promise<SignCIP36VoteResponse> {
+      const parsedCVote = parseCVote(request)
 
-      return interact(this._signGovernanceVote(parsedGovernanceVote), this._send)
+      return interact(this._signCIP36Vote(parsedCVote), this._send)
   }
 
   /** @ignore */
-  * _signGovernanceVote(request: ParsedGovernanceVote): Interaction<SignedGovernanceVoteData> {
+  * _signCIP36Vote(request: ParsedCVote): Interaction<SignedCIP36VoteData> {
       const version = yield* getVersion()
-      return yield* signGovernanceVote(version, request)
+      return yield* signCVote(version, request)
   }
 
   /**
@@ -459,17 +459,17 @@ export type SignOperationalCertificateRequest = OperationalCertificate
 export type SignOperationalCertificateResponse = OperationalCertificateSignature
 
 /**
- * Sign governance vote ([[Ada.signGovernanceVote]]) request data
+ * Sign CIP36 vote ([[Ada.signCIP36Vote]]) request data
  * @category Main
- * @see [[SignGovernanceVoteResponse]]
+ * @see [[SignCIP36VoteResponse]]
  */
-export type SignGovernanceVoteRequest = GovernanceVote
+export type SignCIP36VoteRequest = CIP36Vote
 /**
-  * Sign governance vote ([[Ada.signGovernanceVote]]) response data
+  * Sign CIP36 vote ([[Ada.signCIP36Vote]]) response data
   * @category Main
-  * @see [[SignGovernanceVoteRequest]]
+  * @see [[SignCIP36VoteRequest]]
   */
-export type SignGovernanceVoteResponse = SignedGovernanceVoteData
+export type SignCIP36VoteResponse = SignedCIP36VoteData
 
 /**
  * Derive native script hash ([[Ada.deriveNativeScriptHash]]) request data

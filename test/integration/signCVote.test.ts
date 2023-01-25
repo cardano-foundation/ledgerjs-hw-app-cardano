@@ -3,10 +3,10 @@ import chaiAsPromised from "chai-as-promised"
 
 import type Ada from "../../src/Ada"
 import { getAda } from "../test_utils"
-import { tests } from "./__fixtures__/signGovernanceVote"
+import { tests } from "./__fixtures__/signCVote"
 chai.use(chaiAsPromised)
 
-describe("signGovernanceVote", async () => {
+describe("signCIP36Vote", async () => {
     let ada: Ada = {} as Ada
 
     beforeEach(async () => {
@@ -17,9 +17,9 @@ describe("signGovernanceVote", async () => {
         await (ada as any).t.close()
     })
 
-    for (const { testName, governanceVote, expected } of tests) {
+    for (const { testName, cVote, expected } of tests) {
         it(testName, async () => {
-            const response = await ada.signGovernanceVote(governanceVote)
+            const response = await ada.signCIP36Vote(cVote)
 
             expect(response).to.deep.equal(expected)
         })

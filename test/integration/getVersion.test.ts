@@ -34,7 +34,7 @@ describe("getVersion", async () => {
             supportsAlonzo: true,
             supportsReqSignersInOrdinaryTx: true,
             supportsBabbage: true,
-            supportsGovernanceVoting: true,
+            supportsCIP36Vote: true,
         })
     })
 })

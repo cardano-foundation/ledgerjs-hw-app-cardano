@@ -62,7 +62,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsAlonzo: v4_0,
         supportsReqSignersInOrdinaryTx: v4_1,
         supportsBabbage: v5_0,
-        supportsGovernanceVoting: v6_0,
+        supportsCIP36Vote: v6_0,
     }
 }
 

@@ -132,21 +132,21 @@ export enum InvalidDataReason {
 
   METADATA_UNKNOWN_TYPE = "unknown metadata type",
 
-  GOVERNANCE_VOTING_REGISTRATION_INCONSISTENT_WITH_CIP15 = "governance voting registration params inconsistent with CIP-15",
-  GOVERNANCE_VOTING_REGISTRATION_INCONSISTENT_WITH_CIP36 = "governance voting registration params inconsistent with CIP-36",
-  GOVERNANCE_VOTING_REGISTRATION_BOTH_KEY_AND_PATH = "governance voting key given both as a key and as a derivation path",
-  GOVERNANCE_VOTING_REGISTRATION_MISSING_VOTING_KEY = "governance voting key missing",
-  GOVERNANCE_VOTING_REGISTRATION_INVALID_VOTING_KEY = "invalid governance voting registration voting key",
-  GOVERNANCE_VOTING_REGISTRATION_INVALID_VOTING_KEY_PATH = "invalid governance voting registration voting key path",
-  GOVERNANCE_VOTING_REGISTRATION_INVALID_STAKING_KEY_PATH = "invalid governance voting registration staking key path",
-  GOVERNANCE_VOTING_REGISTRATION_INVALID_NONCE = "invalid governance voting registration nonce",
-  GOVERNANCE_VOTING_REGISTRATION_INVALID_VOTING_PURPOSE = "invalid governance voting registration voting purpose",
-  GOVERNANCE_VOTING_REGISTRATION_DELEGATIONS_NOT_ARRAY = "governance voting registration delegations not an array",
-  GOVERNANCE_VOTING_DELEGATION_UNKNOWN_FORMAT = "invalid governance voting delegation format",
-  GOVERNANCE_VOTING_DELEGATION_UNKNOWN_DELEGATION_TYPE = "invalid governance voting delegation type",
-  GOVERNANCE_VOTING_DELEGATION_INVALID_WEIGHT = "invalid governance voting delegation weight",
-  GOVERNANCE_VOTING_DELEGATION_INVALID_PATH = "invalid governance voting delegation path",
-  GOVERNANCE_VOTING_DELEGATION_INVALID_KEY = "invalid governance voting delegation key",
+  CVOTE_REGISTRATION_INCONSISTENT_WITH_CIP15 = "CIP36 registration params inconsistent with CIP-15",
+  CVOTE_REGISTRATION_INCONSISTENT_WITH_CIP36 = "CIP36 registration params inconsistent with CIP-36",
+  CVOTE_REGISTRATION_BOTH_KEY_AND_PATH = "CIP36 vote key given both as a key and as a derivation path",
+  CVOTE_REGISTRATION_MISSING_VOTE_KEY = "CIP36 vote key missing",
+  CVOTE_REGISTRATION_INVALID_VOTE_KEY = "invalid CIP36 registration vote key",
+  CVOTE_REGISTRATION_INVALID_VOTE_KEY_PATH = "invalid CIP36 registration vote key path",
+  CVOTE_REGISTRATION_INVALID_STAKING_KEY_PATH = "invalid CIP36 registration staking key path",
+  CVOTE_REGISTRATION_INVALID_NONCE = "invalid CIP36 registration nonce",
+  CVOTE_REGISTRATION_INVALID_VOTING_PURPOSE = "invalid CIP36 registration voting purpose",
+  CVOTE_REGISTRATION_DELEGATIONS_NOT_ARRAY = "CIP36 registration delegations not an array",
+  CVOTE_DELEGATION_UNKNOWN_FORMAT = "invalid CIP36 delegation format",
+  CVOTE_DELEGATION_UNKNOWN_DELEGATION_TYPE = "invalid CIP36 delegation type",
+  CVOTE_DELEGATION_INVALID_WEIGHT = "invalid CIP36 delegation weight",
+  CVOTE_DELEGATION_INVALID_PATH = "invalid CIP36 delegation path",
+  CVOTE_DELEGATION_INVALID_KEY = "invalid CIP36 delegation key",
 
   VALIDITY_INTERVAL_START_INVALID = "invalid validity interval start",
 
@@ -277,8 +277,8 @@ export enum InvalidDataReason {
   OPERATIONAL_CERTIFICATE_INVALID_COLD_KEY_PATH =
   "invalid operational certificate cold key path",
 
-  GOVERNANCE_VOTE_INVALID_VOTECAST_DATA = "invalid votecast data for governance voting",
-  GOVERNANCE_VOTE_INVALID_WITNESS = "invalid witness for governance voting",
+  CVOTE_INVALID_VOTECAST_DATA = "invalid votecast data for CIP36 vote",
+  CVOTE_INVALID_WITNESS = "invalid witness for CIP36 vote",
 
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_DATA = "invalid native script input",
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_KEY_PATH = "invalid key path param",

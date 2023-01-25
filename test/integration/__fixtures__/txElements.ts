@@ -54,8 +54,8 @@ export const destinations: Record<
   | 'internalEnterprise'
   | 'internalPointer'
   | 'multiassetThirdParty'
-  | 'rewardsKeyPath'
-  | 'rewardsScriptHash'
+  | 'paymentKeyPath'
+  | 'paymentScriptHash'
   , TxOutputDestination
 > = {
     externalByronMainnet: {
@@ -190,7 +190,7 @@ export const destinations: Record<
             ),
         },
     },
-    rewardsKeyPath: {
+    paymentKeyPath: {
         type: TxOutputDestinationType.DEVICE_OWNED,
         params: {
             type: AddressType.REWARD_KEY,
@@ -199,7 +199,7 @@ export const destinations: Record<
             },
         },
     },
-    rewardsScriptHash: {
+    paymentScriptHash: {
         type: TxOutputDestinationType.DEVICE_OWNED,
         params: {
             type: AddressType.REWARD_SCRIPT,

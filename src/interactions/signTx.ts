@@ -31,8 +31,8 @@ import type {
     TxAuxiliaryDataSupplement} from "../types/public"
 import {
     AddressType,
+    CIP36VoteRegistrationFormat,
     DatumType,
-    GovernanceVotingRegistrationFormat,
     PoolKeyType,
     TransactionSigningMode,
     TxAuxiliaryDataSupplementType,
@@ -47,14 +47,14 @@ import {INS} from "./common/ins"
 import type {Interaction, SendParams} from "./common/types"
 import {ensureLedgerAppVersionCompatible, getCompatibility} from "./getVersion"
 import {
-    serializeGovernanceVotingRegistrationDelegation,
-    serializeGovernanceVotingRegistrationInit,
-    serializeGovernanceVotingRegistrationNonce,
-    serializeGovernanceVotingRegistrationRewardsDestination,
-    serializeGovernanceVotingRegistrationStakingPath,
-    serializeGovernanceVotingRegistrationVotingKey,
-    serializeGovernanceVotingRegistrationVotingPurpose,
-} from "./serialization/governanceVotingRegistration"
+    serializeCVoteRegistrationDelegation,
+    serializeCVoteRegistrationInit,
+    serializeCVoteRegistrationNonce,
+    serializeCVoteRegistrationPaymentDestination,
+    serializeCVoteRegistrationStakingPath,
+    serializeCVoteRegistrationVoteKey,
+    serializeCVoteRegistrationVotingPurpose,
+} from "./serialization/cVoteRegistration"
 import {
     serializeFinancials,
     serializePoolInitialParams,
@@ -486,7 +486,7 @@ function* signTx_setAuxiliaryData(
 
   const supportedAuxiliaryDataTypes = [
       TxAuxiliaryDataType.ARBITRARY_HASH,
-      TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION,
+      TxAuxiliaryDataType.CIP36_REGISTRATION,
   ]
 
   assert(supportedAuxiliaryDataTypes.includes(auxiliaryData.type), 'Auxiliary data type not implemented')
@@ -498,15 +498,15 @@ function* signTx_setAuxiliaryData(
       expectedResponseLength: 0,
   })
 
-  if (auxiliaryData.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION) {
+  if (auxiliaryData.type === TxAuxiliaryDataType.CIP36_REGISTRATION) {
       const params = auxiliaryData.params
 
     const enum P2 {
       INIT = 0x36,
-      VOTING_KEY = 0x30,
+      VOTE_KEY = 0x30,
       DELEGATION = 0x37,
       STAKING_KEY = 0x31,
-      VOTING_REWARDS_ADDRESS = 0x32,
+      PAYMENT_ADDRESS = 0x32,
       NONCE = 0x33,
       VOTING_PURPOSE = 0x35,
       CONFIRM = 0x34,
@@ -517,16 +517,16 @@ function* signTx_setAuxiliaryData(
         yield send({
             p1: P1.STAGE_AUX_DATA,
             p2: P2.INIT,
-            data: serializeGovernanceVotingRegistrationInit(auxiliaryData.params),
+            data: serializeCVoteRegistrationInit(auxiliaryData.params),
             expectedResponseLength: 0,
         })
     }
 
-    if (params.votingPublicKey || params.votingPublicKeyPath) {
+    if (params.votePublicKey || params.votePublicKeyPath) {
         yield send({
             p1: P1.STAGE_AUX_DATA,
-            p2: P2.VOTING_KEY,
-            data: serializeGovernanceVotingRegistrationVotingKey(params.votingPublicKey, params.votingPublicKeyPath, version),
+            p2: P2.VOTE_KEY,
+            data: serializeCVoteRegistrationVoteKey(params.votePublicKey, params.votePublicKeyPath, version),
             expectedResponseLength: 0,
         })
     } else if (params.delegations) {
@@ -534,33 +534,33 @@ function* signTx_setAuxiliaryData(
             yield send({
                 p1: P1.STAGE_AUX_DATA,
                 p2: P2.DELEGATION,
-                data: serializeGovernanceVotingRegistrationDelegation(delegation),
+                data: serializeCVoteRegistrationDelegation(delegation),
                 expectedResponseLength: 0,
             })
         }
     } else {
         // should have been caught by previous validation
-        throw Error('wrong governance registration params')
+        throw Error('wrong CIP36 registration params')
     }
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.STAKING_KEY,
-        data: serializeGovernanceVotingRegistrationStakingPath(params.stakingPath),
+        data: serializeCVoteRegistrationStakingPath(params.stakingPath),
         expectedResponseLength: 0,
     })
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
-        p2: P2.VOTING_REWARDS_ADDRESS,
-        data: serializeGovernanceVotingRegistrationRewardsDestination(params.rewardsDestination, version),
+        p2: P2.PAYMENT_ADDRESS,
+        data: serializeCVoteRegistrationPaymentDestination(params.paymentDestination, version),
         expectedResponseLength: 0,
     })
 
     yield send({
         p1: P1.STAGE_AUX_DATA,
         p2: P2.NONCE,
-        data: serializeGovernanceVotingRegistrationNonce(params.nonce),
+        data: serializeCVoteRegistrationNonce(params.nonce),
         expectedResponseLength: 0,
     })
 
@@ -569,7 +569,7 @@ function* signTx_setAuxiliaryData(
         yield send({
             p1: P1.STAGE_AUX_DATA,
             p2: P2.VOTING_PURPOSE,
-            data: serializeGovernanceVotingRegistrationVotingPurpose(params.votingPurpose),
+            data: serializeCVoteRegistrationVotingPurpose(params.votingPurpose),
             expectedResponseLength: 0,
         })
     }
@@ -587,9 +587,9 @@ function* signTx_setAuxiliaryData(
     const signature = response.slice(AUXILIARY_DATA_HASH_LENGTH, AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH)
 
     return {
-        type: TxAuxiliaryDataSupplementType.GOVERNANCE_VOTING_REGISTRATION,
+        type: TxAuxiliaryDataSupplementType.CIP36_REGISTRATION,
         auxiliaryDataHashHex: auxDataHash.toString('hex'),
-        governanceVotingRegistrationSignatureHex: signature.toString('hex'),
+        cip36VoteRegistrationSignatureHex: signature.toString('hex'),
     }
   }
 
@@ -1026,27 +1026,27 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Reference inputs not supported by Ledger app version ${getVersionString(version)}.`)
     }
 
-    // catalyst/governance voting registration is a specific type of auxiliary data that requires a HW wallet signature
+    // catalyst/CIP36 registration is a specific type of auxiliary data that requires a HW wallet signature
     const auxiliaryData = request.tx?.auxiliaryData
-    const hasCIP15Registration = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
-        && auxiliaryData.params.format === GovernanceVotingRegistrationFormat.CIP_15
+    const hasCIP15Registration = auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
+        && auxiliaryData.params.format === CIP36VoteRegistrationFormat.CIP_15
     if (hasCIP15Registration && !getCompatibility(version).supportsCatalystRegistration) {
         throw new DeviceVersionUnsupported(`Catalyst registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
-    const hasCIP36Registration = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
-        && auxiliaryData.params.format === GovernanceVotingRegistrationFormat.CIP_36
+    const hasCIP36Registration = auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
+        && auxiliaryData.params.format === CIP36VoteRegistrationFormat.CIP_36
     if (hasCIP36Registration && !getCompatibility(version).supportsCIP36) {
-        throw new DeviceVersionUnsupported(`Governance voting registration not supported by Ledger app version ${getVersionString(version)}.`)
+        throw new DeviceVersionUnsupported(`CIP36 registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
-    const hasKeyPath = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
-        && auxiliaryData.params.votingPublicKeyPath != null
-    if (hasKeyPath && !getCompatibility(version).supportsGovernanceVoting) {
-        throw new DeviceVersionUnsupported(`Voting key derivation path in governance voting registration not supported by Ledger app version ${getVersionString(version)}.`)
+    const hasKeyPath = auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
+        && auxiliaryData.params.votePublicKeyPath != null
+    if (hasKeyPath && !getCompatibility(version).supportsCIP36Vote) {
+        throw new DeviceVersionUnsupported(`Vote key derivation path in CIP15/CIP36 registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
-    const thirdPartyRewards = auxiliaryData?.type === TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION
-        && auxiliaryData.params.rewardsDestination.type != TxOutputDestinationType.DEVICE_OWNED
-    if (thirdPartyRewards && !getCompatibility(version).supportsCIP36) {
-        throw new DeviceVersionUnsupported(`Catalyst reward addresses not owned by the device not supported by Ledger app version ${getVersionString(version)}.`)
+    const thirdPartyPayment = auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
+        && auxiliaryData.params.paymentDestination.type != TxOutputDestinationType.DEVICE_OWNED
+    if (thirdPartyPayment && !getCompatibility(version).supportsCIP36) {
+        throw new DeviceVersionUnsupported(`CIP36 payment addresses not owned by the device not supported by Ledger app version ${getVersionString(version)}.`)
     }
 }
 
