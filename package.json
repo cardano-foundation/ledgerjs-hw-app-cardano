@@ -21,7 +21,7 @@
   "author": "VacuumLabs <adalite@vacuumlabs.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^6.27.8",
+    "@ledgerhq/hw-transport": "^6.27.10",
     "@types/ledgerhq__hw-transport": "^4.21.3",
     "base-x": "^3.0.5",
     "bech32": "^1.1.4",
@@ -29,8 +29,8 @@
     "int64-buffer": "^1.0.1"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^6.27.8",
-    "@ledgerhq/hw-transport-node-speculos": "^6.27.8",
+    "@ledgerhq/hw-transport-node-hid": "^6.27.10",
+    "@ledgerhq/hw-transport-node-speculos": "^6.27.10",
     "@types/blake2": "^4.0.1",
     "@types/chai": "^4.2.15",
     "@types/chai-as-promised": "^7.1.3",
