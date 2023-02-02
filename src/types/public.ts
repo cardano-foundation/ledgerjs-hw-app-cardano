@@ -1528,7 +1528,7 @@ export type NativeScriptParamsAny = {
  * @see [[NativeScript]]
  */
 export type NativeScriptParamsNofK = {
-    requiredCount: bigint_like;
+    requiredCount: number;
     scripts: NativeScript[];
 }
 

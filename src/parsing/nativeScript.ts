@@ -12,7 +12,7 @@ export function parseNativeScript(
     const params = script.params as {
         path?: BIP32Path;
         keyHashHex?: string;
-        requiredCount?: bigint_like;
+        requiredCount?: number;
         slot?: bigint_like;
         scripts?: NativeScript[];
     }
