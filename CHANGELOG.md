@@ -16,9 +16,16 @@ Support for CIP0036 voting
 - support for CIP36 voting (signing of vote-cast fragments with 1694 vote keys)
 - support for CIP36 features (vote key registration in transaction auxiliary data)
 
+- support for Ledger Stax (upgraded ledgerhq transport libraries)
+- support for Node v18
+
 ### Changed
 
 - API for Catalyst registration (it is still possible to use CIP-0015 in auxiliary data)
+
+### Fixed
+
+- type of requiredCount field in NativeScriptParamsNofK
 
 
 ## [5.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v5.0.0...v5.1.0) - [September 9th 2022]
