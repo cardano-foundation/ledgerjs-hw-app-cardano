@@ -1,10 +1,9 @@
 import { DeviceVersionUnsupported } from "../../errors"
 import { InvalidDataReason } from "../../errors/invalidDataReason"
 import type { ParsedAddressParams, SpendingDataSource, StakingDataSource, Uint8_t, Version } from "../../types/internal"
-import { SpendingDataSourceType } from "../../types/internal"
-import { AddressType, StakingDataSourceType } from "../../types/internal"
+import { SpendingDataSourceType , AddressType, StakingDataSourceType } from "../../types/internal"
 import { getVersionString } from "../../utils"
-import { assert } from "../../utils/assert"
+import { assert, unreachable } from "../../utils/assert"
 import { hex_to_buf, path_to_buf, uint8_to_buf, uint32_to_buf } from "../../utils/serialize"
 import { getCompatibility } from "../getVersion"
 
@@ -16,6 +15,8 @@ function serializeSpendingDataSource(dataSource: SpendingDataSource): Buffer {
         return hex_to_buf(dataSource.scriptHashHex)
     case SpendingDataSourceType.NONE:
         return Buffer.alloc(0)
+    default:
+        unreachable(dataSource)
     }
 }
 
@@ -60,6 +61,8 @@ function serializeStakingDataSource(dataSource: StakingDataSource): Buffer {
             uint32_to_buf(dataSource.pointer.certificateIndex),
         ])
     }
+    default:
+        unreachable(dataSource)
     }
 }
 

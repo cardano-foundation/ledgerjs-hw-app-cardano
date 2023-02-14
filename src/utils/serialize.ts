@@ -2,7 +2,7 @@ import { Int64BE, Uint64BE } from "int64-buffer"
 
 import type { FixlenHexString, HexString, Int64_str, ParsedStakeCredential, Uint8_t, Uint16_t, Uint32_t, Uint64_str } from "../types/internal"
 import { StakeCredentialType } from "../types/internal"
-import { assert } from './assert'
+import { assert, unreachable } from './assert'
 import { isHexString, isInt64str, isUint8, isUint16, isUint32, isUint64str, isValidPath } from "./parse"
 
 export function uint8_to_buf(value: Uint8_t): Buffer {
@@ -58,7 +58,7 @@ export function int64_to_buf(value: Int64_str): Buffer {
     return data
 }
 
-export function hex_to_buf(data: HexString | FixlenHexString<any>): Buffer {
+export function hex_to_buf(data: HexString | FixlenHexString<unknown>): Buffer {
     assert(isHexString(data), "invalid hex string")
     return Buffer.from(data, "hex")
 }
@@ -98,6 +98,8 @@ export function stake_credential_to_buf(stakeCredential: ParsedStakeCredential):
             uint8_to_buf(stakeCredential.type as Uint8_t),
             hex_to_buf(stakeCredential.scriptHashHex),
         ])
+    default:
+        unreachable(stakeCredential)
     }
 }
 

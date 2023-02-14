@@ -29,11 +29,10 @@ export function str_to_path(data: string): Array<number> {
     validate(isString(data), errMsg)
     validate(data.length > 0, errMsg)
 
-    return data.split("/").map(function (x: string): number {
+    return data.split("/").map((x: string): number => {
         return parseBIP32Index(x, errMsg)
     })
 }
-
 
 
 export function base58_encode(data: Buffer): string {
@@ -51,22 +50,11 @@ export function base58_decode(data: string): Buffer {
     return bs58.decode(data)
 }
 
-export function bech32_encodeAddress(data: Buffer): string {
-    assert(isBuffer(data), "invalid buffer")
-
-    const data5bit = bech32.toWords(data)
-    const MAX_HUMAN_ADDRESS_LENGTH = 150 // see cardano.h in https://github.com/vacuumlabs/ledger-app-cardano-shelley
-    return bech32.encode(
-        getShelleyAddressPrefix(data),
-        data5bit,
-        MAX_HUMAN_ADDRESS_LENGTH
-    )
-}
-
 // based on https://github.com/cardano-foundation/CIPs/pull/6/files
 function getShelleyAddressPrefix(data: Buffer): string {
     let result = ""
 
+    // eslint-disable-next-line no-bitwise
     const addressType = (data[0] & 0b11110000) >> 4
     switch (addressType) {
     case AddressType.REWARD_KEY:
@@ -77,12 +65,25 @@ function getShelleyAddressPrefix(data: Buffer): string {
         result = "addr"
     }
 
+    // eslint-disable-next-line no-bitwise
     const networkId = data[0] & 0b00001111
     if (networkId === TESTNET_NETWORK_ID) {
         result += "_test"
     }
 
     return result
+}
+
+export function bech32_encodeAddress(data: Buffer): string {
+    assert(isBuffer(data), "invalid buffer")
+
+    const data5bit = bech32.toWords(data)
+    const MAX_HUMAN_ADDRESS_LENGTH = 150 // see cardano.h in https://github.com/vacuumlabs/ledger-app-cardano-shelley
+    return bech32.encode(
+        getShelleyAddressPrefix(data),
+        data5bit,
+        MAX_HUMAN_ADDRESS_LENGTH
+    )
 }
 
 export function bech32_decodeAddress(data: string): Buffer {

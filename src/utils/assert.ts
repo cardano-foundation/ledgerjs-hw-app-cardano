@@ -1,7 +1,8 @@
 import { ErrorBase } from "../errors/errorBase"
 
 export function assert(cond: boolean, errMsg: string): asserts cond {
-    if (!cond) throw new ErrorBase('Assertion failed' + errMsg ? ': ' + errMsg : '')
+    const msg = errMsg ? `: ${errMsg}` : ''
+    if (!cond) throw new ErrorBase(`Assertion failed${msg}`)
 }
 
 export function unreachable(_val: never): never {

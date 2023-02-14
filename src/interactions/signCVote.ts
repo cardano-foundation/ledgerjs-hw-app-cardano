@@ -34,7 +34,7 @@ export function* signCVote(
     }
     const MAX_VOTECAST_CHUNK_SIZE = 240
 
-    let votecastBytes = hex_to_buf(cVote.voteCastDataHex)
+    const votecastBytes = hex_to_buf(cVote.voteCastDataHex)
     let start = 0
     let end = Math.min(votecastBytes.length, start + MAX_VOTECAST_CHUNK_SIZE)
 

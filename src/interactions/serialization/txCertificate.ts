@@ -1,7 +1,6 @@
 import { InvalidDataReason } from "../../errors/invalidDataReason"
 import type { ParsedCertificate, Uint8_t, Version } from "../../types/internal"
-import { StakeCredentialType } from "../../types/internal"
-import { CertificateType } from "../../types/internal"
+import { StakeCredentialType , CertificateType } from "../../types/internal"
 import { assert, unreachable } from "../../utils/assert"
 import { hex_to_buf, path_to_buf, stake_credential_to_buf,uint8_to_buf, uint64_to_buf } from "../../utils/serialize"
 import { getCompatibility } from "../getVersion"

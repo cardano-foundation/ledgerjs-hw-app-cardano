@@ -50,7 +50,7 @@ function extractStakingDataSource(
         validate(stakingPath == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         validate(stakingBlockchainPointer == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         validate(stakingScriptHashHex == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
-        const hashHex = parseHexStringOfLength(stakingKeyHashHex!, KEY_HASH_LENGTH, InvalidDataReason.ADDRESS_INVALID_STAKING_KEY_HASH)
+        const hashHex = parseHexStringOfLength(stakingKeyHashHex, KEY_HASH_LENGTH, InvalidDataReason.ADDRESS_INVALID_STAKING_KEY_HASH)
         return {
             type: StakingDataSourceType.KEY_HASH,
             keyHashHex: hashHex,
@@ -60,7 +60,7 @@ function extractStakingDataSource(
         validate(stakingPath == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         validate(stakingKeyHashHex == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
         validate(stakingScriptHashHex == null, InvalidDataReason.ADDRESS_INVALID_STAKING_INFO)
-        const pointer = stakingBlockchainPointer!
+        const pointer = stakingBlockchainPointer
         return {
             type: StakingDataSourceType.BLOCKCHAIN_POINTER,
             pointer: {
@@ -159,6 +159,7 @@ export function parseAddress(
     }
 
     // will be cast to 'any' since the extract functions guarantee the type match
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const spendingDataSource = extractSpendingDataSource(
         params.spendingPath,
         params.spendingScriptHashHex
@@ -187,4 +188,5 @@ export function parseAddress(
             stakingDataSource: stakingDataSource as any,
         }
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 }

@@ -6,7 +6,7 @@ import { getAda } from "../test_utils"
 import { tests } from "./__fixtures__/signCVote"
 chai.use(chaiAsPromised)
 
-describe("signCIP36Vote", async () => {
+describe("signCIP36Vote", () => {
     let ada: Ada = {} as Ada
 
     beforeEach(async () => {
@@ -14,6 +14,7 @@ describe("signCIP36Vote", async () => {
     })
 
     afterEach(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (ada as any).t.close()
     })
 

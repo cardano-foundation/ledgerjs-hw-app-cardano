@@ -1,16 +1,22 @@
-import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
-import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos"
+/* eslint-disable no-console */
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
+import SpeculosTransport from '@ledgerhq/hw-transport-node-speculos'
 
-import { Certificate, StakeCredentialParamsType, TxInput, TxOutput, Withdrawal } from "../src/Ada";
-import { Ada, AddressType, CertificateType, HARDENED, Networks, TransactionSigningMode, TxOutputDestinationType } from "../src/Ada";
-import { base58_encode, bech32_encodeAddress, str_to_path } from "../src/utils/address";
+import {
+  Certificate,
+  StakeCredentialParamsType,
+  TxInput,
+  TxOutput,
+  Withdrawal,
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getVersion = async (appAda: Ada) => {
   console.log("getVersion");
   console.log(await appAda.getVersion());
   console.log("-".repeat(40));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getExtendedPublicKey = async (appAda: Ada) => {
   console.log("getExtendedPublicKey");
   console.log(
@@ -31,6 +37,7 @@ const getExtendedPublicKey = async (appAda: Ada) => {
   console.log("-".repeat(40));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deriveAddress = async (appAda: Ada) => {
   console.log("deriveAddress");
 
@@ -81,6 +88,7 @@ const deriveAddress = async (appAda: Ada) => {
   console.log("-".repeat(40));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const showAddress = async (appAda: Ada) => {
   console.log("showAddress");
   console.log("Legacy address");

@@ -167,6 +167,129 @@ function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
     return value
 }
 
+function parseTxInput(input: TxInput): ParsedInput {
+    const txHashHex = parseHexStringOfLength(input.txHashHex, TX_HASH_LENGTH, InvalidDataReason.INPUT_INVALID_TX_HASH)
+    const outputIndex = parseUint32_t(input.outputIndex, InvalidDataReason.INPUT_INVALID_UTXO_INDEX)
+    return {
+        txHashHex,
+        outputIndex,
+        path: input.path != null ? parseBIP32Path(input.path, InvalidDataReason.INPUT_INVALID_PATH) : null,
+    }
+}
+
+function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
+    return {
+        amount: parseUint64_str(params.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT),
+        stakeCredential: parseStakeCredential(params.stakeCredential, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL),
+    }
+}
+
+/*
+ * Typically, destination is used in output, where we forbid reward addresses.
+ * In some other places, we allow them. The parameter 'validateAsTxOutput'
+ * is used to control this validation.
+ */
+export function parseTxDestination(
+    network: Network,
+    destination: TxOutputDestination,
+    validateAsTxOutput: boolean,
+): ParsedOutputDestination {
+    switch (destination.type) {
+    case TxOutputDestinationType.THIRD_PARTY: {
+        const params = destination.params
+        const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
+        validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
+        return {
+            type: TxOutputDestinationType.THIRD_PARTY,
+            addressHex,
+        }
+    }
+    case TxOutputDestinationType.DEVICE_OWNED: {
+        const params = destination.params
+        const addressParams = parseAddress(network, params)
+        if (validateAsTxOutput) {
+            validate(
+                // a reward address cannot be used in tx output
+                addressParams.spendingDataSource.type === SpendingDataSourceType.PATH,
+                InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS
+            )
+        }
+        return {
+            type: TxOutputDestinationType.DEVICE_OWNED,
+            addressParams,
+        }
+    }
+    default:
+        throw new InvalidData(InvalidDataReason.ADDRESS_UNKNOWN_TYPE)
+    }
+}
+
+function parseTxOutput(
+    output: TxOutput,
+    network: Network,
+): ParsedOutput {
+    const format = output.format === TxOutputFormat.MAP_BABBAGE
+        ? TxOutputFormat.MAP_BABBAGE
+        : TxOutputFormat.ARRAY_LEGACY
+
+    const amount = parseUint64_str(output.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
+
+    const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
+
+    const destination = parseTxDestination(network, output.destination, true)
+
+    const datum = parseDatum(output)
+    if (datum?.type === DatumType.INLINE) {
+        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
+    }
+
+    const referenceScriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.referenceScriptHex
+        ? parseHexString(output.referenceScriptHex, InvalidDataReason.OUTPUT_INVALID_REFERENCE_SCRIPT_HEX)
+        : null
+    if (referenceScriptHex != null) {
+        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REFERENCE_SCRIPT)
+    }
+
+    return {
+        format,
+        amount,
+        tokenBundle,
+        destination,
+        datum,
+        referenceScriptHex,
+    }
+}
+
+function parseRequiredSigner(requiredSigner: RequiredSigner): ParsedRequiredSigner {
+    switch (requiredSigner.type) {
+    case TxRequiredSignerType.PATH:
+        return {
+            type: RequiredSignerType.PATH,
+            path: parseBIP32Path(requiredSigner.path, InvalidDataReason.REQUIRED_SIGNER_INVALID_PATH),
+        }
+    case TxRequiredSignerType.HASH:
+        return {
+            type: RequiredSignerType.HASH,
+            hashHex: parseHexStringOfLength(requiredSigner.hashHex, KEY_HASH_LENGTH, InvalidDataReason.VKEY_HASH_WRONG_LENGTH),
+        }
+    default:
+        throw new InvalidData(InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE)
+    }
+}
+
+export function parseSigningMode(mode: TransactionSigningMode): TransactionSigningMode {
+    switch (mode) {
+    case TransactionSigningMode.ORDINARY_TRANSACTION:
+    case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
+    case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+    case TransactionSigningMode.MULTISIG_TRANSACTION:
+    case TransactionSigningMode.PLUTUS_TRANSACTION:
+        return mode
+    default:
+        throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
+    }
+}
+
 export function parseTransaction(tx: Transaction): ParsedTransaction {
     const network = parseNetwork(tx.network)
     // inputs
@@ -261,129 +384,6 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         collateralOutput,
         totalCollateral,
         referenceInputs,
-    }
-}
-
-function parseTxInput(input: TxInput): ParsedInput {
-    const txHashHex = parseHexStringOfLength(input.txHashHex, TX_HASH_LENGTH, InvalidDataReason.INPUT_INVALID_TX_HASH)
-    const outputIndex = parseUint32_t(input.outputIndex, InvalidDataReason.INPUT_INVALID_UTXO_INDEX)
-    return {
-        txHashHex,
-        outputIndex,
-        path: input.path != null ? parseBIP32Path(input.path, InvalidDataReason.INPUT_INVALID_PATH) : null,
-    }
-}
-
-function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
-    return {
-        amount: parseUint64_str(params.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT),
-        stakeCredential: parseStakeCredential(params.stakeCredential, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL),
-    }
-}
-
-/*
- * Typically, destination is used in output, where we forbid reward addresses.
- * In some other places, we allow them. The parameter 'validateAsTxOutput'
- * is used to control this validation.
- */
-export function parseTxDestination(
-    network: Network,
-    destination: TxOutputDestination,
-    validateAsTxOutput: boolean,
-): ParsedOutputDestination {
-    switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY: {
-        const params = destination.params
-        const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
-        validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
-        return {
-            type: TxOutputDestinationType.THIRD_PARTY,
-            addressHex,
-        }
-    }
-    case TxOutputDestinationType.DEVICE_OWNED: {
-        const params = destination.params
-        const addressParams = parseAddress(network, params)
-        if (validateAsTxOutput) {
-            validate(
-                // a reward address cannot be used in tx output
-                addressParams.spendingDataSource.type === SpendingDataSourceType.PATH,
-                InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS
-            )
-        }
-        return {
-            type: TxOutputDestinationType.DEVICE_OWNED,
-            addressParams: addressParams,
-        }
-    }
-    default:
-        throw new InvalidData(InvalidDataReason.ADDRESS_UNKNOWN_TYPE)
-    }
-}
-
-function parseTxOutput(
-    output: TxOutput,
-    network: Network,
-): ParsedOutput {
-    const format = output.format === TxOutputFormat.MAP_BABBAGE
-        ? TxOutputFormat.MAP_BABBAGE
-        : TxOutputFormat.ARRAY_LEGACY
-
-    const amount = parseUint64_str(output.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
-
-    const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
-
-    const destination = parseTxDestination(network, output.destination, true)
-
-    const datum = parseDatum(output)
-    if (datum?.type === DatumType.INLINE) {
-        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
-    }
-
-    const referenceScriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.referenceScriptHex
-        ? parseHexString(output.referenceScriptHex, InvalidDataReason.OUTPUT_INVALID_REFERENCE_SCRIPT_HEX)
-        : null
-    if (referenceScriptHex != null) {
-        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REFERENCE_SCRIPT)
-    }
-
-    return {
-        format,
-        amount,
-        tokenBundle,
-        destination,
-        datum,
-        referenceScriptHex,
-    }
-}
-
-function parseRequiredSigner(requiredSigner: RequiredSigner): ParsedRequiredSigner {
-    switch (requiredSigner.type) {
-    case TxRequiredSignerType.PATH:
-        return {
-            type: RequiredSignerType.PATH,
-            path: parseBIP32Path(requiredSigner.path, InvalidDataReason.REQUIRED_SIGNER_INVALID_PATH),
-        }
-    case TxRequiredSignerType.HASH:
-        return {
-            type: RequiredSignerType.HASH,
-            hashHex: parseHexStringOfLength(requiredSigner.hashHex, KEY_HASH_LENGTH, InvalidDataReason.VKEY_HASH_WRONG_LENGTH),
-        }
-    default:
-        throw new InvalidData(InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE)
-    }
-}
-
-export function parseSigningMode(mode: TransactionSigningMode): TransactionSigningMode {
-    switch (mode) {
-    case TransactionSigningMode.ORDINARY_TRANSACTION:
-    case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
-    case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
-    case TransactionSigningMode.MULTISIG_TRANSACTION:
-    case TransactionSigningMode.PLUTUS_TRANSACTION:
-        return mode
-    default:
-        throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
     }
 }
 
@@ -714,5 +714,5 @@ export function parseSignTransactionRequest(request: SignTransactionRequest): Pa
         unreachable(signingMode)
     }
 
-    return { tx, signingMode, additionalWitnessPaths: additionalWitnessPaths }
+    return { tx, signingMode, additionalWitnessPaths }
 }

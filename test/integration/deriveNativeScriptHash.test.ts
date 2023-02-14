@@ -8,18 +8,19 @@ import { InvalidOnLedgerScriptTestcases, InvalidScriptTestcases, ValidNativeScri
 
 chai.use(chaiAsPromised)
 
-describe("deriveNativeScriptHash", async () => {
-    let ada: Ada = {} as any
+describe("deriveNativeScriptHash", () => {
+    let ada: Ada = {} as Ada
 
     beforeEach(async () => {
         ada = await getAda()
     })
 
     afterEach(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (ada as any).t.close()
     })
 
-    describe("Valid native scripts", async () => {
+    describe("Valid native scripts", () => {
         for (const { testName, script, displayFormat, hashHex: expectedHash } of ValidNativeScriptTestcases) {
             it(testName, async () => {
                 const { scriptHashHex } = await ada.deriveNativeScriptHash({
@@ -32,7 +33,7 @@ describe("deriveNativeScriptHash", async () => {
         }
     })
 
-    describeWithoutValidation("Ledger should not permit invalid scripts", async () => {
+    describeWithoutValidation("Ledger should not permit invalid scripts", () => {
         for (const { testName, script } of InvalidOnLedgerScriptTestcases) {
             it(testName, async () => {
                 const promise = ada.deriveNativeScriptHash({
@@ -44,7 +45,7 @@ describe("deriveNativeScriptHash", async () => {
         }
     })
 
-    describe("Ledgerjs should not permit invalid scripts", async () => {
+    describe("Ledgerjs should not permit invalid scripts", () => {
         for (const { testName, script, invalidDataReason: expectedInvalidDataReason } of InvalidScriptTestcases) {
             it(testName, async () => {
                 const promise = ada.deriveNativeScriptHash({

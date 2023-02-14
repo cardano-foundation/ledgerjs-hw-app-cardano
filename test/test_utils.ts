@@ -1,4 +1,3 @@
-// @ts-ignore
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid"
 import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos"
 import * as blake2 from "blake2"
@@ -24,6 +23,7 @@ export async function getAda() {
     const transport = await getTransport()
 
     const ada = new Ada(transport);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ada as any).t = transport
     return Promise.resolve(ada)
 }
@@ -32,6 +32,7 @@ export function turnOffValidation() {
     const validate_mock = ImportMock.mockFunction(parseModule, 'validate')
 
     const fns = ['isString', 'isInteger', 'isArray', 'isBuffer', 'isHexString', 'isHexStringOfLength', 'isValidPath']
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     /* @ts-ignore */
     const mocks = fns.map((fn) => ImportMock.mockFunction(parseModule, fn, true))
 
@@ -42,7 +43,7 @@ export function turnOffValidation() {
 }
 
 export function describeWithoutValidation(title: string, test: () => void) {
-    describe(title, async () => {
+    describe(title, () => {
         let restoreValidation: () => void
 
         before(() => {
@@ -88,7 +89,7 @@ export const Networks = {
 type TxHash = FixlenHexString<32>
 
 function hashTxBody(txBodyHex: string): TxHash {
-    let b2 = blake2.createHash("blake2b", { digestLength: 32 })
+    const b2 = blake2.createHash("blake2b", { digestLength: 32 })
     b2.update(Buffer.from(txBodyHex, 'hex'))
     return parseModule.parseHexStringOfLength(b2.digest('hex'), 32, InvalidDataReason.INVALID_B2_HASH)
 }
@@ -97,10 +98,11 @@ export function bech32_to_hex(str: string): string {
     return utils.buf_to_hex(utils.bech32_decodeAddress(str))
 }
 
-export const DontRunOnLedger: string = "DO NOT RUN ON LEDGER"
+export const DontRunOnLedger = "DO NOT RUN ON LEDGER"
 
-export function describeSignTxRejects(name: string, testList: any) {
-    describe(name + "_JS", async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function describeSignTxRejects(name: string, testList: any[]) {
+    describe(`${name  }_JS`, () => {
         let ada: Ada = {} as Ada
 
         beforeEach(async () => {
@@ -108,6 +110,7 @@ export function describeSignTxRejects(name: string, testList: any) {
         })
 
         afterEach(async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (ada as any).t.close()
         })
 
@@ -126,7 +129,7 @@ export function describeSignTxRejects(name: string, testList: any) {
         }
     })
 
-    describeWithoutValidation(name + "_Ledger", async () => {
+    describeWithoutValidation(`${name  }_Ledger`, () => {
         let ada: Ada = {} as Ada
 
         beforeEach(async () => {
@@ -134,6 +137,7 @@ export function describeSignTxRejects(name: string, testList: any) {
         })
 
         afterEach(async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (ada as any).t.close()
         })
 
@@ -153,8 +157,9 @@ export function describeSignTxRejects(name: string, testList: any) {
     })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function describeSignTxPositiveTest(name: string, tests: any[]) {
-    describe(name, async () => {
+    describe(name, () => {
         let ada: Ada = {} as Ada
 
         beforeEach(async () => {
@@ -162,15 +167,18 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
         })
 
         afterEach(async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (ada as any).t.close()
         })
 
         for (const { testName, tx, signingMode, additionalWitnessPaths, txBody, expectedResult } of tests) {
             it(`${testName} [${signingMode}]`, async () => {
                 if (!txBody) {
-                    console.log("WARNING --- No tx body given: " + testName)
+                    // eslint-disable-next-line no-console
+                    console.log(`WARNING --- No tx body given: ${  testName}`)
                 } else if (hashTxBody(txBody) !== expectedResult.txHashHex) {
-                    console.log("WARNING --- Tx body hash mismatch: " + testName)
+                    // eslint-disable-next-line no-console
+                    console.log(`WARNING --- Tx body hash mismatch: ${  testName}`)
                 }
                 const response = await ada.signTransaction({
                     tx,

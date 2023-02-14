@@ -1,15 +1,14 @@
 import { InvalidDataReason } from "../../errors/invalidDataReason"
 import type { Int64_str, ParsedAssetGroup, ParsedInput, ParsedRequiredSigner, ParsedToken, ParsedWithdrawal, Uint8_t, Uint32_t, Uint64_str, ValidBIP32Path, Version} from "../../types/internal"
-import      { RequiredSignerType } from "../../types/internal"
-import { StakeCredentialType } from "../../types/internal"
-import { assert } from "../../utils/assert"
+import      { RequiredSignerType , StakeCredentialType } from "../../types/internal"
+import { assert, unreachable } from "../../utils/assert"
 import { hex_to_buf, path_to_buf, stake_credential_to_buf, uint8_to_buf, uint32_to_buf, uint64_to_buf } from "../../utils/serialize"
 import { getCompatibility } from "../getVersion"
 import type {SerializeTokenAmountFn} from "../signTx"
 
 export function serializeTxInput(
     input: ParsedInput
-) {
+): Buffer {
     return Buffer.concat([
         hex_to_buf(input.txHashHex),
         uint32_to_buf(input.outputIndex),
@@ -19,7 +18,7 @@ export function serializeTxInput(
 export function serializeTxWithdrawal(
     withdrawal: ParsedWithdrawal,
     version: Version,
-) {
+): Buffer {
     if (getCompatibility(version).supportsMultisigTransaction) {
         return Buffer.concat([
             uint64_to_buf(withdrawal.amount),
@@ -37,7 +36,7 @@ export function serializeTxWithdrawal(
 
 export function serializeTxFee(
     fee: Uint64_str
-) {
+): Buffer {
     return Buffer.concat([
         uint64_to_buf(fee),
     ])
@@ -45,7 +44,7 @@ export function serializeTxFee(
 
 export function serializeTxTtl(
     ttl: Uint64_str
-) {
+): Buffer {
     return Buffer.concat([
         uint64_to_buf(ttl),
     ])
@@ -53,7 +52,7 @@ export function serializeTxTtl(
 
 export function serializeTxValidityStart(
     validityIntervalStart: Uint64_str
-) {
+): Buffer {
     return Buffer.concat([
         uint64_to_buf(validityIntervalStart),
     ])
@@ -61,20 +60,20 @@ export function serializeTxValidityStart(
 
 export function serializeTxWitnessRequest(
     path: ValidBIP32Path
-) {
+): Buffer {
     return Buffer.concat([
         path_to_buf(path),
     ])
 }
 
-export function serializeAssetGroup<T>(assetGroup: ParsedAssetGroup<T>) {
+export function serializeAssetGroup<T>(assetGroup: ParsedAssetGroup<T>): Buffer {
     return Buffer.concat([
         hex_to_buf(assetGroup.policyIdHex),
         uint32_to_buf(assetGroup.tokens.length as Uint32_t),
     ])
 }
 
-export function serializeToken<T>(token: ParsedToken<T>, serializeTokenAmountFn: SerializeTokenAmountFn<T>) {
+export function serializeToken<T>(token: ParsedToken<T>, serializeTokenAmountFn: SerializeTokenAmountFn<T>): Buffer {
     return Buffer.concat([
         uint32_to_buf(token.assetNameHex.length / 2 as Uint32_t),
         hex_to_buf(token.assetNameHex),
@@ -82,13 +81,13 @@ export function serializeToken<T>(token: ParsedToken<T>, serializeTokenAmountFn:
     ])
 }
 
-export function serializeMintBasicParams(mint: Array<ParsedAssetGroup<Int64_str>>) {
+export function serializeMintBasicParams(mint: Array<ParsedAssetGroup<Int64_str>>): Buffer {
     return Buffer.concat([
         uint32_to_buf(mint.length as Uint32_t),
     ])
 }
 
-export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner) {
+export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner): Buffer {
     switch (requiredSigner.type) {
     case RequiredSignerType.PATH:
         return Buffer.concat([
@@ -100,12 +99,14 @@ export function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner) {
             uint8_to_buf(requiredSigner.type as Uint8_t),
             hex_to_buf(requiredSigner.hashHex),
         ])
+    default:
+        unreachable(requiredSigner)
     }
 }
 
 export function serializeTotalCollateral(
     totalCollateral: Uint64_str
-) {
+): Buffer {
     return Buffer.concat([
         uint64_to_buf(totalCollateral),
     ])

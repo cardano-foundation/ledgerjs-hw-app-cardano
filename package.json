@@ -63,7 +63,7 @@
   "homepage": "https://github.com/cardano-foundation/ledgerjs-hw-app-cardano",
   "scripts": {
     "clean": "rm -rf dist/",
-    "lint": "eslint src/ test/ --max-warnings=0 --ext .ts,.js",
+    "lint": "eslint src/ test/ example-node/ --max-warnings=0 --ext .ts,.js",
     "prettier:check": "prettier --check .",
     "prettier": "prettier --write .",
     "spell:check": "yarn cspell lint --gitignore '**' 2>/dev/null",

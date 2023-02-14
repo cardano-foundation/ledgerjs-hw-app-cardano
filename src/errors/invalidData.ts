@@ -7,6 +7,6 @@ import type { InvalidDataReason } from "./invalidDataReason"
  */
 export class InvalidData extends ErrorBase {
     public constructor(reason: InvalidDataReason) {
-        super(reason)
+        super(reason as string)
     }
 }

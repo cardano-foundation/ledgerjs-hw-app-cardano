@@ -3,14 +3,13 @@ import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { ParsedCertificate } from "../types/internal"
 import { CertificateType, KEY_HASH_LENGTH } from "../types/internal"
 import type { Certificate} from "../types/public"
-import { parseBIP32Path, parseHexStringOfLength, parseStakeCredential, parseUint64_str, validate } from "../utils/parse"
+import { parseBIP32Path, parseHexStringOfLength, parseStakeCredential, parseUint64_str } from "../utils/parse"
 import { parsePoolParams } from "./poolRegistration"
 
 export function parseCertificate(cert: Certificate): ParsedCertificate {
     switch (cert.type) {
     case CertificateType.STAKE_REGISTRATION:
     case CertificateType.STAKE_DEREGISTRATION: {
-        validate((cert.params as any).poolKeyHashHex == null, InvalidDataReason.CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH)
         return {
             type: cert.type,
             stakeCredential: parseStakeCredential(cert.params.stakeCredential, InvalidDataReason.CERTIFICATE_INVALID_SCRIPT_HASH),

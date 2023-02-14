@@ -1,8 +1,7 @@
 import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { ParsedNetwork } from "../types/internal"
 import type { Network } from "../types/public"
-import { validate } from "../utils/parse"
-import { parseUint8_t, parseUint32_t } from "../utils/parse"
+import { validate , parseUint8_t, parseUint32_t } from "../utils/parse"
 
 export function parseNetwork(network: Network): ParsedNetwork {
     const parsed = {

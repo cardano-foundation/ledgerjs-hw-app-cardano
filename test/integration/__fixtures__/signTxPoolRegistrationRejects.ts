@@ -247,7 +247,7 @@ export const invalidRelayTestcases: TestcaseRejectShelley[] = [
                                 params: {
                                     portNumber: 3000,
                                     dnsName: null,
-                                } as any as SingleHostHostnameRelayParams,
+                                } as unknown as SingleHostHostnameRelayParams,
                             },
                         ],
                     },
@@ -273,7 +273,7 @@ export const invalidRelayTestcases: TestcaseRejectShelley[] = [
                                 type: RelayType.MULTI_HOST,
                                 params: {
                                     dnsName: null,
-                                } as any as MultiHostRelayParams,
+                                } as unknown as MultiHostRelayParams,
                             },
                         ],
                     },

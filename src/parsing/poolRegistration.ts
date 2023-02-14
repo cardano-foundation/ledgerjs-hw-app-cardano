@@ -1,8 +1,7 @@
 import { InvalidData } from "../errors"
 import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { ParsedMargin, ParsedPoolKey, ParsedPoolMetadata, ParsedPoolOwner, ParsedPoolParams, ParsedPoolRelay, ParsedPoolRewardAccount, Uint16_t, Uint64_str, VarlenAsciiString } from "../types/internal"
-import { AUXILIARY_DATA_HASH_LENGTH } from "../types/internal"
-import { KEY_HASH_LENGTH, RelayType, REWARD_ACCOUNT_HEX_LENGTH, VRF_KEY_HASH_LENGTH } from "../types/internal"
+import { AUXILIARY_DATA_HASH_LENGTH , KEY_HASH_LENGTH, RelayType, REWARD_ACCOUNT_HEX_LENGTH, VRF_KEY_HASH_LENGTH } from "../types/internal"
 import type {
     MultiHostRelayParams,
     PoolKey,
@@ -42,42 +41,6 @@ function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
         numerator: marginNumerator as Uint64_str,
         denominator: marginDenominator as Uint64_str,
     }
-}
-
-export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParams {
-    const poolKey = parsePoolKey(params.poolKey)
-    const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, VRF_KEY_HASH_LENGTH, InvalidDataReason.POOL_REGISTRATION_INVALID_VRF_KEY_HASH)
-    const pledge = parseUint64_str(params.pledge, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.POOL_REGISTRATION_INVALID_PLEDGE)
-    const cost = parseUint64_str(params.cost, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.POOL_REGISTRATION_INVALID_COST)
-    const margin = parseMargin(params.margin)
-    const rewardAccount = parseRewardAccount(params.rewardAccount)
-
-    const owners = params.poolOwners.map(owner => parsePoolOwnerParams(owner))
-    const relays = params.relays.map(relay => parsePoolRelayParams(relay))
-    const metadata = params.metadata == null ? null : parsePoolMetadataParams(params.metadata)
-
-    // Additional checks
-    validate(
-        owners.length <= POOL_REGISTRATION_OWNERS_MAX,
-        InvalidDataReason.POOL_REGISTRATION_OWNERS_TOO_MANY
-    )
-    validate(
-        relays.length <= POOL_REGISTRATION_RELAYS_MAX,
-        InvalidDataReason.POOL_REGISTRATION_RELAYS_TOO_MANY
-    )
-
-    return {
-        poolKey,
-        vrfHashHex,
-        pledge,
-        cost,
-        margin,
-        rewardAccount,
-        owners,
-        relays,
-        metadata,
-    }
-
 }
 
 function parsePoolKey(poolKey: PoolKey): ParsedPoolKey {
@@ -263,5 +226,40 @@ function parsePoolMetadataParams(params: PoolMetadataParams): ParsedPoolMetadata
         url,
         hashHex,
         __brand: 'pool_metadata' as const,
+    }
+}
+
+export function parsePoolParams(params: PoolRegistrationParams): ParsedPoolParams {
+    const poolKey = parsePoolKey(params.poolKey)
+    const vrfHashHex = parseHexStringOfLength(params.vrfKeyHashHex, VRF_KEY_HASH_LENGTH, InvalidDataReason.POOL_REGISTRATION_INVALID_VRF_KEY_HASH)
+    const pledge = parseUint64_str(params.pledge, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.POOL_REGISTRATION_INVALID_PLEDGE)
+    const cost = parseUint64_str(params.cost, { max: MAX_LOVELACE_SUPPLY_STR }, InvalidDataReason.POOL_REGISTRATION_INVALID_COST)
+    const margin = parseMargin(params.margin)
+    const rewardAccount = parseRewardAccount(params.rewardAccount)
+
+    const owners = params.poolOwners.map(owner => parsePoolOwnerParams(owner))
+    const relays = params.relays.map(relay => parsePoolRelayParams(relay))
+    const metadata = params.metadata == null ? null : parsePoolMetadataParams(params.metadata)
+
+    // Additional checks
+    validate(
+        owners.length <= POOL_REGISTRATION_OWNERS_MAX,
+        InvalidDataReason.POOL_REGISTRATION_OWNERS_TOO_MANY
+    )
+    validate(
+        relays.length <= POOL_REGISTRATION_RELAYS_MAX,
+        InvalidDataReason.POOL_REGISTRATION_RELAYS_TOO_MANY
+    )
+
+    return {
+        poolKey,
+        vrfHashHex,
+        pledge,
+        cost,
+        margin,
+        rewardAccount,
+        owners,
+        relays,
+        metadata,
     }
 }

@@ -152,17 +152,17 @@ function* signTx_addInput(
 
 function* signTx_addOutput_sendChunks(hex: HexString, p2: number) {
 
-    //First chunk is already sent with previous APDU, so we start with 2nd chunk
+    // First chunk is already sent with previous APDU, so we start with 2nd chunk
     let start = MAX_CHUNK_SIZE * 2
     let end = start
 
     while (start < hex.length) {
         end = Math.min(hex.length, start + (MAX_CHUNK_SIZE * 2))
-        let chunk = hex.substring(start, end)
+        const chunk = hex.substring(start, end)
 
         yield send({
             p1: P1.STAGE_OUTPUTS,
-            p2: p2,
+            p2,
             data: Buffer.concat([
                 uint32_to_buf(chunk.length / 2 as Uint32_t),
                 hex_to_buf(chunk as HexString),
@@ -170,6 +170,34 @@ function* signTx_addOutput_sendChunks(hex: HexString, p2: number) {
             expectedResponseLength: 0,
         })
         start = end
+    }
+}
+
+export type SerializeTokenAmountFn<T> = (val: T) => Buffer
+
+function* signTx_addTokenBundle<T>(tokenBundle: ParsedAssetGroup<T>[], p1: number, serializeTokenAmountFn: SerializeTokenAmountFn<T>) {
+    const enum P2 {
+        ASSET_GROUP = 0x31,
+        TOKEN = 0x32,
+    }
+
+    // Assets
+    for (const assetGroup of tokenBundle) {
+        yield send({
+            p1,
+            p2: P2.ASSET_GROUP,
+            data: serializeAssetGroup(assetGroup),
+            expectedResponseLength: 0,
+        })
+
+        for (const token of assetGroup.tokens) {
+            yield send({
+                p1,
+                p2: P2.TOKEN,
+                data: serializeToken(token, serializeTokenAmountFn),
+                expectedResponseLength: 0,
+            })
+        }
     }
 }
 
@@ -233,64 +261,6 @@ function* signTx_addOutput(
         data: Buffer.concat([]),
         expectedResponseLength: 0,
     })
-}
-
-export type SerializeTokenAmountFn<T> = (val: T) => Buffer
-
-function* signTx_addTokenBundle<T>(tokenBundle: ParsedAssetGroup<T>[], p1: number, serializeTokenAmountFn: SerializeTokenAmountFn<T>) {
-    const enum P2 {
-        ASSET_GROUP = 0x31,
-        TOKEN = 0x32,
-    }
-
-    // Assets
-    for (const assetGroup of tokenBundle) {
-        yield send({
-            p1: p1,
-            p2: P2.ASSET_GROUP,
-            data: serializeAssetGroup(assetGroup),
-            expectedResponseLength: 0,
-        })
-
-        for (const token of assetGroup.tokens) {
-            yield send({
-                p1: p1,
-                p2: P2.TOKEN,
-                data: serializeToken(token, serializeTokenAmountFn),
-                expectedResponseLength: 0,
-            })
-        }
-    }
-}
-
-function* signTx_addCertificate(
-    certificate: ParsedCertificate,
-    version: Version,
-): Interaction<void> {
-  const enum P2 {
-    UNUSED = 0x00,
-  }
-  yield send({
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.UNUSED,
-      data: serializeTxCertificate(certificate, version),
-      expectedResponseLength: 0,
-  })
-
-  // additional data for pool certificate
-  if (certificate.type === CertificateType.STAKE_POOL_REGISTRATION) {
-      if (getCompatibility(version).supportsPoolRegistrationAsOperator) {
-          yield* signTx_addStakePoolRegistrationCertificate(certificate)
-      } else {
-          // TODO since version 4.0.0 of the Ledger app, pool registration owner witness
-          // is checked against the pool owner in the certificate
-          // after that version is tested and widespread, we want to drop support
-          // for the previous unsafe version (since 2.4) and the unsafe legacy version (since 2.1 or so)
-          // When the support for unsafe version is gone,
-          // the following legacy serialization should be removed, too.
-          yield* signTx_addStakePoolRegistrationCertificateLegacy(certificate)
-      }
-  }
 }
 
 function* signTx_addStakePoolRegistrationCertificate(
@@ -431,6 +401,36 @@ function* signTx_addStakePoolRegistrationCertificateLegacy(
       data: Buffer.alloc(0),
       expectedResponseLength: 0,
   })
+}
+
+function* signTx_addCertificate(
+    certificate: ParsedCertificate,
+    version: Version,
+): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+  yield send({
+      p1: P1.STAGE_CERTIFICATES,
+      p2: P2.UNUSED,
+      data: serializeTxCertificate(certificate, version),
+      expectedResponseLength: 0,
+  })
+
+  // additional data for pool certificate
+  if (certificate.type === CertificateType.STAKE_POOL_REGISTRATION) {
+      if (getCompatibility(version).supportsPoolRegistrationAsOperator) {
+          yield* signTx_addStakePoolRegistrationCertificate(certificate)
+      } else {
+          // TODO since version 4.0.0 of the Ledger app, pool registration owner witness
+          // is checked against the pool owner in the certificate
+          // after that version is tested and widespread, we want to drop support
+          // for the previous unsafe version (since 2.4) and the unsafe legacy version (since 2.1 or so)
+          // When the support for unsafe version is gone,
+          // the following legacy serialization should be removed, too.
+          yield* signTx_addStakePoolRegistrationCertificateLegacy(certificate)
+      }
+  }
 }
 
 function* signTx_addWithdrawal(
@@ -583,8 +583,8 @@ function* signTx_setAuxiliaryData(
         expectedResponseLength: AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH,
     })
 
-    const auxDataHash = response.slice(0, AUXILIARY_DATA_HASH_LENGTH)
-    const signature = response.slice(AUXILIARY_DATA_HASH_LENGTH, AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH)
+    const auxDataHash = response.subarray(0, AUXILIARY_DATA_HASH_LENGTH)
+    const signature = response.subarray(AUXILIARY_DATA_HASH_LENGTH, AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH)
 
     return {
         type: TxAuxiliaryDataSupplementType.CIP36_REGISTRATION,
@@ -786,7 +786,7 @@ function* signTx_getWitness(
       expectedResponseLength: ED25519_SIGNATURE_LENGTH,
   })
   return {
-      path: path,
+      path,
       witnessSignatureHex: buf_to_hex(response),
   }
 }
@@ -794,7 +794,7 @@ function* signTx_getWitness(
 // general name, because it should work with any type if generalized
 function uniquify(witnessPaths: ValidBIP32Path[]): ValidBIP32Path[] {
     const uniquifier: Record<string, ValidBIP32Path> = {}
-    witnessPaths.forEach(p => uniquifier[JSON.stringify(p)] = p)
+    witnessPaths.forEach(p => {uniquifier[JSON.stringify(p)] = p})
     return Object.values(uniquifier)
 }
 
@@ -802,7 +802,7 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
     const { tx, signingMode, additionalWitnessPaths } = request
     const witnessPaths: ValidBIP32Path[] = []
 
-    if (signingMode != TransactionSigningMode.MULTISIG_TRANSACTION) {
+    if (signingMode !== TransactionSigningMode.MULTISIG_TRANSACTION) {
         // for multisig, all the witness paths should be given in additionalWitnessPaths
         // because there might be several (or none) for each of the tx body elements
 
@@ -1044,7 +1044,7 @@ function ensureRequestSupportedByAppVersion(version: Version, request: ParsedSig
         throw new DeviceVersionUnsupported(`Vote key derivation path in CIP15/CIP36 registration not supported by Ledger app version ${getVersionString(version)}.`)
     }
     const thirdPartyPayment = auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
-        && auxiliaryData.params.paymentDestination.type != TxOutputDestinationType.DEVICE_OWNED
+        && auxiliaryData.params.paymentDestination.type !== TxOutputDestinationType.DEVICE_OWNED
     if (thirdPartyPayment && !getCompatibility(version).supportsCIP36) {
         throw new DeviceVersionUnsupported(`CIP36 payment addresses not owned by the device not supported by Ledger app version ${getVersionString(version)}.`)
     }

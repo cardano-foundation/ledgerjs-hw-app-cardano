@@ -28,12 +28,33 @@ export function* getVersion(): Interaction<Version> {
     const [major, minor, patch, flags_value] = response
 
     const FLAG_IS_DEBUG = 1
-    //const FLAG_IS_HEADLESS = 2;
+    // const FLAG_IS_HEADLESS = 2;
 
     const flags = {
+        // eslint-disable-next-line no-bitwise
         isDebug: (flags_value & FLAG_IS_DEBUG) === FLAG_IS_DEBUG,
     }
     return { major, minor, patch, flags }
+}
+
+export function isLedgerAppVersionAtLeast(
+    version: Version,
+    minMajor: number,
+    minMinor: number
+): boolean {
+    const { major, minor } = version
+
+    return major > minMajor || (major === minMajor && minor >= minMinor)
+}
+
+export function isLedgerAppVersionAtMost(
+    version: Version,
+    maxMajor: number,
+    maxMinor: number
+): boolean {
+    const { major, minor } = version
+
+    return major < maxMajor || (major === maxMajor && minor <= maxMinor)
 }
 
 export function getCompatibility(version: Version): DeviceCompatibility {
@@ -64,26 +85,6 @@ export function getCompatibility(version: Version): DeviceCompatibility {
         supportsBabbage: v5_0,
         supportsCIP36Vote: v6_0,
     }
-}
-
-export function isLedgerAppVersionAtLeast(
-    version: Version,
-    minMajor: number,
-    minMinor: number
-): boolean {
-    const { major, minor } = version
-
-    return major > minMajor || (major === minMajor && minor >= minMinor)
-}
-
-export function isLedgerAppVersionAtMost(
-    version: Version,
-    maxMajor: number,
-    maxMinor: number
-): boolean {
-    const { major, minor } = version
-
-    return major < maxMajor || (major === maxMajor && minor <= maxMinor)
 }
 
 export function ensureLedgerAppVersionCompatible(

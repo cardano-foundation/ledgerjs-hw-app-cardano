@@ -1,4 +1,4 @@
-/********************************************************************************
+/** ******************************************************************************
  *   Ledger Node JS API
  *   (c) 2016-2017 Ledger
  *
@@ -13,7 +13,9 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- ********************************************************************************/
+ ******************************************************************************* */
+
+/* eslint-disable require-await */
 import type Transport from "@ledgerhq/hw-transport"
 
 import { DeviceStatusCodes, DeviceStatusError } from './errors'
@@ -42,8 +44,7 @@ import type {
     ParsedSigningRequest,
     ValidBIP32Path,
 } from './types/internal'
-import type { BIP32Path, CIP36Vote, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedCIP36VoteData, SignedTransactionData, SignTransactionRequest, Transaction, Version } from './types/public'
-import { AddressType, CertificateType, NativeScriptType, RelayType, TransactionSigningMode } from "./types/public"
+import type { BIP32Path, CIP36Vote, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedCIP36VoteData, SignedTransactionData, SignTransactionRequest, Version } from './types/public'
 import utils from "./utils"
 import { assert } from './utils/assert'
 import { isArray, parseBIP32Path, validate } from './utils/parse'
@@ -53,13 +54,15 @@ export * from './types/public'
 
 const CLA = 0xd7
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types,@typescript-eslint/ban-ts-comment */
+
 function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
     // @ts-ignore
     return async (...args) => {
         try {
             return await fn(...args)
-        } catch (e: any) {
-            if (e && e.statusCode) {
+        } catch (e: unknown) {
+            if (e && typeof e === 'object' && 'statusCode' in e && typeof e.statusCode === 'number') {
                 throw new DeviceStatusError(e.statusCode)
             }
             throw e
@@ -105,6 +108,7 @@ function wrapRetryStillInCall<T extends Function>(fn: T): T {
     }
 }
 
+/* eslint-enable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types,@typescript-eslint/ban-ts-comment */
 
 async function interact<T>(
     interaction: Interaction<T>,
@@ -136,7 +140,7 @@ export class Ada {
   _send: SendFn;
 
   /** $FlowIgnore[value-as-type] */
-  constructor(transport: Transport, scrambleKey: string = "ADA") {
+  constructor(transport: Transport, scrambleKey = "ADA") {
       this.transport = transport
       // Note: this is list of methods that should "lock" the transport to avoid concurrent use
       const methods = [
@@ -488,8 +492,7 @@ export type DeriveNativeScriptHashRequest = {
 export type DeriveNativeScriptHashResponse = NativeScriptHash
 
 // reexport
-export type { Transaction, DeviceOwnedAddress }
-export { AddressType, CertificateType, RelayType, InvalidDataReason, TransactionSigningMode, NativeScriptType, utils }
+export { utils }
 export default Ada
 
 /**

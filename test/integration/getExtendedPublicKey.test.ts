@@ -6,11 +6,10 @@ import { DeviceStatusError } from "../../src/Ada"
 import { str_to_path } from "../../src/utils/address"
 import { getAda } from "../test_utils"
 import type { TestCase} from "./__fixtures__/getExtendedPublicKey"
-import { testsCVoteKeys } from "./__fixtures__/getExtendedPublicKey"
-import { testsByron, testsColdKeys, testsShelleyUnusual, testsShelleyUsual } from "./__fixtures__/getExtendedPublicKey"
+import { testsCVoteKeys , testsByron, testsColdKeys, testsShelleyUnusual, testsShelleyUsual } from "./__fixtures__/getExtendedPublicKey"
 chai.use(chaiAsPromised)
 
-describe("getExtendedPublicKey", async () => {
+describe("getExtendedPublicKey", () => {
     let ada: Ada = {} as Ada
 
     beforeEach(async () => {
@@ -18,10 +17,11 @@ describe("getExtendedPublicKey", async () => {
     })
 
     afterEach(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (ada as any).t.close()
     })
 
-    describe("Should successfully get a single extended public key", async () => {
+    describe("Should successfully get a single extended public key", () => {
         const test = async (tests: TestCase[]) => {
             for (const { path, expected } of tests) {
                 const response = await ada.getExtendedPublicKey(
@@ -50,7 +50,7 @@ describe("getExtendedPublicKey", async () => {
         })
     })
 
-    describe("Should successfully get several extended public keys", async () => {
+    describe("Should successfully get several extended public keys", () => {
         const test = async (tests: TestCase[]) => {
             const results = await ada.getExtendedPublicKeys(
                 { paths: tests.map(({ path }) => str_to_path(path)) }

@@ -1,7 +1,8 @@
+import { base58_decode, str_to_path } from "../../../src/utils/address"
 import type {AssetGroup, TxInput, TxOutput, TxOutputDestination} from "../../../src/types/public"
 import {AddressType, DatumType, TxOutputDestinationType, TxOutputFormat} from "../../../src/types/public"
-import utils, {str_to_path} from "../../../src/utils"
 import {bech32_to_hex, Networks} from "../../test_utils"
+import { buf_to_hex } from "../../../src/utils/serialize"
 
 export const inputs: Record<
   | 'utxoByron'
@@ -36,7 +37,7 @@ export const inputs: Record<
     },
 }
 
-const base58_to_hex = (str: string): string => utils.buf_to_hex(utils.base58_decode(str))
+const base58_to_hex = (str: string): string => buf_to_hex(base58_decode(str))
 // const bech32_to_hex = (str: string): string => utils.buf_to_hex(utils.bech32_decodeAddress(str))
 
 export const destinations: Record<

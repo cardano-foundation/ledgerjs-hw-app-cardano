@@ -1,35 +1,13 @@
 import { InvalidData } from "../errors"
 import { InvalidDataReason } from "../errors/invalidDataReason"
 import type { ParsedCVoteDelegation, ParsedCVoteRegistrationParams, ParsedTxAuxiliaryData } from "../types/internal"
-import { CVOTE_PUBLIC_KEY_LENGTH } from "../types/internal"
-import { AUXILIARY_DATA_HASH_LENGTH } from "../types/internal"
+import { CVOTE_PUBLIC_KEY_LENGTH , AUXILIARY_DATA_HASH_LENGTH } from "../types/internal"
 import type { CIP36VoteDelegation, CIP36VoteRegistrationParams, Network,TxAuxiliaryData } from "../types/public"
-import { CIP36VoteDelegationType, CIP36VoteRegistrationFormat } from "../types/public"
-import { TxAuxiliaryDataType } from "../types/public"
-import { isArray, parseBIP32Path, parseHexStringOfLength, parseUint32_t, parseUint64_str } from "../utils/parse"
-import { validate } from "../utils/parse"
+import { CIP36VoteDelegationType, CIP36VoteRegistrationFormat , TxAuxiliaryDataType } from "../types/public"
+import { isArray, parseBIP32Path, parseHexStringOfLength, parseUint32_t, parseUint64_str , validate } from "../utils/parse"
 import { parseTxDestination } from "./transaction"
 
 export const CVOTE_VKEY_LENGTH = 32
-
-export function parseTxAuxiliaryData(network: Network, auxiliaryData: TxAuxiliaryData): ParsedTxAuxiliaryData {
-    switch (auxiliaryData.type) {
-    case TxAuxiliaryDataType.ARBITRARY_HASH: {
-        return {
-            type: TxAuxiliaryDataType.ARBITRARY_HASH,
-            hashHex: parseHexStringOfLength(auxiliaryData.params.hashHex, AUXILIARY_DATA_HASH_LENGTH, InvalidDataReason.AUXILIARY_DATA_INVALID_HASH),
-        }
-    }
-    case TxAuxiliaryDataType.CIP36_REGISTRATION: {
-        return {
-            type: TxAuxiliaryDataType.CIP36_REGISTRATION,
-            params: parseCVoteRegistrationParams(network, auxiliaryData.params),
-        }
-    }
-    default:
-        throw new InvalidData(InvalidDataReason.AUXILIARY_DATA_UNKNOWN_TYPE)
-    }
-}
 
 function parseCVoteDelegation(delegation: CIP36VoteDelegation): ParsedCVoteDelegation {
     const weight = parseUint32_t(delegation.weight, InvalidDataReason.CVOTE_DELEGATION_INVALID_WEIGHT)
@@ -105,5 +83,24 @@ function parseCVoteRegistrationParams(network: Network, params: CIP36VoteRegistr
         paymentDestination: parseTxDestination(network, params.paymentDestination, false),
         nonce: parseUint64_str(params.nonce, {}, InvalidDataReason.CVOTE_REGISTRATION_INVALID_NONCE),
         votingPurpose,
+    }
+}
+
+export function parseTxAuxiliaryData(network: Network, auxiliaryData: TxAuxiliaryData): ParsedTxAuxiliaryData {
+    switch (auxiliaryData.type) {
+    case TxAuxiliaryDataType.ARBITRARY_HASH: {
+        return {
+            type: TxAuxiliaryDataType.ARBITRARY_HASH,
+            hashHex: parseHexStringOfLength(auxiliaryData.params.hashHex, AUXILIARY_DATA_HASH_LENGTH, InvalidDataReason.AUXILIARY_DATA_INVALID_HASH),
+        }
+    }
+    case TxAuxiliaryDataType.CIP36_REGISTRATION: {
+        return {
+            type: TxAuxiliaryDataType.CIP36_REGISTRATION,
+            params: parseCVoteRegistrationParams(network, auxiliaryData.params),
+        }
+    }
+    default:
+        throw new InvalidData(InvalidDataReason.AUXILIARY_DATA_UNKNOWN_TYPE)
     }
 }

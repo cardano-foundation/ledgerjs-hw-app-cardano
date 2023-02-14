@@ -1,5 +1,5 @@
+import { str_to_path } from "../../../src/utils/address"
 import type { OperationalCertificate, OperationalCertificateSignature } from "../../../src/Ada"
-import { str_to_path } from "../../../src/utils"
 
 export type TestCase = {
   testName: string;

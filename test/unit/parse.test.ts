@@ -41,8 +41,9 @@ const basicParseTests: BasicParseTest[] = [
     },
 ]
 
-describe("basicParseTest", async () => {
+describe("basicParseTest", () => {
     for (const { signed, numberString } of basicParseTests) {
+        // eslint-disable-next-line no-console
         console.log(`parsing ${numberString} (${signed ? "signed" : "unsigned"})`)
         const objectRepresentation = (signed ? new Int64BE(numberString, 10) : new Uint64BE(numberString, 10))
         const bufferRep = objectRepresentation.toBuffer()
@@ -55,20 +56,20 @@ describe("basicParseTest", async () => {
 
 describe('advancedParseTest', () => {
     it('parse int64 correctly', () => {
-        let nmb = "1235543"
-        let result = parseInt64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)
+        const nmb = "1235543"
+        const result = parseInt64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)
         expect(result).to.equal("1235543")
     })
 
     it("parse negative int64 correctly", () => {
-        let nmb = "-123456"
-        let result = parseInt64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)
+        const nmb = "-123456"
+        const result = parseInt64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)
         expect(result).to.equal("-123456")
     })
 
     it("throw error when trying to parse negative number as Uint", () => {
-        let nmb = "-123456"
-        //let result = parseUint64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)
+        const nmb = "-123456"
+        // let result = parseUint64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)
         expect(() => parseUint64_str(nmb, {}, InvalidDataReason.INPUT_INVALID_TX_HASH)).to.throw(InvalidDataReason.INPUT_INVALID_TX_HASH)
     })
 })

@@ -1,7 +1,5 @@
 import type { DeviceOwnedAddress, ErrorBase, Network } from "../../../src/Ada"
-import { DeviceStatusCodes, DeviceStatusMessages } from "../../../src/Ada"
-import { DeviceStatusError } from "../../../src/Ada"
-import { AddressType } from "../../../src/Ada"
+import { DeviceStatusCodes, DeviceStatusMessages , DeviceStatusError , AddressType } from "../../../src/Ada"
 import { str_to_path } from "../../../src/utils/address"
 import { Networks } from "../../test_utils"
 

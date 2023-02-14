@@ -871,7 +871,7 @@ export const testsMary: SignTxTestcase[] = [
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         txBody: "a300818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249501a0034bf15581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2021821",
         expectedResult: {
-            txHashHex: "a36c270c8ee52c8f5b9cc47ccad0869ad72f00dd1ac1510b682752e09738a27f",
+            "txHashHex": "a36c270c8ee52c8f5b9cc47ccad0869ad72f00dd1ac1510b682752e09738a27f",
             "witnesses": [
                 {
                     "path": [
@@ -884,7 +884,7 @@ export const testsMary: SignTxTestcase[] = [
                     "witnessSignatureHex": "30e8da0b9230bc1b1e2748ef51e9259f457d4e0bd0387eb186ade839f3bbac5a2face7eea72061b850c7d26a5b66bd0f90cff546c6c30e0987091a067c960d06",
                 },
             ],
-            auxiliaryDataSupplement: null,
+            "auxiliaryDataSupplement": null,
         },
     },
     {
@@ -898,7 +898,7 @@ export const testsMary: SignTxTestcase[] = [
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         txBody: "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a09a1581c7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373a44000581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20920581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20a1b7fffffffffffffff581c1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df20b3b7fffffffffffffff",
         expectedResult: {
-            txHashHex: "d31008087e3a9a267661f802993f7604ac2dd53d4b458f27bfc3663bc7072de1",
+            "txHashHex": "d31008087e3a9a267661f802993f7604ac2dd53d4b458f27bfc3663bc7072de1",
             "witnesses": [
                 {
                     "path": [
@@ -911,7 +911,7 @@ export const testsMary: SignTxTestcase[] = [
                     "witnessSignatureHex": "18fa055fb6d74b12170cdc227aaf4922c78405d4caf7bdbe5f959df2c3a912e20c5a18c4412d504685fe1179d32b5b588efe4a8d59f0274492de77f30f315409",
                 },
             ],
-            auxiliaryDataSupplement: null,
+            "auxiliaryDataSupplement": null,
         },
     },
     {
@@ -926,7 +926,7 @@ export const testsMary: SignTxTestcase[] = [
         signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
         txBody: "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182109a2581c6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15fa14553545249503a0034bf14581caf2e27f580f7f08e93190a81f72462f153026d06450924726645891ba244445249501904d24cffffffffffffffffffffffff1904d2",
         expectedResult: {
-            txHashHex: "a96b68158758496044fbf91d7abaaa59e1cc426315c4fc2a1c4fa2c5db432807",
+            "txHashHex": "a96b68158758496044fbf91d7abaaa59e1cc426315c4fc2a1c4fa2c5db432807",
             "witnesses": [
                 {
                     "path": [
@@ -939,7 +939,7 @@ export const testsMary: SignTxTestcase[] = [
                     "witnessSignatureHex": "11b9ed90e2923c01869627ed5bc49ea66874fbef2418a2184437e19a30738a8bb52d7569113984617d73144e304be5cf84a30c21bd8b1c4cfe93cc434ed3db04",
                 },
             ],
-            auxiliaryDataSupplement: null,
+            "auxiliaryDataSupplement": null,
         },
     },
     {

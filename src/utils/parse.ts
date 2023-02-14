@@ -4,6 +4,7 @@ import type { _Int64_bigint, _Int64_num, _Uint64_bigint, _Uint64_num, FixlenHexS
 import { KEY_HASH_LENGTH, SCRIPT_HASH_LENGTH, StakeCredentialType } from "../types/internal"
 import type { StakeCredentialParams } from "../types/public"
 import { StakeCredentialParamsType } from "../types/public"
+import { unreachable } from "./assert"
 
 export const MAX_UINT_64_STR = "18446744073709551615"
 export const MIN_INT_64_STR = "-9223372036854775808"
@@ -39,15 +40,6 @@ export const isHexStringOfLength = <L extends number>(data: unknown, expectedByt
 export const isValidPath = (data: unknown): data is ValidBIP32Path =>
     isArray(data) && data.every(x => isUint32(x)) && data.length <= 5
 
-export const isUint64str = (data: unknown): data is Uint64_str =>
-    isUintStr(data, {})
-
-export const isUint64Number = (data: unknown): data is _Uint64_num =>
-    isInteger(data) && data >= 0 && data <= Number.MAX_SAFE_INTEGER
-
-export const isUint64Bigint = (data: unknown): data is _Uint64_bigint =>
-    (typeof data === 'bigint') && isUint64str(data.toString())
-
 export const isUintStr = (data: unknown, constraints: { min?: string; max?: string }): data is string => {
     const min = constraints.min ?? "0"
     const max = constraints.max ?? MAX_UINT_64_STR
@@ -69,6 +61,39 @@ export const isUintStr = (data: unknown, constraints: { min?: string; max?: stri
     )
 }
 
+export const isUint64str = (data: unknown): data is Uint64_str =>
+    isUintStr(data, {})
+
+export const isUint64Number = (data: unknown): data is _Uint64_num =>
+    isInteger(data) && data >= 0 && data <= Number.MAX_SAFE_INTEGER
+
+export const isUint64Bigint = (data: unknown): data is _Uint64_bigint =>
+    (typeof data === 'bigint') && isUint64str(data.toString())
+
+
+export const isIntStr = (data: unknown, constraints: { min?: string; max?: string }): data is string => {
+    const min = constraints.min ?? MIN_INT_64_STR
+    const max = constraints.max ?? MAX_INT_64_STR
+
+    const hasValidFormat = isString(data)
+        // check format via RegExp
+        && /^-?[0-9]*$/.test(data)
+        // Length checks
+        && data.length > 0
+
+    const isValidNegativeNumber = isString(data) && data.startsWith("-") &&
+        // leading zeros
+        (data.length === 2 || data[1] !== "0") &&
+        // if number is negative: greater or equal than min value (Note: this is string comparison!)
+        (data.length < min.length || data <= min)
+    const isValidPositiveNumber = isString(data) && !data.startsWith("-") &&
+        // leading zeros
+        (data.length === 1 || data[0] !== "0") &&
+        // if number is positive: less or equal than max value (Note: this is string comparison!)
+        (data.length < max.length || data <= max)
+
+    return hasValidFormat && (isValidNegativeNumber || isValidPositiveNumber)
+}
 
 export const isInt64str = (data: unknown): data is Int64_str =>
     isIntStr(data, {})
@@ -79,34 +104,9 @@ export const isInt64Number = (data: unknown): data is _Int64_num =>
 export const isInt64Bigint = (data: unknown): data is _Int64_bigint =>
     (typeof data === 'bigint') && isInt64str(data.toString())
 
-export const isIntStr = (data: unknown, constraints: { min?: string; max?: string }): data is string => {
-    const min = constraints.min ?? MIN_INT_64_STR
-    const max = constraints.max ?? MAX_INT_64_STR
-
-    let hasValidFormat = isString(data)
-        // check format via RegExp
-        && /^-?[0-9]*$/.test(data)
-        // Length checks
-        && data.length > 0
-
-    let isValidNegativeNumber = isString(data) && data.startsWith("-") &&
-        // leading zeros
-        (data.length === 2 || data[1] !== "0") &&
-        // if number is negative: greater or equal than min value (Note: this is string comparison!)
-        (data.length < min.length || data <= min)
-    let isValidPositiveNumber = isString(data) && !data.startsWith("-") &&
-        // leading zeros
-        (data.length === 1 || data[0] !== "0") &&
-        // if number is positive: less or equal than max value (Note: this is string comparison!)
-        (data.length < max.length || data <= max)
-
-    return hasValidFormat && (isValidNegativeNumber || isValidPositiveNumber)
-}
-
 export function validate(cond: boolean, errMsg: InvalidDataReason): asserts cond {
     if (!cond) throw new InvalidData(errMsg)
 }
-
 
 export function parseAscii(str: unknown, errMsg: InvalidDataReason): VarlenAsciiString {
     validate(isString(str), errMsg)
@@ -198,6 +198,8 @@ export function parseStakeCredential(stakeCredential: StakeCredentialParams, err
             type: StakeCredentialType.SCRIPT_HASH,
             scriptHashHex: parseHexStringOfLength(stakeCredential.scriptHashHex, SCRIPT_HASH_LENGTH, errMsg),
         }
+    default:
+        unreachable(stakeCredential)
     }
 }
 
@@ -206,9 +208,9 @@ export function parseStakeCredential(stakeCredential: StakeCredentialParams, err
 
 export function parseIntFromStr(str: string, errMsg: InvalidDataReason): number {
     validate(isString(str), errMsg)
-    const i = parseInt(str)
+    const i = parseInt(str, 10)
     // Check that we parsed everything
-    validate("" + i === str, errMsg)
+    validate(`${  i}` === str, errMsg)
     // Could be invalid
     validate(!isNaN(i), errMsg)
     // Could still be float

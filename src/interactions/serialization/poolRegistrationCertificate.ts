@@ -19,12 +19,14 @@ export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
 
 export function serializePoolInitialParamsLegacy(pool: ParsedPoolParams): Buffer {
     return Buffer.concat([
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         serializePoolKeyLegacy(pool.poolKey),
         hex_to_buf(pool.vrfHashHex),
         uint64_to_buf(pool.pledge),
         uint64_to_buf(pool.cost),
         uint64_to_buf(pool.margin.numerator),
         uint64_to_buf(pool.margin.denominator),
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         serializePoolRewardAccountLegacy(pool.rewardAccount),
         uint32_to_buf(pool.owners.length as Uint32_t),
         uint32_to_buf(pool.relays.length as Uint32_t),

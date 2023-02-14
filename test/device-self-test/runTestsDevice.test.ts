@@ -1,7 +1,7 @@
 import type Ada from "../../src/Ada"
 import { getAda } from "../test_utils"
 
-describe("runTestsDevice", async () => {
+describe("runTestsDevice", () => {
     let ada: Ada = {} as Ada
 
     beforeEach(async () => {
@@ -9,6 +9,7 @@ describe("runTestsDevice", async () => {
     })
 
     afterEach(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (ada as any).t.close()
     })
 
