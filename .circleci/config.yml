@@ -25,14 +25,17 @@ jobs:
           key: v2-dependencies-{{ checksum "yarn.lock" }}
 
       - run:
-          name: Build
-          command: yarn build
-      - run:
           name: Lint
           command: yarn lint
       - run:
+          name: Spellcheck
+          command: yarn spell:check
+      - run:
           name: Audit dependencies
           command: yarn audit
+      - run:
+          name: Build
+          command: yarn build
       - run:
           name: Try building the example
           command: yarn tsc -p example-node/tsconfig.json --noEmit
