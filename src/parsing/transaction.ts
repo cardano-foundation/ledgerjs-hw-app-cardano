@@ -1,57 +1,40 @@
 import {InvalidData} from "../errors"
 import {InvalidDataReason} from "../errors/invalidDataReason"
 import type {
-    ParsedAssetGroup,
     ParsedCertificate,
-    ParsedDatum,
     ParsedInput,
-    ParsedOutput,
-    ParsedOutputDestination,
     ParsedRequiredSigner,
     ParsedSigningRequest,
-    ParsedToken,
     ParsedTransaction,
     ParsedWithdrawal,
 } from "../types/internal"
 import {
-    ASSET_NAME_LENGTH_MAX,
     CertificateType,
-    DATUM_HASH_LENGTH,
     KEY_HASH_LENGTH,
     RequiredSignerType,
     SCRIPT_DATA_HASH_LENGTH,
-    SpendingDataSourceType,
     StakeCredentialType,
-    TOKEN_POLICY_LENGTH,
     TX_HASH_LENGTH,
 } from "../types/internal"
 import type {
-    AssetGroup,
     Certificate,
-    Network,
     RequiredSigner,
     SignTransactionRequest,
-    Token,
     Transaction,
     TxInput,
-    TxOutput,
-    TxOutputDestination,
     Withdrawal,
 } from "../types/public"
 import {
-    DatumType,
     PoolKeyType,
     PoolOwnerType,
     TransactionSigningMode,
     TxOutputDestinationType,
-    TxOutputFormat,
     TxRequiredSignerType,
 } from "../types/public"
 import {unreachable} from '../utils/assert'
 import {
     isArray,
     parseBIP32Path,
-    parseHexString,
     parseHexStringOfLength,
     parseInt64_str,
     parseStakeCredential,
@@ -59,10 +42,10 @@ import {
     parseUint64_str,
     validate,
 } from "../utils/parse"
-import {parseAddress} from "./address"
 import {parseCertificate} from "./certificate"
-import {ASSET_GROUPS_MAX, MAX_LOVELACE_SUPPLY_STR, TOKENS_IN_GROUP_MAX} from "./constants"
+import {MAX_LOVELACE_SUPPLY_STR} from "./constants"
 import {parseNetwork} from "./network"
+import { parseTokenBundle, parseTxOutput } from "./output"
 import {parseTxAuxiliaryData} from "./txAuxiliaryData"
 
 function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertificate> {
@@ -71,95 +54,6 @@ function parseCertificates(certificates: Array<Certificate>): Array<ParsedCertif
     const parsed = certificates.map(cert => parseCertificate(cert))
 
     return parsed
-}
-
-
-type ParseTokenAmountFn<T> = (
-    val: unknown,
-    constraints: { min?: string; max?: string },
-    errMsg: InvalidDataReason
-) => T
-
-function parseToken<T>(token: Token, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedToken<T> {
-    const assetNameHex = parseHexString(token.assetNameHex, InvalidDataReason.MULTIASSET_INVALID_ASSET_NAME)
-    validate(
-        token.assetNameHex.length <= ASSET_NAME_LENGTH_MAX * 2,
-        InvalidDataReason.MULTIASSET_INVALID_ASSET_NAME
-    )
-
-    const amount = parseTokenAmountFn(token.amount, {}, InvalidDataReason.MULTIASSET_INVALID_TOKEN_AMOUNT)
-    return {
-        assetNameHex,
-        amount,
-    }
-}
-
-function parseAssetGroup<T>(assetGroup: AssetGroup, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedAssetGroup<T> {
-    validate(isArray(assetGroup.tokens), InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_ARRAY)
-    validate(assetGroup.tokens.length <= TOKENS_IN_GROUP_MAX, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_TOO_LARGE)
-    validate(assetGroup.tokens.length > 0, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_EMPTY)
-
-    const parsedAssetGroup = {
-        policyIdHex: parseHexStringOfLength(assetGroup.policyIdHex, TOKEN_POLICY_LENGTH, InvalidDataReason.MULTIASSET_INVALID_POLICY_NAME),
-        tokens: assetGroup.tokens.map(t => parseToken(t, parseTokenAmountFn)),
-    }
-
-    const assetNamesHex = parsedAssetGroup.tokens.map(t => t.assetNameHex)
-    validate(assetNamesHex.length === new Set(assetNamesHex).size, InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE)
-
-    const sortedAssetNames = [...assetNamesHex].sort((n1, n2) => {
-        if (n1.length === n2.length) return n1.localeCompare(n2)
-        else return n1.length - n2.length
-    })
-    validate(JSON.stringify(assetNamesHex) === JSON.stringify(sortedAssetNames), InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING)
-
-    return parsedAssetGroup
-}
-
-function parseTokenBundle<T>(tokenBundle: AssetGroup[], emptyTokenBundleAllowed: boolean, parseTokenAmountFn: ParseTokenAmountFn<T>): ParsedAssetGroup<T>[] {
-    validate(isArray(tokenBundle), InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_ARRAY)
-    validate(tokenBundle.length <= ASSET_GROUPS_MAX, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_TOO_LARGE)
-    validate(emptyTokenBundleAllowed || tokenBundle.length > 0, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_EMPTY)
-    const parsedTokenBundle = tokenBundle.map(ag => parseAssetGroup(ag, parseTokenAmountFn))
-
-    const policyIds = parsedTokenBundle.map(ag => ag.policyIdHex)
-    validate(policyIds.length === new Set(policyIds).size, InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE)
-
-    const sortedPolicyIds = [...policyIds].sort()
-    validate(JSON.stringify(policyIds) === JSON.stringify(sortedPolicyIds), InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING)
-
-    return parsedTokenBundle
-}
-
-function parseDatumHash(datumHashHex: string): ParsedDatum | null {
-    return {
-        type: DatumType.HASH,
-        datumHashHex: parseHexStringOfLength(datumHashHex, DATUM_HASH_LENGTH, InvalidDataReason.OUTPUT_INVALID_DATUM_HASH),
-    }
-}
-
-function parseDatum(output: TxOutput): ParsedDatum | null {
-    if (output.format === TxOutputFormat.MAP_BABBAGE) {
-
-        switch (output.datum?.type) {
-        case DatumType.HASH:
-            return parseDatumHash(output.datum?.datumHashHex)
-
-        case DatumType.INLINE:
-            return {
-                type: DatumType.INLINE,
-                datumHex: parseHexString(output.datum.datumHex, InvalidDataReason.OUTPUT_INVALID_INLINE_DATUM),
-            }
-
-        default:
-            return null
-        }
-
-    } else { // Alonzo
-        return output.datumHashHex == null
-            ? null
-            : parseDatumHash(output.datumHashHex)
-    }
 }
 
 function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
@@ -181,82 +75,6 @@ function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
     return {
         amount: parseUint64_str(params.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT),
         stakeCredential: parseStakeCredential(params.stakeCredential, InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL),
-    }
-}
-
-/*
- * Typically, destination is used in output, where we forbid reward addresses.
- * In some other places, we allow them. The parameter 'validateAsTxOutput'
- * is used to control this validation.
- */
-export function parseTxDestination(
-    network: Network,
-    destination: TxOutputDestination,
-    validateAsTxOutput: boolean,
-): ParsedOutputDestination {
-    switch (destination.type) {
-    case TxOutputDestinationType.THIRD_PARTY: {
-        const params = destination.params
-        const addressHex = parseHexString(params.addressHex, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
-        validate(params.addressHex.length <= 128 * 2, InvalidDataReason.OUTPUT_INVALID_ADDRESS)
-        return {
-            type: TxOutputDestinationType.THIRD_PARTY,
-            addressHex,
-        }
-    }
-    case TxOutputDestinationType.DEVICE_OWNED: {
-        const params = destination.params
-        const addressParams = parseAddress(network, params)
-        if (validateAsTxOutput) {
-            validate(
-                // a reward address cannot be used in tx output
-                addressParams.spendingDataSource.type === SpendingDataSourceType.PATH,
-                InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS
-            )
-        }
-        return {
-            type: TxOutputDestinationType.DEVICE_OWNED,
-            addressParams,
-        }
-    }
-    default:
-        throw new InvalidData(InvalidDataReason.ADDRESS_UNKNOWN_TYPE)
-    }
-}
-
-function parseTxOutput(
-    output: TxOutput,
-    network: Network,
-): ParsedOutput {
-    const format = output.format === TxOutputFormat.MAP_BABBAGE
-        ? TxOutputFormat.MAP_BABBAGE
-        : TxOutputFormat.ARRAY_LEGACY
-
-    const amount = parseUint64_str(output.amount, {max: MAX_LOVELACE_SUPPLY_STR}, InvalidDataReason.OUTPUT_INVALID_AMOUNT)
-
-    const tokenBundle = parseTokenBundle(output.tokenBundle ?? [], true, parseUint64_str)
-
-    const destination = parseTxDestination(network, output.destination, true)
-
-    const datum = parseDatum(output)
-    if (datum?.type === DatumType.INLINE) {
-        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_DATUM)
-    }
-
-    const referenceScriptHex = output.format === TxOutputFormat.MAP_BABBAGE && output.referenceScriptHex
-        ? parseHexString(output.referenceScriptHex, InvalidDataReason.OUTPUT_INVALID_REFERENCE_SCRIPT_HEX)
-        : null
-    if (referenceScriptHex != null) {
-        validate(output.format === TxOutputFormat.MAP_BABBAGE, InvalidDataReason.OUTPUT_INCONSISTENT_REFERENCE_SCRIPT)
-    }
-
-    return {
-        format,
-        amount,
-        tokenBundle,
-        destination,
-        datum,
-        referenceScriptHex,
     }
 }
 

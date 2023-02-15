@@ -5,7 +5,7 @@ import { CVOTE_PUBLIC_KEY_LENGTH , AUXILIARY_DATA_HASH_LENGTH } from "../types/i
 import type { CIP36VoteDelegation, CIP36VoteRegistrationParams, Network,TxAuxiliaryData } from "../types/public"
 import { CIP36VoteDelegationType, CIP36VoteRegistrationFormat , TxAuxiliaryDataType } from "../types/public"
 import { isArray, parseBIP32Path, parseHexStringOfLength, parseUint32_t, parseUint64_str , validate } from "../utils/parse"
-import { parseTxDestination } from "./transaction"
+import { parseTxDestination } from "./output"
 
 export const CVOTE_VKEY_LENGTH = 32
 
