@@ -16,38 +16,59 @@
  ******************************************************************************* */
 
 /* eslint-disable require-await */
-import type Transport from "@ledgerhq/hw-transport"
+import type Transport from '@ledgerhq/hw-transport'
 
-import { DeviceStatusCodes, DeviceStatusError } from './errors'
-import { InvalidDataReason } from "./errors/invalidDataReason"
-import type { Interaction, SendParams } from './interactions/common/types'
-import { deriveAddress } from "./interactions/deriveAddress"
-import { deriveNativeScriptHash } from "./interactions/deriveNativeScriptHash"
-import { getExtendedPublicKeys } from "./interactions/getExtendedPublicKeys"
-import { getSerial } from "./interactions/getSerial"
-import { getCompatibility, getVersion } from "./interactions/getVersion"
-import { runTests } from "./interactions/runTests"
-import { showAddress } from "./interactions/showAddress"
-import { signCVote } from "./interactions/signCVote"
-import { signOperationalCertificate } from "./interactions/signOperationalCertificate"
-import { signTransaction } from "./interactions/signTx"
-import { parseAddress } from './parsing/address'
-import { parseCVote } from "./parsing/cVote"
-import { parseNativeScript, parseNativeScriptHashDisplayFormat } from "./parsing/nativeScript"
-import { parseOperationalCertificate } from "./parsing/operationalCertificate"
-import { parseSignTransactionRequest } from "./parsing/transaction"
+import {DeviceStatusCodes, DeviceStatusError} from './errors'
+import {InvalidDataReason} from './errors/invalidDataReason'
+import type {Interaction, SendParams} from './interactions/common/types'
+import {deriveAddress} from './interactions/deriveAddress'
+import {deriveNativeScriptHash} from './interactions/deriveNativeScriptHash'
+import {getExtendedPublicKeys} from './interactions/getExtendedPublicKeys'
+import {getSerial} from './interactions/getSerial'
+import {getCompatibility, getVersion} from './interactions/getVersion'
+import {runTests} from './interactions/runTests'
+import {showAddress} from './interactions/showAddress'
+import {signCVote} from './interactions/signCVote'
+import {signOperationalCertificate} from './interactions/signOperationalCertificate'
+import {signTransaction} from './interactions/signTx'
+import {parseAddress} from './parsing/address'
+import {parseCVote} from './parsing/cVote'
+import {
+  parseNativeScript,
+  parseNativeScriptHashDisplayFormat,
+} from './parsing/nativeScript'
+import {parseOperationalCertificate} from './parsing/operationalCertificate'
+import {parseSignTransactionRequest} from './parsing/transaction'
 import type {
-    ParsedAddressParams,
-    ParsedCVote,
-    ParsedNativeScript,
-    ParsedOperationalCertificate,
-    ParsedSigningRequest,
-    ValidBIP32Path,
+  ParsedAddressParams,
+  ParsedCVote,
+  ParsedNativeScript,
+  ParsedOperationalCertificate,
+  ParsedSigningRequest,
+  ValidBIP32Path,
 } from './types/internal'
-import type { BIP32Path, CIP36Vote, DerivedAddress, DeviceCompatibility, DeviceOwnedAddress, ExtendedPublicKey, NativeScript, NativeScriptHash, NativeScriptHashDisplayFormat, Network, OperationalCertificate, OperationalCertificateSignature, Serial, SignedCIP36VoteData, SignedTransactionData, SignTransactionRequest, Version } from './types/public'
-import utils from "./utils"
-import { assert } from './utils/assert'
-import { isArray, parseBIP32Path, validate } from './utils/parse'
+import type {
+  BIP32Path,
+  CIP36Vote,
+  DerivedAddress,
+  DeviceCompatibility,
+  DeviceOwnedAddress,
+  ExtendedPublicKey,
+  NativeScript,
+  NativeScriptHash,
+  NativeScriptHashDisplayFormat,
+  Network,
+  OperationalCertificate,
+  OperationalCertificateSignature,
+  Serial,
+  SignedCIP36VoteData,
+  SignedTransactionData,
+  SignTransactionRequest,
+  Version,
+} from './types/public'
+import utils from './utils'
+import {assert} from './utils/assert'
+import {isArray, parseBIP32Path, validate} from './utils/parse'
 
 export * from './errors'
 export * from './types/public'
@@ -57,17 +78,22 @@ const CLA = 0xd7
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types,@typescript-eslint/ban-ts-comment */
 
 function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
-    // @ts-ignore
-    return async (...args) => {
-        try {
-            return await fn(...args)
-        } catch (e: unknown) {
-            if (e && typeof e === 'object' && 'statusCode' in e && typeof e.statusCode === 'number') {
-                throw new DeviceStatusError(e.statusCode)
-            }
-            throw e
-        }
+  // @ts-ignore
+  return async (...args) => {
+    try {
+      return await fn(...args)
+    } catch (e: unknown) {
+      if (
+        e &&
+        typeof e === 'object' &&
+        'statusCode' in e &&
+        typeof e.statusCode === 'number'
+      ) {
+        throw new DeviceStatusError(e.statusCode)
+      }
+      throw e
     }
+  }
 }
 
 /**
@@ -79,7 +105,7 @@ function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
  */
 
 /** @ignore */
-export type SendFn = (params: SendParams) => Promise<Buffer>;
+export type SendFn = (params: SendParams) => Promise<Buffer>
 
 // It can happen that we try to send a message to the device
 // when the device thinks it is still in a middle of previous ADPU stream.
@@ -90,41 +116,41 @@ export type SendFn = (params: SendParams) => Promise<Buffer>;
 
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
 function wrapRetryStillInCall<T extends Function>(fn: T): T {
-    // @ts-ignore
-    return async (...args: any) => {
-        try {
-            return await fn(...args)
-        } catch (e: any) {
-            if (
-                e &&
-                e.statusCode &&
-                e.statusCode === DeviceStatusCodes.ERR_STILL_IN_CALL
-            ) {
-                // Do the retry
-                return await fn(...args)
-            }
-            throw e
-        }
+  // @ts-ignore
+  return async (...args: any) => {
+    try {
+      return await fn(...args)
+    } catch (e: any) {
+      if (
+        e &&
+        e.statusCode &&
+        e.statusCode === DeviceStatusCodes.ERR_STILL_IN_CALL
+      ) {
+        // Do the retry
+        return await fn(...args)
+      }
+      throw e
     }
+  }
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types,@typescript-eslint/ban-ts-comment */
 
 async function interact<T>(
-    interaction: Interaction<T>,
-    send: SendFn,
+  interaction: Interaction<T>,
+  send: SendFn,
 ): Promise<T> {
-    let cursor = interaction.next()
-    let first = true
-    while (!cursor.done) {
-        const apdu = cursor.value
-        const res = first
-            ? await wrapRetryStillInCall(send)(apdu)
-            : await send(apdu)
-        first = false
-        cursor = interaction.next(res)
-    }
-    return cursor.value
+  let cursor = interaction.next()
+  let first = true
+  while (!cursor.done) {
+    const apdu = cursor.value
+    const res = first
+      ? await wrapRetryStillInCall(send)(apdu)
+      : await send(apdu)
+    first = false
+    cursor = interaction.next(res)
+  }
+  return cursor.value
 }
 
 /**
@@ -135,43 +161,43 @@ export class Ada {
   // we generate flow type annotations for the package
   // and it does not work for Transport, so we suppress the error
   /** $FlowIgnore[value-as-type] */
-  transport: Transport;
+  transport: Transport
   /** @ignore */
-  _send: SendFn;
+  _send: SendFn
 
   /** $FlowIgnore[value-as-type] */
-  constructor(transport: Transport, scrambleKey = "ADA") {
-      this.transport = transport
-      // Note: this is list of methods that should "lock" the transport to avoid concurrent use
-      const methods = [
-          "getVersion",
-          "getSerial",
-          "getExtendedPublicKeys",
-          "signTransaction",
-          "deriveAddress",
-          "showAddress",
-          "deriveNativeScriptHash",
-      ]
-      this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
-      this._send = async (params: SendParams): Promise<Buffer> => {
-          let response = await wrapConvertDeviceStatusError(this.transport.send)(
-              CLA,
-              params.ins,
-              params.p1,
-              params.p2,
-              params.data
-          )
-          response = utils.stripRetcodeFromResponse(response)
+  constructor(transport: Transport, scrambleKey = 'ADA') {
+    this.transport = transport
+    // Note: this is list of methods that should "lock" the transport to avoid concurrent use
+    const methods = [
+      'getVersion',
+      'getSerial',
+      'getExtendedPublicKeys',
+      'signTransaction',
+      'deriveAddress',
+      'showAddress',
+      'deriveNativeScriptHash',
+    ]
+    this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
+    this._send = async (params: SendParams): Promise<Buffer> => {
+      let response = await wrapConvertDeviceStatusError(this.transport.send)(
+        CLA,
+        params.ins,
+        params.p1,
+        params.p2,
+        params.data,
+      )
+      response = utils.stripRetcodeFromResponse(response)
 
-          if (params.expectedResponseLength != null) {
-              assert(
-                  response.length === params.expectedResponseLength,
-                  `unexpected response length: ${response.length} instead of ${params.expectedResponseLength}`
-              )
-          }
-
-          return response
+      if (params.expectedResponseLength != null) {
+        assert(
+          response.length === params.expectedResponseLength,
+          `unexpected response length: ${response.length} instead of ${params.expectedResponseLength}`,
+        )
       }
+
+      return response
+    }
   }
 
   /**
@@ -185,14 +211,14 @@ export class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-      const version = await interact(this._getVersion(), this._send)
-      return { version, compatibility: getCompatibility(version) }
+    const version = await interact(this._getVersion(), this._send)
+    return {version, compatibility: getCompatibility(version)}
   }
 
   // Just for consistency
   /** @ignore */
   *_getVersion(): Interaction<Version> {
-      return yield* getVersion()
+    return yield* getVersion()
   }
 
   /**
@@ -206,29 +232,27 @@ export class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-      return interact(this._getSerial(), this._send)
+    return interact(this._getSerial(), this._send)
   }
 
   /** @ignore */
   *_getSerial(): Interaction<GetSerialResponse> {
-      const version = yield* getVersion()
-      return yield* getSerial(version)
+    const version = yield* getVersion()
+    return yield* getSerial(version)
   }
-
 
   /**
    * Runs unit tests on the device (DEVEL app build only)
    */
   async runTests(): Promise<void> {
-      return interact(this._runTests(), this._send)
+    return interact(this._runTests(), this._send)
   }
 
   /** @ignore */
   *_runTests(): Interaction<void> {
-      const version = yield* getVersion()
-      return yield* runTests(version)
+    const version = yield* getVersion()
+    return yield* runTests(version)
   }
-
 
   /**
    * Get several public keys; one for each of the specified BIP 32 path.
@@ -242,110 +266,116 @@ export class Ada {
    * console.log(publicKey);
    * ```
    */
-  async getExtendedPublicKeys(
-      { paths }: GetExtendedPublicKeysRequest
-  ): Promise<GetExtendedPublicKeysResponse> {
-      // validate the input
-      validate(isArray(paths), InvalidDataReason.GET_EXT_PUB_KEY_PATHS_NOT_ARRAY)
-      const parsed = paths.map((path) => parseBIP32Path(path, InvalidDataReason.INVALID_PATH))
+  async getExtendedPublicKeys({
+    paths,
+  }: GetExtendedPublicKeysRequest): Promise<GetExtendedPublicKeysResponse> {
+    // validate the input
+    validate(isArray(paths), InvalidDataReason.GET_EXT_PUB_KEY_PATHS_NOT_ARRAY)
+    const parsed = paths.map((path) =>
+      parseBIP32Path(path, InvalidDataReason.INVALID_PATH),
+    )
 
-      return interact(this._getExtendedPublicKeys(parsed), this._send)
+    return interact(this._getExtendedPublicKeys(parsed), this._send)
   }
 
   /** @ignore */
   *_getExtendedPublicKeys(paths: ValidBIP32Path[]) {
-      const version = yield* getVersion()
-      return yield* getExtendedPublicKeys(version, paths)
+    const version = yield* getVersion()
+    return yield* getExtendedPublicKeys(version, paths)
   }
 
   /**
    * Get a public key from the specified BIP 32 path.
    *
    */
-  async getExtendedPublicKey(
-      { path }: GetExtendedPublicKeyRequest
-  ): Promise<GetExtendedPublicKeyResponse> {
-      return (await this.getExtendedPublicKeys({ paths: [path] }))[0]
+  async getExtendedPublicKey({
+    path,
+  }: GetExtendedPublicKeyRequest): Promise<GetExtendedPublicKeyResponse> {
+    return (await this.getExtendedPublicKeys({paths: [path]}))[0]
   }
 
   /**
    * Derives an address for the specified BIP 32 path.
    * Note that the address is returned in raw *hex* format without any bech32/base58 encoding
    */
-  async deriveAddress({ network, address }: DeriveAddressRequest): Promise<DeriveAddressResponse> {
-      const parsedParams = parseAddress(network, address)
+  async deriveAddress({
+    network,
+    address,
+  }: DeriveAddressRequest): Promise<DeriveAddressResponse> {
+    const parsedParams = parseAddress(network, address)
 
-      return interact(this._deriveAddress(parsedParams), this._send)
+    return interact(this._deriveAddress(parsedParams), this._send)
   }
 
   /** @ignore */
-  *_deriveAddress(addressParams: ParsedAddressParams): Interaction<DerivedAddress> {
-      const version = yield* getVersion()
-      return yield* deriveAddress(version, addressParams)
+  *_deriveAddress(
+    addressParams: ParsedAddressParams,
+  ): Interaction<DerivedAddress> {
+    const version = yield* getVersion()
+    return yield* deriveAddress(version, addressParams)
   }
-
 
   /**
    * Show address corresponding to a given derivation path on the device.
    * This is useful for users to check whether the wallet does not try to scam the user.
    */
-  async showAddress({ network, address }: ShowAddressRequest): Promise<void> {
-      const parsedParams = parseAddress(network, address)
+  async showAddress({network, address}: ShowAddressRequest): Promise<void> {
+    const parsedParams = parseAddress(network, address)
 
-      return interact(this._showAddress(parsedParams), this._send)
+    return interact(this._showAddress(parsedParams), this._send)
   }
 
   /** @ignore */
   *_showAddress(addressParams: ParsedAddressParams): Interaction<void> {
-      const version = yield* getVersion()
-      return yield* showAddress(version, addressParams)
+    const version = yield* getVersion()
+    return yield* showAddress(version, addressParams)
   }
-
-
 
   async signTransaction(
-      request: SignTransactionRequest
+    request: SignTransactionRequest,
   ): Promise<SignTransactionResponse> {
+    const parsedRequest = parseSignTransactionRequest(request)
 
-      const parsedRequest = parseSignTransactionRequest(request)
-
-      return interact(this._signTx(parsedRequest), this._send)
+    return interact(this._signTx(parsedRequest), this._send)
   }
 
   /** @ignore */
-  * _signTx(request: ParsedSigningRequest): Interaction<SignedTransactionData> {
-      const version = yield* getVersion()
-      return yield* signTransaction(version, request)
+  *_signTx(request: ParsedSigningRequest): Interaction<SignedTransactionData> {
+    const version = yield* getVersion()
+    return yield* signTransaction(version, request)
   }
-
-
 
   async signOperationalCertificate(
-      request: SignOperationalCertificateRequest
+    request: SignOperationalCertificateRequest,
   ): Promise<SignOperationalCertificateResponse> {
-      const parsedOperationalCertificate = parseOperationalCertificate(request)
+    const parsedOperationalCertificate = parseOperationalCertificate(request)
 
-      return interact(this._signOperationalCertificate(parsedOperationalCertificate), this._send)
+    return interact(
+      this._signOperationalCertificate(parsedOperationalCertificate),
+      this._send,
+    )
   }
 
   /** @ignore */
-  * _signOperationalCertificate(request: ParsedOperationalCertificate): Interaction<OperationalCertificateSignature> {
-      const version = yield* getVersion()
-      return yield* signOperationalCertificate(version, request)
+  *_signOperationalCertificate(
+    request: ParsedOperationalCertificate,
+  ): Interaction<OperationalCertificateSignature> {
+    const version = yield* getVersion()
+    return yield* signOperationalCertificate(version, request)
   }
 
   async signCIP36Vote(
-      request: SignCIP36VoteRequest
+    request: SignCIP36VoteRequest,
   ): Promise<SignCIP36VoteResponse> {
-      const parsedCVote = parseCVote(request)
+    const parsedCVote = parseCVote(request)
 
-      return interact(this._signCIP36Vote(parsedCVote), this._send)
+    return interact(this._signCIP36Vote(parsedCVote), this._send)
   }
 
   /** @ignore */
-  * _signCIP36Vote(request: ParsedCVote): Interaction<SignedCIP36VoteData> {
-      const version = yield* getVersion()
-      return yield* signCVote(version, request)
+  *_signCIP36Vote(request: ParsedCVote): Interaction<SignedCIP36VoteData> {
+    const version = yield* getVersion()
+    return yield* signCVote(version, request)
   }
 
   /**
@@ -353,22 +383,27 @@ export class Ada {
    * it on Ledger in the specified format. The hash is returned in raw hex
    * format without any encoding.
    */
-  async deriveNativeScriptHash(
-      { script, displayFormat }: DeriveNativeScriptHashRequest
-  ): Promise<DeriveNativeScriptHashResponse> {
-      const parsedScript = parseNativeScript(script)
-      const parsedDisplayFormat = parseNativeScriptHashDisplayFormat(displayFormat)
+  async deriveNativeScriptHash({
+    script,
+    displayFormat,
+  }: DeriveNativeScriptHashRequest): Promise<DeriveNativeScriptHashResponse> {
+    const parsedScript = parseNativeScript(script)
+    const parsedDisplayFormat =
+      parseNativeScriptHashDisplayFormat(displayFormat)
 
-      return interact(this._deriveNativeScriptHash(parsedScript, parsedDisplayFormat), this._send)
+    return interact(
+      this._deriveNativeScriptHash(parsedScript, parsedDisplayFormat),
+      this._send,
+    )
   }
 
   /** @ignore */
-  * _deriveNativeScriptHash(
-      script: ParsedNativeScript,
-      displayFormat: NativeScriptHashDisplayFormat
+  *_deriveNativeScriptHash(
+    script: ParsedNativeScript,
+    displayFormat: NativeScriptHashDisplayFormat,
   ): Interaction<NativeScriptHash> {
-      const version = yield* getVersion()
-      return yield* deriveNativeScriptHash(version, script, displayFormat)
+    const version = yield* getVersion()
+    return yield* deriveNativeScriptHash(version, script, displayFormat)
   }
 }
 
@@ -377,8 +412,8 @@ export class Ada {
  * @category Main
  */
 export type GetVersionResponse = {
-  version: Version;
-  compatibility: DeviceCompatibility;
+  version: Version
+  compatibility: DeviceCompatibility
 }
 
 /**
@@ -388,7 +423,7 @@ export type GetVersionResponse = {
  */
 export type GetExtendedPublicKeysRequest = {
   /** Paths to public keys which should be derived by the device */
-  paths: BIP32Path[];
+  paths: BIP32Path[]
 }
 
 /**
@@ -405,7 +440,7 @@ export type GetExtendedPublicKeysResponse = Array<ExtendedPublicKey>
  */
 export type GetExtendedPublicKeyRequest = {
   /** Path to public key which should be derived */
-  path: BIP32Path;
+  path: BIP32Path
 }
 /**
  * Get single public key ([[Ada.getExtendedPublicKey]]) response data
@@ -420,8 +455,8 @@ export type GetExtendedPublicKeyResponse = ExtendedPublicKey
  * @see [[DeriveAddressResponse]]
  */
 export type DeriveAddressRequest = {
-  network: Network;
-  address: DeviceOwnedAddress;
+  network: Network
+  address: DeviceOwnedAddress
 }
 /**
  * Derive address ([[Ada.deriveAddress]]) response data
@@ -469,10 +504,10 @@ export type SignOperationalCertificateResponse = OperationalCertificateSignature
  */
 export type SignCIP36VoteRequest = CIP36Vote
 /**
-  * Sign CIP36 vote ([[Ada.signCIP36Vote]]) response data
-  * @category Main
-  * @see [[SignCIP36VoteRequest]]
-  */
+ * Sign CIP36 vote ([[Ada.signCIP36Vote]]) response data
+ * @category Main
+ * @see [[SignCIP36VoteRequest]]
+ */
 export type SignCIP36VoteResponse = SignedCIP36VoteData
 
 /**
@@ -481,8 +516,8 @@ export type SignCIP36VoteResponse = SignedCIP36VoteData
  * @see [[DeriveNativeScriptHashResponse]]
  */
 export type DeriveNativeScriptHashRequest = {
-  script: NativeScript;
-  displayFormat: NativeScriptHashDisplayFormat;
+  script: NativeScript
+  displayFormat: NativeScriptHashDisplayFormat
 }
 /**
  * Derive native script hash ([[Ada.deriveNativeScriptHash]]) response data
@@ -492,7 +527,7 @@ export type DeriveNativeScriptHashRequest = {
 export type DeriveNativeScriptHashResponse = NativeScriptHash
 
 // reexport
-export { utils }
+export {utils}
 export default Ada
 
 /**
@@ -500,12 +535,12 @@ export default Ada
  * @see [[Network]]
  */
 export const Networks = {
-    Mainnet: {
-        networkId: 0x01,
-        protocolMagic: 764824073,
-    } as Network,
-    Testnet: {
-        networkId: 0x00,
-        protocolMagic: 1097911063,
-    } as Network,
+  Mainnet: {
+    networkId: 0x01,
+    protocolMagic: 764824073,
+  } as Network,
+  Testnet: {
+    networkId: 0x00,
+    protocolMagic: 1097911063,
+  } as Network,
 }

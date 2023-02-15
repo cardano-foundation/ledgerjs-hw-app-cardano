@@ -1,6 +1,9 @@
 .eslintrc.js
 README.md
+CHANGELOG.md
 docs
+docs_generated/
 .vscode
 .circleci
 dist/
+_typedoc/

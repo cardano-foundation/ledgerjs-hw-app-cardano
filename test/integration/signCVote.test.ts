@@ -1,28 +1,28 @@
-import chai, { expect } from "chai"
-import chaiAsPromised from "chai-as-promised"
+import chai, {expect} from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 
-import type Ada from "../../src/Ada"
-import { getAda } from "../test_utils"
-import { tests } from "./__fixtures__/signCVote"
+import type Ada from '../../src/Ada'
+import {getAda} from '../test_utils'
+import {tests} from './__fixtures__/signCVote'
 chai.use(chaiAsPromised)
 
-describe("signCIP36Vote", () => {
-    let ada: Ada = {} as Ada
+describe('signCIP36Vote', () => {
+  let ada: Ada = {} as Ada
 
-    beforeEach(async () => {
-        ada = await getAda()
+  beforeEach(async () => {
+    ada = await getAda()
+  })
+
+  afterEach(async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (ada as any).t.close()
+  })
+
+  for (const {testName, cVote, expected} of tests) {
+    it(testName, async () => {
+      const response = await ada.signCIP36Vote(cVote)
+
+      expect(response).to.deep.equal(expected)
     })
-
-    afterEach(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (ada as any).t.close()
-    })
-
-    for (const { testName, cVote, expected } of tests) {
-        it(testName, async () => {
-            const response = await ada.signCIP36Vote(cVote)
-
-            expect(response).to.deep.equal(expected)
-        })
-    }
+  }
 })
