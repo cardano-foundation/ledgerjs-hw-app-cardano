@@ -11,16 +11,16 @@ import {
 } from './__fixtures__/signTx'
 import {testsAlonzo, testsBabbage} from './__fixtures__/signTxPlutus'
 import {
-  addressParamsRejectTestcases,
-  certificateRejectTestcases,
-  certificateStakePoolRetirementRejectTestcases,
-  certificateStakingRejectTestcases,
-  collateralOutputRejectTestcases,
-  singleAccountRejectTestcases,
+  addressParamsRejectTestCases,
+  certificateRejectTestCases,
+  certificateStakePoolRetirementRejectTestCases,
+  certificateStakingRejectTestCases,
+  collateralOutputRejectTestCases,
+  singleAccountRejectTestCases,
   testsInvalidTokenBundleOrdering,
-  transactionInitRejectTestcases,
-  withdrawalRejectTestcases,
-  witnessRejectTestcases,
+  transactionInitRejectTestCases,
+  withdrawalRejectTestCases,
+  witnessRejectTestCases,
 } from './__fixtures__/signTxRejects'
 
 describeSignTxPositiveTest('signTxAlonzo', testsAlonzo)
@@ -46,34 +46,34 @@ describeSignTxPositiveTest(
   testsBabbageTrezorComparison,
 )
 
-describeSignTxRejects('signTxInitPolicyRejects', transactionInitRejectTestcases)
+describeSignTxRejects('signTxInitPolicyRejects', transactionInitRejectTestCases)
 describeSignTxRejects(
   'signTxAddressParamsPolicyRejects',
-  addressParamsRejectTestcases,
+  addressParamsRejectTestCases,
 )
 describeSignTxRejects(
   'signTxCertificatePolicyRejects',
-  certificateRejectTestcases,
+  certificateRejectTestCases,
 )
 describeSignTxRejects(
   'signTxCertificateStakingPolicyRejects',
-  certificateStakingRejectTestcases,
+  certificateStakingRejectTestCases,
 )
 describeSignTxRejects(
   'signTxCertificateStakePoolRetirementPolicyRejects',
-  certificateStakePoolRetirementRejectTestcases,
+  certificateStakePoolRetirementRejectTestCases,
 )
-describeSignTxRejects('signTxWithdrawalRejects', withdrawalRejectTestcases)
-describeSignTxRejects('signTxWitnessRejects', witnessRejectTestcases)
+describeSignTxRejects('signTxWithdrawalRejects', withdrawalRejectTestCases)
+describeSignTxRejects('signTxWitnessRejects', witnessRejectTestCases)
 describeSignTxRejects(
   'signTxInvalidMultiassetRejects',
   testsInvalidTokenBundleOrdering,
 )
 describeSignTxRejects(
   'signTxSingleAccountRejects',
-  singleAccountRejectTestcases,
+  singleAccountRejectTestCases,
 )
 describeSignTxRejects(
   'signTxCollateralOutputRejects',
-  collateralOutputRejectTestcases,
+  collateralOutputRejectTestCases,
 )

@@ -12,8 +12,8 @@ import {
   TransactionSigningMode,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
-import type {SignTxTestcase} from './signTx'
-import type {TestcaseRejectShelley} from './signTxRejects'
+import type {SignTxTestCase} from './signTx'
+import type {TestCaseRejectShelley} from './signTxRejects'
 import {
   destinations,
   inputs,
@@ -22,7 +22,7 @@ import {
   shelleyBase,
 } from './txElements'
 
-export const testsCatalystRegistration: SignTxTestcase[] = [
+export const testsCatalystRegistration: SignTxTestCase[] = [
   {
     testName: 'Sign tx with Catalyst registration metadata with base address',
     tx: {
@@ -110,7 +110,7 @@ export const testsCatalystRegistration: SignTxTestcase[] = [
   },
 ]
 
-export const testsCVoteRegistrationCIP36: SignTxTestcase[] = [
+export const testsCVoteRegistrationCIP36: SignTxTestCase[] = [
   {
     testName: 'Sign tx with CIP36 registration with vote key hex',
     tx: {
@@ -381,7 +381,7 @@ export const testsCVoteRegistrationCIP36: SignTxTestcase[] = [
   },
 ]
 
-export const testsCVoteRegistrationRejects: TestcaseRejectShelley[] = [
+export const testsCVoteRegistrationRejects: TestCaseRejectShelley[] = [
   {
     testName: 'CIP15 registration with delegation',
     tx: {

@@ -8,14 +8,14 @@ import {
 import {str_to_path} from '../../../src/utils/address'
 import {Networks} from '../../test_utils'
 
-type ByronTestcase = {
+type ByronTestCase = {
   testName: string
   network: Network
   addressParams: DeviceOwnedAddress
   result: string
 }
 
-export const byronTestcases: ByronTestcase[] = [
+export const byronTestCases: ByronTestCase[] = [
   // Mainnet
   {
     testName: 'mainnet 1',
@@ -81,13 +81,13 @@ const Pointer = (
   certificateIndex: number,
 ) => ({blockIndex, txIndex, certificateIndex})
 
-type ShelleyTestcase = {
+type ShelleyTestCase = {
   testName: string
   network: Network
   addressParams: DeviceOwnedAddress
   result: string
 }
-export const shelleyTestcases: ShelleyTestcase[] = [
+export const shelleyTestCases: ShelleyTestCase[] = [
   {
     testName: 'base address path/path 1',
     network: Networks.Fake,
@@ -528,7 +528,7 @@ export const shelleyTestcases: ShelleyTestcase[] = [
   },
 ]
 
-type RejectTestcase = {
+type RejectTestCase = {
   testName: string
   network: Network
   addressParams: DeviceOwnedAddress
@@ -536,16 +536,16 @@ type RejectTestcase = {
   errMsg: string
 }
 
-const rejectTestcaseBase = {
+const rejectTestCaseBase = {
   network: Networks.Mainnet,
   errCls: DeviceStatusError,
   errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
 }
 
-export const RejectTestcases: RejectTestcase[] = [
+export const RejectTestCases: RejectTestCase[] = [
   {
     testName: 'path too short',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BYRON,
       params: {
@@ -555,7 +555,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'invalid path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BYRON,
       params: {
@@ -565,7 +565,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'Byron with Shelley path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BYRON,
       params: {
@@ -575,7 +575,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'base key/key with Byron spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
@@ -586,7 +586,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'base key/key with wrong spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
@@ -597,7 +597,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'base key/key with wrong staking path 1',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
@@ -608,7 +608,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'base key/key with wrong staking path 2',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
@@ -619,7 +619,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'base key/script with Byron spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
       params: {
@@ -631,7 +631,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'base address scripthash/keyhash not allowed',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
       params: {
@@ -644,7 +644,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'pointer with Byron spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.POINTER_KEY,
       params: {
@@ -655,7 +655,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'pointer with wrong spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.POINTER_KEY,
       params: {
@@ -666,7 +666,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'enterprise with Byron spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.ENTERPRISE_KEY,
       params: {
@@ -676,7 +676,7 @@ export const RejectTestcases: RejectTestcase[] = [
   },
   {
     testName: 'enterprise with wrong spending path',
-    ...rejectTestcaseBase,
+    ...rejectTestCaseBase,
     addressParams: {
       type: AddressType.ENTERPRISE_KEY,
       params: {

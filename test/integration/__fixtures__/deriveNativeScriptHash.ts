@@ -6,14 +6,14 @@ import {
 } from '../../../src/Ada'
 import {str_to_path} from '../../../src/utils/address'
 
-type ValidNativeScriptTestcase = {
+type ValidNativeScriptTestCase = {
   testName: string
   script: NativeScript
   displayFormat: NativeScriptHashDisplayFormat
   hashHex: string
 }
 
-export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
+export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
   {
     testName: 'PUBKEY - device owned',
     script: {
@@ -354,12 +354,12 @@ export const ValidNativeScriptTestcases: ValidNativeScriptTestcase[] = [
   },
 ]
 
-type InvalidOnLedgerScriptTestcase = {
+type InvalidOnLedgerScriptTestCase = {
   testName: string
   script: NativeScript
 }
 
-export const InvalidOnLedgerScriptTestcases: InvalidOnLedgerScriptTestcase[] = [
+export const InvalidOnLedgerScriptTestCases: InvalidOnLedgerScriptTestCase[] = [
   {
     testName: 'PUBKEY - invalid key path',
     script: {
@@ -399,13 +399,13 @@ export const InvalidOnLedgerScriptTestcases: InvalidOnLedgerScriptTestcase[] = [
   },
 ]
 
-type InvalidScriptTestcase = {
+type InvalidScriptTestCase = {
   testName: string
   script: NativeScript
   invalidDataReason: InvalidDataReason
 }
 
-export const InvalidScriptTestcases: InvalidScriptTestcase[] = [
+export const InvalidScriptTestCases: InvalidScriptTestCase[] = [
   {
     testName: 'PUBKEY - invalid key path',
     script: {

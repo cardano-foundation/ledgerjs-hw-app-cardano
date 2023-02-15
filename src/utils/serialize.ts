@@ -1,7 +1,7 @@
 import {Int64BE, Uint64BE} from 'int64-buffer'
 
 import type {
-  FixlenHexString,
+  FixLenHexString,
   HexString,
   Int64_str,
   ParsedStakeCredential,
@@ -75,7 +75,7 @@ export function int64_to_buf(value: Int64_str): Buffer {
   return data
 }
 
-export function hex_to_buf(data: HexString | FixlenHexString<unknown>): Buffer {
+export function hex_to_buf(data: HexString | FixLenHexString<unknown>): Buffer {
   assert(isHexString(data), 'invalid hex string')
   return Buffer.from(data, 'hex')
 }

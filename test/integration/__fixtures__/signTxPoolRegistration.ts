@@ -22,7 +22,7 @@ import {
 } from '../../../src/Ada'
 import {TransactionSigningMode} from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
-import type {SignTxTestcase} from './signTx'
+import type {SignTxTestCase} from './signTx'
 
 export const inputs: Record<
   'utxoNoPath' | 'utxoWithPath0' | 'utxoWithPath1',
@@ -365,7 +365,7 @@ export const certificates: Record<
   },
 }
 
-export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
+export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness valid multiple mixed owners all relays pool registration',
@@ -560,7 +560,7 @@ export const poolRegistrationOwnerTestcases: SignTxTestcase[] = [
   },
 ]
 
-export const poolRegistrationOperatorTestcases: SignTxTestcase[] = [
+export const poolRegistrationOperatorTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness pool registration as operator with no owners and no relays',

@@ -4,10 +4,10 @@ import {
   TransactionSigningMode,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
-import type {SignTxTestcase} from './signTx'
+import type {SignTxTestCase} from './signTx'
 import {inputs, mainnetFeeTtl, outputs} from './txElements'
 
-export const testsAlonzo: SignTxTestcase[] = [
+export const testsAlonzo: SignTxTestCase[] = [
   {
     testName: 'Sign tx with script data hash',
     tx: {
@@ -323,7 +323,7 @@ export const testsAlonzo: SignTxTestcase[] = [
   },
 ]
 
-export const testsBabbage: SignTxTestcase[] = [
+export const testsBabbage: SignTxTestCase[] = [
   // inline datum
   {
     testName: 'Sign tx with short inline datum in output with tokens',

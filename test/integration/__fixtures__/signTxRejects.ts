@@ -37,7 +37,7 @@ import {
   shelleyBase,
 } from './txElements'
 
-export type TestcaseRejectShelley = {
+export type TestCaseRejectShelley = {
   testName: string
   tx: Transaction
   signingMode: TransactionSigningMode
@@ -140,7 +140,7 @@ const stakeDelegationParam: StakeDelegationParams = {
   poolKeyHashHex: '',
 }
 
-export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
+export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Non-mainnet protocol magic',
     tx: {
@@ -647,7 +647,7 @@ export const transactionInitRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
+export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Reward address - key',
     tx: {
@@ -787,7 +787,7 @@ export const addressParamsRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const certificateRejectTestcases: TestcaseRejectShelley[] = [
+export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Pool registration in Ordinary Tx',
     tx: {
@@ -998,7 +998,7 @@ export const certificateRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const certificateStakingRejectTestcases: TestcaseRejectShelley[] = [
+export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Script hash in Ordinary Tx',
     tx: {
@@ -1056,7 +1056,7 @@ export const certificateStakingRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const certificateStakePoolRetirementRejectTestcases: TestcaseRejectShelley[] =
+export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelley[] =
   [
     {
       testName: 'Non-pool cold key in Ordinary Tx',
@@ -1080,7 +1080,7 @@ export const certificateStakePoolRetirementRejectTestcases: TestcaseRejectShelle
     // can't test the rest of the signing modes, because a previous checks catches them
   ]
 
-export const withdrawalRejectTestcases: TestcaseRejectShelley[] = [
+export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Script hash as stake credential in Ordinary Tx',
     tx: {
@@ -1161,7 +1161,7 @@ export const withdrawalRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const witnessRejectTestcases: TestcaseRejectShelley[] = [
+export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Ordinary account path in Ordinary Tx',
     tx: {
@@ -1500,7 +1500,7 @@ export const witnessRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
+export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
   {
     testName: 'Reject tx where asset groups are not ordered',
     tx: {
@@ -1593,7 +1593,7 @@ export const testsInvalidTokenBundleOrdering: TestcaseRejectShelley[] = [
   },
 ]
 
-export const singleAccountRejectTestcases: TestcaseRejectShelley[] = [
+export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Input and change output account mismatch',
     tx: {
@@ -1900,7 +1900,7 @@ export const singleAccountRejectTestcases: TestcaseRejectShelley[] = [
   },
 ]
 
-export const collateralOutputRejectTestcases: TestcaseRejectShelley[] = [
+export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Collateral output with datum hash',
     tx: {

@@ -5,7 +5,7 @@ import type {
   _Int64_num,
   _Uint64_bigint,
   _Uint64_num,
-  FixlenHexString,
+  FixLenHexString,
   HexString,
   Int64_str,
   ParsedStakeCredential,
@@ -14,7 +14,7 @@ import type {
   Uint32_t,
   Uint64_str,
   ValidBIP32Path,
-  VarlenAsciiString,
+  VarLenAsciiString,
 } from '../types/internal'
 import {
   KEY_HASH_LENGTH,
@@ -55,7 +55,7 @@ export const isHexString = (data: unknown): data is HexString =>
 export const isHexStringOfLength = <L extends number>(
   data: unknown,
   expectedByteLength: L,
-): data is FixlenHexString<L> =>
+): data is FixLenHexString<L> =>
   isHexString(data) && data.length === expectedByteLength * 2
 
 export const isValidPath = (data: unknown): data is ValidBIP32Path =>
@@ -148,13 +148,13 @@ export function validate(
 export function parseAscii(
   str: unknown,
   errMsg: InvalidDataReason,
-): VarlenAsciiString {
+): VarLenAsciiString {
   validate(isString(str), errMsg)
   validate(
     str.split('').every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
     errMsg,
   )
-  return str as VarlenAsciiString
+  return str as VarLenAsciiString
 }
 
 export function parseHexString(
@@ -169,7 +169,7 @@ export function parseHexStringOfLength<L extends number>(
   str: unknown,
   length: L,
   errMsg: InvalidDataReason,
-): FixlenHexString<L> {
+): FixLenHexString<L> {
   validate(isHexStringOfLength(str, length), errMsg)
   return str
 }

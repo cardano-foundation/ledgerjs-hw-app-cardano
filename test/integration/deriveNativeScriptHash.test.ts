@@ -9,9 +9,9 @@ import {
 } from '../../src/Ada'
 import {describeWithoutValidation, getAda} from '../test_utils'
 import {
-  InvalidOnLedgerScriptTestcases,
-  InvalidScriptTestcases,
-  ValidNativeScriptTestcases,
+  InvalidOnLedgerScriptTestCases,
+  InvalidScriptTestCases,
+  ValidNativeScriptTestCases,
 } from './__fixtures__/deriveNativeScriptHash'
 
 chai.use(chaiAsPromised)
@@ -34,7 +34,7 @@ describe('deriveNativeScriptHash', () => {
       script,
       displayFormat,
       hashHex: expectedHash,
-    } of ValidNativeScriptTestcases) {
+    } of ValidNativeScriptTestCases) {
       it(testName, async () => {
         const {scriptHashHex} = await ada.deriveNativeScriptHash({
           script,
@@ -47,7 +47,7 @@ describe('deriveNativeScriptHash', () => {
   })
 
   describeWithoutValidation('Ledger should not permit invalid scripts', () => {
-    for (const {testName, script} of InvalidOnLedgerScriptTestcases) {
+    for (const {testName, script} of InvalidOnLedgerScriptTestCases) {
       it(testName, async () => {
         const promise = ada.deriveNativeScriptHash({
           script,
@@ -63,7 +63,7 @@ describe('deriveNativeScriptHash', () => {
       testName,
       script,
       invalidDataReason: expectedInvalidDataReason,
-    } of InvalidScriptTestcases) {
+    } of InvalidScriptTestCases) {
       it(testName, async () => {
         const promise = ada.deriveNativeScriptHash({
           script,

@@ -284,7 +284,7 @@ export type TxInput = {
    * Describes path used for witnessing this UTxO. The API will sign transaction with this path.
    *
    * Note: null indicates we don't want to sign this utxo. This is highly non-standard
-   * and the only usecase so far is pool registration as owner.
+   * and the only use case so far is pool registration as owner.
    * We therefore don't mark it as optional so that people won't forget specifying it
    *
    * Note: Device has no ability to really check whether `path` is correct witnessing path for this UTxO.
@@ -427,7 +427,7 @@ export enum TxOutputDestinationType {
   THIRD_PARTY = 'third_party',
   /**
    * Destination is an address owned by the device.
-   * Device will not show the address (unles it seems fishy)
+   * Device will not show the address (unless it seems fishy)
    * @see [[DeviceOwnedAddress]]
    */
   DEVICE_OWNED = 'device_owned',
@@ -1082,7 +1082,7 @@ export type SignedTransactionData = {
   witnesses: Array<Witness>
   /**
    * Additional information about auxiliary data serialized into the transaction, providing
-   * the caller with information needed to assemble the transation containing these auxiliary data.
+   * the caller with information needed to assemble the transaction containing these auxiliary data.
    */
   auxiliaryDataSupplement: TxAuxiliaryDataSupplement | null
 }
@@ -1191,7 +1191,7 @@ export type CIP36VoteRegistrationParams = {
 
 export enum CIP36VoteDelegationType {
   PATH = 'cip36_vote_key_path',
-  KEY = 'cip36_vote_key_keyhex',
+  KEY = 'cip36_vote_key_keyHex',
 }
 
 export type CIP36VoteDelegation =
@@ -1476,14 +1476,14 @@ export enum NativeScriptType {
   N_OF_K = 'n_of_k',
   /**
    * The script is invalid before the specified slot.
-   * Timelock validity intervals are half-open intervals `[a, b)`.
+   * Time lock validity intervals are half-open intervals `[a, b)`.
    * This field specifies the left (included) endpoint `a`.
    * @see [[NativeScriptParamsInvalidBefore]]
    */
   INVALID_BEFORE = 'invalid_before',
   /**
    * The script is invalid after the specified slot.
-   * Timelock validity intervals are half-open intervals `[a, b)`.
+   * Time lock validity intervals are half-open intervals `[a, b)`.
    * This field specifies the right (excluded) endpoint `b`.
    * @see [[NativeScriptParamsInvalidHereafter]]
    */

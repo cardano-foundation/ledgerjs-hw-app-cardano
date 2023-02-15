@@ -3,7 +3,7 @@ import SpeculosTransport from '@ledgerhq/hw-transport-node-speculos'
 import * as blake2 from 'blake2'
 import {expect} from 'chai'
 import {ImportMock} from 'ts-mock-imports'
-import type {FixlenHexString} from 'types/internal'
+import type {FixLenHexString} from 'types/internal'
 
 import {Ada, utils} from '../src/Ada'
 import {InvalidDataReason} from '../src/errors/index'
@@ -94,7 +94,7 @@ export const Networks = {
   },
 }
 
-type TxHash = FixlenHexString<32>
+type TxHash = FixLenHexString<32>
 
 function hashTxBody(txBodyHex: string): TxHash {
   const b2 = blake2.createHash('blake2b', {digestLength: 32})
@@ -110,7 +110,7 @@ export function bech32_to_hex(str: string): string {
   return utils.buf_to_hex(utils.bech32_decodeAddress(str))
 }
 
-export const DontRunOnLedger = 'DO NOT RUN ON LEDGER'
+export const DoNotRunOnLedger = 'DO NOT RUN ON LEDGER'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function describeSignTxRejects(name: string, testList: any[]) {
@@ -168,7 +168,7 @@ export function describeSignTxRejects(name: string, testList: any[]) {
       errMsg,
     } of testList) {
       it(`${testName} [${signingMode}]`, async () => {
-        if (errMsg === DontRunOnLedger) {
+        if (errMsg === DoNotRunOnLedger) {
           return
         }
         const response = ada.signTransaction({

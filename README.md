@@ -20,7 +20,7 @@ Automated tests are provided. There are two types of tests
     * `yarn test-speculos`. Runs the `test-integration` test against the Speculos emulator.
 
 2. `yarn device-self-test`. Runs tests defined in the application code of the Ledger application, requires development build of the application.
-    * `yarn device-self-test-speculos`. Runs `yarn device-self-test` on Speculos (useful because the full app in debug mode with self-tests does not fit on Nanos S).
+    * `yarn device-self-test-speculos`. Runs `yarn device-self-test` on Speculos (useful because the full app in debug mode with self-tests does not fit on Nano S).
 
 Note that for these tests it is advisable to install the developer build of the Cardano app with _headless_ mode enabled unless you want to verify the UI flows, otherwise you will need a significant amount of time to manually confirm all prompts on the device.
 

@@ -17,8 +17,8 @@ import {
 } from './public'
 
 // Basic primitives
-export type VarlenAsciiString = string & {__type: 'ascii'}
-export type FixlenHexString<N> = string & {__type: 'hex'; __length: N}
+export type VarLenAsciiString = string & {__type: 'ascii'}
+export type FixLenHexString<N> = string & {__type: 'hex'; __length: N}
 export type HexString = string & {__type: 'hex'}
 
 export type _Uint64_num = number & {__type: 'uint64_t'}
@@ -80,11 +80,11 @@ export type ParsedStakeCredential =
     }
   | {
       type: StakeCredentialType.KEY_HASH
-      keyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+      keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
     }
   | {
       type: StakeCredentialType.SCRIPT_HASH
-      scriptHashHex: FixlenHexString<typeof SCRIPT_HASH_LENGTH>
+      scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
     }
 
 export type ParsedCertificate =
@@ -99,7 +99,7 @@ export type ParsedCertificate =
   | {
       type: CertificateType.STAKE_DELEGATION
       stakeCredential: ParsedStakeCredential
-      poolKeyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+      poolKeyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
     }
   | {
       type: CertificateType.STAKE_POOL_REGISTRATION
@@ -120,7 +120,7 @@ export type ParsedToken<IntegerType> = {
 }
 
 export type ParsedAssetGroup<T> = {
-  policyIdHex: FixlenHexString<typeof TOKEN_POLICY_LENGTH>
+  policyIdHex: FixLenHexString<typeof TOKEN_POLICY_LENGTH>
   tokens: Array<ParsedToken<T>>
 }
 
@@ -131,12 +131,12 @@ export type ParsedNetwork = {
 
 export const CVOTE_PUBLIC_KEY_LENGTH = 32
 
-export type CVotePublicKey = FixlenHexString<typeof CVOTE_PUBLIC_KEY_LENGTH>
+export type CVotePublicKey = FixLenHexString<typeof CVOTE_PUBLIC_KEY_LENGTH>
 
 export type ParsedTxAuxiliaryData =
   | {
       type: TxAuxiliaryDataType.ARBITRARY_HASH
-      hashHex: FixlenHexString<typeof AUXILIARY_DATA_HASH_LENGTH>
+      hashHex: FixLenHexString<typeof AUXILIARY_DATA_HASH_LENGTH>
     }
   | {
       type: TxAuxiliaryDataType.CIP36_REGISTRATION
@@ -193,7 +193,7 @@ export type ParsedSigningRequest = {
 }
 
 export type ParsedInput = {
-  txHashHex: FixlenHexString<typeof TX_HASH_LENGTH>
+  txHashHex: FixLenHexString<typeof TX_HASH_LENGTH>
   outputIndex: Uint32_t
   path: ValidBIP32Path | null
 }
@@ -203,7 +203,7 @@ export type ParsedWithdrawal = {
   stakeCredential: ParsedStakeCredential
 }
 
-export type ScriptDataHash = FixlenHexString<typeof SCRIPT_DATA_HASH_LENGTH>
+export type ScriptDataHash = FixLenHexString<typeof SCRIPT_DATA_HASH_LENGTH>
 
 export const enum RequiredSignerType {
   PATH = 0,
@@ -213,7 +213,7 @@ export const enum RequiredSignerType {
 export type ParsedRequiredSigner =
   | {
       type: RequiredSignerType.HASH
-      hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+      hashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
     }
   | {
       type: RequiredSignerType.PATH
@@ -227,7 +227,7 @@ export type ParsedMargin = {
 
 export type ParsedPoolParams = {
   poolKey: ParsedPoolKey
-  vrfHashHex: FixlenHexString<typeof VRF_KEY_HASH_LENGTH>
+  vrfHashHex: FixLenHexString<typeof VRF_KEY_HASH_LENGTH>
   pledge: Uint64_str
   cost: Uint64_str
   margin: ParsedMargin
@@ -244,7 +244,7 @@ export type ParsedPoolKey =
     }
   | {
       type: PoolKeyType.THIRD_PARTY
-      hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+      hashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
     }
 
 export type ParsedPoolOwner =
@@ -254,7 +254,7 @@ export type ParsedPoolOwner =
     }
   | {
       type: PoolOwnerType.THIRD_PARTY
-      hashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+      hashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
     }
 
 export type ParsedPoolRewardAccount =
@@ -264,7 +264,7 @@ export type ParsedPoolRewardAccount =
     }
   | {
       type: PoolRewardAccountType.THIRD_PARTY
-      rewardAccountHex: FixlenHexString<typeof REWARD_ACCOUNT_HEX_LENGTH>
+      rewardAccountHex: FixLenHexString<typeof REWARD_ACCOUNT_HEX_LENGTH>
     }
 
 export type ParsedPoolRelay =
@@ -277,16 +277,16 @@ export type ParsedPoolRelay =
   | {
       type: RelayType.SINGLE_HOST_HOSTNAME
       port: Uint16_t | null
-      dnsName: VarlenAsciiString
+      dnsName: VarLenAsciiString
     }
   | {
       type: RelayType.MULTI_HOST
-      dnsName: VarlenAsciiString
+      dnsName: VarLenAsciiString
     }
 
 export type ParsedPoolMetadata = {
-  url: VarlenAsciiString
-  hashHex: FixlenHexString<32>
+  url: VarLenAsciiString
+  hashHex: FixLenHexString<32>
 } & {__brand: 'pool_metadata'}
 
 export const enum SpendingDataSourceType {
@@ -304,7 +304,7 @@ type SpendingDataSourcePath = {
 }
 type SpendingDataSourceScriptHash = {
   type: SpendingDataSourceType.SCRIPT_HASH
-  scriptHashHex: FixlenHexString<typeof SCRIPT_HASH_LENGTH>
+  scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
 }
 
 export const enum StakingDataSourceType {
@@ -330,7 +330,7 @@ type StakingDataSourcePath = {
 }
 type StakingDataSourceKeyHash = {
   type: StakingDataSourceType.KEY_HASH
-  keyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+  keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
 }
 type StakingDataSourcePointer = {
   type: StakingDataSourceType.BLOCKCHAIN_POINTER
@@ -338,7 +338,7 @@ type StakingDataSourcePointer = {
 }
 type StakingDataSourceScriptHash = {
   type: StakingDataSourceType.SCRIPT_HASH
-  scriptHashHex: FixlenHexString<typeof SCRIPT_HASH_LENGTH>
+  scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
 }
 
 export type SpendingDataSource =
@@ -431,12 +431,12 @@ export type ParsedOutputDestination =
       addressParams: ParsedAddressParams
     }
 
-export type DatumHash = FixlenHexString<typeof DATUM_HASH_LENGTH>
+export type DatumHash = FixLenHexString<typeof DATUM_HASH_LENGTH>
 
 export type ParsedDatum =
   | {
       type: DatumType.HASH
-      datumHashHex: FixlenHexString<typeof DATUM_HASH_LENGTH>
+      datumHashHex: FixLenHexString<typeof DATUM_HASH_LENGTH>
     }
   | {
       type: DatumType.INLINE
@@ -455,7 +455,7 @@ export type ParsedOutput = {
 export const ASSET_NAME_LENGTH_MAX = 32
 
 export type ParsedOperationalCertificate = {
-  kesPublicKeyHex: FixlenHexString<typeof KES_PUBLIC_KEY_LENGTH>
+  kesPublicKeyHex: FixLenHexString<typeof KES_PUBLIC_KEY_LENGTH>
   kesPeriod: Uint64_str
   issueCounter: Uint64_str
   coldKeyPath: ValidBIP32Path
@@ -478,7 +478,7 @@ export type ParsedSimpleNativeScript =
   | {
       type: NativeScriptType.PUBKEY_THIRD_PARTY
       params: {
-        keyHashHex: FixlenHexString<typeof KEY_HASH_LENGTH>
+        keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
       }
     }
   | {

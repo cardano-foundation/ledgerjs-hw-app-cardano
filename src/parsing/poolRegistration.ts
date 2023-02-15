@@ -10,7 +10,7 @@ import type {
   ParsedPoolRewardAccount,
   Uint16_t,
   Uint64_str,
-  VarlenAsciiString,
+  VarLenAsciiString,
 } from '../types/internal'
 import {
   AUXILIARY_DATA_HASH_LENGTH,
@@ -209,7 +209,7 @@ function parseIPv6(ipv6: string, errMsg: InvalidDataReason): Buffer {
 function parseDnsName(
   dnsName: string,
   errMsg: InvalidDataReason,
-): VarlenAsciiString {
+): VarLenAsciiString {
   validate(isString(dnsName), errMsg)
   validate(dnsName.length <= 64, errMsg)
   validate(dnsName.length > 0, errMsg)
@@ -221,7 +221,7 @@ function parseDnsName(
       .every((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) <= 126),
     errMsg,
   )
-  return dnsName as VarlenAsciiString
+  return dnsName as VarLenAsciiString
 }
 
 function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {

@@ -3,32 +3,32 @@ import chaiAsPromised from 'chai-as-promised'
 
 import {describeSignTxPositiveTest, describeSignTxRejects} from '../test_utils'
 import {
-  poolRegistrationOperatorTestcases,
-  poolRegistrationOwnerTestcases,
+  poolRegistrationOperatorTestCases,
+  poolRegistrationOwnerTestCases,
 } from './__fixtures__/signTxPoolRegistration'
 import {
   invalidCertificates,
-  invalidPoolMetadataTestcases,
-  invalidRelayTestcases,
+  invalidPoolMetadataTestCases,
+  invalidRelayTestCases,
   outputRejectTestCases,
-  poolRegistrationOwnerRejectTestcases,
-  stakePoolRegistrationOwnerRejectTestcases,
-  stakePoolRegistrationPoolIdRejectTestcases,
+  poolRegistrationOwnerRejectTestCases,
+  stakePoolRegistrationOwnerRejectTestCases,
+  stakePoolRegistrationPoolIdRejectTestCases,
 } from './__fixtures__/signTxPoolRegistrationRejects'
 chai.use(chaiAsPromised)
 
 describeSignTxPositiveTest(
   'signTxPoolRegistrationOK_Owner',
-  poolRegistrationOwnerTestcases,
+  poolRegistrationOwnerTestCases,
 )
 describeSignTxPositiveTest(
   'signTxPoolRegistrationOK_Operator',
-  poolRegistrationOperatorTestcases,
+  poolRegistrationOperatorTestCases,
 )
 
 describeSignTxRejects(
   'signTxPoolRegistrationRejects_Owner_General',
-  poolRegistrationOwnerRejectTestcases,
+  poolRegistrationOwnerRejectTestCases,
 )
 describeSignTxRejects(
   'signTxPoolRegistrationRejects_Outputs',
@@ -40,17 +40,17 @@ describeSignTxRejects(
 )
 describeSignTxRejects(
   'signTxPoolRegistrationRejects_Owner_Metadata',
-  invalidPoolMetadataTestcases,
+  invalidPoolMetadataTestCases,
 )
 describeSignTxRejects(
   'signTxPoolRegistrationRejects_Owner_Relay',
-  invalidRelayTestcases,
+  invalidRelayTestCases,
 )
 describeSignTxRejects(
   'signTxPoolRegistrationRejects_PoolId',
-  stakePoolRegistrationPoolIdRejectTestcases,
+  stakePoolRegistrationPoolIdRejectTestCases,
 )
 describeSignTxRejects(
   'signTxPoolRegistrationRejects_Owner_Security',
-  stakePoolRegistrationOwnerRejectTestcases,
+  stakePoolRegistrationOwnerRejectTestCases,
 )

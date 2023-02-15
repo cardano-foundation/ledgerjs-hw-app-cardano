@@ -19,7 +19,7 @@ import {
   TransactionSigningMode,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
-import {DontRunOnLedger} from '../../test_utils'
+import {DoNotRunOnLedger} from '../../test_utils'
 import {
   certificates,
   defaultPoolRegistration,
@@ -28,7 +28,7 @@ import {
   poolOwnerVariationSet,
   relayVariationSet,
 } from './signTxPoolRegistration'
-import type {TestcaseRejectShelley} from './signTxRejects'
+import type {TestCaseRejectShelley} from './signTxRejects'
 import {outputs as outputs2} from './txElements'
 
 const txBase: Transaction = {
@@ -39,7 +39,7 @@ const txBase: Transaction = {
   ttl: 10,
 }
 
-export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
+export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Different index',
     tx: {
@@ -107,12 +107,12 @@ export const poolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] = [
       str_to_path("1854'/1815'/0'/2/0"),
     ],
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger, // it would be finnicky bypassing this check in the js code
+    errMsg: DoNotRunOnLedger, // it would be finnicky bypassing this check in the js code
     rejectReason: InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN,
   },
 ]
 
-export const invalidCertificates: TestcaseRejectShelley[] = [
+export const invalidCertificates: TestCaseRejectShelley[] = [
   {
     testName: 'pool registration with multiple path owners',
     tx: {
@@ -157,7 +157,7 @@ export const invalidCertificates: TestcaseRejectShelley[] = [
   },
 ]
 
-export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
+export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
   // Invalid url
   {
     testName: 'pool metadata url too long',
@@ -180,7 +180,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
   },
   {
@@ -203,7 +203,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
   },
   {
@@ -225,7 +225,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
   },
   // Invalid hash
@@ -249,7 +249,7 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH,
   },
   {
@@ -270,12 +270,12 @@ export const invalidPoolMetadataTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH,
   },
 ]
 
-export const invalidRelayTestcases: TestcaseRejectShelley[] = [
+export const invalidRelayTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'SingleHostHostname missing dns',
     tx: {
@@ -300,7 +300,7 @@ export const invalidRelayTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
   },
   {
@@ -326,12 +326,12 @@ export const invalidRelayTestcases: TestcaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DontRunOnLedger,
+    errMsg: DoNotRunOnLedger,
     rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
   },
 ]
 
-export const stakePoolRegistrationPoolIdRejectTestcases: TestcaseRejectShelley[] =
+export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[] =
   [
     {
       testName: 'Path sent in for Pool Registration Owner Tx',
@@ -387,7 +387,7 @@ export const stakePoolRegistrationPoolIdRejectTestcases: TestcaseRejectShelley[]
     },
   ]
 
-export const stakePoolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] =
+export const stakePoolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] =
   [
     {
       testName: 'Non-staking path for Pool Registration Owner Tx',
@@ -418,7 +418,7 @@ export const stakePoolRegistrationOwnerRejectTestcases: TestcaseRejectShelley[] 
     },
   ]
 
-export const outputRejectTestCases: TestcaseRejectShelley[] = [
+export const outputRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Pool operator - datum hash',
     tx: {

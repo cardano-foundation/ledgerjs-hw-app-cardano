@@ -6,9 +6,9 @@ import type {Ada} from '../../src/Ada'
 import {utils} from '../../src/Ada'
 import {getAda} from '../test_utils'
 import {
-  byronTestcases,
-  RejectTestcases,
-  shelleyTestcases,
+  byronTestCases,
+  RejectTestCases,
+  shelleyTestCases,
 } from './__fixtures__/deriveAddress'
 
 chai.use(chaiAsPromised)
@@ -34,7 +34,7 @@ describe('deriveAddress', () => {
       network,
       addressParams,
       result: expectedResult,
-    } of byronTestcases) {
+    } of byronTestCases) {
       it(testName, async () => {
         const {addressHex} = await ada.deriveAddress({
           network,
@@ -52,7 +52,7 @@ describe('deriveAddress', () => {
       network,
       addressParams,
       result: expectedResult,
-    } of shelleyTestcases) {
+    } of shelleyTestCases) {
       it(testName, async () => {
         const {addressHex} = await ada.deriveAddress({
           network,
@@ -73,7 +73,7 @@ describe('deriveAddress', () => {
       addressParams,
       errCls,
       errMsg,
-    } of RejectTestcases) {
+    } of RejectTestCases) {
       it(testName, async () => {
         const promise = ada.deriveAddress({
           network,
@@ -85,7 +85,7 @@ describe('deriveAddress', () => {
   })
 
   describe('Should successfully show Byron address', () => {
-    for (const {testName, network, addressParams} of byronTestcases) {
+    for (const {testName, network, addressParams} of byronTestCases) {
       it(testName, async () => {
         const result = await ada.showAddress({network, address: addressParams})
         expect(result).to.equal(undefined)
@@ -94,7 +94,7 @@ describe('deriveAddress', () => {
   })
 
   describe('Should successfully show Shelley address', () => {
-    for (const {testName, network, addressParams} of shelleyTestcases) {
+    for (const {testName, network, addressParams} of shelleyTestCases) {
       it(testName, async () => {
         const result = await ada.showAddress({network, address: addressParams})
         expect(result).to.equal(undefined)
@@ -109,7 +109,7 @@ describe('deriveAddress', () => {
       addressParams,
       errCls,
       errMsg,
-    } of RejectTestcases) {
+    } of RejectTestCases) {
       it(testName, async () => {
         const promise = ada.showAddress({
           network,

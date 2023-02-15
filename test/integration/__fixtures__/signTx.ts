@@ -15,7 +15,7 @@ import {
   testnetFeeTtl,
 } from './txElements'
 
-export type SignTxTestcase = {
+export type SignTxTestCase = {
   testName: string
   tx: Transaction
   signingMode: TransactionSigningMode
@@ -25,7 +25,7 @@ export type SignTxTestcase = {
   expectedResult: SignedTransactionData
 }
 
-export const testsByron: SignTxTestcase[] = [
+export const testsByron: SignTxTestCase[] = [
   {
     testName: 'Sign tx with third-party Byron mainnet output',
     tx: {
@@ -108,7 +108,7 @@ export const testsByron: SignTxTestcase[] = [
   },
 ]
 
-export const testsShelleyNoCertificates: SignTxTestcase[] = [
+export const testsShelleyNoCertificates: SignTxTestCase[] = [
   {
     testName: 'Sign tx without outputs',
     tx: {
@@ -359,7 +359,7 @@ export const testsShelleyNoCertificates: SignTxTestcase[] = [
   },
 ]
 
-export const testsShelleyWithCertificates: SignTxTestcase[] = [
+export const testsShelleyWithCertificates: SignTxTestCase[] = [
   {
     testName: 'Sign tx with a stake registration path certificate',
     tx: {
@@ -633,7 +633,7 @@ export const testsShelleyWithCertificates: SignTxTestcase[] = [
   },
 ]
 
-export const testsMultisig: SignTxTestcase[] = [
+export const testsMultisig: SignTxTestCase[] = [
   {
     testName: 'Sign tx without change address with Shelley scripthash output',
     tx: {
@@ -796,7 +796,7 @@ export const testsMultisig: SignTxTestcase[] = [
   },
 ]
 
-export const testsAllegra: SignTxTestcase[] = [
+export const testsAllegra: SignTxTestCase[] = [
   {
     testName: 'Sign tx with no ttl and no validity interval start',
     tx: {
@@ -851,7 +851,7 @@ export const testsAllegra: SignTxTestcase[] = [
   },
 ]
 
-export const testsMary: SignTxTestcase[] = [
+export const testsMary: SignTxTestCase[] = [
   {
     testName: 'Sign tx with a multiasset output',
     tx: {
@@ -1089,7 +1089,7 @@ export const testsMary: SignTxTestcase[] = [
   },
 ]
 
-export const testsAlonzoTrezorComparison: SignTxTestcase[] = [
+export const testsAlonzoTrezorComparison: SignTxTestCase[] = [
   {
     testName: 'Full test for trezor feature parity',
     tx: {
@@ -1200,7 +1200,7 @@ export const testsAlonzoTrezorComparison: SignTxTestcase[] = [
   },
 ]
 
-export const testsBabbageTrezorComparison: SignTxTestcase[] = [
+export const testsBabbageTrezorComparison: SignTxTestCase[] = [
   {
     testName: 'Full test for trezor feature parity - Babbage elements (Plutus)',
     tx: {

@@ -86,7 +86,7 @@ Patch update removing the requirement to order token bundle canonically.
 
 ## [3.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v3.1.0...v3.2.0) - [May 24th 2021]
 
-Added support for signing pool registration certificates as operator, support for pool retirement certificates within the `signTransaction()` call and added a new call for operational ceritificate signing - `signOperationalCertificate()`.
+Added support for signing pool registration certificates as operator, support for pool retirement certificates within the `signTransaction()` call and added a new call for operational certificate signing - `signOperationalCertificate()`.
 
 ### Added
 
@@ -97,7 +97,7 @@ Added support for signing pool registration certificates as operator, support fo
 ### Changed
 
 - `PoolRegistrationParams.poolKey` has been changed from a `string` to `PoolKey` in order to support pool operator signing - `poolKey` can now also be sent as a path
-- `PoolRegistrationParams.rewardAccount` has been changeed from a `string` to `PoolRewardAccount` in order to support pool operator signing - `rewardAccount` can now also be sent as path
+- `PoolRegistrationParams.rewardAccount` has been changed from a `string` to `PoolRewardAccount` in order to support pool operator signing - `rewardAccount` can now also be sent as path
 - `AssetGroup.tokens` and `TxOutput.tokenBundle` are required to be in CBOR canonical order
 
 
@@ -130,7 +130,7 @@ Major release. Switched from flow to TypeScript.
   (For the overview see `src/Ada.ts` changes in https://github.com/vacuumlabs/ledgerjs-cardano-shelley/pull/61)
 - `AddressTypeNibble` enum renamed to `AddressType`
 - `derive/showAddress` now take `network` as an explicit parameter instead of `networkIdOrProtocolMagic` field in `AddressParams`
-- all 64-bit integers that were previously stored in fields ending with `Str` (e.g. `feeStr`) are now without the suffix (i.e. `fee`) and take a "bignumber-like" argument which can be `Number` (if it is small enough, i.e. `<= Number.MAX_SAFE_INTEGER`), string, or native `BigInt`. Non-native bigint implementations are not supported and should be converted to strings)
+- all 64-bit integers that were previously stored in fields ending with `Str` (e.g. `feeStr`) are now without the suffix (i.e. `fee`) and take a "bigint-like" argument which can be `Number` (if it is small enough, i.e. `<= Number.MAX_SAFE_INTEGER`), string, or native `BigInt`. Non-native bigint implementations are not supported and should be converted to strings)
 - all "tagged enums" now use `{type: SomeType.Variant, params: SomeTypeVariantParams}` typing. This unified previously mixed tagging with sometimes arbitrarily variant fields into the parent type. As part of this change
   - Relays are now typed properly with variants
   - TxOutput was separated into "amount" part (amount & tokenBundle) & `destination` specification.
@@ -139,9 +139,9 @@ Major release. Switched from flow to TypeScript.
   - `Address` is now tagged enum across different address types (Byron, Base, Enterprise, Pointer, Reward). Reward address still uses `spendingPath` instead of `stakingPath` to denote that this key can be used to spend funds
 - All API call types now use `*Request`/`*Response` nomenclature
 - GetVersion call now returns `{version, compatibility}` instead of `version` where `compatibility` describes overall set of features we support for the device. It should be responsibility of API users to check `compatibility.isCompatible` flag and urge users to upgrade device to `compatibility.recommendedVersion` if the device is not compatible.
-- All (expected) errors thrown by the API are now descendants of `ErrorBase` from `errors` subpackage. API now distinguishes between these error types
+- All (expected) errors thrown by the API are now descendants of `ErrorBase` from `errors` sub-package. API now distinguishes between these error types
   - `InvalidData` - you passed some wrong data to the API. We will not even try to communicate with the device
-  - `DeviceUnsupported` - thrown when trying to use API with unsopported Ledger app version (or when using features not yet available for the app version)
+  - `DeviceUnsupported` - thrown when trying to use API with unsupported Ledger app version (or when using features not yet available for the app version)
   - `DeviceStatusError` - thrown when device rejects operation for some reason. Common reasons are found in `DeviceStatusCodes` mapping.
 - There is new documentation available at (https://vacuumlabs.github.io/ledgerjs-cardano-shelley/index.html)
 

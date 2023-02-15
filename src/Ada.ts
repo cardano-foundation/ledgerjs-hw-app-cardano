@@ -108,7 +108,7 @@ function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
 export type SendFn = (params: SendParams) => Promise<Buffer>
 
 // It can happen that we try to send a message to the device
-// when the device thinks it is still in a middle of previous ADPU stream.
+// when the device thinks it is still in a middle of previous APDU stream.
 // This happens mostly if the host aborts communication for some reason
 // leaving ledger mid-call.
 // In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
@@ -466,7 +466,7 @@ export type DeriveAddressRequest = {
 export type DeriveAddressResponse = DerivedAddress
 
 /**
- * Show address on derivce ([[Ada.showAddress]]) request data
+ * Show address on device ([[Ada.showAddress]]) request data
  * @category Main
  */
 export type ShowAddressRequest = DeriveAddressRequest
