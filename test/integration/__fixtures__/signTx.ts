@@ -25,6 +25,7 @@ export type SignTxTestCase = {
   txBody?: string
   txAuxiliaryData?: string
   expectedResult: SignedTransactionData
+  unsupportedInAppXS?: boolean
 }
 
 export const testsByron: SignTxTestCase[] = [
@@ -522,6 +523,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
   },
   {
     testName: 'Sign tx with pool retirement combined with stake registration',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [
@@ -576,6 +578,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
   },
   {
     testName: 'Sign tx with pool retirement combined with stake deregistration',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [

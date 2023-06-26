@@ -6,7 +6,7 @@ import {ImportMock} from 'ts-mock-imports'
 import type {FixLenHexString} from 'types/internal'
 
 import {Ada, utils} from '../src/Ada'
-import {InvalidDataReason} from '../src/errors/index'
+import {DeviceVersionUnsupported, InvalidDataReason} from '../src/errors/index'
 import * as parseModule from '../src/utils/parse'
 
 export function shouldUseSpeculos(): boolean {
@@ -142,6 +142,7 @@ export function describeSignTxRejects(name: string, testList: any[]) {
           signingMode,
           additionalWitnessPaths: additionalWitnessPaths || [],
         })
+
         await expect(response).to.be.rejectedWith(rejectReason)
       })
     }
@@ -166,17 +167,31 @@ export function describeSignTxRejects(name: string, testList: any[]) {
       signingMode,
       errCls,
       errMsg,
+      unsupportedInAppXS,
     } of testList) {
       it(`${testName} [${signingMode}]`, async () => {
         if (errMsg === DoNotRunOnLedger) {
           return
         }
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
         const response = ada.signTransaction({
           tx,
           signingMode,
           additionalWitnessPaths: additionalWitnessPaths || [],
         })
-        await expect(response).to.be.rejectedWith(errCls, errMsg)
+
+        // Certain tests contain test data that cannot be properly serialized,
+        // as manifested by `TypeError`s.
+        // We do not expect DeviceVersionUnsupported in that case for XS app.
+        const hasTypeError = errCls === TypeError
+        const correctlyDetectsUnsupportedInAppXS =
+          isAppXS && unsupportedInAppXS && !hasTypeError
+
+        if (correctlyDetectsUnsupportedInAppXS) {
+          await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          await expect(response).to.be.rejectedWith(errCls, errMsg)
+        }
       })
     }
   })
@@ -203,6 +218,7 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
       additionalWitnessPaths,
       txBody,
       expectedResult,
+      unsupportedInAppXS,
     } of tests) {
       it(`${testName} [${signingMode}]`, async () => {
         if (!txBody) {
@@ -212,12 +228,18 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
           // eslint-disable-next-line no-console
           console.log(`WARNING --- Tx body hash mismatch: ${testName}`)
         }
-        const response = await ada.signTransaction({
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
+        const response = ada.signTransaction({
           tx,
           signingMode,
           additionalWitnessPaths,
         })
-        expect(response).to.deep.equal(expectedResult)
+
+        if (isAppXS && unsupportedInAppXS) {
+          await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          expect(await response).to.deep.equal(expectedResult)
+        }
       })
     }
   })

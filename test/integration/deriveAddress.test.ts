@@ -3,11 +3,11 @@ import chaiAsPromised from 'chai-as-promised'
 import {HexString} from '../../src/types/internal'
 
 import type {Ada} from '../../src/Ada'
-import {utils} from '../../src/Ada'
+import {DeviceVersionUnsupported, utils} from '../../src/Ada'
 import {getAda} from '../test_utils'
 import {
   byronTestCases,
-  RejectTestCases,
+  rejectTestCases,
   shelleyTestCases,
 } from './__fixtures__/deriveAddress'
 
@@ -36,12 +36,19 @@ describe('deriveAddress', () => {
       result: expectedResult,
     } of byronTestCases) {
       it(testName, async () => {
-        const {addressHex} = await ada.deriveAddress({
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
+        const promise = ada.deriveAddress({
           network,
           address: addressParams,
         })
 
-        expect(address_hex_to_base58(addressHex)).to.equal(expectedResult)
+        if (isAppXS) {
+          await expect(promise).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          expect(address_hex_to_base58((await promise).addressHex)).to.equal(
+            expectedResult,
+          )
+        }
       })
     }
   })
@@ -73,13 +80,21 @@ describe('deriveAddress', () => {
       addressParams,
       errCls,
       errMsg,
-    } of RejectTestCases) {
+      unsupportedInAppXS,
+    } of rejectTestCases) {
       it(testName, async () => {
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
+
         const promise = ada.deriveAddress({
           network,
           address: addressParams,
         })
-        await expect(promise).to.be.rejectedWith(errCls, errMsg)
+
+        if (isAppXS && unsupportedInAppXS) {
+          await expect(promise).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          await expect(promise).to.be.rejectedWith(errCls, errMsg)
+        }
       })
     }
   })
@@ -87,8 +102,17 @@ describe('deriveAddress', () => {
   describe('Should successfully show Byron address', () => {
     for (const {testName, network, addressParams} of byronTestCases) {
       it(testName, async () => {
-        const result = await ada.showAddress({network, address: addressParams})
-        expect(result).to.equal(undefined)
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
+        const promise = ada.showAddress({
+          network,
+          address: addressParams,
+        })
+
+        if (isAppXS) {
+          await expect(promise).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          expect(await promise).to.equal(undefined)
+        }
       })
     }
   })
@@ -109,13 +133,20 @@ describe('deriveAddress', () => {
       addressParams,
       errCls,
       errMsg,
-    } of RejectTestCases) {
+      unsupportedInAppXS,
+    } of rejectTestCases) {
       it(testName, async () => {
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
         const promise = ada.showAddress({
           network,
           address: addressParams,
         })
-        await expect(promise).to.be.rejectedWith(errCls, errMsg)
+
+        if (isAppXS && unsupportedInAppXS) {
+          await expect(promise).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          await expect(promise).to.be.rejectedWith(errCls, errMsg)
+        }
       })
     }
   })

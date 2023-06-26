@@ -33,9 +33,14 @@ export function serializeTxInit(
   numWitnesses: number,
   version: Version,
 ) {
-  const mintBuffer = getCompatibility(version).supportsMint
+  const appAwareOfMint =
+    getCompatibility(version).supportsMint || version.flags.isAppXS
+  // even though XS app doesn't support minting, it does expect the flag value
+  // (we want to keep the APDU serialization uniform)
+  const mintBuffer = appAwareOfMint
     ? serializeOptionFlag(tx.mint != null)
     : Buffer.from([])
+
   const scriptDataHashBuffer = getCompatibility(version).supportsAlonzo
     ? serializeOptionFlag(tx.scriptDataHashHex != null)
     : Buffer.from([])

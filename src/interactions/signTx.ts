@@ -965,6 +965,17 @@ function ensureRequestSupportedByAppVersion(
   // signing modes
 
   if (
+    request.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_OWNER &&
+    !getCompatibility(version).supportsPoolRegistrationAsOwner
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Pool registration as owner not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  if (
     request.signingMode ===
       TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR &&
     !getCompatibility(version).supportsPoolRegistrationAsOperator
@@ -999,6 +1010,26 @@ function ensureRequestSupportedByAppVersion(
   }
 
   // transaction elements
+
+  const isOutputByron = (o: ParsedOutput | null) =>
+    o != null &&
+    o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&
+    o.destination.addressParams.type === AddressType.BYRON
+
+  const hasByronAddressParam =
+    request.tx.outputs.some(isOutputByron) ||
+    isOutputByron(request.tx.collateralOutput)
+    // Byron collateral outputs forbidden by the security policy
+  if (
+    hasByronAddressParam &&
+    !getCompatibility(version).supportsByronAddressDerivation
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Byron address parameters not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
 
   if (
     hasScriptHashInAddressParams(request.tx) &&
@@ -1059,6 +1090,20 @@ function ensureRequestSupportedByAppVersion(
   ) {
     throw new DeviceVersionUnsupported(
       `Key hash in withdrawal not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  const hasPoolRegistration = request.tx.certificates.some(
+    (c) => c.type === CertificateType.STAKE_POOL_REGISTRATION,
+  )
+  const supportsPoolRegistration =
+    getCompatibility(version).supportsPoolRegistrationAsOwner ||
+    getCompatibility(version).supportsPoolRegistrationAsOperator
+  if (hasPoolRegistration && !supportsPoolRegistration) {
+    throw new DeviceVersionUnsupported(
+      `Pool registration certificate not supported by Ledger app version ${getVersionString(
         version,
       )}.`,
     )

@@ -28,10 +28,13 @@ export function* getVersion(): Interaction<Version> {
 
   const FLAG_IS_DEBUG = 1
   // const FLAG_IS_HEADLESS = 2;
+  const FLAG_IS_APP_XS = 4
 
   const flags = {
     // eslint-disable-next-line no-bitwise
     isDebug: (flags_value & FLAG_IS_DEBUG) === FLAG_IS_DEBUG,
+    // eslint-disable-next-line no-bitwise
+    isAppXS: (flags_value & FLAG_IS_APP_XS) === FLAG_IS_APP_XS,
   }
   return {major, minor, patch, flags}
 }
@@ -83,16 +86,20 @@ export function getCompatibility(version: Version): DeviceCompatibility {
     isLedgerAppVersionAtLeast(version, 6, 0) &&
     isLedgerAppVersionAtMost(version, 6, Infinity)
 
+  const isAppXS = version.flags.isAppXS
+
   return {
     isCompatible: v2_2,
     recommendedVersion: v2_2 ? null : '6.0',
+    supportsByronAddressDerivation: v2_2 && !isAppXS,
     supportsMary: v2_2,
     supportsCatalystRegistration: v2_3, // CIP-15
     supportsCIP36: v6_0,
     supportsZeroTtl: v2_3,
-    supportsPoolRegistrationAsOperator: v2_4,
-    supportsPoolRetirement: v2_4,
-    supportsNativeScriptHashDerivation: v3_0,
+    supportsPoolRegistrationAsOwner: v2_2 && !isAppXS,
+    supportsPoolRegistrationAsOperator: v2_4 && !isAppXS,
+    supportsPoolRetirement: v2_4 && !isAppXS,
+    supportsNativeScriptHashDerivation: v3_0 && !isAppXS,
     supportsMultisigTransaction: v3_0,
     supportsMint: v3_0,
     supportsAlonzo: v4_0,

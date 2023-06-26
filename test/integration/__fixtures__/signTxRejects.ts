@@ -45,6 +45,7 @@ export type TestCaseRejectShelley = {
   errCls: new (...args: any[]) => ErrorBase
   errMsg: string
   rejectReason: InvalidDataReason
+  unsupportedInAppXS?: boolean
 }
 
 const poolRegParamOwner: PoolRegistrationParams = {
@@ -171,6 +172,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - too few certificates',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [],
@@ -183,6 +185,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - too few certificates',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -196,6 +199,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - too many certificates',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -217,6 +221,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - too many certificates',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -239,6 +244,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - too many withdrawals',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -266,6 +272,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - too many withdrawals',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -294,6 +301,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - mint included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -322,6 +330,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - mint included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -376,6 +385,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - collateral inputs included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -394,6 +404,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - collateral inputs included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -414,6 +425,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   // required signers
   {
     testName: 'Pool registration (operator) - required signers included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -437,6 +449,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - required signers included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -486,6 +499,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - collateral output included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -504,6 +518,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - collateral output included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -548,6 +563,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - total collateral included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -566,6 +582,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - total collateral included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -610,6 +627,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (operator) - reference inputs included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -628,6 +646,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration (owner) - reference inputs included',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -736,6 +755,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool operator - spending choice not path',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       outputs: [
@@ -774,6 +794,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool owner - unconditionally',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -790,6 +811,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
 export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   {
     testName: 'Pool registration in Ordinary Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -807,6 +829,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration in Multisig Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -824,6 +847,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool registration in Plutus Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -841,6 +865,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool retirement in Multisig Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -860,6 +885,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   // since we can't serialize the wrong type of certificate
   {
     testName: 'Stake registration in Pool Registration Operator',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -877,6 +903,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Stake registration in Pool Registration Owner',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [],
@@ -895,6 +922,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Stake deregistration in Pool Registration Operator',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -912,6 +940,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Stake deregistration in Pool Registration Owner',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [],
@@ -930,6 +959,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Stake delegation in Pool Registration Operator',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -946,6 +976,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Stake delegation in Pool Registration Owner',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [],
@@ -963,6 +994,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool retirement in Pool Registration Operator',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -980,6 +1012,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool retirement in Pool Registration Owner',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [],
@@ -1060,6 +1093,7 @@ export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelle
   [
     {
       testName: 'Non-pool cold key in Ordinary Tx',
+      unsupportedInAppXS: true,
       tx: {
         ...shelleyBase,
         certificates: [
@@ -1307,6 +1341,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Multisig account path in Pool Registration (Owner) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -1325,6 +1360,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Ordinary spending path in Pool Registration (Owner) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -1343,6 +1379,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Multisig spending path in Pool Registration (Owner) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -1361,6 +1398,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Multisig staking path in Pool Registration (Owner) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -1379,6 +1417,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Mint path in Pool Registration (Owner) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -1397,6 +1436,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Pool cold path in Pool Registration (Owner) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       inputs: [inputs.utxoMultisig],
@@ -1415,6 +1455,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Multisig account path in Pool Registration (Operator) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1432,6 +1473,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Multisig spending path in Pool Registration (Operator) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1449,6 +1491,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Ordinary staking path in Pool Registration (Operator) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1466,6 +1509,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Multisig staking path in Pool Registration (Operator) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1483,6 +1527,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
   },
   {
     testName: 'Mint path in Pool Registration (Operator) Tx',
+    unsupportedInAppXS: true,
     tx: {
       ...shelleyBase,
       certificates: [

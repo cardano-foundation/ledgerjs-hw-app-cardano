@@ -4,6 +4,7 @@ import chaiAsPromised from 'chai-as-promised'
 import type {Ada} from '../../src/Ada'
 import {
   DeviceStatusError,
+  DeviceVersionUnsupported,
   InvalidData,
   NativeScriptHashDisplayFormat,
 } from '../../src/Ada'
@@ -36,12 +37,16 @@ describe('deriveNativeScriptHash', () => {
       hashHex: expectedHash,
     } of ValidNativeScriptTestCases) {
       it(testName, async () => {
-        const {scriptHashHex} = await ada.deriveNativeScriptHash({
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
+        const promise = ada.deriveNativeScriptHash({
           script,
           displayFormat,
         })
-
-        expect(scriptHashHex).to.equal(expectedHash)
+        if (isAppXS) {
+          await expect(promise).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          expect((await promise).scriptHashHex).to.equal(expectedHash)
+        }
       })
     }
   })
@@ -49,11 +54,16 @@ describe('deriveNativeScriptHash', () => {
   describeWithoutValidation('Ledger should not permit invalid scripts', () => {
     for (const {testName, script} of InvalidOnLedgerScriptTestCases) {
       it(testName, async () => {
+        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
         const promise = ada.deriveNativeScriptHash({
           script,
           displayFormat: NativeScriptHashDisplayFormat.BECH32,
         })
-        await expect(promise).to.be.rejectedWith(DeviceStatusError)
+        if (isAppXS) {
+          await expect(promise).to.be.rejectedWith(DeviceVersionUnsupported)
+        } else {
+          await expect(promise).to.be.rejectedWith(DeviceStatusError)
+        }
       })
     }
   })

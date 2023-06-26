@@ -878,6 +878,7 @@ export type Withdrawal = {
  */
 export type Flags = {
   isDebug: boolean
+  isAppXS: boolean
 }
 
 /**
@@ -911,6 +912,10 @@ export type DeviceCompatibility = {
    */
   recommendedVersion: string | null
   /**
+   * Whether we support Byron address parameters in transaction outputs
+   */
+  supportsByronAddressDerivation: boolean
+  /**
    * Whether we support Mary features
    */
   supportsMary: boolean
@@ -928,7 +933,11 @@ export type DeviceCompatibility = {
    */
   supportsZeroTtl: boolean
   /**
-   * Whether we support operational certificate signing
+   * Whether we support pool registration certificate signing by pool owners
+   */
+  supportsPoolRegistrationAsOwner: boolean
+  /**
+   * Whether we support operational and pool registration certificate signing by pool operators
    */
   supportsPoolRegistrationAsOperator: boolean
   /**
