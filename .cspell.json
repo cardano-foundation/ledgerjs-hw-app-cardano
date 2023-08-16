@@ -54,6 +54,7 @@
     "libudev",
     "libusb",
     "multiasset",
+    "multidelegation",
     "nargs",
     "opcert",
     "PAYMENTADDRESS",

@@ -154,17 +154,44 @@ export const shelleyTestCases: ShelleyTestCase[] = [
       'addr1qwpug24twgud02405vncq9gmthq3r8e3a6l3855r8jpkgjnfwjwuljn5a0p37d4yvxevnte42mffrpmf4823vcdq62xqm8xq3j',
   },
   {
-    testName: 'base address path/path unusual staking path account',
+    testName: 'base address path/path multidelegation stake key usual',
+    network: Networks.Testnet,
+    addressParams: {
+      type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+      params: {
+        spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+        stakingPath: str_to_path("1852'/1815'/0'/2/60"),
+      },
+    },
+    result:
+      'addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vl404mjsaz2xyzvegxxrpx5ltrjgy4qws4ataqtv5lp2h3q30eyjm',
+  },
+  {
+    testName:
+      'base address path/path multidelegation stake key unusual account',
     network: Networks.Fake,
     addressParams: {
       type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
       params: {
         spendingPath: str_to_path("1852'/1815'/0'/0/1"),
-        stakingPath: str_to_path("1852'/1815'/101'/2/0"),
+        stakingPath: str_to_path("1852'/1815'/101'/2/60"), // WARN
       },
     },
     result:
-      'addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vmfwjwuljn5a0p37d4yvxevnte42mffrpmf4823vcdq62xq3kdpkj',
+      'addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vmugd5zn06wnjkd3e4gz260kt832axwmcruch85mkpqnv2qzt38al',
+  },
+  {
+    testName: 'base address path/path multidelegation stake key unusual index',
+    network: Networks.Fake,
+    addressParams: {
+      type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+      params: {
+        spendingPath: str_to_path("1852'/1815'/0'/0/1"),
+        stakingPath: str_to_path("1852'/1815'/0'/2/1000001"), // WARN
+      },
+    },
+    result:
+      'addr1qdd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63v7z7lu6g8ncaa9ksx9q5lg2676a59a93y6fv86qzzdx4k5qjp9hw2',
   },
   {
     testName: 'base address path/keyHash 1',
@@ -235,6 +262,20 @@ export const shelleyTestCases: ShelleyTestCase[] = [
     },
     result:
       'addr1zvfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq8dxrpu',
+  },
+  {
+    testName: 'base address scriptHash/path multidelegation',
+    network: Networks.Fake,
+    addressParams: {
+      type: AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
+      params: {
+        spendingScriptHashHex:
+          '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
+        stakingPath: str_to_path("1852'/1815'/0'/2/3"),
+      },
+    },
+    result:
+      'addr1zvfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yauc4nklr34kj8uk8kfgz3lkv6tu0ndr3x0rp3snqdayaxgqwrgxu2',
   },
   {
     testName: 'base address scriptHash/path unusual account',
@@ -492,6 +533,39 @@ export const shelleyTestCases: ShelleyTestCase[] = [
     result: 'stake1uvwjy7h05jmhx9y3wzy94td6xz4txynuccgam0zfn800v8qqucf2t',
   },
   {
+    testName: 'reward multidelegation usual',
+    network: Networks.Testnet,
+    addressParams: {
+      type: AddressType.REWARD_KEY,
+      params: {
+        stakingPath: str_to_path("1852'/1815'/0'/2/1"),
+      },
+    },
+    result: 'stake_test1uqktgr9psuz0fxggkx9ald8wu8kgpckr2d9kjfxrum6sm3qp87652',
+  },
+  {
+    testName: 'reward multidelegation unusual account',
+    network: Networks.Testnet,
+    addressParams: {
+      type: AddressType.REWARD_KEY,
+      params: {
+        stakingPath: str_to_path("1852'/1815'/101'/2/1"),
+      },
+    },
+    result: 'stake_test1up0umv478zejdvynrddaddjzcztnmm2phsqs77cghyuah6qnjw5hh',
+  },
+  {
+    testName: 'reward multidelegation unusual index',
+    network: Networks.Testnet,
+    addressParams: {
+      type: AddressType.REWARD_KEY,
+      params: {
+        stakingPath: str_to_path("1852'/1815'/0'/2/20000000"),
+      },
+    },
+    result: 'stake_test1urgn94qu0ewtt6f7l4sp6jm5vjv5u3gktevzy46s2qn92yshap4ze',
+  },
+  {
     testName: 'reward path unusual account',
     network: Networks.Fake,
     addressParams: {
@@ -603,17 +677,6 @@ export const RejectTestCases: RejectTestCase[] = [
       params: {
         spendingPath: str_to_path("1852'/1815'/1'/0/0"),
         stakingPath: str_to_path("1852'/1815'/1'/0/1"),
-      },
-    },
-  },
-  {
-    testName: 'base key/key with wrong staking path 2',
-    ...rejectTestCaseBase,
-    addressParams: {
-      type: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
-      params: {
-        spendingPath: str_to_path("1852'/1815'/1'/0/0"),
-        stakingPath: str_to_path("1852'/1815'/1'/2/1"),
       },
     },
   },

@@ -5,6 +5,7 @@ import {
   testsBabbageTrezorComparison,
   testsByron,
   testsMary,
+  testsMultidelegation,
   testsMultisig,
   testsShelleyNoCertificates,
   testsShelleyWithCertificates,
@@ -45,6 +46,7 @@ describeSignTxPositiveTest(
   'signTxBabbageTrezorComparison',
   testsBabbageTrezorComparison,
 )
+describeSignTxPositiveTest('signTxMultidelegation', testsMultidelegation)
 
 describeSignTxRejects('signTxInitPolicyRejects', transactionInitRejectTestCases)
 describeSignTxRejects(

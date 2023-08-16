@@ -1,7 +1,9 @@
 import type {Transaction} from '../../../src/Ada'
 import {CertificateType, Networks, TxAuxiliaryDataType} from '../../../src/Ada'
-import type {BIP32Path, SignedTransactionData} from '../../../src/types/public'
 import {
+  BIP32Path,
+  SignedTransactionData,
+  TxRequiredSignerType,
   StakeCredentialParamsType,
   TransactionSigningMode,
 } from '../../../src/types/public'
@@ -1257,6 +1259,118 @@ export const testsBabbageTrezorComparison: SignTxTestCase[] = [
           path: str_to_path("1852'/1815'/0'/0/0"),
           witnessSignatureHex:
             'a655f96ffc6fe56c5f9287dc28474805a97a46b85def8002cb1d4ee975fe69ae89a4a24c317db9cc3c7390410465ded89f349d081de5fd757689af9b6c125609',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const testsMultidelegation: SignTxTestCase[] = [
+  {
+    testName: 'Sign tx with multidelegation keys in all tx elements',
+    tx: {
+      // "protocol_magic": 764824073,
+      // "network_id": 1,
+      // if Networks.Mainnet differs, the test should just explicitly give these
+      network: Networks.Mainnet,
+      inputs: [
+        {...inputs.utxoShelley, path: str_to_path("1852'/1815'/0'/2/1")},
+      ],
+      outputs: [outputs.trezorParity1, outputs.trezorParityDatumHash1],
+      fee: 42,
+      ttl: 10,
+      validityIntervalStart: 47,
+      certificates: [
+        {
+          type: CertificateType.STAKE_REGISTRATION,
+          params: {
+            stakeCredential: {
+              type: StakeCredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/2"),
+            },
+          },
+        },
+        {
+          type: CertificateType.STAKE_DEREGISTRATION,
+          params: {
+            stakeCredential: {
+              type: StakeCredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/2"),
+            },
+          },
+        },
+        {
+          type: CertificateType.STAKE_DELEGATION,
+          params: {
+            stakeCredential: {
+              type: StakeCredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/2"),
+            },
+            poolKeyHashHex:
+              'f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973',
+          },
+        },
+      ],
+      withdrawals: [
+        {
+          stakeCredential: {
+            type: StakeCredentialParamsType.KEY_PATH,
+            keyPath: str_to_path("1852'/1815'/0'/2/3"),
+          },
+          amount: 1000,
+        },
+      ],
+      requiredSigners: [
+        {
+          type: TxRequiredSignerType.PATH,
+          path: str_to_path("1852'/1815'/0'/2/4"),
+        },
+      ],
+      scriptDataHashHex:
+        '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+      includeNetworkId: true,
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [
+      str_to_path("1852'/1815'/0'/0/0"),
+      str_to_path("1852'/1815'/0'/2/5"),
+    ],
+    txBody:
+      'aa00818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821a001e8480a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a0078386283581d71477e52b3116b62fe8cd34a312615f5fcd678c94e1d6cdb86c1a3964c0158203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702182a030a048382008200581cee6d266f2b60add5a249a3754f91cf1f423ac94c6cd964b3814f21a382018200581cee6d266f2b60add5a249a3754f91cf1f423ac94c6cd964b3814f21a383028200581cee6d266f2b60add5a249a3754f91cf1f423ac94c6cd964b3814f21a3581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb497305a1581de198acedf1c6b691f963d928147f66697c7cda3899e30c613037a4e9901903e808182f0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70e81581c86df572e0e28bec8ca8066e9d8c3681b4ac86c43c57cd52eb06ae8640f01',
+    expectedResult: {
+      txHashHex:
+        'edcf824da89507ae03c46a4ad1f4676c28842052022e2d2062993680c3e36f80',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/2/1"),
+          witnessSignatureHex:
+            '873f55cd0ffa058d1c93fed2eb748f33c12fc2f144cb493e7e621eb2a248c809f43208e31e53ac85a3186a9c848d7b4aa95928635355a2f4473a3216e0466407',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/2"),
+          witnessSignatureHex:
+            'c04a246ae7495f9e0733b5610dcac3ee955b417dc6089dd36da714566230235bd5aa7ff6f364477b32d48d1bee5764166a4c0ecb5c13946d7d1f1b2611f5fc00',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/3"),
+          witnessSignatureHex:
+            '1c9c5d5bccbc6a45adb41fde16fb82b5ba2748755ce048a2b50e1994d59f51905b2e43a8eef886d62ee1f77e81df201569bb1bab39c14f80c71a0568fcbf5e02',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/4"),
+          witnessSignatureHex:
+            '4a1026097d9a2ab2ead55cab8979e29bcf2ead8b7a2141c1175f8bc2ed54f3333435455b552e04ef0e3f25b943d63a682da40088a812088c229e9afb3af6b806',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '531e53866638657fabdd20315f1639a59887c3db538b4917e5bea0a9f20ca66908848a279e47dbc1be3a880fc4052272be106f3fa2a1e3d6fc300c5e92405106',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/5"),
+          witnessSignatureHex:
+            'af7bb2a9740c4a3de2ec239850523a43dd0689a1a73fc11dce399bfbfbf527c140d5751b45fc8bb733be2eab4610f56e947190c5dcbd0b72e3b236388cd17608',
         },
       ],
       auxiliaryDataSupplement: null,

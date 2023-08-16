@@ -69,6 +69,15 @@ export const testsShelleyUsual: TestCase[] = [
         'e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
     },
   },
+  {
+    path: "1852'/1815'/0'/2/1001",
+    expected: {
+      publicKey:
+        'dbc5fbbe47eabc036c6834ea62c011b15272ec85a17facd3670cd9304486ffe8',
+      chainCode:
+        'fb037474fc75e64745f7fd9f44b4bcbc58d81cae2209f2f5c1f77501e9bb43df',
+    },
+  },
 ]
 
 export const testsShelleyUnusual: TestCase[] = [
@@ -88,6 +97,15 @@ export const testsShelleyUnusual: TestCase[] = [
         'd06a7a9d87e95f475811e31b03564d272f1c2614e8b2cf0f37d6e973fd2aba9c',
       chainCode:
         '8aca949d791e4a4f26e05e55d39d17f565884b56882283cf7d97e338fa7ab9ee',
+    },
+  },
+  {
+    path: "1852'/1815'/0'/2/1000001",
+    expected: {
+      publicKey:
+        '1763dfbba10629d5e9ed8f8714889f82f0bdb4b62af22b19b607713919f93e4d',
+      chainCode:
+        'b46ecc1459e0ad4ae7fa1b9a7440584b6177472db300304a3191a91b7fb0e1e8',
     },
   },
 ]
