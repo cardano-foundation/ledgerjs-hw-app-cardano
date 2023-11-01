@@ -10,6 +10,7 @@ import type {
   ParsedSigningRequest,
   ParsedTransaction,
   ParsedTxAuxiliaryData,
+  ParsedVoterVotes,
   ParsedWithdrawal,
   ScriptDataHash,
   Uint32_t,
@@ -23,7 +24,7 @@ import {
   ED25519_SIGNATURE_LENGTH,
   PoolOwnerType,
   RequiredSignerType,
-  StakeCredentialType,
+  CredentialType,
   TX_HASH_LENGTH,
 } from '../types/internal'
 import type {
@@ -40,6 +41,7 @@ import {
   TxAuxiliaryDataType,
   TxOutputDestinationType,
   TxOutputFormat,
+  VoterType,
 } from '../types/public'
 import {getVersionString} from '../utils'
 import {assert} from '../utils/assert'
@@ -47,6 +49,7 @@ import {
   buf_to_hex,
   hex_to_buf,
   int64_to_buf,
+  serializeCoin,
   uint32_to_buf,
   uint64_to_buf,
 } from '../utils/serialize'
@@ -80,13 +83,12 @@ import {
   serializeMintBasicParams,
   serializeRequiredSigner,
   serializeToken,
-  serializeTotalCollateral,
-  serializeTxFee,
   serializeTxInput,
   serializeTxTtl,
   serializeTxValidityStart,
   serializeTxWithdrawal,
   serializeTxWitnessRequest,
+  serializeVoterVotes,
 } from './serialization/txOther'
 import {
   MAX_CHUNK_SIZE,
@@ -113,6 +115,9 @@ const enum P1 {
   STAGE_COLLATERAL_OUTPUT = 0x12,
   STAGE_TOTAL_COLLATERAL = 0x10,
   STAGE_REFERENCE_INPUTS = 0x11,
+  STAGE_VOTING_PROCEDURES = 0x13,
+  STAGE_TREASURY = 0x15,
+  STAGE_DONATION = 0x16,
   STAGE_CONFIRM = 0x0a,
   STAGE_WITNESSES = 0x0f,
 }
@@ -479,7 +484,7 @@ function* signTx_setFee(fee: Uint64_str): Interaction<void> {
   yield send({
     p1: P1.STAGE_FEE,
     p2: P2.UNUSED,
-    data: serializeTxFee(fee),
+    data: serializeCoin(fee),
     expectedResponseLength: 0,
   })
 }
@@ -774,7 +779,7 @@ function* signTx_addTotalCollateral(
   yield send({
     p1: P1.STAGE_TOTAL_COLLATERAL,
     p2: P2.UNUSED,
-    data: serializeTotalCollateral(totalCollateral),
+    data: serializeCoin(totalCollateral),
     expectedResponseLength: 0,
   })
 }
@@ -789,6 +794,44 @@ function* signTx_addReferenceInput(
     p1: P1.STAGE_REFERENCE_INPUTS,
     p2: P2.UNUSED,
     data: serializeTxInput(referenceInput),
+    expectedResponseLength: 0,
+  })
+}
+
+function* signTx_addVoterVotes(
+  voterVotes: ParsedVoterVotes,
+): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+  yield send({
+    p1: P1.STAGE_VOTING_PROCEDURES,
+    p2: P2.UNUSED,
+    data: serializeVoterVotes(voterVotes),
+    expectedResponseLength: 0,
+  })
+}
+
+function* signTx_addTreasury(treasury: Uint64_str): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+  yield send({
+    p1: P1.STAGE_TREASURY,
+    p2: P2.UNUSED,
+    data: serializeCoin(treasury),
+    expectedResponseLength: 0,
+  })
+}
+
+function* signTx_addDonation(donation: Uint64_str): Interaction<void> {
+  const enum P2 {
+    UNUSED = 0x00,
+  }
+  yield send({
+    p1: P1.STAGE_DONATION,
+    p2: P2.UNUSED,
+    data: serializeCoin(donation),
     expectedResponseLength: 0,
   })
 }
@@ -856,10 +899,30 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
     // certificate witnesses
     for (const cert of tx.certificates) {
       switch (cert.type) {
-        case CertificateType.STAKE_DELEGATION:
+        // for CertificateType.STAKE_REGISTRATION, we do not provide the witness automatically
+        // it can be obtained via SignTransactionRequest.additionalWitnessPaths
+        case CertificateType.STAKE_REGISTRATION_CONWAY:
         case CertificateType.STAKE_DEREGISTRATION:
-          if (cert.stakeCredential.type === StakeCredentialType.KEY_PATH) {
+        case CertificateType.STAKE_DEREGISTRATION_CONWAY:
+        case CertificateType.STAKE_DELEGATION:
+        case CertificateType.VOTE_DELEGATION:
+          if (cert.stakeCredential.type === CredentialType.KEY_PATH) {
             witnessPaths.push(cert.stakeCredential.path)
+          }
+          break
+
+        case CertificateType.AUTHORIZE_COMMITTEE_HOT:
+        case CertificateType.RESIGN_COMMITTEE_COLD:
+          if (cert.coldCredential.type === CredentialType.KEY_PATH) {
+            witnessPaths.push(cert.coldCredential.path)
+          }
+          break
+
+        case CertificateType.DREP_REGISTRATION:
+        case CertificateType.DREP_DEREGISTRATION:
+        case CertificateType.DREP_UPDATE:
+          if (cert.dRepCredential.type === CredentialType.KEY_PATH) {
+            witnessPaths.push(cert.dRepCredential.path)
           }
           break
 
@@ -887,7 +950,7 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
 
     // withdrawal witnesses
     for (const withdrawal of tx.withdrawals) {
-      if (withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH) {
+      if (withdrawal.stakeCredential.type === CredentialType.KEY_PATH) {
         witnessPaths.push(withdrawal.stakeCredential.path)
       }
     }
@@ -898,7 +961,6 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
         case RequiredSignerType.PATH:
           witnessPaths.push(signer.path)
           break
-
         default:
           break
       }
@@ -908,6 +970,19 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
     for (const collateral of tx.collateralInputs) {
       if (collateral.path != null) {
         witnessPaths.push(collateral.path)
+      }
+    }
+
+    // voting procedures witnesses
+    for (const voterVotes of tx.votingProcedures) {
+      switch (voterVotes.voter.type) {
+        case VoterType.COMMITTEE_KEY_PATH:
+        case VoterType.DREP_KEY_PATH:
+        case VoterType.STAKE_POOL_KEY_PATH:
+          witnessPaths.push(voterVotes.voter.keyPath)
+          break
+        default:
+          break
       }
     }
   }
@@ -920,22 +995,22 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
   return uniquify(witnessPaths)
 }
 
-function hasStakeCredentialInCertificates(
+function hasCredentialInCertificatesPreConway(
   tx: ParsedTransaction,
-  stakeCredentialType: StakeCredentialType,
+  credentialType: CredentialType,
 ) {
   return tx.certificates.some(
     (c) =>
       (c.type === CertificateType.STAKE_DELEGATION ||
-        c.type === CertificateType.STAKE_DEREGISTRATION ||
-        c.type === CertificateType.STAKE_REGISTRATION) &&
-      c.stakeCredential.type === stakeCredentialType,
+        c.type === CertificateType.STAKE_REGISTRATION ||
+        c.type === CertificateType.STAKE_DEREGISTRATION) &&
+      c.stakeCredential.type === credentialType,
   )
 }
 
-function hasStakeCredentialInWithdrawals(
+function hasCredentialInWithdrawals(
   tx: ParsedTransaction,
-  stakeCredentialType: StakeCredentialType,
+  stakeCredentialType: CredentialType,
 ) {
   return tx.withdrawals.some(
     (w) => w.stakeCredential.type === stakeCredentialType,
@@ -1019,7 +1094,7 @@ function ensureRequestSupportedByAppVersion(
   const hasByronAddressParam =
     request.tx.outputs.some(isOutputByron) ||
     isOutputByron(request.tx.collateralOutput)
-    // Byron collateral outputs forbidden by the security policy
+  // Byron collateral outputs forbidden by the security policy
   if (
     hasByronAddressParam &&
     !getCompatibility(version).supportsByronAddressDerivation
@@ -1071,30 +1146,6 @@ function ensureRequestSupportedByAppVersion(
     )
   }
 
-  if (
-    hasStakeCredentialInWithdrawals(
-      request.tx,
-      StakeCredentialType.SCRIPT_HASH,
-    ) &&
-    !getCompatibility(version).supportsMultisigTransaction
-  ) {
-    throw new DeviceVersionUnsupported(
-      `Script hash in withdrawal not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-  if (
-    hasStakeCredentialInWithdrawals(request.tx, StakeCredentialType.KEY_HASH) &&
-    !getCompatibility(version).supportsAlonzo
-  ) {
-    throw new DeviceVersionUnsupported(
-      `Key hash in withdrawal not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-
   const hasPoolRegistration = request.tx.certificates.some(
     (c) => c.type === CertificateType.STAKE_POOL_REGISTRATION,
   )
@@ -1119,10 +1170,32 @@ function ensureRequestSupportedByAppVersion(
       )}.`,
     )
   }
+
+  const conwayCertificateTypes = [
+    CertificateType.STAKE_REGISTRATION_CONWAY,
+    CertificateType.STAKE_DEREGISTRATION_CONWAY,
+    CertificateType.VOTE_DELEGATION,
+    CertificateType.AUTHORIZE_COMMITTEE_HOT,
+    CertificateType.RESIGN_COMMITTEE_COLD,
+    CertificateType.DREP_REGISTRATION,
+    CertificateType.DREP_DEREGISTRATION,
+    CertificateType.DREP_UPDATE,
+  ]
+  const hasConwayCertificates = request.tx.certificates.some((c) =>
+    conwayCertificateTypes.includes(c.type),
+  )
+  if (hasConwayCertificates && !getCompatibility(version).supportsConway) {
+    throw new DeviceVersionUnsupported(
+      `Conway era certificates not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
   if (
-    hasStakeCredentialInCertificates(
+    hasCredentialInCertificatesPreConway(
       request.tx,
-      StakeCredentialType.SCRIPT_HASH,
+      CredentialType.SCRIPT_HASH,
     ) &&
     !getCompatibility(version).supportsMultisigTransaction
   ) {
@@ -1133,10 +1206,7 @@ function ensureRequestSupportedByAppVersion(
     )
   }
   if (
-    hasStakeCredentialInCertificates(
-      request.tx,
-      StakeCredentialType.KEY_HASH,
-    ) &&
+    hasCredentialInCertificatesPreConway(request.tx, CredentialType.KEY_HASH) &&
     !getCompatibility(version).supportsAlonzo
   ) {
     throw new DeviceVersionUnsupported(
@@ -1146,14 +1216,35 @@ function ensureRequestSupportedByAppVersion(
     )
   }
 
-  if (request.tx?.mint && !getCompatibility(version).supportsMint) {
+  if (
+    hasCredentialInWithdrawals(request.tx, CredentialType.SCRIPT_HASH) &&
+    !getCompatibility(version).supportsMultisigTransaction
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Script hash in withdrawal not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+  if (
+    hasCredentialInWithdrawals(request.tx, CredentialType.KEY_HASH) &&
+    !getCompatibility(version).supportsAlonzo
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Key hash in withdrawal not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  if (request.tx?.mint !== null && !getCompatibility(version).supportsMint) {
     throw new DeviceVersionUnsupported(
       `Mint not supported by Ledger app version ${getVersionString(version)}.`,
     )
   }
 
   if (
-    request.tx.validityIntervalStart &&
+    request.tx.validityIntervalStart !== null &&
     !getCompatibility(version).supportsMary
   ) {
     throw new DeviceVersionUnsupported(
@@ -1164,7 +1255,7 @@ function ensureRequestSupportedByAppVersion(
   }
 
   if (
-    request.tx.scriptDataHashHex &&
+    request.tx.scriptDataHashHex !== null &&
     !getCompatibility(version).supportsAlonzo
   ) {
     throw new DeviceVersionUnsupported(
@@ -1214,7 +1305,7 @@ function ensureRequestSupportedByAppVersion(
   }
 
   if (
-    request.tx.includeNetworkId &&
+    request.tx.includeNetworkId !== null &&
     !getCompatibility(version).supportsAlonzo
   ) {
     throw new DeviceVersionUnsupported(
@@ -1225,7 +1316,7 @@ function ensureRequestSupportedByAppVersion(
   }
 
   if (
-    request.tx.collateralOutput &&
+    request.tx.collateralOutput !== null &&
     !getCompatibility(version).supportsBabbage
   ) {
     throw new DeviceVersionUnsupported(
@@ -1236,7 +1327,7 @@ function ensureRequestSupportedByAppVersion(
   }
 
   if (
-    request.tx.totalCollateral &&
+    request.tx.totalCollateral !== null &&
     !getCompatibility(version).supportsBabbage
   ) {
     throw new DeviceVersionUnsupported(
@@ -1252,6 +1343,39 @@ function ensureRequestSupportedByAppVersion(
   ) {
     throw new DeviceVersionUnsupported(
       `Reference inputs not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  if (
+    request.tx.votingProcedures.length > 0 &&
+    !getCompatibility(version).supportsConway
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Voting procedures not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  if (
+    request.tx.treasury !== null &&
+    !getCompatibility(version).supportsConway
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Treasury amount not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  if (
+    request.tx.donation !== null &&
+    !getCompatibility(version).supportsConway
+  ) {
+    throw new DeviceVersionUnsupported(
+      `Treasury donation not supported by Ledger app version ${getVersionString(
         version,
       )}.`,
     )
@@ -1401,11 +1525,24 @@ export function* signTransaction(
     yield* signTx_addTotalCollateral(tx.totalCollateral)
   }
 
-  // reference input
-  if (tx.referenceInputs != null) {
-    for (const referenceInput of tx.referenceInputs) {
-      yield* signTx_addReferenceInput(referenceInput)
-    }
+  // reference inputs
+  for (const referenceInput of tx.referenceInputs) {
+    yield* signTx_addReferenceInput(referenceInput)
+  }
+
+  // voting procedures
+  for (const voterVotes of tx.votingProcedures) {
+    yield* signTx_addVoterVotes(voterVotes)
+  }
+
+  // treasury
+  if (tx.treasury != null) {
+    yield* signTx_addTreasury(tx.treasury)
+  }
+
+  // donation
+  if (tx.donation != null) {
+    yield* signTx_addDonation(tx.donation)
   }
 
   // confirm

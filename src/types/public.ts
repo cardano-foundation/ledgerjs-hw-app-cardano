@@ -81,6 +81,46 @@ export enum CertificateType {
    * @see [[PoolRegistrationParams]]
    */
   STAKE_POOL_RETIREMENT = 4,
+  /**
+   * Staking key registration certificate with deposit
+   * @see [[StakeRegistrationConwayParams]]
+   */
+  STAKE_REGISTRATION_CONWAY = 7,
+  /**
+   * Staking key deregistration certificate with deposit
+   * @see [[StakeDeregistrationConwayParams]]
+   */
+  STAKE_DEREGISTRATION_CONWAY = 8,
+  /**
+   * Vote delegation certificate
+   * @see [[VoteDelegationParams]]
+   */
+  VOTE_DELEGATION = 9,
+  /**
+   * Authorize constitutional committee member hot certificate
+   * @see [[AuthorizeCommitteeParams]]
+   */
+  AUTHORIZE_COMMITTEE_HOT = 14,
+  /**
+   * Resign from constitutional committee certificate
+   * @see [[ResignCommitteeParams]]
+   */
+  RESIGN_COMMITTEE_COLD = 15,
+  /**
+   * DRep registration certificate
+   * @see [[DRepRegistrationParams]]
+   */
+  DREP_REGISTRATION = 16,
+  /**
+   * DRep deregistration certificate
+   * @see [[DRepDeregistrationParams]]
+   */
+  DREP_DEREGISTRATION = 17,
+  /**
+   * DRep update certificate
+   * @see [[DRepUpdateParams]]
+   */
+  DREP_UPDATE = 18,
 }
 
 /**
@@ -760,31 +800,85 @@ export type PoolRetirementParams = {
   retirementEpoch: bigint_like
 }
 
-export enum StakeCredentialParamsType {
+export enum CredentialParamsType {
   KEY_PATH,
   KEY_HASH,
   SCRIPT_HASH,
 }
 
-export type KeyPathStakeCredentialParams = {
-  type: StakeCredentialParamsType.KEY_PATH
+export type KeyPathCredentialParams = {
+  type: CredentialParamsType.KEY_PATH
   keyPath: BIP32Path
 }
 
-export type KeyHashStakeCredentialParams = {
-  type: StakeCredentialParamsType.KEY_HASH
+export type KeyHashCredentialParams = {
+  type: CredentialParamsType.KEY_HASH
   keyHashHex: string
 }
 
-export type ScriptStakeCredentialParams = {
-  type: StakeCredentialParamsType.SCRIPT_HASH
+export type ScriptHashCredentialParams = {
+  type: CredentialParamsType.SCRIPT_HASH
   scriptHashHex: string
 }
 
-export type StakeCredentialParams =
-  | KeyPathStakeCredentialParams
-  | KeyHashStakeCredentialParams
-  | ScriptStakeCredentialParams
+export type CredentialParams =
+  | KeyPathCredentialParams
+  | KeyHashCredentialParams
+  | ScriptHashCredentialParams
+
+export enum DRepParamsType {
+  KEY_PATH,
+  KEY_HASH,
+  SCRIPT_HASH,
+  ABSTAIN,
+  NO_CONFIDENCE,
+}
+
+export type KeyPathDRepParams = {
+  type: DRepParamsType.KEY_PATH
+  keyPath: BIP32Path
+}
+
+export type KeyHashDRepParams = {
+  type: DRepParamsType.KEY_HASH
+  keyHashHex: string
+}
+
+export type ScriptHashDRepParams = {
+  type: DRepParamsType.SCRIPT_HASH
+  scriptHashHex: string
+}
+
+export type AbstainDRepParams = {
+  type: DRepParamsType.ABSTAIN
+}
+
+export type NoConfidenceParams = {
+  type: DRepParamsType.NO_CONFIDENCE
+}
+
+export type DRepParams =
+  | KeyPathDRepParams
+  | KeyHashDRepParams
+  | ScriptHashDRepParams
+  | AbstainDRepParams
+  | NoConfidenceParams
+
+/**
+ * Anchor for committee and DRep certificates
+ * @category Shelley
+ * @see [[Certificate]]
+ */
+export type AnchorParams = {
+  /**
+   * Anchor URL
+   */
+  url: string
+  /**
+   * Anchor data hash in hex
+   */
+  hashHex: string
+}
 
 /**
  * Stake key registration certificate parameters
@@ -795,7 +889,23 @@ export type StakeRegistrationParams = {
   /**
    * Id to be registered
    */
-  stakeCredential: StakeCredentialParams
+  stakeCredential: CredentialParams
+}
+
+/**
+ * Stake key registration certificate parameters since Conway era
+ * @category Shelley
+ * @see [[Certificate]]
+ */
+export type StakeRegistrationConwayParams = {
+  /**
+   * Id to be registered
+   */
+  stakeCredential: CredentialParams
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
 }
 
 /**
@@ -807,7 +917,23 @@ export type StakeDeregistrationParams = {
   /**
    * Id to be deregistered
    */
-  stakeCredential: StakeCredentialParams
+  stakeCredential: CredentialParams
+}
+
+/**
+ * Stake key deregistration certificate parameters since Conway era
+ * @category Shelley
+ * @see [[Certificate]]
+ */
+export type StakeDeregistrationConwayParams = {
+  /**
+   * Id to be deregistered
+   */
+  stakeCredential: CredentialParams
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
 }
 
 /**
@@ -819,11 +945,111 @@ export type StakeDelegationParams = {
   /**
    * Id of the staking entity / reward account that wants to delegate
    */
-  stakeCredential: StakeCredentialParams
+  stakeCredential: CredentialParams
   /**
    * Pool ID user wants to delegate to
    */
   poolKeyHashHex: string
+}
+
+/**
+ * Vote delegation certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type VoteDelegationParams = {
+  /**
+   * Id of the staking entity that wants to delegate
+   */
+  stakeCredential: CredentialParams
+  /**
+   * DRep to delegate to
+   */
+  dRep: DRepParams
+}
+
+/**
+ * Authorize committee hot key certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type AuthorizeCommitteeParams = {
+  /**
+   * Credential of the committee member that wants to authorize a hot key
+   */
+  coldCredential: CredentialParams
+  /**
+   * Credential for the hot key
+   */
+  hotCredential: CredentialParams
+}
+
+/**
+ * Resign from committee certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type ResignCommitteeParams = {
+  /**
+   * Credential of the committee member that wants to resign
+   */
+  coldCredential: CredentialParams
+  /**
+   * Anchor
+   */
+  anchor?: AnchorParams | null
+}
+
+/**
+ * DRep registration certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type DRepRegistrationParams = {
+  /**
+   * Credential of the DRep that wants to register
+   */
+  dRepCredential: CredentialParams
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
+  /**
+   * Anchor
+   */
+  anchor?: AnchorParams | null
+}
+
+/**
+ * DRep deregistration certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type DRepDeregistrationParams = {
+  /**
+   * Credential of the DRep that wants to deregister
+   */
+  dRepCredential: CredentialParams
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
+}
+
+/**
+ * DRep update certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type DRepUpdateParams = {
+  /**
+   * Credential of the DRep that wants to register
+   */
+  dRepCredential: CredentialParams
+  /**
+   * Anchor
+   */
+  anchor?: AnchorParams | null
 }
 
 /**
@@ -842,8 +1068,40 @@ export type Certificate =
       params: StakeDeregistrationParams
     }
   | {
+      type: CertificateType.STAKE_REGISTRATION_CONWAY
+      params: StakeRegistrationConwayParams
+    }
+  | {
+      type: CertificateType.STAKE_DEREGISTRATION_CONWAY
+      params: StakeDeregistrationConwayParams
+    }
+  | {
       type: CertificateType.STAKE_DELEGATION
       params: StakeDelegationParams
+    }
+  | {
+      type: CertificateType.VOTE_DELEGATION
+      params: VoteDelegationParams
+    }
+  | {
+      type: CertificateType.AUTHORIZE_COMMITTEE_HOT
+      params: AuthorizeCommitteeParams
+    }
+  | {
+      type: CertificateType.RESIGN_COMMITTEE_COLD
+      params: ResignCommitteeParams
+    }
+  | {
+      type: CertificateType.DREP_REGISTRATION
+      params: DRepRegistrationParams
+    }
+  | {
+      type: CertificateType.DREP_DEREGISTRATION
+      params: DRepDeregistrationParams
+    }
+  | {
+      type: CertificateType.DREP_UPDATE
+      params: DRepUpdateParams
     }
   | {
       type: CertificateType.STAKE_POOL_REGISTRATION
@@ -863,7 +1121,7 @@ export type Withdrawal = {
   /**
    * Path to rewards account being withdrawn
    */
-  stakeCredential: StakeCredentialParams
+  stakeCredential: CredentialParams
   /**
    * Amount (in Lovelace) being withdrawn.
    * Note that Amount *must* be all accumulated rewards.
@@ -972,6 +1230,10 @@ export type DeviceCompatibility = {
    * Whether we support CIP-36 voting (signing vote-casts by HW devices)
    */
   supportsCIP36Vote: boolean
+  /**
+   * Whether we support Conway era transaction elements
+   */
+  supportsConway: boolean
 }
 
 /**
@@ -1231,6 +1493,111 @@ export type RequiredSigner =
       hashHex: string
     }
 
+export enum VoterType {
+  COMMITTEE_KEY_HASH = 0,
+  COMMITTEE_KEY_PATH = 100,
+  COMMITTEE_SCRIPT_HASH = 1,
+  DREP_KEY_HASH = 2,
+  DREP_KEY_PATH = 102,
+  DREP_SCRIPT_HASH = 3,
+  STAKE_POOL_KEY_HASH = 4,
+  STAKE_POOL_KEY_PATH = 104,
+}
+
+export type CommitteeKeyHashVoter = {
+  type: VoterType.COMMITTEE_KEY_HASH
+  keyHashHex: string
+}
+
+export type CommitteeKeyPathVoter = {
+  type: VoterType.COMMITTEE_KEY_PATH
+  keyPath: BIP32Path
+}
+
+export type CommitteeScriptHashVoter = {
+  type: VoterType.COMMITTEE_SCRIPT_HASH
+  scriptHashHex: string
+}
+
+export type DRepKeyHashVoter = {
+  type: VoterType.DREP_KEY_HASH
+  keyHashHex: string
+}
+
+export type DRepKeyPathVoter = {
+  type: VoterType.DREP_KEY_PATH
+  keyPath: BIP32Path
+}
+
+export type DRepScriptHashVoter = {
+  type: VoterType.DREP_SCRIPT_HASH
+  scriptHashHex: string
+}
+
+export type StakePoolKeyHashVoter = {
+  type: VoterType.STAKE_POOL_KEY_HASH
+  keyHashHex: string
+}
+
+export type StakePoolKeyPathVoter = {
+  type: VoterType.STAKE_POOL_KEY_PATH
+  keyPath: BIP32Path
+}
+
+export type Voter =
+  | CommitteeKeyHashVoter
+  | CommitteeKeyPathVoter
+  | CommitteeScriptHashVoter
+  | DRepKeyHashVoter
+  | DRepKeyPathVoter
+  | DRepScriptHashVoter
+  | StakePoolKeyHashVoter
+  | StakePoolKeyPathVoter
+
+export enum VoteOption {
+  NO = 0,
+  YES = 1,
+  ABSTAIN = 2,
+}
+
+export type VotingProcedure = {
+  /**
+   * Vote
+   */
+  vote: VoteOption
+  /**
+   * Anchor (optional)
+   */
+  anchor?: AnchorParams | null
+}
+
+export type GovActionId = {
+  /**
+   * UTxO's hash of the transaction
+   */
+  txHashHex: string
+  /**
+   * UTxO's governance action index
+   */
+  govActionIndex: number
+}
+
+export type Vote = {
+  /**
+   * Governance action to vote about
+   */
+  govActionId: GovActionId
+  /**
+   * Voting procedure
+   */
+  votingProcedure: VotingProcedure
+}
+
+export type VoterVotes = {
+  voter: Voter
+  votes: Array<Vote>
+}
+
 /**
  * Represents transaction to be signed by the device.
  * Note that this represents a *superset* of what Ledger can sign due to certain hardware app/security limitations.
@@ -1317,6 +1684,18 @@ export type Transaction = {
    * Reference inputs (UTxOs). Visible to Plutus scripts, but not spent.
    */
   referenceInputs?: Array<TxInput> | null
+  /**
+   * Voting procedures.
+   */
+  votingProcedures?: Array<VoterVotes> | null
+  /**
+   * Treasury amount (in Lovelace).
+   */
+  treasury?: bigint_like | null
+  /**
+   * Treasury donation (in Lovelace).
+   */
+  donation?: bigint_like | null
 }
 
 /**
@@ -1344,7 +1723,7 @@ export enum TransactionSigningMode {
    * The API witnesses
    * - all non-null [[TxInput.path]] on `inputs`
    * - all [[Withdrawal.path]] on `withdrawals`
-   * - all [[StakeCredentialParams.path]] properties on `certificates` for Stake registering/deregistering/delegating certificate.
+   * - all [[CredentialParams.path]] properties on `certificates` for Stake registering/deregistering/delegating certificate.
    */
   ORDINARY_TRANSACTION = 'ordinary_transaction',
 

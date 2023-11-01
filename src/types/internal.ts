@@ -14,6 +14,8 @@ import {
   TxAuxiliaryDataType,
   TxOutputDestinationType,
   TxOutputFormat,
+  VoteOption,
+  VoterType,
 } from './public'
 
 // Basic primitives
@@ -65,41 +67,125 @@ export const REWARD_ACCOUNT_HEX_LENGTH = 29
 export const ED25519_SIGNATURE_LENGTH = 64
 export const SCRIPT_DATA_HASH_LENGTH = 32
 export const DATUM_HASH_LENGTH = 32
+export const ANCHOR_HASH_LENGTH = 32
 
-export const enum StakeCredentialType {
+export const MAX_URL_LENGTH = 64
+export const MAX_DNS_NAME_LENGTH = 64
+
+export type ParsedInput = {
+  txHashHex: FixLenHexString<typeof TX_HASH_LENGTH>
+  outputIndex: Uint32_t
+  path: ValidBIP32Path | null
+}
+
+export const enum CredentialType {
   // enum values are affected by backwards-compatibility
   KEY_PATH = 0,
   KEY_HASH = 2,
   SCRIPT_HASH = 1,
 }
 
-export type ParsedStakeCredential =
+export type ParsedCredential =
   | {
-      type: StakeCredentialType.KEY_PATH
+      type: CredentialType.KEY_PATH
       path: ValidBIP32Path
     }
   | {
-      type: StakeCredentialType.KEY_HASH
+      type: CredentialType.KEY_HASH
       keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
     }
   | {
-      type: StakeCredentialType.SCRIPT_HASH
+      type: CredentialType.SCRIPT_HASH
       scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
     }
+
+export const enum DRepType {
+  KEY_HASH = 0,
+  KEY_PATH = 100,
+  SCRIPT_HASH = 1,
+  ABSTAIN = 2,
+  NO_CONFIDENCE = 3,
+}
+
+export type ParsedDRep =
+  | {
+      type: DRepType.KEY_PATH
+      path: ValidBIP32Path
+    }
+  | {
+      type: DRepType.KEY_HASH
+      keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+    }
+  | {
+      type: DRepType.SCRIPT_HASH
+      scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
+    }
+  | {
+      type: DRepType.ABSTAIN
+    }
+  | {
+      type: DRepType.NO_CONFIDENCE
+    }
+
+export type ParsedAnchor = {
+  url: VarLenAsciiString
+  hashHex: FixLenHexString<typeof ANCHOR_HASH_LENGTH>
+} & {__brand: 'anchor'}
 
 export type ParsedCertificate =
   | {
       type: CertificateType.STAKE_REGISTRATION
-      stakeCredential: ParsedStakeCredential
+      stakeCredential: ParsedCredential
+    }
+  | {
+      type: CertificateType.STAKE_REGISTRATION_CONWAY
+      stakeCredential: ParsedCredential
+      deposit: Uint64_str
     }
   | {
       type: CertificateType.STAKE_DEREGISTRATION
-      stakeCredential: ParsedStakeCredential
+      stakeCredential: ParsedCredential
+    }
+  | {
+      type: CertificateType.STAKE_DEREGISTRATION_CONWAY
+      stakeCredential: ParsedCredential
+      deposit: Uint64_str
     }
   | {
       type: CertificateType.STAKE_DELEGATION
-      stakeCredential: ParsedStakeCredential
+      stakeCredential: ParsedCredential
       poolKeyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+    }
+  | {
+      type: CertificateType.VOTE_DELEGATION
+      stakeCredential: ParsedCredential
+      dRep: ParsedDRep
+    }
+  | {
+      type: CertificateType.AUTHORIZE_COMMITTEE_HOT
+      coldCredential: ParsedCredential
+      hotCredential: ParsedCredential
+    }
+  | {
+      type: CertificateType.RESIGN_COMMITTEE_COLD
+      coldCredential: ParsedCredential
+      anchor: ParsedAnchor | null
+    }
+  | {
+      type: CertificateType.DREP_REGISTRATION
+      dRepCredential: ParsedCredential
+      deposit: Uint64_str
+      anchor: ParsedAnchor | null
+    }
+  | {
+      type: CertificateType.DREP_DEREGISTRATION
+      dRepCredential: ParsedCredential
+      deposit: Uint64_str
+    }
+  | {
+      type: CertificateType.DREP_UPDATE
+      dRepCredential: ParsedCredential
+      anchor: ParsedAnchor | null
     }
   | {
       type: CertificateType.STAKE_POOL_REGISTRATION
@@ -124,9 +210,78 @@ export type ParsedAssetGroup<T> = {
   tokens: Array<ParsedToken<T>>
 }
 
-export type ParsedNetwork = {
-  protocolMagic: Uint32_t
-  networkId: Uint8_t
+export type ParsedWithdrawal = {
+  amount: Uint64_str
+  stakeCredential: ParsedCredential
+}
+
+export const enum RequiredSignerType {
+  PATH = 0,
+  HASH = 1,
+}
+
+export type ParsedRequiredSigner =
+  | {
+      type: RequiredSignerType.HASH
+      hashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+    }
+  | {
+      type: RequiredSignerType.PATH
+      path: ValidBIP32Path
+    }
+
+export type ParsedGovActionId = {
+  txHashHex: FixLenHexString<typeof TX_HASH_LENGTH>
+  govActionIndex: Uint32_t
+}
+
+export type ParsedVotingProcedure = {
+  vote: VoteOption
+  anchor: ParsedAnchor | null
+}
+
+export type ParsedVote = {
+  govActionId: ParsedGovActionId
+  votingProcedure: ParsedVotingProcedure
+}
+
+export type ParsedVoter =
+  | {
+      type: VoterType.COMMITTEE_KEY_HASH
+      keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+    }
+  | {
+      type: VoterType.COMMITTEE_KEY_PATH
+      keyPath: ValidBIP32Path
+    }
+  | {
+      type: VoterType.COMMITTEE_SCRIPT_HASH
+      scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
+    }
+  | {
+      type: VoterType.DREP_KEY_HASH
+      keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+    }
+  | {
+      type: VoterType.DREP_KEY_PATH
+      keyPath: ValidBIP32Path
+    }
+  | {
+      type: VoterType.DREP_SCRIPT_HASH
+      scriptHashHex: FixLenHexString<typeof SCRIPT_HASH_LENGTH>
+    }
+  | {
+      type: VoterType.STAKE_POOL_KEY_HASH
+      keyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+    }
+  | {
+      type: VoterType.STAKE_POOL_KEY_PATH
+      keyPath: ValidBIP32Path
+    }
+
+export type ParsedVoterVotes = {
+  voter: ParsedVoter
+  votes: Array<ParsedVote>
 }
 
 export const CVOTE_PUBLIC_KEY_LENGTH = 32
@@ -166,6 +321,11 @@ export type ParsedCVoteDelegation =
       weight: Uint32_t
     }
 
+export type ParsedNetwork = {
+  protocolMagic: Uint32_t
+  networkId: Uint8_t
+}
+
 export type ParsedTransaction = {
   network: ParsedNetwork
   inputs: ParsedInput[]
@@ -184,6 +344,9 @@ export type ParsedTransaction = {
   collateralOutput: ParsedOutput | null
   totalCollateral: Uint64_str | null
   referenceInputs: ParsedInput[]
+  votingProcedures: ParsedVoterVotes[]
+  treasury: Uint64_str | null
+  donation: Uint64_str | null
 }
 
 export type ParsedSigningRequest = {
@@ -192,33 +355,7 @@ export type ParsedSigningRequest = {
   additionalWitnessPaths: ValidBIP32Path[]
 }
 
-export type ParsedInput = {
-  txHashHex: FixLenHexString<typeof TX_HASH_LENGTH>
-  outputIndex: Uint32_t
-  path: ValidBIP32Path | null
-}
-
-export type ParsedWithdrawal = {
-  amount: Uint64_str
-  stakeCredential: ParsedStakeCredential
-}
-
 export type ScriptDataHash = FixLenHexString<typeof SCRIPT_DATA_HASH_LENGTH>
-
-export const enum RequiredSignerType {
-  PATH = 0,
-  HASH = 1,
-}
-
-export type ParsedRequiredSigner =
-  | {
-      type: RequiredSignerType.HASH
-      hashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
-    }
-  | {
-      type: RequiredSignerType.PATH
-      path: ValidBIP32Path
-    }
 
 export type ParsedMargin = {
   numerator: Uint64_str

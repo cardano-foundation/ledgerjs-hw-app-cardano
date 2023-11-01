@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [7.0.0](TBD) - [TBD]
+
+Support for Conway era
+
+### Added
+
+- export of Conway-era keys (DReps, Constitutional Committee Hot and Cold keys)
+- Conway era transaction body items (new certificates, voting procedures, treasury, donation)
+- support for reduced features on Nano S (since Ledger app v7, due to memory limits)
+
+### Changed
+
+- names of credential types (e.g. StakeCredentialParamsType -> CredentialParamsType)
+
+
 ## [6.0.0](TBD) - [TBD]
 
 Support for CIP0036 voting

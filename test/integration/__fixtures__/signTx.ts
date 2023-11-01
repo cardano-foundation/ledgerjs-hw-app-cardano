@@ -4,8 +4,11 @@ import {
   BIP32Path,
   SignedTransactionData,
   TxRequiredSignerType,
-  StakeCredentialParamsType,
+  CredentialParamsType,
   TransactionSigningMode,
+  DRepParamsType,
+  VoterType,
+  VoteOption,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
 import {
@@ -301,7 +304,7 @@ export const testsShelleyNoCertificates: SignTxTestCase[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/0'/2/0"),
           },
           amount: 111,
@@ -364,7 +367,8 @@ export const testsShelleyNoCertificates: SignTxTestCase[] = [
 
 export const testsShelleyWithCertificates: SignTxTestCase[] = [
   {
-    testName: 'Sign tx with a stake registration path certificate',
+    testName:
+      'Sign tx with a stake registration path certificate --- pre-Conway',
     tx: {
       ...shelleyBase,
       certificates: [
@@ -372,7 +376,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           type: CertificateType.STAKE_REGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
           },
@@ -397,6 +401,45 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
     },
   },
   {
+    testName:
+      'Sign tx with a stake deregistration path certificate --- pre-Conway',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.STAKE_DEREGISTRATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048182018200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
+    expectedResult: {
+      txHashHex:
+        '8b143fae3b37748fee1decdc10fbfa554158b58fbc99623ecdd2ba7aa709e471',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '6136510eb91449474f6137c8d1c7c69eb518e3844a3e63a626be8cf4af91afa24e12f4fa578398bf0e7992e22dcfc5f9773fb8546b88c19e3abfdaa3bbe7a304',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            '77210ce6533a76db3673af1076bf3933747a8d81cabda80c8bc9c852c78685f8a42c9372721bdfe9b47611039364afb3391031211b5c427cfec0c5c505cfec0c',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
     testName: 'Sign tx with a stake delegation path certificate',
     tx: {
       ...shelleyBase,
@@ -405,7 +448,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           type: CertificateType.STAKE_DELEGATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
             poolKeyHashHex:
@@ -437,44 +480,6 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with a stake deregistration path certificate',
-    tx: {
-      ...shelleyBase,
-      certificates: [
-        {
-          type: CertificateType.STAKE_DEREGISTRATION,
-          params: {
-            stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
-              keyPath: str_to_path("1852'/1815'/0'/2/0"),
-            },
-          },
-        },
-      ],
-    },
-    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
-    additionalWitnessPaths: [],
-    txBody:
-      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048182018200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
-    expectedResult: {
-      txHashHex:
-        '8b143fae3b37748fee1decdc10fbfa554158b58fbc99623ecdd2ba7aa709e471',
-      witnesses: [
-        {
-          path: str_to_path("1852'/1815'/0'/0/0"),
-          witnessSignatureHex:
-            '6136510eb91449474f6137c8d1c7c69eb518e3844a3e63a626be8cf4af91afa24e12f4fa578398bf0e7992e22dcfc5f9773fb8546b88c19e3abfdaa3bbe7a304',
-        },
-        {
-          path: str_to_path("1852'/1815'/0'/2/0"),
-          witnessSignatureHex:
-            '77210ce6533a76db3673af1076bf3933747a8d81cabda80c8bc9c852c78685f8a42c9372721bdfe9b47611039364afb3391031211b5c427cfec0c5c505cfec0c',
-        },
-      ],
-      auxiliaryDataSupplement: null,
-    },
-  },
-  {
     testName: 'Sign tx and filter out witnesses with duplicate paths',
     tx: {
       ...shelleyBase,
@@ -483,7 +488,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
           },
@@ -492,7 +497,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
           },
@@ -546,7 +551,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           type: CertificateType.STAKE_REGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
           },
@@ -601,7 +606,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
           },
@@ -631,6 +636,449 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
           path: str_to_path("1852'/1815'/0'/2/0"),
           witnessSignatureHex:
             '1c926e24d825d699a4b2d5d7dc95d717d4c19a0196ed120f115c76a168a7e661e6c393c4f97fe7b7533f20017be834fae53711265a3fe52b4c4211ac18990007',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const testsConwayWithCertificates: SignTxTestCase[] = [
+  {
+    testName: 'Sign tx with a stake registration path certificate --- Conway',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.STAKE_REGISTRATION_CONWAY,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            deposit: '17',
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048183078200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c11',
+    expectedResult: {
+      txHashHex:
+        '26ab8ebe60e70fffd59eb186ed6903ccd5a27c2468da72c5033b596dd41d1745',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '128c993b5873029f98df738191462c6e8903ec2a765f7ddcc3a5722b5555e4ef2cccc4464bbdfb606627fe48e97f2db94f68c9d71b4076c93db682bd357ffa0b',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            'bf22ca4b78fa64692a8cfbc375611deb1d60043db880ff000aeba7e4970492daa4e814c79960977816a91f9dd179bec6f127d37b8955589674e385b9a757d507',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with a stake deregistration path certificate --- Conway',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.STAKE_DEREGISTRATION_CONWAY,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            deposit: '17',
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048183088200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c11',
+    expectedResult: {
+      txHashHex:
+        '58dc7ddba14500538e5de842066bb3a1979687c6ae0c2472d8f1851b4f011e26',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'b0a196ce81930fedb90551d395f7ba2ff8671f1528d1eec85e3d2398174a1bf6c9bc2afc6c14891cf11a24e16c4a6d39f73689f5947170d0f0d9a53418c76400',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            'c9ee07d3ee9ed1be5576e1ed371393335a98270f2a316ebec6c702e519db1b68a8cfb67039355a46a3f9d96051c74ae4e13e41d1ad05c3a401a8365369ea8407',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with vote delegation certificates',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            dRep: {
+              type: DRepParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/3/0"),
+            },
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            dRep: {
+              type: DRepParamsType.KEY_HASH,
+              keyHashHex:
+                '7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+            },
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            dRep: {
+              type: DRepParamsType.SCRIPT_HASH,
+              scriptHashHex:
+                '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+            },
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            dRep: {
+              type: DRepParamsType.ABSTAIN,
+            },
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+            dRep: {
+              type: DRepParamsType.NO_CONFIDENCE,
+            },
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048583098200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a183098200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8200581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c883098200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8201581c1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c883098200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c810283098200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8103',
+    expectedResult: {
+      txHashHex:
+        'b65bfdff7d247058d60b55958111c5b45322fdb3806be0e86a09382bafce3457',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '1a9dd087bce2b189a1d2a3ff6e57017bf6cef86d51ca944a8faf9c04cddafd4336e4bdebc29450c82b766f766b4a7982b5cee9731edb85f9025c7826880de106',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            '8100907b358d25330003ea0f9606c031256f2ca060322138e3e118676cdea4e949b1a2217e714f6c5686a31fe70e80bcb2d460f8b7f12a7f5926c1211502c70f',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with AUTHORIZE_COMMITTEE_HOT certificates',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.AUTHORIZE_COMMITTEE_HOT,
+          params: {
+            coldCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/4/0"),
+            },
+            hotCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/5/0"),
+            },
+          },
+        },
+        {
+          type: CertificateType.AUTHORIZE_COMMITTEE_HOT,
+          params: {
+            coldCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/4/0"),
+            },
+            hotCredential: {
+              type: CredentialParamsType.KEY_HASH,
+              keyHashHex:
+                '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+            },
+          },
+        },
+        {
+          type: CertificateType.AUTHORIZE_COMMITTEE_HOT,
+          params: {
+            coldCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/4/0"),
+            },
+            hotCredential: {
+              type: CredentialParamsType.SCRIPT_HASH,
+              scriptHashHex:
+                '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+            },
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a0483830e8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba68200581cd098c6a0a621f3343abe55877ee88fd5a83363e3c7887b3c48839092830e8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba68200581c1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8830e8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba68201581c1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+    expectedResult: {
+      txHashHex:
+        'f39823031913a09286755ec2383da73a7248e36f6fc92685928296ec81e43b76',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '73e3c0105404e90f6cccebbd9a1e9bb119c4f0a3d5e489a52d15caa477db35802fefe83dbec748b2c388b9dc193821eac068f519edb89ed2c550bc28e51a7203',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/4/0"),
+          witnessSignatureHex:
+            'b8075d9666648e02f3e2ab6355fd786b3864cfc18a0070beb60813745a36c68e03b9face68231efc0d13da11069f2b3c7ca9a2c7fbf2119970071607e5c18d01',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with RESIGN_COMMITTEE_COLD certificates',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.RESIGN_COMMITTEE_COLD,
+          params: {
+            coldCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/4/0"),
+            },
+            anchor: {
+              url: 'www.vacuumlabs.com',
+              hashHex:
+                '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+            },
+          },
+        },
+        {
+          type: CertificateType.RESIGN_COMMITTEE_COLD,
+          params: {
+            coldCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/4/0"),
+            },
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a0482830f8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba682727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef830f8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba6f6',
+    expectedResult: {
+      txHashHex:
+        '1817433dfe1082c43c67375977e08b6cf7654161b9f8227bdae79f962cd5d391',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '84ee1d069b3b851330a2c1bd4c2423500551400c53182a36792f1559148409bdda2ccaf0bdfc9a7885042092b9e316b12d21e3912cc47579f190df8a80b28c04',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/4/0"),
+          witnessSignatureHex:
+            '6d2a387455c55590c3ea9f5432dbb55ecdded67db163d53ba5ac3ad4ad30a4a715990866440ba164ba790bf24c86192d4d68c86382a299cd5de56f8293fe540a',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with DREP_REGISTRATION certificates',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.DREP_REGISTRATION,
+          params: {
+            dRepCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/3/0"),
+            },
+            deposit: '19',
+            anchor: {
+              url: 'www.vacuumlabs.com',
+              hashHex:
+                '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+            },
+          },
+        },
+        {
+          type: CertificateType.DREP_REGISTRATION,
+          params: {
+            dRepCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/3/0"),
+            },
+            deposit: '19',
+            anchor: null,
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048284108200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a11382727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef84108200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a113f6',
+    expectedResult: {
+      txHashHex:
+        'd029be88cc6c18578cd49713438270d80b64c0c126b2ce90b8418d6b020e2395',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'ce8634b0306f71be765b655488276e86a56cbe6e77ffdd14e40851394cf6842d695f4184df0dcb8e76dd5918ec9b1b65976b31bf54c5621b34b1ff58d631540d',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/3/0"),
+          witnessSignatureHex:
+            'd1600ce316bac100729207b08550d53f77834983fa4ae1285d8b8478d813cb8a9321588026e40521147718ba3708c533e4b37f890bc9b66ac0456534e926ce06',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with DREP_DEREGISTRATION certificate',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.DREP_DEREGISTRATION,
+          params: {
+            dRepCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/3/0"),
+            },
+            deposit: '19',
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048183118200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a113',
+    expectedResult: {
+      txHashHex:
+        'ddac3d3a8a4554f7dd1797a7bfdd4ec19ddf13d20f3b9ea79ed37d5663b51497',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '903e42d8f48c60d4bacc8aa953bff66c79ef8b48c2eece243f03d32146f9d213e6595809bc6c13e2ebb13f990ad0ef7bb937eab6a9d251c35aae7bafc2c51702',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/3/0"),
+          witnessSignatureHex:
+            '56786aa0710832c8ef584ebe964473cd21eb15b4b60057a5d96973f6a4687176d1f7cbecde585f7b875fc75ad73a9404733219d61ee542363ef4baa8a1bb1504',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with DREP_UPDATE certificates',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.DREP_UPDATE,
+          params: {
+            dRepCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/3/0"),
+            },
+            anchor: {
+              url: 'www.vacuumlabs.com',
+              hashHex:
+                '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+            },
+          },
+        },
+        {
+          type: CertificateType.DREP_UPDATE,
+          params: {
+            dRepCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/3/0"),
+            },
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048283128200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a182727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef83128200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1f6',
+    expectedResult: {
+      txHashHex:
+        '85b23eda26bd9f6f9f4ce80f7d1e9c0cf3afcb33a39c0102711a81a96715d2e6',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'e65f9e0d99db02f1a39b8af92b9f7e8f6509b24cbd6f4492e19d699f5f7e08d627a64def7408405ff0aadd7504bacfa279a2f1ba550a765f43d06fcac16f1009',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/3/0"),
+          witnessSignatureHex:
+            '88b20b4bc43f6d45981c658689e6d80886b6aeb02b654363c421462f855654039d5ff3595be6778934b4eff2a24c3a082789f95559bd6e8afa2e8bab339e910d',
         },
       ],
       auxiliaryDataSupplement: null,
@@ -670,7 +1118,7 @@ export const testsMultisig: SignTxTestCase[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.SCRIPT_HASH,
+            type: CredentialParamsType.SCRIPT_HASH,
             scriptHashHex:
               '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
           },
@@ -704,7 +1152,7 @@ export const testsMultisig: SignTxTestCase[] = [
           type: CertificateType.STAKE_REGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.SCRIPT_HASH,
+              type: CredentialParamsType.SCRIPT_HASH,
               scriptHashHex:
                 '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
             },
@@ -738,7 +1186,7 @@ export const testsMultisig: SignTxTestCase[] = [
           type: CertificateType.STAKE_DELEGATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.SCRIPT_HASH,
+              type: CredentialParamsType.SCRIPT_HASH,
               scriptHashHex:
                 '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
             },
@@ -774,7 +1222,7 @@ export const testsMultisig: SignTxTestCase[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.SCRIPT_HASH,
+              type: CredentialParamsType.SCRIPT_HASH,
               scriptHashHex:
                 '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
             },
@@ -1112,7 +1560,7 @@ export const testsAlonzoTrezorComparison: SignTxTestCase[] = [
           type: CertificateType.STAKE_REGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.SCRIPT_HASH,
+              type: CredentialParamsType.SCRIPT_HASH,
               scriptHashHex:
                 '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
             },
@@ -1122,7 +1570,7 @@ export const testsAlonzoTrezorComparison: SignTxTestCase[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.SCRIPT_HASH,
+              type: CredentialParamsType.SCRIPT_HASH,
               scriptHashHex:
                 '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
             },
@@ -1132,7 +1580,7 @@ export const testsAlonzoTrezorComparison: SignTxTestCase[] = [
           type: CertificateType.STAKE_DELEGATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.SCRIPT_HASH,
+              type: CredentialParamsType.SCRIPT_HASH,
               scriptHashHex:
                 '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
             },
@@ -1144,7 +1592,7 @@ export const testsAlonzoTrezorComparison: SignTxTestCase[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.SCRIPT_HASH,
+            type: CredentialParamsType.SCRIPT_HASH,
             scriptHashHex:
               '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
           },
@@ -1289,7 +1737,7 @@ export const testsMultidelegation: SignTxTestCase[] = [
           type: CertificateType.STAKE_REGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/2"),
             },
           },
@@ -1298,7 +1746,7 @@ export const testsMultidelegation: SignTxTestCase[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/2"),
             },
           },
@@ -1307,7 +1755,7 @@ export const testsMultidelegation: SignTxTestCase[] = [
           type: CertificateType.STAKE_DELEGATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/2"),
             },
             poolKeyHashHex:
@@ -1318,7 +1766,7 @@ export const testsMultidelegation: SignTxTestCase[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/0'/2/3"),
           },
           amount: 1000,
@@ -1374,6 +1822,388 @@ export const testsMultidelegation: SignTxTestCase[] = [
           path: str_to_path("1852'/1815'/0'/2/5"),
           witnessSignatureHex:
             'af7bb2a9740c4a3de2ec239850523a43dd0689a1a73fc11dce399bfbfbf527c140d5751b45fc8bb733be2eab4610f56e947190c5dcbd0b72e3b236388cd17608',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const testsConwayWithoutCertificates: SignTxTestCase[] = [
+  {
+    testName: 'Sign tx with treasury',
+    tx: {
+      ...shelleyBase,
+      treasury: 27,
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a15181b',
+    expectedResult: {
+      txHashHex:
+        'c3fb3f4330d9f051b567db11d56ab8174cba081373936c9fde80d809b178326f',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'd709944dbc56080b194455a76474981e56c64715b8e5182a58f9f5bba20357f2e02945431145e6fe418b1953424ef1b88e3328f373da1d24cb164d6eb8e0a80f',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with donation',
+    tx: {
+      ...shelleyBase,
+      donation: 28,
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a16181c',
+    expectedResult: {
+      txHashHex:
+        '618718225c0c876fd429ca25957a23ad894eaebc1831365c5b41cba50993a1bf',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'eef7538ecd01708a3483900155c3c1545188b671f626a4622864cbfe41a51bfd4c47ccb9ee8accd7891bd0291bce3e44c8363a30ffbe80864af1a29a74239c00',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with treasury and donation',
+    tx: {
+      ...shelleyBase,
+      treasury: 27,
+      donation: 28,
+    },
+    signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a15181b16181c',
+    expectedResult: {
+      txHashHex:
+        '37e2cf72599186d1ec571af568ea0ab39f7f73ba2e8c5f4725bfd0d4fb8c58e7',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '90627003619a5512c5600542bfe5ece07909433948a601d599f51bc0b3d19b5c8084cf72d2b6ae6962918392c540d60105c32626804986e99364e6966f5e1504',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+const vote1 = {
+  govActionId: {
+    txHashHex:
+      '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+    govActionIndex: 3,
+  },
+  votingProcedure: {
+    vote: VoteOption.ABSTAIN,
+    anchor: {
+      url: 'www.vacuumlabs.com',
+      hashHex:
+        '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+    },
+  },
+}
+const vote2 = {
+  govActionId: {
+    txHashHex:
+      '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+    govActionIndex: 3,
+  },
+  votingProcedure: {
+    vote: VoteOption.NO,
+    anchor: null,
+  },
+}
+const vote3 = {
+  govActionId: {
+    txHashHex:
+      '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+    govActionIndex: 3,
+  },
+  votingProcedure: {
+    vote: VoteOption.YES,
+    anchor: null,
+  },
+}
+
+export const testsConwayVotingProcedures: SignTxTestCase[] = [
+  {
+    testName: 'Sign tx with voting procedures, COMMITTEE_KEY_PATH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.COMMITTEE_KEY_PATH,
+            keyPath: str_to_path("1852'/1815'/0'/5/0"),
+          },
+          votes: [vote1],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18200581cd098c6a0a621f3343abe55877ee88fd5a83363e3c7887b3c48839092a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+    expectedResult: {
+      txHashHex:
+        '1878027bc8ffa79d279f5c739a18817598382f1f181c0722954642e28a552417',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '740d2c38e72b017566ee04cce0329795df75b9c5b5ab40045faabaafba16e80894169467a62db6e6a7110e9c3591819e9ba023c40598309c1db401ea6b84d107',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/5/0"),
+          witnessSignatureHex:
+            '87045d01fed7fe418601fd529ada773e40e48973760a10bff18702b76ad50d689cc17f350faba86aeea587441d3bc0856c3d650644cdf67e00ebdf4be9768f0c',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, DREP_KEY_PATH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.DREP_KEY_PATH,
+            keyPath: str_to_path("1852'/1815'/0'/3/0"),
+          },
+          votes: [vote2],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18202581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7038200f6',
+    expectedResult: {
+      txHashHex:
+        'c76996d3e2bce5d61c19e5c6f4e69dbda650f14b706b95c440e4f4dbe56f584c',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '8ed6756e5913a5cf965fda822a61c0f1691e795709104194483915d383b3ed4dbeae8c1258fd4fa2a915e0a573c3a8fe5ee2bf1c56652e02f2729cdea7f43a03',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/3/0"),
+          witnessSignatureHex:
+            '901cb9f18ada4c07fb7b132fc7859d6e1a3beb42934f58d4d44fb8fbeef066a349482d4c159ecd54b61b4cb34e4db1fc5c57cc3b6bb4a040cf61d6dd88f73901',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, STAKE_POOL_KEY_PATH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.STAKE_POOL_KEY_PATH,
+            keyPath: str_to_path("1853'/1815'/0'/0'"),
+          },
+          votes: [vote3],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18204581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7038201f6',
+    expectedResult: {
+      txHashHex:
+        'a883078593d6e64486f54bb975230f47d43e4a92f3a6bdef60a522197610c947',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '8fcacfc066da36cab795cc820433fc4cef8cc0b8f3b62fb95a32da1056aea878411e8f6b891d1f77881f1b95903fb6c4fd4c3922b44de7dc790909a1d1dcb800',
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            '745e2b96ae05133dba57695aff7a37e35a2c21f3c53174f280df5661974626839ed7cf6362a75db50349c30e935e2993a8493ef2a600e96fc67542cede5bbf02',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, COMMITTEE_KEY_HASH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.COMMITTEE_KEY_HASH,
+            keyHashHex:
+              '7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+          },
+          votes: [vote1],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18200581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+    expectedResult: {
+      txHashHex:
+        'e19f0cdcd735f6ea53f5673e593008af68a182f66c1027aa31fd8da449b7cf5b',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '6d4d4be3cae6d5cac5721fe29b6bbc445bfce24b6ebc6be663043e240a575a96238e0beea8391a080fb060e290b7661413c275ef3ba0458af86df30ed62f6202',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, COMMITTEE_SCRIPT_HASH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.COMMITTEE_SCRIPT_HASH,
+            scriptHashHex:
+              '7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+          },
+          votes: [vote2],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18201581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7038200f6',
+    expectedResult: {
+      txHashHex:
+        '05af307259f8f07f34c536ce037b1a443c7a1be8e62f644c37364d3210b744d8',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '803bd1793c4afdf303d9ae5e7ec2eef7344663f0cfc77a5f8327fb51c693d6a13f07066cb01ab12d575a1fc45f2747ff3a2302edd5048a74b6e205bed0384e00',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, DREP_KEY_HASH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.DREP_KEY_HASH,
+            keyHashHex:
+              '7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+          },
+          votes: [vote3],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18202581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7038201f6',
+    expectedResult: {
+      txHashHex:
+        '4cc800d11a4464c352841e393543981bfeb35dfef04037519c0170dce87c5198',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '7d8002af012f8ec0b67b3679f80f9119794062827834ded271be2e014970dd4206d6a53936d557daa74996d85812d6f541bad9578a05927d0c0778d63463f409',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, DREP_SCRIPT_HASH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.DREP_SCRIPT_HASH,
+            scriptHashHex:
+              '7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+          },
+          votes: [vote1],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18203581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+    expectedResult: {
+      txHashHex:
+        '00881f4f414a32bd7e3e06036935b8a37944dc3d348216df6a1470fb4e2f04ae',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'efd40f0cb90f93b3c664a1a8aba72941c570c07351db43054a399be4b0020d052397c8fdc28f2ed949d29b0d2040d5c296f447c0e104ed6ae58c553405e8c202',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName: 'Sign tx with voting procedures, STAKE_POOL_KEY_HASH voter',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.STAKE_POOL_KEY_HASH,
+            keyHashHex:
+              '7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8',
+          },
+          votes: [vote1],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18204581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+    expectedResult: {
+      txHashHex:
+        '623dd691a60d25e379424eceae1052acff119013c56bd2b73e8e1e822d3292bd',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '5e9b164e24e0752c1c9987df83aa4ff9a54455c799231c191e8b150ad7af83db36cd5f91941f65b853f883b6721e4b9f724788fffa2371aaf5644ca53ccc1308',
         },
       ],
       auxiliaryDataSupplement: null,

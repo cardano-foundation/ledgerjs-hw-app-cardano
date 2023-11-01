@@ -20,7 +20,7 @@ describe('getVersion', () => {
 
     const {version, compatibility} = await ada.getVersion()
 
-    expect(version.major).to.equal(6)
+    expect(version.major).to.equal(7)
     expect(version.minor).to.equal(0)
 
     expect(version.flags.isDebug).to.equal(true)
@@ -43,6 +43,7 @@ describe('getVersion', () => {
       supportsReqSignersInOrdinaryTx: true,
       supportsBabbage: true,
       supportsCIP36Vote: true,
+      supportsConway: true,
     })
   })
 })

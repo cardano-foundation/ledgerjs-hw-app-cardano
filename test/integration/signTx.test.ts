@@ -4,6 +4,9 @@ import {
   testsAlonzoTrezorComparison,
   testsBabbageTrezorComparison,
   testsByron,
+  testsConwayVotingProcedures,
+  testsConwayWithCertificates,
+  testsConwayWithoutCertificates,
   testsMary,
   testsMultidelegation,
   testsMultisig,
@@ -34,6 +37,18 @@ describeSignTxPositiveTest(
 describeSignTxPositiveTest(
   'signTxShelleyWithCertificates',
   testsShelleyWithCertificates,
+)
+describeSignTxPositiveTest(
+  'signTxConwayWithoutCertificates',
+  testsConwayWithoutCertificates,
+)
+describeSignTxPositiveTest(
+  'signTxConwayWithCertificates',
+  testsConwayWithCertificates,
+)
+describeSignTxPositiveTest(
+  'signTxConwayVotingProcedures',
+  testsConwayVotingProcedures,
 )
 describeSignTxPositiveTest('signTxMultisig', testsMultisig)
 describeSignTxPositiveTest('signTxAllegra', testsAllegra)

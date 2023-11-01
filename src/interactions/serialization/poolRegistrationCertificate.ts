@@ -22,6 +22,7 @@ import {
   uint16_to_buf,
   uint32_to_buf,
   uint64_to_buf,
+  serializeCoin,
 } from '../../utils/serialize'
 
 const SignTxIncluded = Object.freeze({
@@ -43,8 +44,8 @@ export function serializePoolInitialParamsLegacy(
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     serializePoolKeyLegacy(pool.poolKey),
     hex_to_buf(pool.vrfHashHex),
-    uint64_to_buf(pool.pledge),
-    uint64_to_buf(pool.cost),
+    serializeCoin(pool.pledge),
+    serializeCoin(pool.cost),
     uint64_to_buf(pool.margin.numerator),
     uint64_to_buf(pool.margin.denominator),
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -56,8 +57,8 @@ export function serializePoolInitialParamsLegacy(
 
 export function serializeFinancials(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
-    uint64_to_buf(pool.pledge),
-    uint64_to_buf(pool.cost),
+    serializeCoin(pool.pledge),
+    serializeCoin(pool.cost),
     uint64_to_buf(pool.margin.numerator),
     uint64_to_buf(pool.margin.denominator),
   ])

@@ -15,7 +15,7 @@ import {
   serializeOptionFlag,
   uint8_to_buf,
   uint32_to_buf,
-  uint64_to_buf,
+  serializeCoin,
 } from '../../utils/serialize'
 import {getCompatibility} from '../getVersion'
 import {serializeAddressParams} from './addressParams'
@@ -68,7 +68,7 @@ export function serializeTxOutputBasicParams(
   return Buffer.concat([
     serializationFormatBuffer,
     serializeTxOutputDestination(output.destination, version),
-    uint64_to_buf(output.amount),
+    serializeCoin(output.amount),
     uint32_to_buf(output.tokenBundle.length as Uint32_t),
     includeDatumBuffer,
     includeScriptBuffer,

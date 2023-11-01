@@ -35,7 +35,7 @@ export function serializeTxInit(
 ) {
   const appAwareOfMint =
     getCompatibility(version).supportsMint || version.flags.isAppXS
-  // even though XS app doesn't support minting, it does expect the flag value
+  // even if XS app doesn't support minting, it does expect the flag value
   // (we want to keep the APDU serialization uniform)
   const mintBuffer = appAwareOfMint
     ? serializeOptionFlag(tx.mint != null)
@@ -63,6 +63,15 @@ export function serializeTxInit(
   const referenceInputsBuffer = getCompatibility(version).supportsBabbage
     ? uint32_to_buf(tx.referenceInputs.length as Uint32_t)
     : Buffer.from([])
+  const votingProceduresBuffer = getCompatibility(version).supportsConway
+    ? uint32_to_buf(tx.votingProcedures.length as Uint32_t)
+    : Buffer.from([])
+  const includeTreasuryBuffer = getCompatibility(version).supportsConway
+    ? serializeOptionFlag(tx.treasury != null)
+    : Buffer.from([])
+  const includeDonationBuffer = getCompatibility(version).supportsConway
+    ? serializeOptionFlag(tx.donation != null)
+    : Buffer.from([])
 
   //  we have re-ordered numWitnesses in wireDataBuffer since Babbage
   const witnessBufferLegacy = getCompatibility(version).supportsBabbage
@@ -83,6 +92,8 @@ export function serializeTxInit(
     includeNetworkIdBuffer,
     includeCollateralOutputBuffer,
     includeTotalCollateralBuffer,
+    includeTreasuryBuffer,
+    includeDonationBuffer,
     _serializeSigningMode(signingMode),
     uint32_to_buf(tx.inputs.length as Uint32_t),
     uint32_to_buf(tx.outputs.length as Uint32_t),
@@ -92,6 +103,7 @@ export function serializeTxInit(
     collateralInputsBuffer,
     requiredSignersBuffer,
     referenceInputsBuffer,
+    votingProceduresBuffer,
     witnessBufferBabbage,
   ])
 }

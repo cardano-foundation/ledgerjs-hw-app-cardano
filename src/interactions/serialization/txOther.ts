@@ -1,3 +1,4 @@
+import {VoterType} from '../../types/public'
 import {InvalidDataReason} from '../../errors/invalidDataReason'
 import type {
   Int64_str,
@@ -11,16 +12,20 @@ import type {
   Uint64_str,
   ValidBIP32Path,
   Version,
+  ParsedVoterVotes,
+  ParsedVoter,
 } from '../../types/internal'
-import {RequiredSignerType, StakeCredentialType} from '../../types/internal'
+import {RequiredSignerType, CredentialType} from '../../types/internal'
 import {assert, unreachable} from '../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
-  stake_credential_to_buf,
+  serializeCredential,
   uint8_to_buf,
   uint32_to_buf,
   uint64_to_buf,
+  serializeCoin,
+  serializeAnchor,
 } from '../../utils/serialize'
 import {getCompatibility} from '../getVersion'
 import type {SerializeTokenAmountFn} from '../signTx'
@@ -38,24 +43,20 @@ export function serializeTxWithdrawal(
 ): Buffer {
   if (getCompatibility(version).supportsMultisigTransaction) {
     return Buffer.concat([
-      uint64_to_buf(withdrawal.amount),
-      stake_credential_to_buf(withdrawal.stakeCredential),
+      serializeCoin(withdrawal.amount),
+      serializeCredential(withdrawal.stakeCredential),
     ])
   } else {
     // pre-multisig
     assert(
-      withdrawal.stakeCredential.type === StakeCredentialType.KEY_PATH,
+      withdrawal.stakeCredential.type === CredentialType.KEY_PATH,
       InvalidDataReason.WITHDRAWAL_INVALID_STAKE_CREDENTIAL,
     )
     return Buffer.concat([
-      uint64_to_buf(withdrawal.amount),
+      serializeCoin(withdrawal.amount),
       path_to_buf(withdrawal.stakeCredential.path),
     ])
   }
-}
-
-export function serializeTxFee(fee: Uint64_str): Buffer {
-  return Buffer.concat([uint64_to_buf(fee)])
 }
 
 export function serializeTxTtl(ttl: Uint64_str): Buffer {
@@ -117,6 +118,45 @@ export function serializeRequiredSigner(
   }
 }
 
-export function serializeTotalCollateral(totalCollateral: Uint64_str): Buffer {
-  return Buffer.concat([uint64_to_buf(totalCollateral)])
+function serializeVoter(voter: ParsedVoter): Buffer {
+  switch (voter.type) {
+    case VoterType.COMMITTEE_KEY_HASH:
+    case VoterType.DREP_KEY_HASH:
+    case VoterType.STAKE_POOL_KEY_HASH:
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        hex_to_buf(voter.keyHashHex),
+      ])
+    case VoterType.COMMITTEE_KEY_PATH:
+    case VoterType.DREP_KEY_PATH:
+    case VoterType.STAKE_POOL_KEY_PATH:
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        path_to_buf(voter.keyPath),
+      ])
+    case VoterType.COMMITTEE_SCRIPT_HASH:
+    case VoterType.DREP_SCRIPT_HASH:
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        hex_to_buf(voter.scriptHashHex),
+      ])
+    default:
+      unreachable(voter)
+  }
+}
+
+export function serializeVoterVotes(voterVotes: ParsedVoterVotes): Buffer {
+  assert(voterVotes.votes.length === 1, 'too few / too many votes')
+  const vote = voterVotes.votes[0]
+  return Buffer.concat([
+    serializeVoter(voterVotes.voter),
+    Buffer.concat([
+      hex_to_buf(vote.govActionId.txHashHex),
+      uint32_to_buf(vote.govActionId.govActionIndex),
+    ]),
+    Buffer.concat([
+      uint8_to_buf(vote.votingProcedure.vote as Uint8_t),
+      serializeAnchor(vote.votingProcedure.anchor),
+    ]),
+  ])
 }

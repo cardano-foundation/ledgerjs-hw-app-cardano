@@ -78,6 +78,33 @@ export const testsShelleyUsual: TestCase[] = [
         'fb037474fc75e64745f7fd9f44b4bcbc58d81cae2209f2f5c1f77501e9bb43df',
     },
   },
+  {
+    path: "1852'/1815'/0'/3/0",
+    expected: {
+      publicKey:
+        '7cc18df2fbd3ee1b16b76843b18446679ab95dbcd07b7833b66a9407c0709e37',
+      chainCode:
+        '01d881e1c04fed8defa9a3e8bd3cf85bd975f813ff8eb622d20a4375a07d6bc9',
+    },
+  },
+  {
+    path: "1852'/1815'/0'/4/0",
+    expected: {
+      publicKey:
+        'bc8c8a37d6ab41339bb073e72ce2e776cefed98d1a6d070ea5fada80dc7d6737',
+      chainCode:
+        '6f58406a51d33bb35e98884cbadced9bc94f65a752001ad5f4788af07b2ec0fe',
+    },
+  },
+  {
+    path: "1852'/1815'/1'/5/0",
+    expected: {
+      publicKey:
+        '624142a80217b95ca2fc5b0c1f8d74e26e5683621c430c7bc7eebca6ee541a58',
+      chainCode:
+        '92a8c64cfdf1af08e78c2ba59bef496eb34ddf24bdf0f91404a962415a7a0810',
+    },
+  },
 ]
 
 export const testsShelleyUnusual: TestCase[] = [
@@ -106,6 +133,33 @@ export const testsShelleyUnusual: TestCase[] = [
         '1763dfbba10629d5e9ed8f8714889f82f0bdb4b62af22b19b607713919f93e4d',
       chainCode:
         'b46ecc1459e0ad4ae7fa1b9a7440584b6177472db300304a3191a91b7fb0e1e8',
+    },
+  },
+  {
+    path: "1852'/1815'/101'/3/0",
+    expected: {
+      publicKey:
+        'a4fecb8d8febd80d1f7eefe3d1705b03405e219df1f6aa4c2e227b5909df873e',
+      chainCode:
+        'a0aac4f3cfe62e20ad66c5f737979eecc4472c61c41d8d5f4e06cf13a2386648',
+    },
+  },
+  {
+    path: "1852'/1815'/101'/4/0",
+    expected: {
+      publicKey:
+        '6967cc28a4665b319405b5ce8dae9ae6c89967fb3068f7f84c66bf6abbab94f2',
+      chainCode:
+        '66381ec0b35d2805256f5d57ec47abf948a3206902868ed80b04a5b0e81cf1de',
+    },
+  },
+  {
+    path: "1852'/1815'/101'/5/0",
+    expected: {
+      publicKey:
+        '1b520336538452b69d5562e5d714bfe7aeeb7cf9afd1d8574af1823c5636f9eb',
+      chainCode:
+        '5e21bf9678c54b880d2f594f3b0cd1c000f8516f809fc0f6aaaa35e2d2030e40',
     },
   },
 ]

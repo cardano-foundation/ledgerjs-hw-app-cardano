@@ -23,7 +23,7 @@ import {
   PoolKeyType,
   PoolOwnerType,
   PoolRewardAccountType,
-  StakeCredentialParamsType,
+  CredentialParamsType,
   TransactionSigningMode,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
@@ -114,28 +114,28 @@ const poolRetirementParam: PoolRetirementParams = {
 
 const stakeRegistrationPathParam: StakeRegistrationParams = {
   stakeCredential: {
-    type: StakeCredentialParamsType.KEY_PATH,
+    type: CredentialParamsType.KEY_PATH,
     keyPath: str_to_path("1852'/1815'/0'/2/0"),
   },
 }
 
 const stakeRegistrationScriptHashParam: StakeRegistrationParams = {
   stakeCredential: {
-    type: StakeCredentialParamsType.SCRIPT_HASH,
+    type: CredentialParamsType.SCRIPT_HASH,
     scriptHashHex: '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
   },
 }
 
 const stakeDeregistrationParam: StakeDeregistrationParams = {
   stakeCredential: {
-    type: StakeCredentialParamsType.KEY_PATH,
+    type: CredentialParamsType.KEY_PATH,
     keyPath: str_to_path("1852'/1815'/0'/2/0"),
   },
 }
 
 const stakeDelegationParam: StakeDelegationParams = {
   stakeCredential: {
-    type: StakeCredentialParamsType.KEY_PATH,
+    type: CredentialParamsType.KEY_PATH,
     keyPath: str_to_path("1852'/1815'/0'/2/0"),
   },
   poolKeyHashHex: '',
@@ -256,7 +256,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.SCRIPT_HASH,
+            type: CredentialParamsType.SCRIPT_HASH,
             scriptHashHex:
               '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
           },
@@ -285,7 +285,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.SCRIPT_HASH,
+            type: CredentialParamsType.SCRIPT_HASH,
             scriptHashHex:
               '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
           },
@@ -1058,7 +1058,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
           type: CertificateType.STAKE_REGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/0/0"),
             },
           },
@@ -1085,7 +1085,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
     errCls: DeviceStatusError,
     errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
     rejectReason:
-      InvalidDataReason.SIGN_MODE_MULTISIG__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_SCRIPT,
+      InvalidDataReason.SIGN_MODE_MULTISIG__CERTIFICATE_CREDENTIAL_ONLY_AS_SCRIPT,
   },
 ]
 
@@ -1122,7 +1122,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.SCRIPT_HASH,
+            type: CredentialParamsType.SCRIPT_HASH,
             scriptHashHex:
               '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
           },
@@ -1142,7 +1142,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/0'/0/0"),
           },
           amount: 1000,
@@ -1161,7 +1161,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/0'/2/0"),
           },
           amount: 1000,
@@ -1181,7 +1181,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/0'/0/0"),
           },
           amount: 1000,
@@ -1701,7 +1701,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/1'/2/0"),
             },
           },
@@ -1737,7 +1737,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
         {
           amount: 1000,
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/1'/2/0"),
           },
         },
@@ -1774,7 +1774,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/1'/2/0"),
             },
           },
@@ -1811,7 +1811,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
         {
           amount: 1000,
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/1'/2/0"),
           },
         },
@@ -1848,7 +1848,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
           type: CertificateType.STAKE_DEREGISTRATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_PATH,
+              type: CredentialParamsType.KEY_PATH,
               keyPath: str_to_path("1852'/1815'/0'/2/0"),
             },
           },
@@ -1858,7 +1858,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
         {
           amount: 1000,
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_PATH,
+            type: CredentialParamsType.KEY_PATH,
             keyPath: str_to_path("1852'/1815'/1'/2/0"),
           },
         },

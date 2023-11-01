@@ -18,6 +18,8 @@ import {
   RelayType,
   REWARD_ACCOUNT_HEX_LENGTH,
   VRF_KEY_HASH_LENGTH,
+  MAX_DNS_NAME_LENGTH,
+  MAX_URL_LENGTH,
 } from '../types/internal'
 import type {
   MultiHostRelayParams,
@@ -46,10 +48,10 @@ import {
   parseIntFromStr,
   parseUint64_str,
   validate,
+  parseCoin,
 } from '../utils/parse'
 import {hex_to_buf} from '../utils/serialize'
 import {
-  MAX_LOVELACE_SUPPLY_STR,
   POOL_REGISTRATION_OWNERS_MAX,
   POOL_REGISTRATION_RELAYS_MAX,
 } from './constants'
@@ -211,7 +213,7 @@ function parseDnsName(
   errMsg: InvalidDataReason,
 ): VarLenAsciiString {
   validate(isString(dnsName), errMsg)
-  validate(dnsName.length <= 64, errMsg)
+  validate(dnsName.length <= MAX_DNS_NAME_LENGTH, errMsg)
   validate(dnsName.length > 0, errMsg)
   // eslint-disable-next-line no-control-regex
   validate(/^[\x00-\x7F]*$/.test(dnsName), errMsg)
@@ -283,7 +285,7 @@ function parsePoolMetadataParams(
   )
   // Additional length check
   validate(
-    url.length <= 64,
+    url.length <= MAX_URL_LENGTH,
     InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
   )
 
@@ -309,14 +311,12 @@ export function parsePoolParams(
     VRF_KEY_HASH_LENGTH,
     InvalidDataReason.POOL_REGISTRATION_INVALID_VRF_KEY_HASH,
   )
-  const pledge = parseUint64_str(
+  const pledge = parseCoin(
     params.pledge,
-    {max: MAX_LOVELACE_SUPPLY_STR},
     InvalidDataReason.POOL_REGISTRATION_INVALID_PLEDGE,
   )
-  const cost = parseUint64_str(
+  const cost = parseCoin(
     params.cost,
-    {max: MAX_LOVELACE_SUPPLY_STR},
     InvalidDataReason.POOL_REGISTRATION_INVALID_COST,
   )
   const margin = parseMargin(params.margin)

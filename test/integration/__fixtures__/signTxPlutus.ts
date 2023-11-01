@@ -1,6 +1,6 @@
 import {CertificateType, Networks, TxRequiredSignerType} from '../../../src/Ada'
 import {
-  StakeCredentialParamsType,
+  CredentialParamsType,
   TransactionSigningMode,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
@@ -283,7 +283,7 @@ export const testsAlonzo: SignTxTestCase[] = [
           type: CertificateType.STAKE_DELEGATION,
           params: {
             stakeCredential: {
-              type: StakeCredentialParamsType.KEY_HASH,
+              type: CredentialParamsType.KEY_HASH,
               keyHashHex:
                 '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
             },
@@ -295,7 +295,7 @@ export const testsAlonzo: SignTxTestCase[] = [
       withdrawals: [
         {
           stakeCredential: {
-            type: StakeCredentialParamsType.KEY_HASH,
+            type: CredentialParamsType.KEY_HASH,
             keyHashHex:
               '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
           },

@@ -27,17 +27,14 @@ import {
 } from '../types/public'
 import {
   isArray,
+  parseCoin,
   parseHexString,
   parseHexStringOfLength,
   parseUint64_str,
   validate,
 } from '../utils/parse'
 import {parseAddress} from './address'
-import {
-  ASSET_GROUPS_MAX,
-  MAX_LOVELACE_SUPPLY_STR,
-  TOKENS_IN_GROUP_MAX,
-} from './constants'
+import {ASSET_GROUPS_MAX, TOKENS_IN_GROUP_MAX} from './constants'
 
 type ParseTokenAmountFn<T> = (
   val: unknown,
@@ -241,9 +238,8 @@ export function parseTxOutput(
       ? TxOutputFormat.MAP_BABBAGE
       : TxOutputFormat.ARRAY_LEGACY
 
-  const amount = parseUint64_str(
+  const amount = parseCoin(
     output.amount,
-    {max: MAX_LOVELACE_SUPPLY_STR},
     InvalidDataReason.OUTPUT_INVALID_AMOUNT,
   )
 

@@ -10,7 +10,7 @@ import type {
   TxOutput,
 } from '../../../src/Ada'
 import {
-  StakeCredentialParamsType,
+  CredentialParamsType,
   PoolKeyType,
   PoolRewardAccountType,
   CertificateType,
@@ -260,7 +260,7 @@ export const certificates: Record<
     type: CertificateType.STAKE_DELEGATION,
     params: {
       stakeCredential: {
-        type: StakeCredentialParamsType.KEY_PATH,
+        type: CredentialParamsType.KEY_PATH,
         keyPath: str_to_path("1852'/1815'/0'/2/0"),
       },
       poolKeyHashHex:
@@ -271,7 +271,7 @@ export const certificates: Record<
     type: 0,
     params: {
       stakeCredential: {
-        type: StakeCredentialParamsType.KEY_PATH,
+        type: CredentialParamsType.KEY_PATH,
         keyPath: str_to_path("1852'/1815'/0'/2/0"),
       },
     },

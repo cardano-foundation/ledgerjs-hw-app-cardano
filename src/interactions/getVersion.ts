@@ -63,34 +63,37 @@ export function getCompatibility(version: Version): DeviceCompatibility {
   // We restrict forward compatibility only to backward-compatible semver changes
   const v2_2 =
     isLedgerAppVersionAtLeast(version, 2, 2) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v2_3 =
     isLedgerAppVersionAtLeast(version, 2, 3) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v2_4 =
     isLedgerAppVersionAtLeast(version, 2, 4) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v3_0 =
     isLedgerAppVersionAtLeast(version, 3, 0) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v4_0 =
     isLedgerAppVersionAtLeast(version, 4, 0) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v4_1 =
     isLedgerAppVersionAtLeast(version, 4, 1) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v5_0 =
     isLedgerAppVersionAtLeast(version, 5, 0) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
   const v6_0 =
     isLedgerAppVersionAtLeast(version, 6, 0) &&
-    isLedgerAppVersionAtMost(version, 6, Infinity)
+    isLedgerAppVersionAtMost(version, 7, Infinity)
+  const v7_0 =
+    isLedgerAppVersionAtLeast(version, 7, 0) &&
+    isLedgerAppVersionAtMost(version, 7, Infinity)
 
   const isAppXS = version.flags.isAppXS
 
   return {
     isCompatible: v2_2,
-    recommendedVersion: v2_2 ? null : '6.0',
+    recommendedVersion: v2_2 ? null : '7.0',
     supportsByronAddressDerivation: v2_2 && !isAppXS,
     supportsMary: v2_2,
     supportsCatalystRegistration: v2_3, // CIP-15
@@ -106,6 +109,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
     supportsReqSignersInOrdinaryTx: v4_1,
     supportsBabbage: v5_0,
     supportsCIP36Vote: v6_0,
+    supportsConway: v7_0,
   }
 }
 

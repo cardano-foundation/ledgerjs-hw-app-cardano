@@ -2,9 +2,11 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import SpeculosTransport from '@ledgerhq/hw-transport-node-speculos'
 
+import * as blake2 from 'blake2'
+
 import {
   Certificate,
-  StakeCredentialParamsType,
+  CredentialParamsType,
   TxInput,
   TxOutput,
   Withdrawal,
@@ -32,17 +34,23 @@ const getVersion = async (appAda: Ada) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getExtendedPublicKey = async (appAda: Ada) => {
   console.log('getExtendedPublicKey')
-  console.log(
-    await appAda.getExtendedPublicKey({
-      path: [HARDENED + 44, HARDENED + 1815, HARDENED + 0],
-    }),
-  )
+  const result = await appAda.getExtendedPublicKey({
+      path: [HARDENED + 1852, HARDENED + 1815, HARDENED + 0],
+    })
+  console.log(result)
   /*
     {
-      publicKeyHex: '09353fce36f0b6eb8b8042d94289387af815dc2e31f6455cc0272adcb784358f',
-      chainCodeHex: '7fec2640ed66eb3f6170ddef57a934298ad87cbeb233df243da1ecd9bd506762'
+      publicKeyHex: '0d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc',
+      chainCodeHex: '231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f'
     }
   */
+
+  // useful for crafting hw-cli tests
+  const b2 = blake2.createHash('blake2b', {digestLength: 28})
+  b2.update(Buffer.from(result.publicKeyHex, 'hex'))
+  console.log(b2.digest('hex'))
+  // dc0b21682c420507046b81d94fc72b756350b1682ba8020c5b5c5fa3
+
   console.log('-'.repeat(40))
 }
 
@@ -130,6 +138,7 @@ const showAddress = async (appAda: Ada) => {
   console.log('-'.repeat(40))
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const signTransaction = async (appAda: Ada) => {
   console.log('signTransaction')
 
@@ -216,7 +225,7 @@ const signTransaction = async (appAda: Ada) => {
       type: CertificateType.STAKE_REGISTRATION,
       params: {
         stakeCredential: {
-          type: StakeCredentialParamsType.KEY_PATH,
+          type: CredentialParamsType.KEY_PATH,
           keyPath: [1852 + HARDENED, 1815 + HARDENED, 0 + HARDENED, 2, 0],
         },
       },
@@ -225,7 +234,7 @@ const signTransaction = async (appAda: Ada) => {
       type: CertificateType.STAKE_DELEGATION,
       params: {
         stakeCredential: {
-          type: StakeCredentialParamsType.KEY_PATH,
+          type: CredentialParamsType.KEY_PATH,
           keyPath: [1852 + HARDENED, 1815 + HARDENED, 0 + HARDENED, 2, 0],
         },
         poolKeyHashHex:
@@ -237,7 +246,7 @@ const signTransaction = async (appAda: Ada) => {
   const withdrawals: Withdrawal[] = [
     {
       stakeCredential: {
-        type: StakeCredentialParamsType.KEY_PATH,
+        type: CredentialParamsType.KEY_PATH,
         keyPath: [1852 + HARDENED, 1815 + HARDENED, 0 + HARDENED, 2, 0],
       },
       amount: '1000',
