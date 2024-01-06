@@ -349,10 +349,15 @@ export type ParsedTransaction = {
   donation: Uint64_str | null
 }
 
+export type ParsedTransactionOptions = {
+  tagCborSets: boolean
+}
+
 export type ParsedSigningRequest = {
   tx: ParsedTransaction
   signingMode: TransactionSigningMode
   additionalWitnessPaths: ValidBIP32Path[]
+  options: ParsedTransactionOptions
 }
 
 export type ScriptDataHash = FixLenHexString<typeof SCRIPT_DATA_HASH_LENGTH>

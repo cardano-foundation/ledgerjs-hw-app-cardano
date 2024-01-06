@@ -3,6 +3,8 @@ import type {
   Uint8_t,
   Uint32_t,
   Version,
+  ParsedTransactionOptions,
+  Uint64_str,
 } from '../../types/internal'
 import {TransactionSigningMode} from '../../types/internal'
 import {assert} from '../../utils/assert'
@@ -10,6 +12,7 @@ import {
   serializeOptionFlag,
   uint8_to_buf,
   uint32_to_buf,
+  uint64_to_buf,
 } from '../../utils/serialize'
 import {getCompatibility} from '../getVersion'
 
@@ -27,12 +30,32 @@ const _serializeSigningMode = (mode: TransactionSigningMode): Buffer => {
   return uint8_to_buf(value)
 }
 
+const enum OptionFlags {
+  TAG_CBOR_SETS = 1,
+}
+
+function serializeTxOptions(options: ParsedTransactionOptions): Buffer {
+  // we reserve 64 bits for options in the APDU for future use
+  // the code below would need to be changed if a typescript number
+  // was not enough to fit all the future flags
+  let optionFlags = 0
+  if (options.tagCborSets) {
+    optionFlags += OptionFlags.TAG_CBOR_SETS
+  }
+  return uint64_to_buf(optionFlags.toString() as Uint64_str)
+}
+
 export function serializeTxInit(
   tx: ParsedTransaction,
   signingMode: TransactionSigningMode,
   numWitnesses: number,
+  options: ParsedTransactionOptions,
   version: Version,
 ) {
+  const optionsBuffer = getCompatibility(version).supportsConway
+    ? serializeTxOptions(options)
+    : Buffer.from([])
+
   const appAwareOfMint =
     getCompatibility(version).supportsMint || version.flags.isAppXS
   // even if XS app doesn't support minting, it does expect the flag value
@@ -82,6 +105,7 @@ export function serializeTxInit(
     : Buffer.from([])
 
   return Buffer.concat([
+    optionsBuffer,
     uint8_to_buf(tx.network.networkId),
     uint32_to_buf(tx.network.protocolMagic),
     serializeOptionFlag(tx.ttl != null),

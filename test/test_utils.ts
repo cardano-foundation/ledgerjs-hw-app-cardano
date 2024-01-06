@@ -216,6 +216,7 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
       tx,
       signingMode,
       additionalWitnessPaths,
+      options,
       txBody,
       expectedResult,
       unsupportedInAppXS,
@@ -233,6 +234,7 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
           tx,
           signingMode,
           additionalWitnessPaths,
+          options,
         })
 
         if (isAppXS && unsupportedInAppXS) {

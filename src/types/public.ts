@@ -1806,6 +1806,14 @@ export enum TransactionSigningMode {
   PLUTUS_TRANSACTION = 'plutus_transaction',
 }
 
+export type TransactionOptions = {
+  /**
+   * If true, serialize transactions with 258 tags for all sets (optional since Conway).
+   * If false or not given, do not use the tags.
+   */
+  tagCborSets?: boolean
+}
+
 /**
  * Transaction signing request.
  * This represents the transaction user wants to sign.
@@ -1814,6 +1822,10 @@ export enum TransactionSigningMode {
  */
 export type SignTransactionRequest = {
   /**
+   * Transaction to be signed
+   */
+  tx: Transaction
+  /**
    * Mode in which we want to sign the transaction.
    * Ledger has certain limitations (see [[TransactionSigningMode]] in detail) due to which
    * it cannot sign arbitrary combination of all transaction features.
@@ -1821,14 +1833,13 @@ export type SignTransactionRequest = {
    */
   signingMode: TransactionSigningMode
   /**
-   * Transaction to be signed
-   */
-  tx: Transaction
-
-  /**
    * Additional witness paths that are not gathered from the transaction body, eg. mint witnesses
    */
   additionalWitnessPaths?: BIP32Path[]
+  /**
+   * Additional options used in transaction processing (e.g. details of serialization).
+   */
+  options?: TransactionOptions
 }
 
 /**

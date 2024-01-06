@@ -1,6 +1,10 @@
 import {InvalidData} from '../errors'
 import {InvalidDataReason} from '../errors/invalidDataReason'
-import type {ParsedSigningRequest, ParsedTransaction} from '../types/internal'
+import type {
+  ParsedSigningRequest,
+  ParsedTransaction,
+  ParsedTransactionOptions,
+} from '../types/internal'
 import {
   ParsedCertificate,
   ParsedInput,
@@ -17,7 +21,11 @@ import {
   CredentialType,
   TX_HASH_LENGTH,
 } from '../types/internal'
-import type {SignTransactionRequest, Transaction} from '../types/public'
+import type {
+  SignTransactionRequest,
+  Transaction,
+  TransactionOptions,
+} from '../types/public'
 import {
   Certificate,
   RequiredSigner,
@@ -392,11 +400,20 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
   }
 }
 
+function parseTxOptions(
+  options: TransactionOptions | undefined,
+): ParsedTransactionOptions {
+  return {
+    tagCborSets: options?.tagCborSets || false,
+  }
+}
+
 export function parseSignTransactionRequest(
   request: SignTransactionRequest,
 ): ParsedSigningRequest {
   const tx = parseTransaction(request.tx)
   const signingMode = parseSigningMode(request.signingMode)
+  const options = parseTxOptions(request.options)
 
   validate(
     isArray(request.additionalWitnessPaths ?? []),
@@ -861,5 +878,5 @@ export function parseSignTransactionRequest(
       unreachable(signingMode)
   }
 
-  return {tx, signingMode, additionalWitnessPaths}
+  return {tx, signingMode, additionalWitnessPaths, options}
 }
