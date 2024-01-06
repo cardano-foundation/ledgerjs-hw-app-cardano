@@ -180,6 +180,9 @@ export class Ada {
     ]
     this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
     this._send = async (params: SendParams): Promise<Buffer> => {
+      if (params.data.length > 255) {
+        throw new Error('APDU too large, likely a bug')
+      }
       let response = await wrapConvertDeviceStatusError(this.transport.send)(
         CLA,
         params.ins,

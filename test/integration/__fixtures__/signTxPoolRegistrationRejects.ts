@@ -180,7 +180,7 @@ export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
             ...defaultPoolRegistration,
             metadata: {
               metadataUrl:
-                'https://www.vacuumlabs.com/aaaaaaaaaaaaaaaaaaaaaaaasampleUrl.json',
+                'a'.repeat(129),
               metadataHashHex:
                 'cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb',
             },
