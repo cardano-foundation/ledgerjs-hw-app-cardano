@@ -245,6 +245,8 @@ export enum InvalidDataReason {
    * typically resulting from a detailed analysis of key derivation paths
    */
   LEDGER_POLICY = "Action rejected by Ledger's security policy",
+  // canonical ordering wrong (cannot be checked in LedgerJS for withdrawals)
+  INVALID_DATA_SUPPLIED_TO_LEDGER = 'Invalid data supplied to Ledger',
 
   INVALID_B2_HASH = 'invalid blake2 hashing',
 }

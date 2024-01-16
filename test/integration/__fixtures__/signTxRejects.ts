@@ -1116,6 +1116,36 @@ export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelle
 
 export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
   {
+    testName:
+      'Reject tx with invalid canonical ordering of withdrawals',
+      // ledgerjs cannot validate this, so this test is only meaningful for a ledger device
+    tx: {
+      ...mainnetFeeTtl,
+      inputs: [inputs.utxoShelley],
+      outputs: [],
+      withdrawals: [
+        {
+          amount: 33333,
+          stakeCredential: {
+            keyPath: [ 2147485500, 2147485463, 2147483648, 2, 1 ],
+            type: 0
+          }
+        },
+        {
+          amount: 33333,
+          stakeCredential: {
+            keyPath: [ 2147485500, 2147485463, 2147483648, 2, 0 ],
+            type: 0
+          }
+        },
+      ]
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    errCls: DeviceStatusError,
+    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    rejectReason: InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER,
+  },
+  {
     testName: 'Script hash as stake credential in Ordinary Tx',
     tx: {
       ...shelleyBase,
