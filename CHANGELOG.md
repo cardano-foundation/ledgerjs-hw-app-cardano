@@ -14,11 +14,13 @@ Support for Conway era
 
 - export of Conway-era keys (DReps, Constitutional Committee Hot and Cold keys)
 - Conway era transaction body items (new certificates, voting procedures, treasury, donation)
+- optional CBOR tag 258 in CDDL sets
 - support for reduced features on Nano S (since Ledger app v7, due to memory limits)
 
 ### Changed
 
 - names of credential types (e.g. StakeCredentialParamsType -> CredentialParamsType)
+- increased max. URL and DNS name length to 128
 
 
 ## [6.0.0](TBD) - [TBD]
