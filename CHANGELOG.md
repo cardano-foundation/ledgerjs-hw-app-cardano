@@ -5,8 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [7.0.1](TBD) - [TBD]
 
-## [7.0.0](TBD) - [TBD]
+### Changed
+
+- using `slice` instead of `Buffer.subarray` to avoid a bug (see https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/issues/37)
+
+
+## [7.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v6.0.0...v7.0.0) - [January 17th 2024]
 
 Support for Conway era
 
@@ -23,7 +29,7 @@ Support for Conway era
 - increased max. URL and DNS name length to 128
 
 
-## [6.0.0](TBD) - [TBD]
+## [6.0.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v5.1.0...v6.0.0) - [February 16th 2023]
 
 Support for CIP0036 voting
 

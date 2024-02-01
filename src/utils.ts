@@ -25,7 +25,7 @@ export function chunkBy(data: Buffer, chunkLengths: Array<number>): Buffer[] {
   const restLength = data.length - sum(chunkLengths)
 
   for (const c of [...chunkLengths, restLength]) {
-    result.push(data.subarray(offset, offset + c))
+    result.push(data.slice(offset, offset + c))
 
     offset += c
   }
@@ -38,9 +38,9 @@ export function stripRetcodeFromResponse(response: Buffer): Buffer {
   assert(response.length >= 2, 'response too short')
 
   const L = response.length - 2
-  const retcode = buf_to_uint16(response.subarray(L, L + 2))
+  const retcode = buf_to_uint16(response.slice(L, L + 2))
   assert(retcode === 0x9000, `Invalid retcode ${retcode}`)
-  return response.subarray(0, L)
+  return response.slice(0, L)
 }
 
 export default {

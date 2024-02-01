@@ -45,7 +45,7 @@ export function* signCVote(
   // INIT
   const initDataBuffer = Buffer.concat([
     uint32_to_buf(votecastBytes.length as Uint32_t),
-    votecastBytes.subarray(start, end),
+    votecastBytes.slice(start, end),
   ])
   yield send({
     p1: P1.STAGE_INIT,
@@ -62,7 +62,7 @@ export function* signCVote(
     yield send({
       p1: P1.STAGE_CHUNK,
       p2: P2.UNUSED,
-      data: votecastBytes.subarray(start, end),
+      data: votecastBytes.slice(start, end),
       expectedResponseLength: 0,
     })
     start = end

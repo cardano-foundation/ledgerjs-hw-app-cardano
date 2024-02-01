@@ -627,8 +627,8 @@ function* signTx_setAuxiliaryData(
         AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH,
     })
 
-    const auxDataHash = response.subarray(0, AUXILIARY_DATA_HASH_LENGTH)
-    const signature = response.subarray(
+    const auxDataHash = response.slice(0, AUXILIARY_DATA_HASH_LENGTH)
+    const signature = response.slice(
       AUXILIARY_DATA_HASH_LENGTH,
       AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH,
     )
