@@ -294,6 +294,51 @@ export type OperationalCertificate = {
   coldKeyPath: BIP32Path
 }
 
+/**
+ * CIP-8 message signing
+ *
+ * The content of the `address` field in the protected header in Sig_structure in CIP-8
+ * is not defined. Some dApps use actual Cardano address, but in many cases it would be
+ * more useful to just use a key hash (e.g. for messages signed by DRep keys).
+ * This is implemented on Ledger.
+ */
+export enum MessageAddressFieldType {
+  ADDRESS = 'address',
+  KEY_HASH = 'key_hash',
+}
+
+/**
+ * CIP-8 message signing
+ *
+ * @category Basic types
+ */
+export type MessageData = {
+  // message as bytes in hex
+  // Note: If the message is too long to be displayed at once, it must be hashed.
+  // MAX_CIP8_MSG_FIRST_CHUNK_ASCII_SIZE 198
+  // MAX_CIP8_MSG_FIRST_CHUNK_HEX_SIZE 99
+  messageHex: string
+
+  // the message will be signed with this key
+  signingPath: BIP32Path
+
+  // whether to hash the message when creating payload
+  hashPayload: boolean
+
+  // if true, message will be displayed in hex even if it is ascii
+  preferHexDisplay?: boolean
+} & (
+  | {
+      addressFieldType: MessageAddressFieldType.ADDRESS
+      address: DeviceOwnedAddress
+      network: Network
+    }
+  | {
+      addressFieldType: MessageAddressFieldType.KEY_HASH
+      // the hash of key derived from witnessPath is used in the CIP-8 `address` field
+    }
+)
+
 /** CIP-36 vote
  *
  * @category Basic types
@@ -1234,6 +1279,10 @@ export type DeviceCompatibility = {
    * Whether we support Conway era transaction elements
    */
   supportsConway: boolean
+  /**
+   * Whether we support CIP-8 message signing
+   */
+  supportsMessageSigning: boolean
 }
 
 /**
@@ -1274,6 +1323,17 @@ export type ExtendedPublicKey = {
  */
 export type OperationalCertificateSignature = {
   signatureHex: string
+}
+
+/**
+ * CIP-8 message signature
+ * @category Basic types
+ * @see [[Ada.signMessage]]
+ */
+export type SignedMessageData = {
+  signatureHex: string
+  signingPublicKeyHex: string
+  addressFieldHex: string
 }
 
 /**

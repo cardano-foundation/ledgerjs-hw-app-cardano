@@ -5,6 +5,7 @@ import {
   CIP36VoteDelegationType,
   CIP36VoteRegistrationFormat,
   DatumType,
+  MessageAddressFieldType,
   NativeScriptType,
   PoolKeyType,
   PoolOwnerType,
@@ -57,6 +58,7 @@ export {
 } from './public'
 // Our types
 export const EXTENDED_PUBLIC_KEY_LENGTH = 64
+export const PUBLIC_KEY_LENGTH = 32
 export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28
 export const TX_HASH_LENGTH = 32
@@ -602,6 +604,22 @@ export type ParsedOperationalCertificate = {
   issueCounter: Uint64_str
   coldKeyPath: ValidBIP32Path
 }
+
+export type ParsedMessageData =
+  | {
+      messageHex: HexString
+      signingPath: ValidBIP32Path
+      hashPayload: boolean
+      isAscii: boolean
+    } & (
+      | {
+          addressFieldType: MessageAddressFieldType.ADDRESS
+          address: ParsedAddressParams
+        }
+      | {
+          addressFieldType: MessageAddressFieldType.KEY_HASH
+        }
+    )
 
 export type ParsedCVote = {
   voteCastDataHex: HexString

@@ -88,6 +88,9 @@ export function getCompatibility(version: Version): DeviceCompatibility {
   const v7_0 =
     isLedgerAppVersionAtLeast(version, 7, 0) &&
     isLedgerAppVersionAtMost(version, 7, Infinity)
+  const v7_1 =
+    isLedgerAppVersionAtLeast(version, 7, 1) &&
+    isLedgerAppVersionAtMost(version, 7, Infinity)
 
   const isAppXS = version.flags.isAppXS
 
@@ -110,6 +113,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
     supportsBabbage: v5_0,
     supportsCIP36Vote: v6_0,
     supportsConway: v7_0,
+    supportsMessageSigning: v7_1,
   }
 }
 

@@ -30,6 +30,8 @@ import {runTests} from './interactions/runTests'
 import {showAddress} from './interactions/showAddress'
 import {signCVote} from './interactions/signCVote'
 import {signOperationalCertificate} from './interactions/signOperationalCertificate'
+import {signMessage} from './interactions/signMessage'
+import {parseMessageData} from './parsing/messageData'
 import {signTransaction} from './interactions/signTx'
 import {parseAddress} from './parsing/address'
 import {parseCVote} from './parsing/cVote'
@@ -42,6 +44,7 @@ import {parseSignTransactionRequest} from './parsing/transaction'
 import type {
   ParsedAddressParams,
   ParsedCVote,
+  ParsedMessageData,
   ParsedNativeScript,
   ParsedOperationalCertificate,
   ParsedSigningRequest,
@@ -54,6 +57,8 @@ import type {
   DeviceCompatibility,
   DeviceOwnedAddress,
   ExtendedPublicKey,
+  MessageData,
+  SignedMessageData,
   NativeScript,
   NativeScriptHash,
   NativeScriptHashDisplayFormat,
@@ -367,6 +372,18 @@ export class Ada {
     return yield* signOperationalCertificate(version, request)
   }
 
+  async signMessage(request: SignMessageRequest): Promise<SignMessageResponse> {
+    const parsedMsgData = parseMessageData(request)
+
+    return interact(this._signMessage(parsedMsgData), this._send)
+  }
+
+  /** @ignore */
+  *_signMessage(request: ParsedMessageData): Interaction<SignedMessageData> {
+    const version = yield* getVersion()
+    return yield* signMessage(version, request)
+  }
+
   async signCIP36Vote(
     request: SignCIP36VoteRequest,
   ): Promise<SignCIP36VoteResponse> {
@@ -499,6 +516,19 @@ export type SignOperationalCertificateRequest = OperationalCertificate
  * @see [[SignOperationalCertificateRequest]]
  */
 export type SignOperationalCertificateResponse = OperationalCertificateSignature
+
+/**
+ * Sign CIP-8 message ([[Ada.signMessage]]) request data
+ * @category Main
+ * @see [[SignMessageResponse]]
+ */
+export type SignMessageRequest = MessageData
+/**
+ * Sign CIP-8 message ([[Ada.signMessage]]) response data
+ * @category Main
+ * @see [[SignMessageRequest]]
+ */
+export type SignMessageResponse = SignedMessageData
 
 /**
  * Sign CIP36 vote ([[Ada.signCIP36Vote]]) request data

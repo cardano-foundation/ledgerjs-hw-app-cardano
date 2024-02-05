@@ -227,6 +227,10 @@ export enum InvalidDataReason {
   OPERATIONAL_CERTIFICATE_INVALID_ISSUE_COUNTER = 'invalid operational certificate issue counter',
   OPERATIONAL_CERTIFICATE_INVALID_COLD_KEY_PATH = 'invalid operational certificate cold key path',
 
+  MESSAGE_DATA_INVALID_WITNESS_PATH = 'CIP-8 message signing: invalid witness path',
+  MESSAGE_DATA_INVALID_MESSAGE_HEX = 'CIP-8 message signing: invalid message hex string',
+  MESSAGE_DATA_LONG_NON_HASHED_MSG = 'CIP-8 message signing: non-hashed message too long',
+
   CVOTE_INVALID_VOTECAST_DATA = 'invalid votecast data for CIP36 vote',
   CVOTE_INVALID_WITNESS = 'invalid witness for CIP36 vote',
 

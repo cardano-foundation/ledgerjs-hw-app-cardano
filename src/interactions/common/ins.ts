@@ -9,6 +9,7 @@ export const enum INS {
   SIGN_TX = 0x21,
   SIGN_OPERATIONAL_CERTIFICATE = 0x22,
   SIGN_CIP36_VOTE = 0x23,
+  SIGN_MESSAGE = 0x24,
 
   RUN_TESTS = 0xf0,
 }
