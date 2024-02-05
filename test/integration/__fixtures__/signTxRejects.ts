@@ -1116,9 +1116,8 @@ export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelle
 
 export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName:
-      'Reject tx with invalid canonical ordering of withdrawals',
-      // ledgerjs cannot validate this, so this test is only meaningful for a ledger device
+    testName: 'Reject tx with invalid canonical ordering of withdrawals',
+    // ledgerjs cannot validate this, so this test is only meaningful for a ledger device
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -1127,18 +1126,18 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
         {
           amount: 33333,
           stakeCredential: {
-            keyPath: [ 2147485500, 2147485463, 2147483648, 2, 1 ],
-            type: 0
-          }
+            keyPath: [2147485500, 2147485463, 2147483648, 2, 1],
+            type: 0,
+          },
         },
         {
           amount: 33333,
           stakeCredential: {
-            keyPath: [ 2147485500, 2147485463, 2147483648, 2, 0 ],
-            type: 0
-          }
+            keyPath: [2147485500, 2147485463, 2147483648, 2, 0],
+            type: 0,
+          },
         },
-      ]
+      ],
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,

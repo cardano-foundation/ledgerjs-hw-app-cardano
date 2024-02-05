@@ -35,8 +35,8 @@ const getVersion = async (appAda: Ada) => {
 const getExtendedPublicKey = async (appAda: Ada) => {
   console.log('getExtendedPublicKey')
   const result = await appAda.getExtendedPublicKey({
-      path: [HARDENED + 1852, HARDENED + 1815, HARDENED + 0],
-    })
+    path: [HARDENED + 1852, HARDENED + 1815, HARDENED + 0],
+  })
   console.log(result)
   /*
     {

@@ -137,7 +137,9 @@ export function describeSignTxRejects(name: string, testList: any[]) {
         if (rejectReason === InvalidDataReason.LEDGER_POLICY) {
           return
         }
-        if (rejectReason === InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER) {
+        if (
+          rejectReason === InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER
+        ) {
           return
         }
         const response = ada.signTransaction({
