@@ -197,7 +197,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg11: Should correctly sign a short non-hashed hex message with address in address field',
+      'msg11: Should correctly sign a short non-hashed hex message with base address in address field',
     signMessageData: {
       messageHex: 'deadbeef',
       signingPath: str_to_path("1852'/1815'/0'/5/0"),
@@ -219,6 +219,31 @@ export const tests: TestCase[] = [
         '650eb87ddfffe7babd505f2d66c2db28b1c05ac54f9121589107acd6eb20cc2c',
       addressFieldHex:
         '015a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b31d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
+    },
+  },
+  {
+    testName:
+      'msg12: Should correctly sign a short non-hashed hex message with reward address in address field',
+    signMessageData: {
+      messageHex: 'deadbeef',
+      signingPath: str_to_path("1852'/1815'/0'/5/0"),
+      hashPayload: false,
+      addressFieldType: MessageAddressFieldType.ADDRESS,
+      address: {
+        type: AddressType.REWARD_KEY,
+        params: {
+          stakingPath: str_to_path("1852'/1815'/0'/2/0"),
+        },
+      },
+      network: Networks.Mainnet,
+    },
+    expected: {
+      signatureHex:
+        '95044039aafdfedbd7a16b323475076e4960b78eb8e1864671f05e822ec975c219163ae7830103825777abe6e1bf854a302a96538ed129ff6131e29e8562b003',
+      signingPublicKeyHex:
+        '650eb87ddfffe7babd505f2d66c2db28b1c05ac54f9121589107acd6eb20cc2c',
+      addressFieldHex:
+        'e11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
     },
   },
 ]

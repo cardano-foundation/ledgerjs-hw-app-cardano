@@ -17,6 +17,8 @@ import {
   Networks,
   TransactionSigningMode,
   TxOutputDestinationType,
+  MessageAddressFieldType,
+  MessageData,
 } from '../src/Ada'
 import {
   base58_encode,
@@ -287,6 +289,34 @@ const signTransaction = async (appAda: Ada) => {
   console.log('-'.repeat(40))
 }
 
+const signMessage = async (appAda: Ada) => {
+  console.log('signMessage')
+  const messageData = {
+    messageHex:
+      '7b22707572706f7365223a224b6f696f73204163636f756e7420566572696669636174696f6e222c226163636f756e74223a2265316163353563626432383964373965343932656339393962623864613637386637643238303532366461313031336532643330393738613662222c226e6f6e6365223a313731313632373430343536367d',
+    signingPath: [1852 + HARDENED, 1815 + HARDENED, 0 + HARDENED, 2, 0],
+    hashPayload: false,
+    preferHexDisplay: false,
+    addressFieldType: MessageAddressFieldType.ADDRESS,
+    address: {
+      type: AddressType.REWARD_KEY,
+      params: {
+        stakingPath: [1852 + HARDENED, 1815 + HARDENED, 0 + HARDENED, 2, 0],
+      },
+    },
+    network: {protocolMagic: 764824073, networkId: 1},
+  } as MessageData
+
+  console.log(await appAda.signMessage(messageData))
+  /*
+    {
+      signatureHex: '483a4a47584f1ddebc2873b76a712aadff074a06d858cc268c56be106fe3126e76dca62f864353e020ebdbc0b3c2e0d5408950066e228efa86598e6775dd2a0d',
+      signingPublicKeyHex: '66610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8',
+      addressFieldHex: 'e11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c'
+    }
+  */
+}
+
 export function shouldUseSpeculos(): boolean {
   return process.env.LEDGER_TRANSPORT === 'speculos'
 }
@@ -307,7 +337,8 @@ async function example() {
   // await getExtendedPublicKey(appAda);
   // await deriveAddress(appAda);
   // await showAddress(appAda);
-  await signTransaction(appAda)
+  // await signTransaction(appAda)
+  await signMessage(appAda)
 }
 
 example()
