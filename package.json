@@ -21,14 +21,14 @@
   "author": "VacuumLabs <adalite@vacuumlabs.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^6.27.10",
+    "@ledgerhq/hw-transport": "^6.31.2",
     "base-x": "^3.0.5",
     "bech32": "^1.1.4",
     "int64-buffer": "^1.0.1"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^6.27.10",
-    "@ledgerhq/hw-transport-node-speculos": "^6.27.10",
+    "@ledgerhq/hw-transport-node-hid": "^6.29.3",
+    "@ledgerhq/hw-transport-node-speculos": "^6.29.2",
     "@types/blake2": "^4.0.1",
     "@types/chai": "^4.2.15",
     "@types/chai-as-promised": "^7.1.3",
