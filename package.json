@@ -1,6 +1,6 @@
 {
   "name": "@cardano-foundation/ledgerjs-hw-app-cardano",
-  "version": "7.1.3",
+  "version": "7.1.4",
   "files": [
     "dist"
   ],
