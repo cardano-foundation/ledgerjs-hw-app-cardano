@@ -2,7 +2,7 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import SpeculosTransport from '@ledgerhq/hw-transport-node-speculos'
 
-import * as blake2 from 'blake2'
+import {createHash} from 'crypto'
 
 import {
   Certificate,
@@ -48,7 +48,7 @@ const getExtendedPublicKey = async (appAda: Ada) => {
   */
 
   // useful for crafting hw-cli tests
-  const b2 = blake2.createHash('blake2b', {digestLength: 28})
+  const b2 = createHash('blake2b224')
   b2.update(Buffer.from(result.publicKeyHex, 'hex'))
   console.log(b2.digest('hex'))
   // dc0b21682c420507046b81d94fc72b756350b1682ba8020c5b5c5fa3

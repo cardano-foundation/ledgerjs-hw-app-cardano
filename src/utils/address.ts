@@ -1,5 +1,5 @@
 import basex from 'base-x'
-import bech32 from 'bech32'
+import {bech32} from 'bech32'
 
 import {InvalidDataReason} from '../errors'
 import {AddressType, HARDENED} from '../types/public'
@@ -46,7 +46,7 @@ const isValidBase58 = (data: unknown): data is string =>
 export function base58_decode(data: string): Buffer {
   assert(isValidBase58(data), 'invalid base58 string')
 
-  return bs58.decode(data)
+  return Buffer.from(bs58.decode(data))
 }
 
 // based on https://github.com/cardano-foundation/CIPs/pull/6/files

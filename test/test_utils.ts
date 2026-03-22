@@ -97,10 +97,10 @@ export const Networks = {
 type TxHash = FixLenHexString<32>
 
 function hashTxBody(txBodyHex: string): TxHash {
-  const b2 = blake2.createHash('blake2b', {digestLength: 32})
-  b2.update(Buffer.from(txBodyHex, 'hex'))
+  const hash = blake2.createHash('blake2b', {digestLength: 32})
+  hash.update(Buffer.from(txBodyHex, 'hex'))
   return parseModule.parseHexStringOfLength(
-    b2.digest('hex'),
+    hash.digest('hex'),
     32,
     InvalidDataReason.INVALID_B2_HASH,
   )

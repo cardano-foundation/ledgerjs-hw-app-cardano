@@ -29,7 +29,7 @@
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.29.3",
     "@ledgerhq/hw-transport-node-speculos": "^6.29.2",
-    "@types/blake2": "^4.0.1",
+    "@types/blake2": "^4.0.4",
     "@types/chai": "^5.2.3",
     "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.0",
@@ -53,7 +53,7 @@
     "mocha": "^11.7.5",
     "prettier": "^2.6.2",
     "sinon": "^21.0.3",
-    "ts-mock-imports": "^1.3.7",
+    "ts-mock-imports": "^1.3.19",
     "ts-node": "^10.9.1",
     "typedoc": "^0.26.11",
     "typescript": "^4.9.4"
@@ -81,7 +81,7 @@
     "device-self-test-speculos": "LEDGER_TRANSPORT=speculos yarn device-self-test",
     "test-all": "yarn device-self-test && yarn test-integration",
     "test-integration": "yarn mocha --timeout 3600000 -r ts-node/register test/integration/**/*.test.ts",
-    "test-speculos": "LEDGER_TRANSPORT=speculos yarn test-integration",
+    "test-speculos": "bash scripts/test-speculos.sh",
     "test-unit": "yarn mocha -r ts-node/register test/unit/**/*.test.ts",
     "//": "run single test by specifying --grep <name> parameter in test-integration"
   },
@@ -91,12 +91,8 @@
     "eslint/**/ansi-regex": "<6.0.0",
     "@ledgerhq/hw-transport-node-hid/**/ansi-regex": "<6.0.0",
     "mocha/**/ansi-regex": "<6.0.0",
-    "**/minimatch": "^3.1.3",
-    "**/brace-expansion": "^1.1.12",
-    "**/cross-spawn": "^7.0.5",
-    "**/ajv": "^6.14.0",
-    "**/diff": "^4.0.4",
-    "**/serialize-javascript": "^7.0.3"
+    "mocha/diff": "^8.0.3",
+    "mocha/serialize-javascript": "^7.0.3"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
