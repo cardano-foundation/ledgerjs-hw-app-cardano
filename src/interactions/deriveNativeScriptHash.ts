@@ -14,12 +14,17 @@ import {NativeScriptType} from '../types/public'
 import {getVersionString} from '../utils'
 import {INS} from './common/ins'
 import type {Interaction, SendParams} from './common/types'
-import {ensureLedgerAppVersionCompatible, getCompatibility} from './getVersion'
+import {
+  ensureLedgerAppVersionCompatible,
+  getCompatibility,
+  isV8App,
+} from './getVersion'
 import {
   serializeComplexNativeScriptStart,
   serializeSimpleNativeScript,
   serializeWholeNativeScriptFinish,
 } from './serialization/nativeScript'
+import {deriveNativeScriptHash as deriveNativeScriptHashV8} from './v8/deriveNativeScriptHash'
 
 const send = (params: {
   p1: number
@@ -121,6 +126,9 @@ export function* deriveNativeScriptHash(
   displayFormat: NativeScriptHashDisplayFormat,
 ): Interaction<NativeScriptHash> {
   ensureLedgerAppVersionCompatible(version)
+  if (isV8App(version)) {
+    return yield* deriveNativeScriptHashV8(version, script, displayFormat)
+  }
   ensureScriptHashDerivationSupportedByAppVersion(version)
 
   yield* deriveNativeScriptHash_addScript(script)

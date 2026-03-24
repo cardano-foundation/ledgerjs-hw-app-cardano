@@ -1,5 +1,5 @@
-import type {ParsedOperationalCertificate} from '../../types/internal'
-import {hex_to_buf, path_to_buf, uint64_to_buf} from '../../utils/serialize'
+import type {ParsedOperationalCertificate} from '../../../types/internal'
+import {hex_to_buf, path_to_buf, uint64_to_buf} from '../../../utils/serialize'
 
 export function serializeOperationalCertificate({
   kesPublicKeyHex,
