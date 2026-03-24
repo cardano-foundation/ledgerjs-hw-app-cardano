@@ -20,6 +20,9 @@
   ],
   "author": "VacuumLabs <adalite@vacuumlabs.com>",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@ledgerhq/hw-transport": "^6.31.2",
     "base-x": "^5.0.1",
