@@ -43,12 +43,12 @@ import {
   hex_to_buf,
   int64_to_buf,
   path_to_buf,
-  serializeCredential,
   uint8_to_buf,
   uint16_to_buf,
   uint32_to_buf,
   uint64_to_buf,
 } from '../../../utils/serialize'
+import {serializeCredential} from './credential'
 import {serializeAddressParams} from './addressParams'
 
 export const MAX_SIGN_TX_CHUNK_SIZE = 250
@@ -150,33 +150,27 @@ function serializePoolOwnerCredential(
   }
 }
 
-function serializePoolRewardAccountCredential(
+function serializePoolRewardAccount(
   rewardAccount: ParsedPoolRewardAccount,
-): ParsedCredential {
+): Buffer {
+  const enum PoolRewardAccountWireType {
+    KEY_HASH = 0,
+    KEY_PATH = 2,
+  }
+
   switch (rewardAccount.type) {
     case PoolRewardAccountType.DEVICE_OWNED:
-      return {type: CredentialType.KEY_PATH, path: rewardAccount.path}
+      return Buffer.concat([
+        uint8_to_buf(PoolRewardAccountWireType.KEY_PATH as Uint8_t),
+        path_to_buf(rewardAccount.path),
+      ])
     case PoolRewardAccountType.THIRD_PARTY: {
       const rewardAccountBuffer = hex_to_buf(rewardAccount.rewardAccountHex)
       assert(rewardAccountBuffer.length === 29, 'invalid reward account length')
-      const headerNibble = Math.floor(rewardAccountBuffer[0] / 16)
-      const credentialHex = rewardAccountBuffer.slice(1).toString('hex')
-
-      switch (headerNibble) {
-        case 0x0e:
-          return {
-            type: CredentialType.KEY_HASH,
-            keyHashHex: credentialHex,
-          } as unknown as ParsedCredential
-        case 0x0f:
-          return {
-            type: CredentialType.SCRIPT_HASH,
-            scriptHashHex: credentialHex,
-          } as unknown as ParsedCredential
-        default:
-          assert(false, 'invalid reward account header')
-          throw new Error('invalid reward account header')
-      }
+      return Buffer.concat([
+        uint8_to_buf(PoolRewardAccountWireType.KEY_HASH as Uint8_t),
+        rewardAccountBuffer,
+      ])
     }
     default:
       unreachable(rewardAccount)
@@ -356,7 +350,7 @@ function serializePoolRegistration(certificate: Extract<
     uint64_to_buf(pool.cost),
     uint64_to_buf(pool.margin.numerator),
     uint64_to_buf(pool.margin.denominator),
-    serializeCredential(serializePoolRewardAccountCredential(pool.rewardAccount)),
+    serializePoolRewardAccount(pool.rewardAccount),
     serializeCount16(pool.owners.length),
     serializeCount16(pool.relays.length),
     serializeIncluded(pool.metadata != null),

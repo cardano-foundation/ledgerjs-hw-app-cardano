@@ -16,6 +16,7 @@ import {
   PoolOwnerType,
   RelayType,
   PoolRewardAccountType,
+  TxAuxiliaryDataSupplementType,
 } from '../../../src/types/public'
 import type {SignTxTestCase} from './signTx'
 import {inputs, outputs, shelleyBase} from './txElements'
@@ -30,6 +31,13 @@ const votePath = str_to_path("1694'/1815'/0'/0/1")
 const unusualVotePath = str_to_path("1694'/1815'/101'/0/1")
 
 const poolKeyHashHex = 'f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973'
+const poolVrfKeyHashHex =
+  '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff'
+const poolOwnerStakingKeyHashHex =
+  '1234567890abcdef1234567890abcdef1234567890abcdef12345678'
+const poolRewardAccountPath = str_to_path("1852'/1815'/3'/2/0")
+const poolMetadataHashHex =
+  'ffeeddccbbaa99887766554433221100ffeeddccbbaa99887766554433221100'
 const stakeScriptHashHex =
   '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277'
 const committeeScriptHashHex =
@@ -97,7 +105,23 @@ export const signTxAllElementsAuxiliaryData: SignTxTestCase[] = [
         },
       },
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: '3ab4380755f30a7ded07dcdcc8a0487df1a4762e7a69d383cd4e75ba25378730',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'f9a4614237159258f3555a2fb8691bc66a55d973a0bbf874b87af381698da4f651d49c3602d81a8c4f2248781c2cebf007457f6c8ba2c0961a3edea745bbf707',
+        },
+      ],
+      auxiliaryDataSupplement: {
+        type: TxAuxiliaryDataSupplementType.CIP36_REGISTRATION,
+        auxiliaryDataHashHex:
+          '1999b3bb9102b585c42616e40cf1290518d788f967ab4b3329dcb712ac933da0',
+        cip36VoteRegistrationSignatureHex:
+          'd07070f841e17f50139bfd6cadeaa89ce87474200db051f48d585cba52360f52444db9b4529e1721348763374f35fa8a054d5a3931fb3524484aa910cf465505',
+      },
+    },
   },
   {
     testName: 'signTxAllElementsAuxiliaryData_1',
@@ -120,7 +144,23 @@ export const signTxAllElementsAuxiliaryData: SignTxTestCase[] = [
         },
       },
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: 'd3fa9c5f144daf3df329a62b90d93129547a724adac02064dcde8b8f211248a3',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'f4d96ac70927355eb166c2acbd2653874699c8827c0386f943e0c261e9995b87f51790f1eda9b7c40c7b48245663d344dbac5a9a97c1c4f308177aa6b7ce280d',
+        },
+      ],
+      auxiliaryDataSupplement: {
+        type: TxAuxiliaryDataSupplementType.CIP36_REGISTRATION,
+        auxiliaryDataHashHex:
+          'fdc7791ba8f92fb6e03ad8879a0299a7afc54bd795fee76fe16bd6ea4fb85dd1',
+        cip36VoteRegistrationSignatureHex:
+          '20e5f3916dcef94cbb04ca735b423db6d5ba4b521c7b241ae91d5ee5fa423ff9478ab3cda6e73979425fb3940503a2faf76b3a0254ce60deeca63a0142f15e0f',
+      },
+    },
   },
   {
     testName: 'signTxAllElementsAuxiliaryData_2',
@@ -159,7 +199,17 @@ export const signTxAllElementsAuxiliaryData: SignTxTestCase[] = [
         },
       },
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: '7b26594457ff51ede6fe7085aeb35d0d074111f368612c0551562dc726afa39b',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '647741725e12dcad8be828f7a8177295e522baaeac7bbf3ad7f90b4ec23dbf0f98a258f429648b7d3468a01e6a78f919858e389db784593a3e428e621797990c',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
   },
 ]
 
@@ -182,24 +232,47 @@ export const signTxAllElementsPoolRegistration: SignTxTestCase[] = [
                 path: str_to_path("1852'/1815'/0'/0/0"),
               },
             },
-            vrfKeyHashHex: poolKeyHashHex,
+            vrfKeyHashHex: poolVrfKeyHashHex,
             pledge: '1000',
             cost: '100',
             margin: { numerator: '1', denominator: '2' },
             rewardAccount: {
-              type: PoolRewardAccountType.THIRD_PARTY,
+              type: PoolRewardAccountType.DEVICE_OWNED,
               params: {
-                rewardAccountHex: poolKeyHashHex,
-              }
+                path: poolRewardAccountPath,
+              },
             },
-            poolOwners: [{ type: PoolOwnerType.DEVICE_OWNED, params: { stakingPath: stakePath } }],
-            relays: [{ type: RelayType.MULTI_HOST, params: { dnsName: 'example.com' } }],
-            metadata: { metadataUrl: 'https://example.com', metadataHashHex: poolKeyHashHex },
-          }
-        }
-      ]
+            poolOwners: [
+              {
+                type: PoolOwnerType.THIRD_PARTY,
+                params: {stakingKeyHashHex: poolOwnerStakingKeyHashHex},
+              },
+            ],
+            relays: [{type: RelayType.MULTI_HOST, params: {dnsName: 'example.com'}}],
+            metadata: {
+              metadataUrl: 'https://example.com',
+              metadataHashHex: poolMetadataHashHex,
+            },
+          },
+        },
+      ],
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: '3a1c694bacc75fd9e6b20d8d5a9e2e0c950b3dd40b18161b6b7c368fda9a4f27',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            'e5f5b8de8f1a7eeb7dca22f6cd1c31a0a7ca7e02bdbb3afb17b4bfcfc19a9d97136e74c3f43d96bc68a57fd43cc99d6ffab2da60e911ffebe2df2c091424120f',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/4/0"),
+          witnessSignatureHex:
+            'a4b6daf0b0bb308e8ea422dda5eebf0fc550a0d123895ec74ef075bfa2946adcf97b5ab1e7e41c909ff238fd6e31553a7d786d37187a30bb99f0eb93fc5c4c01',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
   },
 ]
 
@@ -291,7 +364,32 @@ export const signTxAllElementsCertificatesOrdinary: SignTxTestCase[] = [
         },
       ],
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: 'd5c10b6e8632ebac921a0523e7a9ce90b493bc043ebecbcdc08aa928956dde0f',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '8d384627f012ffeeff05052da49e6f710a50fa63f46648f87edae7019568f3728b49bc40cef2897d19b06dfc123c72da82a124d1cf5ee587b66c6639af8ac605',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/2/0"),
+          witnessSignatureHex:
+            'ba9a1101b7fdfedeb6d347d8fb331bc34eaa397fe9fd6f9513b4261fec671c0ece05f167c544d96d30b132a359ef936555bfb3708db708277bea0920fbd68d00',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/4/0"),
+          witnessSignatureHex:
+            '0a50e0d49dce2f410dc45cf3bf97dda8649dacbf20dc0a476af7cca9a7c1f3c4ed79d00b187a5d1cc47e22c1dbcc1415246bd90a310f3f4be8093ea000798607',
+        },
+        {
+          path: str_to_path("1852'/1815'/0'/3/0"),
+          witnessSignatureHex:
+            '2fd679a7e09cac2474f66d7aaaafaa85b5045e23f38768e5fa3be47bb6f9904abe05cfe115ea875f5cd75a373f6028f2706fe931890ac0f7f0cc08fe8031a80b',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
   },
 ]
 
@@ -410,7 +508,11 @@ export const signTxAllElementsCertificatesMultisig: SignTxTestCase[] = [
         },
       ],
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: '8521bed764330528ad9134b34ef58dfe542155296d2d8ea4e0633ac7b3ffd582',
+      witnesses: [],
+      auxiliaryDataSupplement: null,
+    },
   },
 ]
 
@@ -473,6 +575,22 @@ export const signTxAllElementsNoCertificates: SignTxTestCase[] = [
         },
       ],
     } as SignTxTestCase['tx'],
-    expectedResult: pendingResult,
+    expectedResult: {
+      txHashHex: '6cbfabb62dd3a38376acea87c1b1b8935ae2dfa4a970a6e98fb7ae04b70891a6',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '257e5047ea108e66ae5a3fd0d8b6beaef652d1530963eb32a2f9310e3dd5eaf6c8674a4caac25e4d6665d27787d401c32b6f77cb154e30f902a2cfd9371f590b',
+        },
+      ],
+      auxiliaryDataSupplement: {
+        type: TxAuxiliaryDataSupplementType.CIP36_REGISTRATION,
+        auxiliaryDataHashHex:
+          '72dd10fb9a48a9307d1c3faeda41bacb161aecedc1e6c5a3288d550e6a5c38a9',
+        cip36VoteRegistrationSignatureHex:
+          '98aaf88ee2ae3172b1a68225f63d3a9819b21942b8d22b379dbd8fe21591636674196f8f6639181d8a1e67b6ef297bc4536d130b3a249cbee14c382d8f6a4b0d',
+      },
+    },
   },
 ]
