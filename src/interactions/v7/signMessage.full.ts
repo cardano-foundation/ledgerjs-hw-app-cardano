@@ -1,11 +1,11 @@
 import {buf_to_uint32, hex_to_buf, uint32_to_buf} from '../../utils/serialize'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../../errors'
-import type {ParsedMessageData} from '../../types/internal'
+import type {ParsedMessageData,
+  Uint32_t,
+  Version} from '../../types/internal'
 import {
   ED25519_SIGNATURE_LENGTH,
-  PUBLIC_KEY_LENGTH,
-  Uint32_t,
-  Version,
+  PUBLIC_KEY_LENGTH
 } from '../../types/internal'
 import type {SignedMessageData} from '../../types/public'
 import {getVersionString} from '../../utils'

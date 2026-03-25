@@ -1,6 +1,6 @@
 import chai, {expect} from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import {HexString} from '../../src/types/internal'
+import type {HexString} from '../../src/types/internal'
 
 import type {Ada} from '../../src/Ada'
 import {DeviceVersionUnsupported, utils} from '../../src/Ada'

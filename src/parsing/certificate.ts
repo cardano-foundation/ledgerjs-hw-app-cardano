@@ -3,15 +3,15 @@ import {InvalidData} from '../errors'
 import {InvalidDataReason} from '../errors/invalidDataReason'
 import {
   DRepType,
-  ParsedDRep,
   SCRIPT_HASH_LENGTH,
   CertificateType,
-  KEY_HASH_LENGTH,
-  Uint64_str,
+  KEY_HASH_LENGTH
 } from '../types/internal'
-import type {ParsedCertificate} from '../types/internal'
-import {bigint_like, DRepParams, DRepParamsType} from '../types/public'
-import type {Certificate} from '../types/public'
+import type {ParsedCertificate,
+  ParsedDRep,
+  Uint64_str} from '../types/internal'
+import { DRepParamsType} from '../types/public'
+import type {Certificate,bigint_like, DRepParams} from '../types/public'
 import {
   parseBIP32Path,
   parseHexStringOfLength,

@@ -21,8 +21,6 @@ import {
 import type {SignTxTestCase} from './signTx'
 import {inputs, outputs, shelleyBase} from './txElements'
 
-const pendingResult = {} as SignTxTestCase['expectedResult']
-
 const stakePath = str_to_path("1852'/1815'/0'/2/0")
 const dRepPath = str_to_path("1852'/1815'/0'/3/0")
 const committeeColdPath = str_to_path("1852'/1815'/0'/4/0")

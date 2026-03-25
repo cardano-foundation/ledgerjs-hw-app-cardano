@@ -30,6 +30,7 @@ import {
   buildSignOperationalCertificate,
   V8AddressP1,
 } from './commandBuilder'
+import type {NativeScriptHashDisplayFormat} from '../../types/public'
 import {NativeScriptType, TxAuxiliaryDataType} from '../../types/public'
 
 export function* sendSignOperationalCertificate(
@@ -107,7 +108,7 @@ function* sendDeriveNativeScriptHashAddScript(
 
 export function* sendDeriveNativeScriptHash(
   script: ParsedNativeScript,
-  displayFormat: Parameters<typeof buildDeriveNativeScriptHashFinish>[0],
+  displayFormat: NativeScriptHashDisplayFormat,
 ): Interaction<Buffer> {
   yield buildDeriveNativeScriptHashInit()
   yield* sendDeriveNativeScriptHashAddScript(script)

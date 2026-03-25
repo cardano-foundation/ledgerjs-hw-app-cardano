@@ -4,12 +4,14 @@ import SpeculosTransport from '@ledgerhq/hw-transport-node-speculos'
 
 import {createHash} from 'crypto'
 
-import {
+import type {
   Certificate,
-  CredentialParamsType,
   TxInput,
   TxOutput,
   Withdrawal,
+  MessageData} from '../src/Ada';
+import {
+  CredentialParamsType,
   Ada,
   AddressType,
   CertificateType,
@@ -17,8 +19,7 @@ import {
   Networks,
   TransactionSigningMode,
   TxOutputDestinationType,
-  MessageAddressFieldType,
-  MessageData,
+  MessageAddressFieldType
 } from '../src/Ada'
 import {
   base58_encode,

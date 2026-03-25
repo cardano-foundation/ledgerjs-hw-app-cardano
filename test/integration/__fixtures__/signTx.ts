@@ -1,15 +1,16 @@
 import type {Transaction} from '../../../src/Ada'
 import {CertificateType, Networks, TxAuxiliaryDataType} from '../../../src/Ada'
-import {
+import type {
   BIP32Path,
   SignedTransactionData,
+  TransactionOptions} from '../../../src/types/public';
+import {
   TxRequiredSignerType,
   CredentialParamsType,
   TransactionSigningMode,
   DRepParamsType,
   VoterType,
-  VoteOption,
-  TransactionOptions,
+  VoteOption
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
 import {

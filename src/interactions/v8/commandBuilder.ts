@@ -1,11 +1,13 @@
 import type {
   ParsedAddressParams,
+  ParsedComplexNativeScript,
   ParsedCVote,
   ParsedCVoteDelegation,
   ParsedCVoteRegistrationParams,
   ParsedMessageData,
   ParsedOperationalCertificate,
   ParsedSigningRequest,
+  ParsedSimpleNativeScript,
   ParsedTransaction,
   Uint32_t,
   ValidBIP32Path,
@@ -230,7 +232,7 @@ export function buildDeriveNativeScriptHashInit(): SendParams {
 }
 
 export function buildDeriveNativeScriptHashStartComplex(
-  script: Parameters<typeof serializeComplexNativeScriptStart>[0],
+  script: ParsedComplexNativeScript,
 ): SendParams {
   return buildCommand({
     ins: INS.DERIVE_NATIVE_SCRIPT_HASH,
@@ -242,7 +244,7 @@ export function buildDeriveNativeScriptHashStartComplex(
 }
 
 export function buildDeriveNativeScriptHashAddSimple(
-  script: Parameters<typeof serializeSimpleNativeScript>[0],
+  script: ParsedSimpleNativeScript,
 ): SendParams {
   return buildCommand({
     ins: INS.DERIVE_NATIVE_SCRIPT_HASH,
