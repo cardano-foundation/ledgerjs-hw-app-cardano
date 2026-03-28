@@ -132,9 +132,8 @@ export function* deriveNativeScriptHash(
   ensureScriptHashDerivationSupportedByAppVersion(version)
 
   yield* deriveNativeScriptHash_addScript(script)
-  const {scriptHashHex} = yield* deriveNativeScriptHash_finishWholeNativeScript(
-    displayFormat,
-  )
+  const {scriptHashHex} =
+    yield* deriveNativeScriptHash_finishWholeNativeScript(displayFormat)
 
   return {
     scriptHashHex,

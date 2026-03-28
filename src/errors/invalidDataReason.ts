@@ -192,7 +192,7 @@ export enum InvalidDataReason {
   SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED = 'mint not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
   SIGN_MODE_POOL_OWNER__SCRIPT_DATA_HASH_NOT_ALLOWED = 'script data hash not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
   SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED = 'collateral inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
-  SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED = 'reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
+  SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED = 'collateral output not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
   SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED = 'total collateral not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
   SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED = 'required signers not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',
   SIGN_MODE_POOL_OWNER__REFERENCE_INPUTS_NOT_ALLOWED = 'reference inputs not allowed in TransactionSigningMode.POOL_REGISTRATION_AS_OWNER',

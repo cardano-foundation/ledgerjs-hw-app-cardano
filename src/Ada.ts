@@ -80,9 +80,11 @@ export * from './types/public'
 
 const CLA = 0xd7
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types,@typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
 
-function wrapConvertDeviceStatusError<T extends Function>(fn: T): T {
+function wrapConvertDeviceStatusError<T extends (...args: any[]) => any>(
+  fn: T,
+): T {
   // @ts-ignore
   return async (...args) => {
     try {
@@ -120,7 +122,7 @@ export type SendFn = (params: SendParams) => Promise<Buffer>
 // default. We can therefore transparently retry the request.
 
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
-function wrapRetryStillInCall<T extends Function>(fn: T): T {
+function wrapRetryStillInCall<T extends (...args: any[]) => any>(fn: T): T {
   // @ts-ignore
   return async (...args: any) => {
     try {
@@ -139,7 +141,7 @@ function wrapRetryStillInCall<T extends Function>(fn: T): T {
   }
 }
 
-/* eslint-enable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-types,@typescript-eslint/ban-ts-comment */
+/* eslint-enable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
 
 async function interact<T>(
   interaction: Interaction<T>,

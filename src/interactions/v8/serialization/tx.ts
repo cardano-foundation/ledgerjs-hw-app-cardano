@@ -623,8 +623,8 @@ export function serializeTxInitData(
     tx.auxiliaryData?.type === TxAuxiliaryDataType.ARBITRARY_HASH
       ? 0
       : tx.auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
-      ? 1
-      : null
+        ? 1
+        : null
   const auxiliaryDataHash =
     tx.auxiliaryData?.type === TxAuxiliaryDataType.ARBITRARY_HASH
       ? tx.auxiliaryData.hashHex

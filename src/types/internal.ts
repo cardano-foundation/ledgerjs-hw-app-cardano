@@ -605,21 +605,20 @@ export type ParsedOperationalCertificate = {
   coldKeyPath: ValidBIP32Path
 }
 
-export type ParsedMessageData =
+export type ParsedMessageData = {
+  messageHex: HexString
+  signingPath: ValidBIP32Path
+  hashPayload: boolean
+  isAscii: boolean
+} & (
   | {
-      messageHex: HexString
-      signingPath: ValidBIP32Path
-      hashPayload: boolean
-      isAscii: boolean
-    } & (
-      | {
-          addressFieldType: MessageAddressFieldType.ADDRESS
-          address: ParsedAddressParams
-        }
-      | {
-          addressFieldType: MessageAddressFieldType.KEY_HASH
-        }
-    )
+      addressFieldType: MessageAddressFieldType.ADDRESS
+      address: ParsedAddressParams
+    }
+  | {
+      addressFieldType: MessageAddressFieldType.KEY_HASH
+    }
+)
 
 export type ParsedCVote = {
   voteCastDataHex: HexString

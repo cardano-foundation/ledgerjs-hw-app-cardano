@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- fixture literals are not branded types */
 const {expect} = require('chai')
 
 const {
