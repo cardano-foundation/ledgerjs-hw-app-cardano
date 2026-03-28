@@ -287,7 +287,9 @@ export class Ada {
   }
 
   /** @ignore */
-  *_getExtendedPublicKeys(paths: ValidBIP32Path[]) {
+  *_getExtendedPublicKeys(
+    paths: ValidBIP32Path[],
+  ): Interaction<Array<ExtendedPublicKey>> {
     const version = yield* getVersion()
     return yield* getExtendedPublicKeys(version, paths)
   }
