@@ -41,11 +41,7 @@ import {
   serializeWholeNativeScriptFinish,
 } from './serialization/nativeScript'
 import {serializeOperationalCertificate} from './serialization/operationalCertificate'
-import {
-  hex_to_buf,
-  path_to_buf,
-  uint32_to_buf,
-} from '../../utils/serialize'
+import {hex_to_buf, path_to_buf, uint32_to_buf} from '../../utils/serialize'
 
 const MAX_CIP36_PAYLOAD_SIZE = 250
 const MAX_CIP8_MSG_CHUNK_SIZE = 250
@@ -111,9 +107,7 @@ export function buildDeriveAddress(
   })
 }
 
-export function buildGetExtendedPublicKey(
-  path: ValidBIP32Path,
-): SendParams {
+export function buildGetExtendedPublicKey(path: ValidBIP32Path): SendParams {
   return buildCommand({
     ins: INS.GET_EXT_PUBLIC_KEY,
     p1: V8P1_UNUSED,
@@ -134,7 +128,9 @@ export function buildSignCVoteInit(cVote: ParsedCVote): SendParams {
     p2: V8P2_UNUSED,
     data: Buffer.concat([
       uint32_to_buf(dataSize as Uint32_t),
-      hex_to_buf(payloadHex.substring(0, chunkSize) as typeof cVote.voteCastDataHex),
+      hex_to_buf(
+        payloadHex.substring(0, chunkSize) as typeof cVote.voteCastDataHex,
+      ),
     ]),
     expectedResponseLength: 0,
   })
@@ -304,10 +300,9 @@ export function buildSignTxAuxiliaryDataDelegation(
     p1: V8TxP1.AUX_DATA,
     p2: V8TxP2.AUX_DATA_DELEGATION,
     data: serializeTxAuxiliaryDataDelegation(delegation),
-    expectedResponseLength:
-      isLast
-        ? AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH
-        : 0,
+    expectedResponseLength: isLast
+      ? AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH
+      : 0,
   })
 }
 

@@ -9,7 +9,8 @@ import type {
   TxInput,
   TxOutput,
   Withdrawal,
-  MessageData} from '../src/Ada';
+  MessageData,
+} from '../src/Ada'
 import {
   CredentialParamsType,
   Ada,
@@ -19,7 +20,7 @@ import {
   Networks,
   TransactionSigningMode,
   TxOutputDestinationType,
-  MessageAddressFieldType
+  MessageAddressFieldType,
 } from '../src/Ada'
 import {
   base58_encode,

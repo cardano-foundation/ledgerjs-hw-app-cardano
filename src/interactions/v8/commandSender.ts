@@ -126,7 +126,9 @@ export function* sendSignTx(
   yield buildSignTxInit(request, witnessPaths)
 
   let auxiliaryDataResponse: Buffer | null = null
-  if (request.tx.auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION) {
+  if (
+    request.tx.auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
+  ) {
     auxiliaryDataResponse = yield buildSignTxAuxiliaryDataInit(
       request.tx.auxiliaryData.params,
     )

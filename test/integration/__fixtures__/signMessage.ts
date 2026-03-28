@@ -1,11 +1,6 @@
 import {str_to_path} from '../../../src/utils/address'
-import type {
-  MessageData,
-  SignedMessageData} from '../../../src/Ada';
-import {
-  AddressType,
-  MessageAddressFieldType
-} from '../../../src/Ada'
+import type {MessageData, SignedMessageData} from '../../../src/Ada'
+import {AddressType, MessageAddressFieldType} from '../../../src/Ada'
 import {Networks} from '../../test_utils'
 
 export type TestCase = {

@@ -1,26 +1,36 @@
 import {expect} from 'chai'
 import {createRequire} from 'module'
 
-const require = createRequire(import.meta.url)
-const {buildDeriveAddress, V8AddressP1} = require('../../../src/interactions/v8/commandBuilder')
-const {serializeApdu} = require('../../../src/interactions/v8/common/apdu')
-const {sendDeriveAddress, sendShowAddress} = require('../../../src/interactions/v8/commandSender')
+const nodeRequire = createRequire(__filename)
+const {buildDeriveAddress, V8AddressP1} = nodeRequire(
+  '../../../src/interactions/v8/commandBuilder',
+)
+const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
+const {sendDeriveAddress, sendShowAddress} = nodeRequire(
+  '../../../src/interactions/v8/commandSender',
+)
 const {
   expectedDeriveAddressDisplayApduHex,
   expectedDeriveAddressReturnApduHex,
   parsedDeriveAddressFixture,
-} = require('../__fixtures__/v8/deriveAddress')
+} = nodeRequire('../__fixtures__/v8/deriveAddress')
 
 describe('v8 deriveAddress', () => {
   it('builds the return APDU', () => {
-    const apdu = buildDeriveAddress(V8AddressP1.RETURN, parsedDeriveAddressFixture)
+    const apdu = buildDeriveAddress(
+      V8AddressP1.RETURN,
+      parsedDeriveAddressFixture,
+    )
     expect(serializeApdu(apdu).toString('hex')).to.equal(
       expectedDeriveAddressReturnApduHex,
     )
   })
 
   it('builds the display APDU', () => {
-    const apdu = buildDeriveAddress(V8AddressP1.DISPLAY, parsedDeriveAddressFixture)
+    const apdu = buildDeriveAddress(
+      V8AddressP1.DISPLAY,
+      parsedDeriveAddressFixture,
+    )
     expect(serializeApdu(apdu).toString('hex')).to.equal(
       expectedDeriveAddressDisplayApduHex,
     )

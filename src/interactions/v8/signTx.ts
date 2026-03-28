@@ -3,7 +3,13 @@ import type {
   ValidBIP32Path,
   Version,
 } from '../../types/internal'
-import {CertificateType, CredentialType, PoolKeyType, PoolOwnerType, RequiredSignerType} from '../../types/internal'
+import {
+  CertificateType,
+  CredentialType,
+  PoolKeyType,
+  PoolOwnerType,
+  RequiredSignerType,
+} from '../../types/internal'
 import type {SignedTransactionData} from '../../types/public'
 import {
   TransactionSigningMode,
@@ -36,15 +42,15 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
         witnessPaths.push(input.path)
       }
     }
-// certificate witnesses
-for (const cert of tx.certificates) {
-  switch (cert.type) {
-    case CertificateType.STAKE_REGISTRATION:
-    case CertificateType.STAKE_REGISTRATION_CONWAY:
-    case CertificateType.STAKE_DEREGISTRATION:
-    case CertificateType.STAKE_DEREGISTRATION_CONWAY:
-    case CertificateType.STAKE_DELEGATION:
-    case CertificateType.VOTE_DELEGATION:
+    // certificate witnesses
+    for (const cert of tx.certificates) {
+      switch (cert.type) {
+        case CertificateType.STAKE_REGISTRATION:
+        case CertificateType.STAKE_REGISTRATION_CONWAY:
+        case CertificateType.STAKE_DEREGISTRATION:
+        case CertificateType.STAKE_DEREGISTRATION_CONWAY:
+        case CertificateType.STAKE_DELEGATION:
+        case CertificateType.VOTE_DELEGATION:
           if (cert.stakeCredential.type === CredentialType.KEY_PATH) {
             witnessPaths.push(cert.stakeCredential.path)
           }
@@ -120,15 +126,16 @@ export function* signTransaction(
   request: ParsedSigningRequest,
 ): Interaction<SignedTransactionData> {
   const witnessPaths = gatherWitnessPaths(request)
-  const {auxiliaryDataResponse, txHashResponse, witnessResponses} = yield* sendSignTx(
-    request,
-    witnessPaths,
-  )
+  const {auxiliaryDataResponse, txHashResponse, witnessResponses} =
+    yield* sendSignTx(request, witnessPaths)
 
   const auxiliaryDataSupplement =
     request.tx.auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
       ? (() => {
-          assert(auxiliaryDataResponse != null, 'missing v8 auxiliary data response')
+          assert(
+            auxiliaryDataResponse != null,
+            'missing v8 auxiliary data response',
+          )
           assert(
             auxiliaryDataResponse.length ===
               AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH,

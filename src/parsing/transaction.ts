@@ -4,14 +4,14 @@ import type {
   ParsedSigningRequest,
   ParsedTransaction,
   ParsedTransactionOptions,
-
   ParsedCertificate,
   ParsedInput,
   ParsedRequiredSigner,
   ParsedVote,
   ParsedVoter,
   ParsedVoterVotes,
-  ParsedWithdrawal} from '../types/internal'
+  ParsedWithdrawal,
+} from '../types/internal'
 import {
   SCRIPT_HASH_LENGTH,
   CertificateType,
@@ -25,14 +25,14 @@ import type {
   SignTransactionRequest,
   Transaction,
   TransactionOptions,
-
   Certificate,
   RequiredSigner,
   TxInput,
   Vote,
   Voter,
   VoterVotes,
-  Withdrawal} from '../types/public'
+  Withdrawal,
+} from '../types/public'
 import {
   VoterType,
   PoolKeyType,

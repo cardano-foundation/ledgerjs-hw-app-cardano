@@ -1,10 +1,12 @@
 import {expect} from 'chai'
 import {createRequire} from 'module'
 
-const require = createRequire(import.meta.url)
-const {serializeTransactionRaw} = require('../../../src/interactions/v8/serialization/tx')
-const {sendSignTx} = require('../../../src/interactions/v8/commandSender')
-const {signTransaction} = require('../../../src/interactions/v8/signTx')
+const nodeRequire = createRequire(__filename)
+const {serializeTransactionRaw} = nodeRequire(
+  '../../../src/interactions/v8/serialization/tx',
+)
+const {sendSignTx} = nodeRequire('../../../src/interactions/v8/commandSender')
+const {signTransaction} = nodeRequire('../../../src/interactions/v8/signTx')
 const {
   alonzoExpectedChunkApdusHex,
   alonzoExpectedInitApduHex,
@@ -46,7 +48,7 @@ const {
   serializeBuiltChunkApdusHex,
   serializeBuiltInitApduHex,
   serializeBuiltWitnessApdusHex,
-} = require('../__fixtures__/v8/signTx')
+} = nodeRequire('../__fixtures__/v8/signTx')
 
 function exhaustSender(
   request: typeof parsedAlonzoTrezorSignTxRequest,
@@ -58,7 +60,13 @@ function exhaustSender(
 
   let step = interaction.next()
   for (let i = 0; !step.done; i++) {
-    yieldedHex.push(step.value ? require('../../../src/interactions/v8/common/apdu').serializeApdu(step.value).toString('hex') : '')
+    yieldedHex.push(
+      step.value
+        ? nodeRequire('../../../src/interactions/v8/common/apdu')
+            .serializeApdu(step.value)
+            .toString('hex')
+        : '',
+    )
     step = interaction.next(responses[i] ?? Buffer.alloc(0))
   }
 
@@ -85,31 +93,41 @@ function exhaustSignTransaction(
 describe('v8 signTx', () => {
   it('serializes the Alonzo trezor-parity raw tx like the Python fixture', () => {
     expect(
-      serializeTransactionRaw(parsedAlonzoTrezorSignTxRequest.tx).toString('hex'),
+      serializeTransactionRaw(parsedAlonzoTrezorSignTxRequest.tx).toString(
+        'hex',
+      ),
     ).to.equal(alonzoTrezorRawTxHex)
   })
 
   it('serializes the Babbage plutus raw tx like the Python fixture', () => {
     expect(
-      serializeTransactionRaw(parsedBabbagePlutusSignTxRequest.tx).toString('hex'),
+      serializeTransactionRaw(parsedBabbagePlutusSignTxRequest.tx).toString(
+        'hex',
+      ),
     ).to.equal(babbagePlutusRawTxHex)
   })
 
   it('serializes the Babbage ordinary raw tx like the Python fixture', () => {
     expect(
-      serializeTransactionRaw(parsedBabbageOrdinarySignTxRequest.tx).toString('hex'),
+      serializeTransactionRaw(parsedBabbageOrdinarySignTxRequest.tx).toString(
+        'hex',
+      ),
     ).to.equal(babbageOrdinaryRawTxHex)
   })
 
   it('serializes the CIP36 vote-key-hex raw tx like the Python fixture', () => {
     expect(
-      serializeTransactionRaw(parsedCIP36VoteKeyHexSignTxRequest.tx).toString('hex'),
+      serializeTransactionRaw(parsedCIP36VoteKeyHexSignTxRequest.tx).toString(
+        'hex',
+      ),
     ).to.equal(cip36VoteKeyHexRawTxHex)
   })
 
   it('serializes the CIP36 delegations raw tx like the Python fixture', () => {
     expect(
-      serializeTransactionRaw(parsedCIP36DelegationsSignTxRequest.tx).toString('hex'),
+      serializeTransactionRaw(parsedCIP36DelegationsSignTxRequest.tx).toString(
+        'hex',
+      ),
     ).to.equal(cip36DelegationsRawTxHex)
   })
 
@@ -120,12 +138,12 @@ describe('v8 signTx', () => {
         alonzoExpectedWitnessPaths,
       ),
     ).to.equal(alonzoExpectedInitApduHex)
-    expect(serializeBuiltChunkApdusHex(parsedAlonzoTrezorSignTxRequest)).to.deep.equal(
-      alonzoExpectedChunkApdusHex,
-    )
-    expect(serializeBuiltWitnessApdusHex(alonzoExpectedWitnessPaths)).to.deep.equal(
-      alonzoExpectedWitnessApdusHex,
-    )
+    expect(
+      serializeBuiltChunkApdusHex(parsedAlonzoTrezorSignTxRequest),
+    ).to.deep.equal(alonzoExpectedChunkApdusHex)
+    expect(
+      serializeBuiltWitnessApdusHex(alonzoExpectedWitnessPaths),
+    ).to.deep.equal(alonzoExpectedWitnessApdusHex)
   })
 
   it('builds the Babbage plutus APDUs like the Python fixture', () => {
@@ -135,9 +153,9 @@ describe('v8 signTx', () => {
         babbagePlutusExpectedWitnessPaths,
       ),
     ).to.equal(babbagePlutusExpectedInitApduHex)
-    expect(serializeBuiltChunkApdusHex(parsedBabbagePlutusSignTxRequest)).to.deep.equal(
-      babbagePlutusExpectedChunkApdusHex,
-    )
+    expect(
+      serializeBuiltChunkApdusHex(parsedBabbagePlutusSignTxRequest),
+    ).to.deep.equal(babbagePlutusExpectedChunkApdusHex)
     expect(
       serializeBuiltWitnessApdusHex(babbagePlutusExpectedWitnessPaths),
     ).to.deep.equal(babbagePlutusExpectedWitnessApdusHex)
@@ -150,9 +168,9 @@ describe('v8 signTx', () => {
         babbageOrdinaryExpectedWitnessPaths,
       ),
     ).to.equal(babbageOrdinaryExpectedInitApduHex)
-    expect(serializeBuiltChunkApdusHex(parsedBabbageOrdinarySignTxRequest)).to.deep.equal(
-      babbageOrdinaryExpectedChunkApdusHex,
-    )
+    expect(
+      serializeBuiltChunkApdusHex(parsedBabbageOrdinarySignTxRequest),
+    ).to.deep.equal(babbageOrdinaryExpectedChunkApdusHex)
     expect(
       serializeBuiltWitnessApdusHex(babbageOrdinaryExpectedWitnessPaths),
     ).to.deep.equal(babbageOrdinaryExpectedWitnessApdusHex)
@@ -284,8 +302,8 @@ describe('v8 signTx', () => {
     ])
 
     expect(result.auxiliaryDataSupplement).to.deep.equal(
-      require('../../../test/integration/__fixtures__/signTxCVote').testsCVoteRegistrationCIP36[5]
-        .expectedResult.auxiliaryDataSupplement,
+      nodeRequire('../../../test/integration/__fixtures__/signTxCVote')
+        .testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement,
     )
   })
 })

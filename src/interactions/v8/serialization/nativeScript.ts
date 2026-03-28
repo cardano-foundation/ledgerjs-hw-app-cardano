@@ -39,7 +39,10 @@ const DISPLAY_FORMAT_ENCODING = {
 export function serializeComplexNativeScriptStart(
   script: ParsedComplexNativeScript,
 ): Buffer {
-  if (script.type === NativeScriptType.ALL || script.type === NativeScriptType.ANY) {
+  if (
+    script.type === NativeScriptType.ALL ||
+    script.type === NativeScriptType.ANY
+  ) {
     return Buffer.concat([
       uint8_to_buf(TYPE_ENCODING[script.type]),
       uint32_to_buf(script.params.scripts.length as Uint32_t),
@@ -87,7 +90,5 @@ export function serializeSimpleNativeScript(
 export function serializeWholeNativeScriptFinish(
   displayFormat: NativeScriptHashDisplayFormat,
 ): Buffer {
-  return Buffer.concat([
-    uint8_to_buf(DISPLAY_FORMAT_ENCODING[displayFormat]),
-  ])
+  return Buffer.concat([uint8_to_buf(DISPLAY_FORMAT_ENCODING[displayFormat])])
 }

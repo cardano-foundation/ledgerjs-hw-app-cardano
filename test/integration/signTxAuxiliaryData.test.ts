@@ -1,7 +1,9 @@
 import {createRequire} from 'module'
 
-const require = createRequire(import.meta.url)
-const {describeSignTxPositiveTest} = require('../test_utils.ts')
-const {testsAuxiliaryData} = require('./__fixtures__/signTxAuxiliaryData.ts')
+const nodeRequire = createRequire(__filename)
+const {describeSignTxPositiveTest} = nodeRequire('../test_utils.ts')
+const {testsAuxiliaryData} = nodeRequire(
+  './__fixtures__/signTxAuxiliaryData.ts',
+)
 
 describeSignTxPositiveTest('signTxAuxiliaryData', testsAuxiliaryData)

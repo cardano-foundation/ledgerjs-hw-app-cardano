@@ -16,13 +16,7 @@ export function serializeApdu(params: SendParams): Buffer {
   }
 
   return Buffer.concat([
-    Buffer.from([
-      CLA,
-      params.ins,
-      params.p1,
-      params.p2,
-      params.data.length,
-    ]),
+    Buffer.from([CLA, params.ins, params.p1, params.p2, params.data.length]),
     params.data,
   ])
 }

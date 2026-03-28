@@ -1,5 +1,9 @@
 import {MessageAddressFieldType} from '../../../types/public'
-import type {ParsedMessageData, Uint32_t, Uint8_t} from '../../../types/internal'
+import type {
+  ParsedMessageData,
+  Uint32_t,
+  Uint8_t,
+} from '../../../types/internal'
 import {
   path_to_buf,
   uint32_to_buf,
@@ -7,9 +11,7 @@ import {
 } from '../../../utils/serialize'
 import {serializeAddressParams} from './addressParams'
 
-export function serializeMessageDataInit(
-  msgData: ParsedMessageData,
-): Buffer {
+export function serializeMessageDataInit(msgData: ParsedMessageData): Buffer {
   const addressFieldTypeEncoding = {
     [MessageAddressFieldType.ADDRESS]: 0x01,
     [MessageAddressFieldType.KEY_HASH]: 0x02,

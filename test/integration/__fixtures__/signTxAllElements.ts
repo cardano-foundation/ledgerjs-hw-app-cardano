@@ -28,7 +28,8 @@ const committeeHotPath = str_to_path("1852'/1815'/0'/5/0")
 const votePath = str_to_path("1694'/1815'/0'/0/1")
 const unusualVotePath = str_to_path("1694'/1815'/101'/0/1")
 
-const poolKeyHashHex = 'f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973'
+const poolKeyHashHex =
+  'f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973'
 const poolVrfKeyHashHex =
   '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff'
 const poolOwnerStakingKeyHashHex =
@@ -104,7 +105,8 @@ export const signTxAllElementsAuxiliaryData: SignTxTestCase[] = [
       },
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: '3ab4380755f30a7ded07dcdcc8a0487df1a4762e7a69d383cd4e75ba25378730',
+      txHashHex:
+        '3ab4380755f30a7ded07dcdcc8a0487df1a4762e7a69d383cd4e75ba25378730',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
@@ -143,7 +145,8 @@ export const signTxAllElementsAuxiliaryData: SignTxTestCase[] = [
       },
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: 'd3fa9c5f144daf3df329a62b90d93129547a724adac02064dcde8b8f211248a3',
+      txHashHex:
+        'd3fa9c5f144daf3df329a62b90d93129547a724adac02064dcde8b8f211248a3',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
@@ -198,7 +201,8 @@ export const signTxAllElementsAuxiliaryData: SignTxTestCase[] = [
       },
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: '7b26594457ff51ede6fe7085aeb35d0d074111f368612c0551562dc726afa39b',
+      txHashHex:
+        '7b26594457ff51ede6fe7085aeb35d0d074111f368612c0551562dc726afa39b',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
@@ -233,7 +237,7 @@ export const signTxAllElementsPoolRegistration: SignTxTestCase[] = [
             vrfKeyHashHex: poolVrfKeyHashHex,
             pledge: '1000',
             cost: '100',
-            margin: { numerator: '1', denominator: '2' },
+            margin: {numerator: '1', denominator: '2'},
             rewardAccount: {
               type: PoolRewardAccountType.DEVICE_OWNED,
               params: {
@@ -246,7 +250,9 @@ export const signTxAllElementsPoolRegistration: SignTxTestCase[] = [
                 params: {stakingKeyHashHex: poolOwnerStakingKeyHashHex},
               },
             ],
-            relays: [{type: RelayType.MULTI_HOST, params: {dnsName: 'example.com'}}],
+            relays: [
+              {type: RelayType.MULTI_HOST, params: {dnsName: 'example.com'}},
+            ],
             metadata: {
               metadataUrl: 'https://example.com',
               metadataHashHex: poolMetadataHashHex,
@@ -256,7 +262,8 @@ export const signTxAllElementsPoolRegistration: SignTxTestCase[] = [
       ],
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: '3a1c694bacc75fd9e6b20d8d5a9e2e0c950b3dd40b18161b6b7c368fda9a4f27',
+      txHashHex:
+        '3a1c694bacc75fd9e6b20d8d5a9e2e0c950b3dd40b18161b6b7c368fda9a4f27',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
@@ -363,7 +370,8 @@ export const signTxAllElementsCertificatesOrdinary: SignTxTestCase[] = [
       ],
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: 'd5c10b6e8632ebac921a0523e7a9ce90b493bc043ebecbcdc08aa928956dde0f',
+      txHashHex:
+        'd5c10b6e8632ebac921a0523e7a9ce90b493bc043ebecbcdc08aa928956dde0f',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
@@ -507,7 +515,8 @@ export const signTxAllElementsCertificatesMultisig: SignTxTestCase[] = [
       ],
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: '8521bed764330528ad9134b34ef58dfe542155296d2d8ea4e0633ac7b3ffd582',
+      txHashHex:
+        '8521bed764330528ad9134b34ef58dfe542155296d2d8ea4e0633ac7b3ffd582',
       witnesses: [],
       auxiliaryDataSupplement: null,
     },
@@ -526,13 +535,16 @@ export const signTxAllElementsNoCertificates: SignTxTestCase[] = [
       ttl: 10,
       withdrawals: [
         {
-          stakeCredential: scriptHashCredential('29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd'),
+          stakeCredential: scriptHashCredential(
+            '29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd',
+          ),
           amount: 1000,
         },
       ],
       mint: [
         {
-          policyIdHex: '0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425',
+          policyIdHex:
+            '0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425',
           tokens: [
             {
               assetNameHex: '74657374436f696e',
@@ -547,11 +559,14 @@ export const signTxAllElementsNoCertificates: SignTxTestCase[] = [
       ],
       includeNetworkId: true,
       validityIntervalStart: 47,
-      requiredSigners: [{
-        type: TxRequiredSignerType.PATH,
-        path: str_to_path("1852'/1815'/0'/0/0"),
-      }],
-      scriptDataHashHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+      requiredSigners: [
+        {
+          type: TxRequiredSignerType.PATH,
+          path: str_to_path("1852'/1815'/0'/0/0"),
+        },
+      ],
+      scriptDataHashHex:
+        '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
       collateralInputs: [inputs.utxoShelley],
       collateralOutput: outputs.trezorParity1,
       totalCollateral: 10,
@@ -566,15 +581,20 @@ export const signTxAllElementsNoCertificates: SignTxTestCase[] = [
           },
           votes: [
             {
-              govActionId: { txHashHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', govActionIndex: 0 },
-              votingProcedure: { vote: 0 }
-            }
+              govActionId: {
+                txHashHex:
+                  '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+                govActionIndex: 0,
+              },
+              votingProcedure: {vote: 0},
+            },
           ],
         },
       ],
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: '6cbfabb62dd3a38376acea87c1b1b8935ae2dfa4a970a6e98fb7ae04b70891a6',
+      txHashHex:
+        '6cbfabb62dd3a38376acea87c1b1b8935ae2dfa4a970a6e98fb7ae04b70891a6',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),

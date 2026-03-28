@@ -2,15 +2,15 @@ import {expect} from 'chai'
 import {createRequire} from 'module'
 
 import type {Version} from '../../../src/types/public'
-const require = createRequire(import.meta.url)
-const {
-  signOperationalCertificate,
-} = require('../../../src/interactions/signOperationalCertificate')
-const {serializeApdu} = require('../../../src/interactions/v8/common/apdu')
+const nodeRequire = createRequire(__filename)
+const {signOperationalCertificate} = nodeRequire(
+  '../../../src/interactions/signOperationalCertificate',
+)
+const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
 const {
   expectedSignOperationalCertificateApduHex,
   parsedOperationalCertificateFixture,
-} = require('../__fixtures__/v8/opcert')
+} = nodeRequire('../__fixtures__/v8/opcert')
 
 const mkVersion = (major: number): Version => ({
   major,

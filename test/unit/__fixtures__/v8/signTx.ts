@@ -121,7 +121,11 @@ function buildInitApduHex(params: {
 
 function buildChunkApdusHex(rawTxHex: string): string[] {
   const result: string[] = []
-  for (let offset = 0; offset < rawTxHex.length; offset += MAX_SIGN_TX_CHUNK_SIZE * 2) {
+  for (
+    let offset = 0;
+    offset < rawTxHex.length;
+    offset += MAX_SIGN_TX_CHUNK_SIZE * 2
+  ) {
     const chunkHex = rawTxHex.slice(offset, offset + MAX_SIGN_TX_CHUNK_SIZE * 2)
     const p1 =
       offset + MAX_SIGN_TX_CHUNK_SIZE * 2 < rawTxHex.length
@@ -136,7 +140,9 @@ function buildWitnessApduHex(payloadHex: string): string {
   return buildApduHex(INS_SIGN_TX, P1_TX_SIGN_WITNESS, P2_UNUSED, payloadHex)
 }
 
-function parseFixtureRequest(testCase: (typeof testsAlonzoTrezorComparison)[number]) {
+function parseFixtureRequest(
+  testCase: (typeof testsAlonzoTrezorComparison)[number],
+) {
   return parseSignTransactionRequest({
     tx: testCase.tx,
     signingMode: testCase.signingMode,
@@ -181,10 +187,20 @@ export const cip36VoteKeyHexRawTxHex =
   '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700000000003b020001058000073c8000071780000000000000000000000022058000073c8000071780000000000000020000000000000000006ca7930001010000000000000000002a000000000000000a'
 export const cip36DelegationsRawTxHex =
   '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700000000003b020001058000073c8000071780000000000000000000000022058000073c8000071780000000000000020000000000000000006ca7930001010000000000000000002a000000000000000a0000000000000007'
-export const cip36VoteKeyHexAuxDataResponseHex =
-  `${expectHexString(testsCVoteRegistrationCIP36[0].expectedResult.auxiliaryDataSupplement?.auxiliaryDataHashHex)}${expectHexString(testsCVoteRegistrationCIP36[0].expectedResult.auxiliaryDataSupplement?.cip36VoteRegistrationSignatureHex)}`
-export const cip36DelegationsAuxDataResponseHex =
-  `${expectHexString(testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement?.auxiliaryDataHashHex)}${expectHexString(testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement?.cip36VoteRegistrationSignatureHex)}`
+export const cip36VoteKeyHexAuxDataResponseHex = `${expectHexString(
+  testsCVoteRegistrationCIP36[0].expectedResult.auxiliaryDataSupplement
+    ?.auxiliaryDataHashHex,
+)}${expectHexString(
+  testsCVoteRegistrationCIP36[0].expectedResult.auxiliaryDataSupplement
+    ?.cip36VoteRegistrationSignatureHex,
+)}`
+export const cip36DelegationsAuxDataResponseHex = `${expectHexString(
+  testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement
+    ?.auxiliaryDataHashHex,
+)}${expectHexString(
+  testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement
+    ?.cip36VoteRegistrationSignatureHex,
+)}`
 export const cip36VoteKeyHexExpectedAuxInitApduHex = buildApduHex(
   INS_SIGN_TX,
   P1_TX_AUX_DATA,
@@ -357,9 +373,8 @@ export const cip36DelegationsExpectedInitApduHex = buildInitApduHex({
   rawTxHex: cip36DelegationsRawTxHex,
 })
 
-export const alonzoExpectedChunkApdusHex = buildChunkApdusHex(
-  alonzoTrezorRawTxHex,
-)
+export const alonzoExpectedChunkApdusHex =
+  buildChunkApdusHex(alonzoTrezorRawTxHex)
 export const babbagePlutusExpectedChunkApdusHex = buildChunkApdusHex(
   babbagePlutusRawTxHex,
 )
@@ -416,9 +431,12 @@ export function serializeBuiltInitApduHex(
   return serializeApdu(buildSignTxInit(request, witnessPaths)).toString('hex')
 }
 
-export function serializeBuiltChunkApdusHex(request: typeof parsedAlonzoTrezorSignTxRequest) {
-  return buildSignTxChunks(request.tx).map((apdu: {ins: number; p1: number; p2: number; data: Buffer}) =>
-    serializeApdu(apdu).toString('hex'),
+export function serializeBuiltChunkApdusHex(
+  request: typeof parsedAlonzoTrezorSignTxRequest,
+) {
+  return buildSignTxChunks(request.tx).map(
+    (apdu: {ins: number; p1: number; p2: number; data: Buffer}) =>
+      serializeApdu(apdu).toString('hex'),
   )
 }
 
@@ -427,24 +445,34 @@ export function serializeBuiltAuxInitApduHex(
     | typeof parsedCIP36VoteKeyHexSignTxRequest
     | typeof parsedCIP36DelegationsSignTxRequest,
 ) {
-  if (request.tx.auxiliaryData?.type !== TxAuxiliaryDataType.CIP36_REGISTRATION) {
+  if (
+    request.tx.auxiliaryData?.type !== TxAuxiliaryDataType.CIP36_REGISTRATION
+  ) {
     throw new Error('expected CIP36 auxiliary data')
   }
 
-  return serializeApdu(buildSignTxAuxiliaryDataInit(request.tx.auxiliaryData.params)).toString('hex')
+  return serializeApdu(
+    buildSignTxAuxiliaryDataInit(request.tx.auxiliaryData.params),
+  ).toString('hex')
 }
 
 export function serializeBuiltAuxDelegationApdusHex(
   request: typeof parsedCIP36DelegationsSignTxRequest,
 ) {
-  if (request.tx.auxiliaryData?.type !== TxAuxiliaryDataType.CIP36_REGISTRATION) {
+  if (
+    request.tx.auxiliaryData?.type !== TxAuxiliaryDataType.CIP36_REGISTRATION
+  ) {
     throw new Error('expected CIP36 auxiliary data')
   }
 
-  return (request.tx.auxiliaryData.params.delegations ?? []).map((delegation, index, delegations) =>
-    serializeApdu(
-      buildSignTxAuxiliaryDataDelegation(delegation, index === delegations.length - 1),
-    ).toString('hex'),
+  return (request.tx.auxiliaryData.params.delegations ?? []).map(
+    (delegation, index, delegations) =>
+      serializeApdu(
+        buildSignTxAuxiliaryDataDelegation(
+          delegation,
+          index === delegations.length - 1,
+        ),
+      ).toString('hex'),
   )
 }
 

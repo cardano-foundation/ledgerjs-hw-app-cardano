@@ -1,10 +1,10 @@
-import {
-  DRepType,
-  CredentialType,
-  CertificateType,
+import {DRepType, CredentialType, CertificateType} from '../../types/internal'
+import type {
+  ParsedCertificate,
+  ParsedDRep,
+  Version,
+  Uint8_t,
 } from '../../types/internal'
-import type {ParsedCertificate, ParsedDRep, Version,
-  Uint8_t} from '../../types/internal'
 import {assert, unreachable} from '../../utils/assert'
 import {
   hex_to_buf,

@@ -37,7 +37,11 @@ import {
   TxOutputDestinationType,
   TransactionSigningMode,
 } from '../../../types/internal'
-import {CIP36VoteRegistrationFormat, DatumType, VoterType} from '../../../types/public'
+import {
+  CIP36VoteRegistrationFormat,
+  DatumType,
+  VoterType,
+} from '../../../types/public'
 import {assert, unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
@@ -96,9 +100,7 @@ function serializeCount16(count: number): Buffer {
   return uint16_to_buf(count as Uint16_t)
 }
 
-function serializePathOrCvKey(
-  value: ValidBIP32Path | CVotePublicKey,
-): Buffer {
+function serializePathOrCvKey(value: ValidBIP32Path | CVotePublicKey): Buffer {
   if (Array.isArray(value)) {
     return Buffer.concat([
       uint8_to_buf(CVoteCredentialType.KEY_PATH as Uint8_t),
@@ -270,9 +272,15 @@ function serializeOutput(output: ParsedOutput): Buffer {
 function serializeDRep(dRep: ParsedDRep): Buffer {
   switch (dRep.type) {
     case DRepType.KEY_PATH:
-      return Buffer.concat([uint8_to_buf(dRep.type as Uint8_t), path_to_buf(dRep.path)])
+      return Buffer.concat([
+        uint8_to_buf(dRep.type as Uint8_t),
+        path_to_buf(dRep.path),
+      ])
     case DRepType.KEY_HASH:
-      return Buffer.concat([uint8_to_buf(dRep.type as Uint8_t), hex_to_buf(dRep.keyHashHex)])
+      return Buffer.concat([
+        uint8_to_buf(dRep.type as Uint8_t),
+        hex_to_buf(dRep.keyHashHex),
+      ])
     case DRepType.SCRIPT_HASH:
       return Buffer.concat([
         uint8_to_buf(dRep.type as Uint8_t),
@@ -292,9 +300,7 @@ function serializeRelay(relay: ParsedPoolRelay): Buffer {
       return Buffer.concat([
         uint8_to_buf(relay.type as Uint8_t),
         serializeIncluded(relay.port != null),
-        relay.port != null
-          ? uint16_to_buf(relay.port)
-          : Buffer.alloc(0),
+        relay.port != null ? uint16_to_buf(relay.port) : Buffer.alloc(0),
         serializeIncluded(relay.ipv4 != null),
         relay.ipv4 ?? Buffer.alloc(0),
         serializeIncluded(relay.ipv6 != null),
@@ -306,9 +312,7 @@ function serializeRelay(relay: ParsedPoolRelay): Buffer {
       return Buffer.concat([
         uint8_to_buf(relay.type as Uint8_t),
         serializeIncluded(relay.port != null),
-        relay.port != null
-          ? uint16_to_buf(relay.port)
-          : Buffer.alloc(0),
+        relay.port != null ? uint16_to_buf(relay.port) : Buffer.alloc(0),
         serializeIncluded(true),
         uint8_to_buf(dnsName.length as Uint8_t),
         dnsName,
@@ -338,10 +342,12 @@ function serializePoolMetadata(metadata: ParsedPoolMetadata): Buffer {
   ])
 }
 
-function serializePoolRegistration(certificate: Extract<
-  ParsedCertificate,
-  {type: CertificateType.STAKE_POOL_REGISTRATION}
->): Buffer {
+function serializePoolRegistration(
+  certificate: Extract<
+    ParsedCertificate,
+    {type: CertificateType.STAKE_POOL_REGISTRATION}
+  >,
+): Buffer {
   const {pool} = certificate
   const buffers: Buffer[] = [
     serializeCredential(serializePoolKeyCredential(pool.poolKey)),
@@ -369,10 +375,7 @@ function serializePoolRegistration(certificate: Extract<
   }
 
   const payload = Buffer.concat(buffers)
-  return Buffer.concat([
-    uint16_to_buf(payload.length as Uint16_t),
-    payload,
-  ])
+  return Buffer.concat([uint16_to_buf(payload.length as Uint16_t), payload])
 }
 
 function serializeCertificate(certificate: ParsedCertificate): Buffer {
@@ -469,17 +472,35 @@ function serializeRequiredSigner(requiredSigner: ParsedRequiredSigner): Buffer {
 function serializeVoter(voter: ParsedVoter): Buffer {
   switch (voter.type) {
     case VoterType.COMMITTEE_KEY_HASH:
-      return Buffer.concat([uint8_to_buf(voter.type as Uint8_t), hex_to_buf(voter.keyHashHex)])
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        hex_to_buf(voter.keyHashHex),
+      ])
     case VoterType.DREP_KEY_HASH:
-      return Buffer.concat([uint8_to_buf(voter.type as Uint8_t), hex_to_buf(voter.keyHashHex)])
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        hex_to_buf(voter.keyHashHex),
+      ])
     case VoterType.STAKE_POOL_KEY_HASH:
-      return Buffer.concat([uint8_to_buf(voter.type as Uint8_t), hex_to_buf(voter.keyHashHex)])
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        hex_to_buf(voter.keyHashHex),
+      ])
     case VoterType.COMMITTEE_KEY_PATH:
-      return Buffer.concat([uint8_to_buf(voter.type as Uint8_t), path_to_buf(voter.keyPath)])
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        path_to_buf(voter.keyPath),
+      ])
     case VoterType.DREP_KEY_PATH:
-      return Buffer.concat([uint8_to_buf(voter.type as Uint8_t), path_to_buf(voter.keyPath)])
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        path_to_buf(voter.keyPath),
+      ])
     case VoterType.STAKE_POOL_KEY_PATH:
-      return Buffer.concat([uint8_to_buf(voter.type as Uint8_t), path_to_buf(voter.keyPath)])
+      return Buffer.concat([
+        uint8_to_buf(voter.type as Uint8_t),
+        path_to_buf(voter.keyPath),
+      ])
     case VoterType.COMMITTEE_SCRIPT_HASH:
       return Buffer.concat([
         uint8_to_buf(voter.type as Uint8_t),
@@ -602,8 +623,8 @@ export function serializeTxInitData(
     tx.auxiliaryData?.type === TxAuxiliaryDataType.ARBITRARY_HASH
       ? 0
       : tx.auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
-        ? 1
-        : null
+      ? 1
+      : null
   const auxiliaryDataHash =
     tx.auxiliaryData?.type === TxAuxiliaryDataType.ARBITRARY_HASH
       ? tx.auxiliaryData.hashHex
@@ -649,8 +670,7 @@ export function serializeTxAuxiliaryDataInit(
     [CIP36VoteRegistrationFormat.CIP_36]: 2,
   } as const
   const delegationCount = params.delegations?.length ?? 0
-  const votingKey =
-    params.votePublicKeyPath ?? params.votePublicKey ?? null
+  const votingKey = params.votePublicKeyPath ?? params.votePublicKey ?? null
 
   const buffers: Buffer[] = [
     u8(registrationFormatEncoding[params.format]),

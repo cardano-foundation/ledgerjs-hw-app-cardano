@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {createRequire} from 'module'
-const require = createRequire(import.meta.url)
+const nodeRequire = createRequire(__filename)
 
 const CertificateType = {
   STAKE_REGISTRATION: 0,
@@ -65,14 +65,16 @@ const {
   signTxAllElementsCertificatesOrdinary,
   signTxAllElementsPoolRegistration,
   signTxAllElementsNoCertificates,
-} = require('../../integration/__fixtures__/signTxAllElements.ts')
+} = nodeRequire('../../integration/__fixtures__/signTxAllElements.ts')
 
 describe('v8 signTxAllElements fixtures', () => {
   it('parses the auxiliary data fixture', () => {
     expect(signTxAllElementsAuxiliaryData).to.have.length(3)
 
     const voteKeyHexFixture = signTxAllElementsAuxiliaryData[0].tx.auxiliaryData
-    expect(voteKeyHexFixture?.type).to.equal(TxAuxiliaryDataType.CIP36_REGISTRATION)
+    expect(voteKeyHexFixture?.type).to.equal(
+      TxAuxiliaryDataType.CIP36_REGISTRATION,
+    )
     expect(voteKeyHexFixture?.params.format).to.equal(
       CIP36VoteRegistrationFormat.CIP_36,
     )
@@ -90,9 +92,9 @@ describe('v8 signTxAllElements fixtures', () => {
     expect(voteKeyPathFixture?.params.paymentDestination.type).to.equal(
       TxOutputDestinationType.THIRD_PARTY,
     )
-    expect(voteKeyPathFixture?.params.paymentDestination.params.addressHex).to.be.a(
-      'string',
-    )
+    expect(
+      voteKeyPathFixture?.params.paymentDestination.params.addressHex,
+    ).to.be.a('string')
 
     const delegationsFixture =
       signTxAllElementsAuxiliaryData[2].tx.auxiliaryData
@@ -121,7 +123,8 @@ describe('v8 signTxAllElements fixtures', () => {
 
   it('parses the ordinary certificate fixture bucket', () => {
     expect(signTxAllElementsCertificatesOrdinary).to.have.length(1)
-    const ordinaryCertificates = signTxAllElementsCertificatesOrdinary[0].tx.certificates
+    const ordinaryCertificates =
+      signTxAllElementsCertificatesOrdinary[0].tx.certificates
     expect(ordinaryCertificates).to.have.length(11)
 
     const certificateTypes = ordinaryCertificates.map(
@@ -184,12 +187,12 @@ describe('v8 signTxAllElements fixtures', () => {
     expect(broadFixture.tx.certificates[6].params.dRep.type).to.equal(
       DRepParamsType.NO_CONFIDENCE,
     )
-    expect(
-      broadFixture.tx.certificates[7].params.coldCredential.type,
-    ).to.equal(CredentialParamsType.SCRIPT_HASH)
-    expect(broadFixture.tx.certificates[10].params.dRepCredential.type).to.equal(
+    expect(broadFixture.tx.certificates[7].params.coldCredential.type).to.equal(
       CredentialParamsType.SCRIPT_HASH,
     )
+    expect(
+      broadFixture.tx.certificates[10].params.dRepCredential.type,
+    ).to.equal(CredentialParamsType.SCRIPT_HASH)
     expect(
       broadFixture.tx.certificates[13].params.stakeCredential.type,
     ).to.equal(CredentialParamsType.SCRIPT_HASH)

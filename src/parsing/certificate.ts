@@ -5,13 +5,11 @@ import {
   DRepType,
   SCRIPT_HASH_LENGTH,
   CertificateType,
-  KEY_HASH_LENGTH
+  KEY_HASH_LENGTH,
 } from '../types/internal'
-import type {ParsedCertificate,
-  ParsedDRep,
-  Uint64_str} from '../types/internal'
-import { DRepParamsType} from '../types/public'
-import type {Certificate,bigint_like, DRepParams} from '../types/public'
+import type {ParsedCertificate, ParsedDRep, Uint64_str} from '../types/internal'
+import {DRepParamsType} from '../types/public'
+import type {Certificate, bigint_like, DRepParams} from '../types/public'
 import {
   parseBIP32Path,
   parseHexStringOfLength,
