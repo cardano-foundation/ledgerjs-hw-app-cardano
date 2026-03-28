@@ -1,5 +1,10 @@
 dist
 node_modules
+
+# Yarn Berry (tracked release binary; ignore local cache/state)
+.yarn/*
+!.yarn/releases
+
 .vscode
 docs_generated/
 *.tgz

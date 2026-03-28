@@ -32,7 +32,7 @@ jobs:
           command: yarn spell:check
       - run:
           name: Audit dependencies
-          command: yarn audit
+          command: yarn npm audit --all --no-deprecations --recursive
       - run:
           name: Build
           command: yarn build

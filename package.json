@@ -35,7 +35,6 @@
     "@types/blake2": "^4.0.4",
     "@types/chai": "^5.2.3",
     "@types/chai-as-promised": "^8.0.2",
-    "@types/mocha": "^10.0.0",
     "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
@@ -90,12 +89,8 @@
   },
   "resolutions": {
     "chalk/ansi-regex": "<6.0.6",
-    "prettier-eslint/**/ansi-regex": "<6.0.0",
-    "eslint/**/ansi-regex": "<6.0.0",
-    "@ledgerhq/hw-transport-node-hid/**/ansi-regex": "<6.0.0",
-    "mocha/**/ansi-regex": "<6.0.0",
     "mocha/diff": "^8.0.3",
     "mocha/serialize-javascript": "^7.0.3"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@4.13.0"
 }
