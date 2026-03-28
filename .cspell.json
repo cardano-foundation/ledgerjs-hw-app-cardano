@@ -21,6 +21,7 @@
   "words": [
     "Adalite",
     "APDU",
+    "apdus",
     "argparse",
     "basex",
     "bbbc",
@@ -81,6 +82,7 @@
     "uniquify",
     "utxo",
     "vacuumlabs",
+    "venv",
     "vkey",
     "votecast",
     "VOTINGPURPOSE",
