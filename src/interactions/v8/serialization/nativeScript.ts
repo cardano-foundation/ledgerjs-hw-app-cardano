@@ -27,7 +27,8 @@ const TYPE_ENCODING = {
 } as const
 
 const CREDENTIAL_ENCODING = {
-  KEY_HASH: 1 as Uint8_t,
+  KEY_HASH: 0 as Uint8_t,
+  SCRIPT_HASH: 1 as Uint8_t,
   KEY_PATH: 2 as Uint8_t,
 } as const
 
