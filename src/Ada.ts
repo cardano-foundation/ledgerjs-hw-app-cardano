@@ -184,6 +184,9 @@ export class Ada {
       'deriveAddress',
       'showAddress',
       'deriveNativeScriptHash',
+      'signOperationalCertificate',
+      'signMessage',
+      'signCIP36Vote',
     ]
     this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
     this._send = async (params: SendParams): Promise<Buffer> => {
