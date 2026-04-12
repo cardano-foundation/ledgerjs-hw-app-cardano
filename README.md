@@ -24,6 +24,21 @@ The library is organized into the following modules under `src/`:
 Example code interacting with `hw-app-cardano` is provided in `example-node` directory.
 You can execute it with the `yarn run-example` command.
 
+### Tooling
+
+This repo uses Corepack with Yarn 4. If `yarn audit` does not work locally, use:
+
+```bash
+corepack yarn npm audit --all --no-deprecations --recursive
+```
+
+On Linux, `corepack yarn install` may require system packages for `node-hid`:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libusb-1.0-0-dev libudev-dev
+```
+
 ### Tests
 
 Automated tests are provided. There are two types of tests:

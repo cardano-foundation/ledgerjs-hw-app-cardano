@@ -6,7 +6,7 @@ version: 2.1
 jobs:
   build_and_test:
     docker:
-      - image: cimg/node:20.18
+      - image: cimg/node:22.14
     working_directory: ~/repo
     steps:
       - checkout
@@ -53,7 +53,7 @@ jobs:
 
   update_docs:
     docker:
-      - image: cimg/node:20.18
+      - image: cimg/node:22.14
     working_directory: ~/repo
     steps:
       - checkout
