@@ -5,16 +5,17 @@ import type {
   Uint32_t,
 } from '../../../types/internal'
 import {
+  CredentialType,
   NativeScriptHashDisplayFormat,
   NativeScriptType,
 } from '../../../types/internal'
+import {unreachable} from '../../../utils/assert'
 import {
-  hex_to_buf,
-  path_to_buf,
   uint8_to_buf,
   uint32_to_buf,
   uint64_to_buf,
 } from '../../../utils/serialize'
+import {serializeCredential} from './credential'
 
 const TYPE_ENCODING = {
   [NativeScriptType.PUBKEY_DEVICE_OWNED]: 0 as Uint8_t,
@@ -24,12 +25,6 @@ const TYPE_ENCODING = {
   [NativeScriptType.N_OF_K]: 3 as Uint8_t,
   [NativeScriptType.INVALID_BEFORE]: 4 as Uint8_t,
   [NativeScriptType.INVALID_HEREAFTER]: 5 as Uint8_t,
-} as const
-
-const CREDENTIAL_ENCODING = {
-  KEY_HASH: 0 as Uint8_t,
-  SCRIPT_HASH: 1 as Uint8_t,
-  KEY_PATH: 2 as Uint8_t,
 } as const
 
 const DISPLAY_FORMAT_ENCODING = {
@@ -68,14 +63,12 @@ export function serializeSimpleNativeScript(
     case NativeScriptType.PUBKEY_DEVICE_OWNED:
       return Buffer.concat([
         uint8_to_buf(TYPE_ENCODING[script.type]),
-        uint8_to_buf(CREDENTIAL_ENCODING.KEY_PATH),
-        path_to_buf(script.params.path),
+        serializeCredential({type: CredentialType.KEY_PATH, path: script.params.path}),
       ])
     case NativeScriptType.PUBKEY_THIRD_PARTY:
       return Buffer.concat([
         uint8_to_buf(TYPE_ENCODING[script.type]),
-        uint8_to_buf(CREDENTIAL_ENCODING.KEY_HASH),
-        hex_to_buf(script.params.keyHashHex),
+        serializeCredential({type: CredentialType.KEY_HASH, keyHashHex: script.params.keyHashHex}),
       ])
     case NativeScriptType.INVALID_BEFORE:
     case NativeScriptType.INVALID_HEREAFTER:
@@ -84,7 +77,7 @@ export function serializeSimpleNativeScript(
         uint64_to_buf(script.params.slot),
       ])
     default:
-      throw new Error('Unexpected simple native script type')
+      unreachable(script)
   }
 }
 

@@ -16,6 +16,7 @@ import {
   ED25519_SIGNATURE_LENGTH,
   EXTENDED_PUBLIC_KEY_LENGTH,
   NATIVE_SCRIPT_HASH_LENGTH,
+  TX_HASH_LENGTH,
 } from '../../types/internal'
 import type {NativeScriptHashDisplayFormat} from '../../types/public'
 import {INS} from '../common/ins'
@@ -323,7 +324,7 @@ export function buildSignTxChunks(tx: ParsedTransaction): SendParams[] {
         p2: V8P2_UNUSED,
         data: chunkData,
         expectedResponseLength:
-          offset < txData.length ? 0 : ED25519_SIGNATURE_LENGTH / 2,
+          offset < txData.length ? 0 : TX_HASH_LENGTH,
       }),
     )
   }

@@ -145,9 +145,9 @@ export function* sendSignTx(
     }
   }
 
-  let txHashResponse = Buffer.alloc(0)
+  let txHashResponse: Buffer = Buffer.alloc(0)
   for (const chunk of buildSignTxChunks(request.tx)) {
-    txHashResponse = Buffer.from((yield chunk) as Uint8Array)
+    txHashResponse = yield chunk
   }
 
   const witnessResponses: Buffer[] = []
