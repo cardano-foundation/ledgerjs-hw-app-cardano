@@ -444,7 +444,10 @@ function serializeCertificate(certificate: ParsedCertificate): Buffer {
     case CertificateType.STAKE_POOL_RETIREMENT:
       return Buffer.concat([
         uint8_to_buf(certificate.type as Uint8_t),
-        path_to_buf(certificate.path),
+        serializeCredential({
+          type: CredentialType.KEY_PATH,
+          path: certificate.path,
+        }),
         uint64_to_buf(certificate.retirementEpoch),
       ])
     default:

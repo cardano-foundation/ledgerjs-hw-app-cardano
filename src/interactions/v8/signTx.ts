@@ -46,11 +46,15 @@ function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
     for (const cert of tx.certificates) {
       switch (cert.type) {
         case CertificateType.STAKE_REGISTRATION:
-        case CertificateType.STAKE_REGISTRATION_CONWAY:
         case CertificateType.STAKE_DEREGISTRATION:
         case CertificateType.STAKE_DEREGISTRATION_CONWAY:
         case CertificateType.STAKE_DELEGATION:
         case CertificateType.VOTE_DELEGATION:
+          if (cert.stakeCredential.type === CredentialType.KEY_PATH) {
+            witnessPaths.push(cert.stakeCredential.path)
+          }
+          break
+        case CertificateType.STAKE_REGISTRATION_CONWAY:
           if (cert.stakeCredential.type === CredentialType.KEY_PATH) {
             witnessPaths.push(cert.stakeCredential.path)
           }

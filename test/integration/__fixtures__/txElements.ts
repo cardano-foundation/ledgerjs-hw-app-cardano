@@ -260,11 +260,6 @@ export const mints: Record<
       policyIdHex: '7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373',
       tokens: [
         {
-          // fingerprint: asset1rjklcrnsdzqp65wjgrg55sy9723kw09mlgvlc3
-          assetNameHex: '',
-          amount: '0',
-        },
-        {
           // fingerprint: asset17jd78wukhtrnmjh3fngzasxm8rck0l2r4hhyyt
           assetNameHex:
             '1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209',
