@@ -149,6 +149,7 @@ export function* sendSignTx(
   }
 
   let txHashResponse: Buffer = Buffer.alloc(0)
+
   for (const chunk of buildSignTxChunks(request.tx, rawTx)) {
     txHashResponse = yield chunk
   }
