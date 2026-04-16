@@ -24,8 +24,7 @@ describe('deriveAddress', () => {
   })
 
   afterEach(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (ada as any).t.close()
+    await ada.transport.close()
   })
 
   describe('Should successfully derive Byron address', () => {

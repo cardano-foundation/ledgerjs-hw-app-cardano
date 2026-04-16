@@ -11,8 +11,7 @@ describe('getSerial', () => {
   })
 
   afterEach(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (ada as any).t.close()
+    await ada.transport.close()
   })
 
   it('Should correctly get the serial number of the device', async () => {

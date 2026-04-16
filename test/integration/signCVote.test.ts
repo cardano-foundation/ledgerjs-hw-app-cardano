@@ -14,8 +14,7 @@ describe('signCIP36Vote', () => {
   })
 
   afterEach(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (ada as any).t.close()
+    await ada.transport.close()
   })
 
   for (const {testName, cVote, expected} of tests) {
