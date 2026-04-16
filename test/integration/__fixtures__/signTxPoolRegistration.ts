@@ -369,7 +369,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness valid multiple mixed owners all relays pool registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwnersAllRelays],
@@ -393,7 +393,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   },
   {
     testName: 'Witness valid single path owner ipv4 relay pool registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationDefault],
@@ -418,7 +418,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness valid multiple mixed owners ipv4 relay pool registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwners],
@@ -443,7 +443,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness valid multiple mixed owners mixed ipv4, single host relays pool registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [
@@ -470,7 +470,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness valid multiple mixed owners mixed ipv4 ipv6 relays pool registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationMixedOwnersIpv4Ipv6Relays],
@@ -494,7 +494,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   },
   {
     testName: 'Witness valid single path owner no relays pool registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationNoRelays],
@@ -519,7 +519,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   {
     // works as a private pool not visible in yoroi, daedalus, etc.
     testName: 'Witness pool registration with no metadata',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       certificates: [certificates.poolRegistrationNoMetadata],
@@ -543,7 +543,7 @@ export const poolRegistrationOwnerTestCases: SignTxTestCase[] = [
   },
   {
     testName: 'Witness pool registration without outputs',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       outputs: [],
@@ -572,7 +572,7 @@ export const poolRegistrationOperatorTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness pool registration as operator with no owners and no relays',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       inputs: [inputs.utxoWithPath0],
@@ -603,7 +603,7 @@ export const poolRegistrationOperatorTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness pool registration as operator with one owner and no relays',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       inputs: [inputs.utxoWithPath0],
@@ -636,7 +636,7 @@ export const poolRegistrationOperatorTestCases: SignTxTestCase[] = [
   {
     testName:
       'Witness pool registration as operator with multiple owners and all relays',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
       inputs: [inputs.utxoWithPath0],

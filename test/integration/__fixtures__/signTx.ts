@@ -14,6 +14,7 @@ import {
   VoteOption,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
+import type {AppVersionOverride} from '../../test_utils'
 import {
   inputs,
   mainnetFeeTtl,
@@ -32,7 +33,7 @@ export type SignTxTestCase = {
   txBody?: string
   txAuxiliaryData?: string
   expectedResult: SignedTransactionData
-  unsupportedInAppXS?: boolean
+  appVersion?: AppVersionOverride
 }
 
 export const testsByron: SignTxTestCase[] = [
@@ -562,7 +563,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
   },
   {
     testName: 'Sign tx with pool retirement combined with stake registration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
       inputs: [
@@ -617,7 +618,7 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
   },
   {
     testName: 'Sign tx with pool retirement combined with stake deregistration',
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
       inputs: [

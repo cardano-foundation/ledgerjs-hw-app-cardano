@@ -84,6 +84,11 @@ export const Networks = {
   },
 }
 
+export type AppVersionOverride = {
+  unsupportedInAppXS?: boolean // defaults to false
+  supportedSinceV8?: boolean // defaults to false
+}
+
 type TxHash = FixLenHexString<32>
 
 function hashTxBody(txBodyHex: string): TxHash {
@@ -106,7 +111,7 @@ type SignTxRejectCase = {
   rejectReason: InvalidDataReason
   errCls?: new (...args: any[]) => Error
   errMsg?: string | RegExp
-  unsupportedInAppXS?: boolean
+  appVersion?: AppVersionOverride
 }
 
 type SignTxPositiveCase = {
@@ -117,7 +122,7 @@ type SignTxPositiveCase = {
   options?: TransactionOptions
   txBody?: string
   expectedResult: SignedTransactionData
-  unsupportedInAppXS?: boolean
+  appVersion?: AppVersionOverride
 }
 
 function assertSignTxRejectCase(
@@ -199,7 +204,7 @@ export function describeSignTxRejects(
         signingMode,
         errCls,
         errMsg,
-        unsupportedInAppXS,
+        appVersion,
       } = testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (errMsg === DoNotRunOnLedger) {
@@ -217,7 +222,7 @@ export function describeSignTxRejects(
         // We do not expect DeviceVersionUnsupported in that case for XS app.
         const hasTypeError = errCls === TypeError
         const correctlyDetectsUnsupportedInAppXS =
-          isAppXS && unsupportedInAppXS && !hasTypeError
+          isAppXS && (appVersion?.unsupportedInAppXS ?? false) && !hasTypeError
 
         if (correctlyDetectsUnsupportedInAppXS) {
           await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
@@ -256,7 +261,7 @@ export function describeSignTxPositiveTest(
         options,
         txBody,
         expectedResult,
-        unsupportedInAppXS,
+        appVersion,
       } = testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (!txBody) {
@@ -274,7 +279,7 @@ export function describeSignTxPositiveTest(
           options,
         })
 
-        if (isAppXS && unsupportedInAppXS) {
+        if (isAppXS && (appVersion?.unsupportedInAppXS ?? false)) {
           await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
         } else {
           expect(await response).to.deep.equal(expectedResult)

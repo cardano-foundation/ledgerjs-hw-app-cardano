@@ -7,6 +7,7 @@ import {
 } from '../../../src/Ada'
 import {str_to_path} from '../../../src/utils/address'
 import {Networks} from '../../test_utils'
+import type {AppVersionOverride} from '../../test_utils'
 
 type ByronTestCase = {
   testName: string
@@ -608,7 +609,7 @@ type RejectTestCase = {
   addressParams: DeviceOwnedAddress
   errCls: new (...args: any[]) => ErrorBase
   errMsg: string
-  unsupportedInAppXS?: boolean
+  appVersion?: AppVersionOverride
 }
 
 const rejectTestCaseBase = {
@@ -627,7 +628,7 @@ export const rejectTestCases: RejectTestCase[] = [
         spendingPath: str_to_path("44'/1815'/1'"),
       },
     },
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
   },
   {
     testName: 'invalid path',
@@ -638,7 +639,7 @@ export const rejectTestCases: RejectTestCase[] = [
         spendingPath: str_to_path("44'/1815'/1'/5/10'"),
       },
     },
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
   },
   {
     testName: 'Byron with Shelley path',
@@ -649,7 +650,7 @@ export const rejectTestCases: RejectTestCase[] = [
         spendingPath: str_to_path("1852'/1815'/1'/0/10"),
       },
     },
-    unsupportedInAppXS: true,
+    appVersion: {unsupportedInAppXS: true},
   },
   {
     testName: 'base key/key with Byron spending path',
