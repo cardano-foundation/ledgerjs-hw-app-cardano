@@ -17,6 +17,9 @@ export function* getSerial(version: Version): Interaction<Serial> {
 
   const P1_UNUSED = 0x00
   const P2_UNUSED = 0x00
+  // GET_SERIAL returns a fixed-width 7-byte payload from current Ledger devices.
+  // There is no payload length prefix; the trailing APDU status words are stripped in Ada._send.
+  // Keep the strict length check for now and revisit only if future devices change this contract.
   const response = yield send({
     p1: P1_UNUSED,
     p2: P2_UNUSED,

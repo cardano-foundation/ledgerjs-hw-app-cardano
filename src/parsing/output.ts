@@ -42,6 +42,11 @@ type ParseTokenAmountFn<T> = (
   errMsg: InvalidDataReason,
 ) => T
 
+function compareHexByCanonicalAssetOrdering(h1: string, h2: string): number {
+  if (h1.length !== h2.length) return h1.length - h2.length
+  return Buffer.compare(Buffer.from(h1, 'hex'), Buffer.from(h2, 'hex'))
+}
+
 function parseToken<T>(
   token: Token,
   parseTokenAmountFn: ParseTokenAmountFn<T>,
@@ -98,10 +103,7 @@ function parseAssetGroup<T>(
     InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE,
   )
 
-  const sortedAssetNames = [...assetNamesHex].sort((n1, n2) => {
-    if (n1.length === n2.length) return n1.localeCompare(n2)
-    else return n1.length - n2.length
-  })
+  const sortedAssetNames = [...assetNamesHex].sort(compareHexByCanonicalAssetOrdering)
   validate(
     JSON.stringify(assetNamesHex) === JSON.stringify(sortedAssetNames),
     InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,

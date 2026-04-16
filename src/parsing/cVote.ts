@@ -9,9 +9,9 @@ export function parseCVote(cVote: CIP36Vote): ParsedCVote {
     InvalidDataReason.CVOTE_INVALID_VOTECAST_DATA,
   )
 
-  // we don't know what is the true minimal length
-  // this just assures that the Cardano ledger app will be happy
-  const MIN_VOTECAST_LENGTH = 32 + 1 + 1 + 1
+  // The app parses votePlanId(32), proposalIndex(1), and payloadTypeTag(1)
+  // from the votecast payload during INIT, so shorter payloads are rejected.
+  const MIN_VOTECAST_LENGTH = 32 + 1 + 1
   validate(
     voteCastDataHex.length >= 2 * MIN_VOTECAST_LENGTH,
     InvalidDataReason.CVOTE_INVALID_VOTECAST_DATA,

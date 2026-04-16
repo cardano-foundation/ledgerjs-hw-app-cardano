@@ -1,5 +1,5 @@
 export const MAX_LOVELACE_SUPPLY_STR = '45 000 000 000.000000'.replace(
-  /[ .]/,
+  /[ .]/g,
   '',
 )
 export const POOL_REGISTRATION_OWNERS_MAX = 1000

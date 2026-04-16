@@ -11,6 +11,7 @@ import type {
   ParsedVoter,
   ParsedVoterVotes,
   ParsedWithdrawal,
+  ValidBIP32Path,
 } from '../types/internal'
 import {
   SCRIPT_HASH_LENGTH,
@@ -68,6 +69,55 @@ function parseCertificates(
   const parsed = certificates.map((cert) => parseCertificate(cert))
 
   return parsed
+}
+
+function parseWithdrawals(withdrawals: Array<Withdrawal>): Array<ParsedWithdrawal> {
+  validate(isArray(withdrawals), InvalidDataReason.WITHDRAWALS_NOT_ARRAY)
+  return withdrawals.map((withdrawal) => parseWithdrawal(withdrawal))
+}
+
+function parseCollateralInputs(inputs: Array<TxInput>): Array<ParsedInput> {
+  validate(isArray(inputs), InvalidDataReason.COLLATERAL_INPUTS_NOT_ARRAY)
+  return inputs.map((input) => parseTxInput(input))
+}
+
+function parseRequiredSigners(
+  requiredSigners: Array<RequiredSigner>,
+): Array<ParsedRequiredSigner> {
+  validate(
+    isArray(requiredSigners),
+    InvalidDataReason.REQUIRED_SIGNERS_NOT_ARRAY,
+  )
+  return requiredSigners.map((requiredSigner) =>
+    parseRequiredSigner(requiredSigner),
+  )
+}
+
+function parseReferenceInputs(inputs: Array<TxInput>): Array<ParsedInput> {
+  validate(isArray(inputs), InvalidDataReason.REFERENCE_INPUTS_NOT_ARRAY)
+  return inputs.map((input) => parseTxInput(input))
+}
+
+function parseVotingProcedures(
+  votingProcedures: Array<VoterVotes>,
+): Array<ParsedVoterVotes> {
+  validate(
+    isArray(votingProcedures),
+    InvalidDataReason.VOTING_PROCEDURES_NOT_ARRAY,
+  )
+  return votingProcedures.map((voterVotes) => parseVoterVotes(voterVotes))
+}
+
+function parseAdditionalWitnessPaths(
+  additionalWitnessPaths: Array<number[]>,
+): Array<ValidBIP32Path> {
+  validate(
+    isArray(additionalWitnessPaths),
+    InvalidDataReason.ADDITIONAL_WITNESSES_NOT_ARRAY,
+  )
+  return additionalWitnessPaths.map((path) =>
+    parseBIP32Path(path, InvalidDataReason.INVALID_PATH),
+  )
 }
 
 function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
@@ -238,19 +288,11 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
       : parseUint64_str(tx.ttl, {}, InvalidDataReason.TTL_INVALID)
 
   // certificates
-  validate(
-    isArray(tx.certificates ?? []),
-    InvalidDataReason.CERTIFICATES_NOT_ARRAY,
-  )
   const certificates = parseCertificates(tx.certificates ?? [])
 
   // withdrawals
   // we can't check here, but withdrawal map keys (derived from stake credentials) should be in CBOR canonical ordering
-  validate(
-    isArray(tx.withdrawals ?? []),
-    InvalidDataReason.WITHDRAWALS_NOT_ARRAY,
-  )
-  const withdrawals = (tx.withdrawals ?? []).map((w) => parseWithdrawal(w))
+  const withdrawals = parseWithdrawals(tx.withdrawals ?? [])
 
   // auxiliary data
   const auxiliaryData =
@@ -283,22 +325,10 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         )
 
   // collateral inputs
-  validate(
-    isArray(tx.collateralInputs ?? []),
-    InvalidDataReason.COLLATERAL_INPUTS_NOT_ARRAY,
-  )
-  const collateralInputs = (tx.collateralInputs ?? []).map((inp) =>
-    parseTxInput(inp),
-  )
+  const collateralInputs = parseCollateralInputs(tx.collateralInputs ?? [])
 
   // required signers
-  validate(
-    isArray(tx.requiredSigners ?? []),
-    InvalidDataReason.REQUIRED_SIGNERS_NOT_ARRAY,
-  )
-  const requiredSigners = (tx.requiredSigners ?? []).map((rs) =>
-    parseRequiredSigner(rs),
-  )
+  const requiredSigners = parseRequiredSigners(tx.requiredSigners ?? [])
 
   // include network ID
   const includeNetworkId =
@@ -333,22 +363,10 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
         )
 
   // reference inputs
-  validate(
-    isArray(tx.referenceInputs ?? []),
-    InvalidDataReason.REFERENCE_INPUTS_NOT_ARRAY,
-  )
-  const referenceInputs = (tx.referenceInputs ?? []).map((ri) =>
-    parseTxInput(ri),
-  )
+  const referenceInputs = parseReferenceInputs(tx.referenceInputs ?? [])
 
   // voting procedures
-  validate(
-    isArray(tx.votingProcedures ?? []),
-    InvalidDataReason.VOTING_PROCEDURES_NOT_ARRAY,
-  )
-  const votingProcedures = (tx.votingProcedures ?? []).map((x) =>
-    parseVoterVotes(x),
-  )
+  const votingProcedures = parseVotingProcedures(tx.votingProcedures ?? [])
   validate(
     votingProcedures.length <= 1,
     InvalidDataReason.VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTERS,
@@ -415,12 +433,8 @@ export function parseSignTransactionRequest(
   const signingMode = parseSigningMode(request.signingMode)
   const options = parseTxOptions(request.options)
 
-  validate(
-    isArray(request.additionalWitnessPaths ?? []),
-    InvalidDataReason.ADDITIONAL_WITNESSES_NOT_ARRAY,
-  )
-  const additionalWitnessPaths = (request.additionalWitnessPaths ?? []).map(
-    (path) => parseBIP32Path(path, InvalidDataReason.INVALID_PATH),
+  const additionalWitnessPaths = parseAdditionalWitnessPaths(
+    request.additionalWitnessPaths ?? [],
   )
 
   // Additional restrictions based on signing mode

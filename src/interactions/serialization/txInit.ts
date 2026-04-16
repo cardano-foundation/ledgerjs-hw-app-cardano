@@ -12,7 +12,7 @@ import {
   serializeOptionFlag,
   uint8_to_buf,
   uint32_to_buf,
-  uint64_to_buf,
+  uint64Number_to_buf,
 } from '../../utils/serialize'
 import {getCompatibility} from '../getVersion'
 
@@ -42,7 +42,7 @@ function serializeTxOptions(options: ParsedTransactionOptions): Buffer {
   if (options.tagCborSets) {
     optionFlags += OptionFlags.TAG_CBOR_SETS
   }
-  return uint64_to_buf(optionFlags.toString() as Uint64_str)
+  return uint64Number_to_buf(optionFlags)
 }
 
 export function serializeTxInit(

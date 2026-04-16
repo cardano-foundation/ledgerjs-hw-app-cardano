@@ -240,6 +240,7 @@ export enum InvalidDataReason {
   DERIVE_NATIVE_SCRIPT_HASH_SCRIPTS_NOT_AN_ARRAY = 'invalid scripts - scripts is not an array',
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_REQUIRED_COUNT = 'invalid required count',
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_TOKEN_LOCKING_SLOT = 'invalid token locking slot',
+  DERIVE_NATIVE_SCRIPT_HASH_DEPTH_LIMIT_EXCEEDED = 'native script exceeds maximum supported nesting depth',
   DERIVE_NATIVE_SCRIPT_HASH_REQUIRED_COUNT_HIGHER_THAN_NUMBER_OF_SCRIPTS = 'invalid required count - higher than number of total scripts',
   DERIVE_NATIVE_SCRIPT_HASH_UNKNOWN_TYPE = 'unknown script type',
   DERIVE_NATIVE_SCRIPT_HASH_INVALID_DISPLAY_FORMAT = 'invalid native script hash display format',

@@ -50,6 +50,7 @@ import {
   uint8_to_buf,
   uint16_to_buf,
   uint32_to_buf,
+  uint64Number_to_buf,
   uint64_to_buf,
 } from '../../../utils/serialize'
 import {serializeCredential} from './credential'
@@ -93,7 +94,7 @@ function serializeTxOptions(request: ParsedSigningRequest): Buffer {
   if (request.options.tagCborSets) {
     optionFlags += 1
   }
-  return uint64_to_buf(optionFlags.toString() as Uint64_str)
+  return uint64Number_to_buf(optionFlags)
 }
 
 function serializeCount16(count: number): Buffer {

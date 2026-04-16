@@ -12,7 +12,17 @@ import {
   validate,
 } from '../utils/parse'
 
-export function parseNativeScript(script: NativeScript): ParsedNativeScript {
+const MAX_NATIVE_SCRIPT_DEPTH = 11
+
+export function parseNativeScript(
+  script: NativeScript,
+  depth = 1,
+): ParsedNativeScript {
+  validate(
+    depth <= MAX_NATIVE_SCRIPT_DEPTH,
+    InvalidDataReason.DERIVE_NATIVE_SCRIPT_HASH_DEPTH_LIMIT_EXCEEDED,
+  )
+
   // union of all param fields
   const params = script.params as {
     path?: BIP32Path
@@ -106,7 +116,9 @@ export function parseNativeScript(script: NativeScript): ParsedNativeScript {
       return {
         type: script.type,
         params: {
-          scripts: params.scripts.map(parseNativeScript),
+          scripts: params.scripts.map((subscript) =>
+            parseNativeScript(subscript, depth + 1),
+          ),
         },
       }
     }
@@ -141,7 +153,9 @@ export function parseNativeScript(script: NativeScript): ParsedNativeScript {
         type: script.type,
         params: {
           requiredCount,
-          scripts: params.scripts.map(parseNativeScript),
+          scripts: params.scripts.map((subscript) =>
+            parseNativeScript(subscript, depth + 1),
+          ),
         },
       }
     }

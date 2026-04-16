@@ -67,6 +67,15 @@ export function uint64_to_buf(value: Uint64_str): Buffer {
   return data
 }
 
+export function uint64Number_to_buf(value: number): Buffer {
+  assert(Number.isSafeInteger(value), 'invalid uint64 number')
+  assert(value >= 0, 'invalid uint64 number')
+
+  const data = Buffer.alloc(8)
+  data.writeBigUInt64BE(BigInt(value), 0)
+  return data
+}
+
 export function int64_to_buf(value: Int64_str): Buffer {
   assert(isInt64str(value), 'invalid int64_str')
 

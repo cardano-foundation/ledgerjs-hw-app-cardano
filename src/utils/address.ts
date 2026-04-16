@@ -11,6 +11,7 @@ const BASE58_ALPHABET =
 const bs58 = basex(BASE58_ALPHABET)
 
 const TESTNET_NETWORK_ID = 0x00
+const MAX_HUMAN_ADDRESS_LENGTH = 150 // see addressUtilsShelley.h in ledger-app-cardano
 
 function parseBIP32Index(str: string, errMsg: InvalidDataReason): number {
   let base = 0
@@ -28,6 +29,7 @@ export function str_to_path(data: string): Array<number> {
   const errMsg = InvalidDataReason.INVALID_PATH
   validate(isString(data), errMsg)
   validate(data.length > 0, errMsg)
+  validate(!/\s/.test(data), errMsg)
 
   return data.split('/').map((x: string): number => {
     return parseBIP32Index(x, errMsg)
@@ -77,7 +79,6 @@ export function bech32_encodeAddress(data: Buffer): string {
   assert(isBuffer(data), 'invalid buffer')
 
   const data5bit = bech32.toWords(data)
-  const MAX_HUMAN_ADDRESS_LENGTH = 150 // see cardano.h in https://github.com/vacuumlabs/ledger-app-cardano-shelley
   return bech32.encode(
     getShelleyAddressPrefix(data),
     data5bit,
@@ -86,6 +87,6 @@ export function bech32_encodeAddress(data: Buffer): string {
 }
 
 export function bech32_decodeAddress(data: string): Buffer {
-  const {words} = bech32.decode(data, 1000)
+  const {words} = bech32.decode(data, MAX_HUMAN_ADDRESS_LENGTH)
   return Buffer.from(bech32.fromWords(words))
 }
