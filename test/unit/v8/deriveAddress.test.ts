@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {createRequire} from 'module'
 
 const nodeRequire = createRequire(__filename)
-const {buildDeriveAddress, V8AddressP1} = nodeRequire(
+const {buildDeriveAddressDisplay, buildDeriveAddressReturn} = nodeRequire(
   '../../../src/interactions/v8/commandBuilder',
 )
 const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
@@ -17,20 +17,14 @@ const {
 
 describe('v8 deriveAddress', () => {
   it('builds the return APDU', () => {
-    const apdu = buildDeriveAddress(
-      V8AddressP1.RETURN,
-      parsedDeriveAddressFixture,
-    )
+    const apdu = buildDeriveAddressReturn(parsedDeriveAddressFixture)
     expect(serializeApdu(apdu).toString('hex')).to.equal(
       expectedDeriveAddressReturnApduHex,
     )
   })
 
   it('builds the display APDU', () => {
-    const apdu = buildDeriveAddress(
-      V8AddressP1.DISPLAY,
-      parsedDeriveAddressFixture,
-    )
+    const apdu = buildDeriveAddressDisplay(parsedDeriveAddressFixture)
     expect(serializeApdu(apdu).toString('hex')).to.equal(
       expectedDeriveAddressDisplayApduHex,
     )

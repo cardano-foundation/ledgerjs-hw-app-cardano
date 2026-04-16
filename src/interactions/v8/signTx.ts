@@ -158,6 +158,11 @@ export function* signTransaction(
         })()
       : null
 
+  assert(
+    witnessResponses.length === witnessPaths.length,
+    'invalid v8 witness response count',
+  )
+
   return {
     txHashHex: txHashResponse.toString('hex'),
     witnesses: witnessPaths.map((path, index) => ({

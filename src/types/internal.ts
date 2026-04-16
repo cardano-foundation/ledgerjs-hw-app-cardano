@@ -63,6 +63,7 @@ export const KEY_HASH_LENGTH = 28
 export const SCRIPT_HASH_LENGTH = 28
 export const TX_HASH_LENGTH = 32
 export const AUXILIARY_DATA_HASH_LENGTH = 32
+export const POOL_METADATA_HASH_LENGTH = 32
 export const KES_PUBLIC_KEY_LENGTH = 32
 export const VRF_KEY_HASH_LENGTH = 32
 export const REWARD_ACCOUNT_HEX_LENGTH = 29
@@ -73,6 +74,7 @@ export const ANCHOR_HASH_LENGTH = 32
 
 export const MAX_URL_LENGTH = 128
 export const MAX_DNS_NAME_LENGTH = 128
+export const MAX_ADDRESS_LENGTH = 128
 
 export type ParsedInput = {
   txHashHex: FixLenHexString<typeof TX_HASH_LENGTH>

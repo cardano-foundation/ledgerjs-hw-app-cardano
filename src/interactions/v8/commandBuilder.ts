@@ -21,12 +21,7 @@ import {
 import type {NativeScriptHashDisplayFormat} from '../../types/public'
 import {INS} from '../common/ins'
 import type {SendParams} from '../common/types'
-import {
-  buildCommand,
-  buildSignOperationalCertificateCommand,
-  V8P1_UNUSED,
-  V8P2_UNUSED,
-} from './common/apdu'
+import {V8P1_UNUSED, V8P2_UNUSED} from './common/apdu'
 import {
   MAX_SIGN_TX_CHUNK_SIZE,
   serializeTransactionRaw,
@@ -88,34 +83,46 @@ export const V8TxP2 = {
 export function buildSignOperationalCertificate(
   operationalCertificate: ParsedOperationalCertificate,
 ): SendParams {
-  return buildSignOperationalCertificateCommand(
-    serializeOperationalCertificate(operationalCertificate),
-    ED25519_SIGNATURE_LENGTH,
-  )
+  return {
+    ins: INS.SIGN_OPERATIONAL_CERTIFICATE,
+    p1: V8P1_UNUSED,
+    p2: V8P2_UNUSED,
+    data: serializeOperationalCertificate(operationalCertificate),
+    expectedResponseLength: ED25519_SIGNATURE_LENGTH,
+  }
 }
 
-export function buildDeriveAddress(
-  p1: number,
+export function buildDeriveAddressReturn(
   addressParams: ParsedAddressParams,
-  expectedResponseLength?: number,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.DERIVE_ADDRESS,
-    p1,
+    p1: V8AddressP1.RETURN,
     p2: V8P2_UNUSED,
     data: serializeAddressParams(addressParams),
-    expectedResponseLength,
-  })
+  }
+}
+
+export function buildDeriveAddressDisplay(
+  addressParams: ParsedAddressParams,
+): SendParams {
+  return {
+    ins: INS.DERIVE_ADDRESS,
+    p1: V8AddressP1.DISPLAY,
+    p2: V8P2_UNUSED,
+    data: serializeAddressParams(addressParams),
+    expectedResponseLength: 0,
+  }
 }
 
 export function buildGetExtendedPublicKey(path: ValidBIP32Path): SendParams {
-  return buildCommand({
+  return {
     ins: INS.GET_EXT_PUBLIC_KEY,
     p1: V8P1_UNUSED,
     p2: V8P2_UNUSED,
     data: path_to_buf(path),
     expectedResponseLength: EXTENDED_PUBLIC_KEY_LENGTH,
-  })
+  }
 }
 
 export function buildSignCVoteInit(cVote: ParsedCVote): SendParams {
@@ -123,7 +130,7 @@ export function buildSignCVoteInit(cVote: ParsedCVote): SendParams {
   const dataSize = payloadHex.length / 2
   const chunkSize = Math.min(MAX_CIP36_PAYLOAD_SIZE * 2, payloadHex.length)
 
-  return buildCommand({
+  return {
     ins: INS.SIGN_CIP36_VOTE,
     p1: V8CVoteP1.INIT,
     p2: V8P2_UNUSED,
@@ -134,7 +141,7 @@ export function buildSignCVoteInit(cVote: ParsedCVote): SendParams {
       ),
     ]),
     expectedResponseLength: 0,
-  })
+  }
 }
 
 export function buildSignCVoteChunks(cVote: ParsedCVote): SendParams[] {
@@ -146,13 +153,13 @@ export function buildSignCVoteChunks(cVote: ParsedCVote): SendParams[] {
   while (cursor < payload.length) {
     const chunk = payload.substring(cursor, cursor + maxPayloadSize)
     apdus.push(
-      buildCommand({
+      {
         ins: INS.SIGN_CIP36_VOTE,
         p1: V8CVoteP1.CHUNK,
         p2: V8P2_UNUSED,
         data: hex_to_buf(chunk as typeof cVote.voteCastDataHex),
         expectedResponseLength: 0,
-      }),
+      },
     )
     cursor += maxPayloadSize
   }
@@ -162,23 +169,23 @@ export function buildSignCVoteChunks(cVote: ParsedCVote): SendParams[] {
 
 export function buildSignCVoteConfirm(cVote: ParsedCVote): SendParams {
   const HASH_LENGTH = 32
-  return buildCommand({
+  return {
     ins: INS.SIGN_CIP36_VOTE,
     p1: V8CVoteP1.CONFIRM,
     p2: V8P2_UNUSED,
     data: path_to_buf(cVote.witnessPath),
     expectedResponseLength: HASH_LENGTH + ED25519_SIGNATURE_LENGTH,
-  })
+  }
 }
 
 export function buildSignMessageInit(msgData: ParsedMessageData): SendParams {
-  return buildCommand({
+  return {
     ins: INS.SIGN_MESSAGE,
     p1: V8MessageP1.INIT,
     p2: V8P2_UNUSED,
     data: serializeMessageDataInit(msgData),
     expectedResponseLength: 0,
-  })
+  }
 }
 
 export function buildSignMessageChunks(
@@ -192,7 +199,7 @@ export function buildSignMessageChunks(
     const size = Math.min(MAX_CIP8_MSG_CHUNK_SIZE, messageBytes.length - offset)
     const chunkData = messageBytes.slice(offset, offset + size)
     apdus.push(
-      buildCommand({
+      {
         ins: INS.SIGN_MESSAGE,
         p1: V8MessageP1.CHUNK,
         p2: V8P2_UNUSED,
@@ -201,7 +208,7 @@ export function buildSignMessageChunks(
           chunkData,
         ]),
         expectedResponseLength: 0,
-      }),
+      },
     )
     offset += size
   }
@@ -210,77 +217,78 @@ export function buildSignMessageChunks(
 }
 
 export function buildSignMessageConfirm(): SendParams {
-  return buildCommand({
+  return {
     ins: INS.SIGN_MESSAGE,
     p1: V8MessageP1.CONFIRM,
     p2: V8P2_UNUSED,
     data: Buffer.alloc(0),
-  })
+  }
 }
 
 export function buildDeriveNativeScriptHashInit(): SendParams {
-  return buildCommand({
+  return {
     ins: INS.DERIVE_NATIVE_SCRIPT_HASH,
     p1: V8NativeScriptP1.INIT,
     p2: V8P2_UNUSED,
     data: Buffer.alloc(0),
     expectedResponseLength: 0,
-  })
+  }
 }
 
 export function buildDeriveNativeScriptHashStartComplex(
   script: ParsedComplexNativeScript,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.DERIVE_NATIVE_SCRIPT_HASH,
     p1: V8NativeScriptP1.START_COMPLEX,
     p2: V8P2_UNUSED,
     data: serializeComplexNativeScriptStart(script),
     expectedResponseLength: 0,
-  })
+  }
 }
 
 export function buildDeriveNativeScriptHashAddSimple(
   script: ParsedSimpleNativeScript,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.DERIVE_NATIVE_SCRIPT_HASH,
     p1: V8NativeScriptP1.ADD_SIMPLE,
     p2: V8P2_UNUSED,
     data: serializeSimpleNativeScript(script),
     expectedResponseLength: 0,
-  })
+  }
 }
 
 export function buildDeriveNativeScriptHashFinish(
   displayFormat: NativeScriptHashDisplayFormat,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.DERIVE_NATIVE_SCRIPT_HASH,
     p1: V8NativeScriptP1.FINISH,
     p2: V8P2_UNUSED,
     data: serializeWholeNativeScriptFinish(displayFormat),
     expectedResponseLength: NATIVE_SCRIPT_HASH_LENGTH,
-  })
+  }
 }
 
 export function buildSignTxInit(
   request: ParsedSigningRequest,
   witnessPaths: ValidBIP32Path[],
+  rawTx?: Buffer,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.SIGN_TX,
     p1: V8TxP1.INIT,
     p2: V8P2_UNUSED,
-    data: serializeTxInitData(request, witnessPaths),
+    data: serializeTxInitData(request, witnessPaths, rawTx),
     expectedResponseLength: 0,
-  })
+  }
 }
 
 export function buildSignTxAuxiliaryDataInit(
   params: ParsedCVoteRegistrationParams,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.SIGN_TX,
     p1: V8TxP1.AUX_DATA,
     p2: V8TxP2.AUX_DATA_INIT,
@@ -289,14 +297,14 @@ export function buildSignTxAuxiliaryDataInit(
       (params.delegations?.length ?? 0) === 0
         ? AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH
         : 0,
-  })
+  }
 }
 
 export function buildSignTxAuxiliaryDataDelegation(
   delegation: ParsedCVoteDelegation,
   isLast: boolean,
 ): SendParams {
-  return buildCommand({
+  return {
     ins: INS.SIGN_TX,
     p1: V8TxP1.AUX_DATA,
     p2: V8TxP2.AUX_DATA_DELEGATION,
@@ -304,11 +312,13 @@ export function buildSignTxAuxiliaryDataDelegation(
     expectedResponseLength: isLast
       ? AUXILIARY_DATA_HASH_LENGTH + ED25519_SIGNATURE_LENGTH
       : 0,
-  })
+  }
 }
 
-export function buildSignTxChunks(tx: ParsedTransaction): SendParams[] {
-  const txData = serializeTransactionRaw(tx)
+export function buildSignTxChunks(
+  tx: ParsedTransaction,
+  txData = serializeTransactionRaw(tx),
+): SendParams[] {
   const apdus: SendParams[] = []
   let offset = 0
 
@@ -318,14 +328,14 @@ export function buildSignTxChunks(tx: ParsedTransaction): SendParams[] {
     offset += size
 
     apdus.push(
-      buildCommand({
+      {
         ins: INS.SIGN_TX,
         p1: offset < txData.length ? V8TxP1.CHUNK : V8TxP1.CONFIRM,
         p2: V8P2_UNUSED,
         data: chunkData,
         expectedResponseLength:
           offset < txData.length ? 0 : TX_HASH_LENGTH,
-      }),
+      },
     )
   }
 
@@ -333,11 +343,11 @@ export function buildSignTxChunks(tx: ParsedTransaction): SendParams[] {
 }
 
 export function buildSignTxWitness(path: ValidBIP32Path): SendParams {
-  return buildCommand({
+  return {
     ins: INS.SIGN_TX,
     p1: V8TxP1.SIGN_WITNESS,
     p2: V8P2_UNUSED,
     data: path_to_buf(path),
     expectedResponseLength: ED25519_SIGNATURE_LENGTH,
-  })
+  }
 }

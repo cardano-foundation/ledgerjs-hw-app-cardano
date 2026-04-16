@@ -10,6 +10,7 @@ import type {
 import {
   ASSET_NAME_LENGTH_MAX,
   DATUM_HASH_LENGTH,
+  MAX_ADDRESS_LENGTH,
   SpendingDataSourceType,
   TOKEN_POLICY_LENGTH,
 } from '../types/internal'
@@ -141,14 +142,14 @@ export function parseTokenBundle<T>(
 
   const sortedPolicyIds = [...policyIds].sort()
   validate(
-    JSON.stringify(policyIds) === JSON.stringify(sortedPolicyIds),
+    policyIds.every((policyId, index) => policyId === sortedPolicyIds[index]),
     InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
   )
 
   return parsedTokenBundle
 }
 
-function parseDatumHash(datumHashHex: string): ParsedDatum | null {
+function parseDatumHash(datumHashHex: string): ParsedDatum {
   return {
     type: DatumType.HASH,
     datumHashHex: parseHexStringOfLength(
@@ -203,7 +204,7 @@ export function parseTxDestination(
         InvalidDataReason.OUTPUT_INVALID_ADDRESS,
       )
       validate(
-        params.addressHex.length <= 128 * 2,
+        params.addressHex.length <= MAX_ADDRESS_LENGTH * 2,
         InvalidDataReason.OUTPUT_INVALID_ADDRESS,
       )
       return {

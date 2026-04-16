@@ -13,8 +13,8 @@ import type {
   VarLenAsciiString,
 } from '../types/internal'
 import {
-  AUXILIARY_DATA_HASH_LENGTH,
   KEY_HASH_LENGTH,
+  POOL_METADATA_HASH_LENGTH,
   RelayType,
   REWARD_ACCOUNT_HEX_LENGTH,
   VRF_KEY_HASH_LENGTH,
@@ -58,7 +58,7 @@ import {
 
 function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
   const POOL_MARGIN_DENOMINATOR_MAX_STR = '1 000 000 000 000 000 000'.replace(
-    /[ ]/,
+    /[ ]/g,
     '',
   )
 
@@ -291,7 +291,7 @@ function parsePoolMetadataParams(
 
   const hashHex = parseHexStringOfLength(
     params.metadataHashHex,
-    AUXILIARY_DATA_HASH_LENGTH,
+    POOL_METADATA_HASH_LENGTH,
     InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH,
   )
 

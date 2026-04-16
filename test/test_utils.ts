@@ -8,6 +8,7 @@ import type {FixLenHexString} from 'types/internal'
 import {Ada, utils} from '../src/Ada'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../src/errors/index'
 import * as parseModule from '../src/utils/parse'
+import type {BIP32Path, Transaction, TransactionSigningMode} from '../src/types/public'
 
 export function shouldUseSpeculos(): boolean {
   return process.env.LEDGER_TRANSPORT === 'speculos'
@@ -22,31 +23,14 @@ export function getTransport() {
 export async function getAda() {
   const transport = await getTransport()
 
-  const ada = new Ada(transport)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(ada as any).t = transport
-  return Promise.resolve(ada)
+  return new Ada(transport)
 }
 
 export function turnOffValidation() {
   const validate_mock = ImportMock.mockFunction(parseModule, 'validate')
 
-  const fns = [
-    'isString',
-    'isInteger',
-    'isArray',
-    'isBuffer',
-    'isHexString',
-    'isHexStringOfLength',
-    'isValidPath',
-  ]
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  /* @ts-ignore */
-  const mocks = fns.map((fn) => ImportMock.mockFunction(parseModule, fn, true))
-
   return () => {
     validate_mock.restore()
-    mocks.forEach((mock) => mock.restore())
   }
 }
 
@@ -99,11 +83,7 @@ type TxHash = FixLenHexString<32>
 function hashTxBody(txBodyHex: string): TxHash {
   const hash = blake2.createHash('blake2b', {digestLength: 32})
   hash.update(Buffer.from(txBodyHex, 'hex'))
-  return parseModule.parseHexStringOfLength(
-    hash.digest('hex'),
-    32,
-    InvalidDataReason.INVALID_B2_HASH,
-  )
+  return hash.digest('hex') as TxHash
 }
 
 export function bech32_to_hex(str: string): string {
@@ -112,8 +92,52 @@ export function bech32_to_hex(str: string): string {
 
 export const DoNotRunOnLedger = 'DO NOT RUN ON LEDGER'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function describeSignTxRejects(name: string, testList: any[]) {
+type SignTxRejectCase = {
+  testName: string
+  tx: Transaction
+  signingMode: TransactionSigningMode
+  additionalWitnessPaths?: BIP32Path[]
+  rejectReason: InvalidDataReason
+  errCls?: unknown
+  errMsg?: unknown
+  unsupportedInAppXS?: boolean
+}
+
+type SignTxPositiveCase = {
+  testName: string
+  tx: Transaction
+  signingMode: TransactionSigningMode
+  additionalWitnessPaths?: BIP32Path[]
+  options?: unknown
+  txBody?: string
+  expectedResult: unknown
+  unsupportedInAppXS?: boolean
+}
+
+function assertSignTxRejectCase(
+  testCase: Partial<SignTxRejectCase>,
+): asserts testCase is SignTxRejectCase {
+  expect(testCase.testName, 'missing testName').to.be.a('string')
+  expect(testCase.tx, 'missing tx').to.not.equal(undefined)
+  expect(testCase.signingMode, 'missing signingMode').to.be.a('string')
+  expect(testCase.rejectReason, 'missing rejectReason').to.be.a('string')
+}
+
+function assertSignTxPositiveCase(
+  testCase: Partial<SignTxPositiveCase>,
+): asserts testCase is SignTxPositiveCase {
+  expect(testCase.testName, 'missing testName').to.be.a('string')
+  expect(testCase.tx, 'missing tx').to.not.equal(undefined)
+  expect(testCase.signingMode, 'missing signingMode').to.be.a('string')
+  expect(testCase.expectedResult, 'missing expectedResult').to.not.equal(
+    undefined,
+  )
+}
+
+export function describeSignTxRejects(
+  name: string,
+  testList: SignTxRejectCase[],
+) {
   describe(`${name}_JS`, () => {
     let ada: Ada = {} as Ada
 
@@ -122,17 +146,13 @@ export function describeSignTxRejects(name: string, testList: any[]) {
     })
 
     afterEach(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (ada as any).t.close()
+      await ada.transport.close()
     })
 
-    for (const {
-      testName,
-      tx,
-      additionalWitnessPaths,
-      signingMode,
-      rejectReason,
-    } of testList) {
+    for (const testCase of testList) {
+      assertSignTxRejectCase(testCase)
+      const {testName, tx, additionalWitnessPaths, signingMode, rejectReason} =
+        testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (rejectReason === InvalidDataReason.LEDGER_POLICY) {
           return
@@ -161,19 +181,20 @@ export function describeSignTxRejects(name: string, testList: any[]) {
     })
 
     afterEach(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (ada as any).t.close()
+      await ada.transport.close()
     })
 
-    for (const {
-      testName,
-      tx,
-      additionalWitnessPaths,
-      signingMode,
-      errCls,
-      errMsg,
-      unsupportedInAppXS,
-    } of testList) {
+    for (const testCase of testList) {
+      assertSignTxRejectCase(testCase)
+      const {
+        testName,
+        tx,
+        additionalWitnessPaths,
+        signingMode,
+        errCls,
+        errMsg,
+        unsupportedInAppXS,
+      } = testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (errMsg === DoNotRunOnLedger) {
           return
@@ -202,8 +223,10 @@ export function describeSignTxRejects(name: string, testList: any[]) {
   })
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function describeSignTxPositiveTest(name: string, tests: any[]) {
+export function describeSignTxPositiveTest(
+  name: string,
+  tests: SignTxPositiveCase[],
+) {
   describe(name, () => {
     let ada: Ada = {} as Ada
 
@@ -212,20 +235,21 @@ export function describeSignTxPositiveTest(name: string, tests: any[]) {
     })
 
     afterEach(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (ada as any).t.close()
+      await ada.transport.close()
     })
 
-    for (const {
-      testName,
-      tx,
-      signingMode,
-      additionalWitnessPaths,
-      options,
-      txBody,
-      expectedResult,
-      unsupportedInAppXS,
-    } of tests) {
+    for (const testCase of tests) {
+      assertSignTxPositiveCase(testCase)
+      const {
+        testName,
+        tx,
+        signingMode,
+        additionalWitnessPaths,
+        options,
+        txBody,
+        expectedResult,
+        unsupportedInAppXS,
+      } = testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (!txBody) {
           // eslint-disable-next-line no-console

@@ -1,7 +1,7 @@
 import basex from 'base-x'
 import {bech32} from 'bech32'
 
-import {InvalidDataReason} from '../errors'
+import {InvalidData, InvalidDataReason} from '../errors'
 import {AddressType, HARDENED} from '../types/public'
 import {assert} from '../utils/assert'
 import {isBuffer, isString, parseIntFromStr, validate} from './parse'
@@ -87,6 +87,10 @@ export function bech32_encodeAddress(data: Buffer): string {
 }
 
 export function bech32_decodeAddress(data: string): Buffer {
-  const {words} = bech32.decode(data, MAX_HUMAN_ADDRESS_LENGTH)
-  return Buffer.from(bech32.fromWords(words))
+  try {
+    const {words} = bech32.decode(data, MAX_HUMAN_ADDRESS_LENGTH)
+    return Buffer.from(bech32.fromWords(words))
+  } catch {
+    throw new InvalidData(InvalidDataReason.OUTPUT_INVALID_ADDRESS)
+  }
 }

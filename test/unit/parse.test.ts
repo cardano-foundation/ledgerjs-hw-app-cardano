@@ -7,7 +7,7 @@ import {parseNativeScript} from '../../src/parsing/nativeScript'
 import {NativeScriptType} from '../../src/types/public'
 import {assert} from '../../src/utils/assert'
 import {str_to_path} from '../../src/utils/address'
-import {parseInt64_str, parseUint64_str} from '../../src/utils/parse'
+import {isUintStr, parseInt64_str, parseUint64_str} from '../../src/utils/parse'
 
 type BasicParseTest = {
   signed: boolean
@@ -128,5 +128,18 @@ describe('advancedParseTest', () => {
         witnessPath: [0x80000000, 0x80000000, 0x80000000, 0, 0],
       }),
     ).to.throw(InvalidDataReason.CVOTE_INVALID_VOTECAST_DATA)
+  })
+
+  it('accepts canonical uint strings and rejects non-canonical ones', () => {
+    expect(isUintStr('0', {})).to.equal(true)
+    expect(isUintStr('7', {})).to.equal(true)
+    expect(isUintStr('42', {})).to.equal(true)
+
+    expect(isUintStr('', {})).to.equal(false)
+    expect(isUintStr('00', {})).to.equal(false)
+    expect(isUintStr('007', {})).to.equal(false)
+    expect(isUintStr('+7', {})).to.equal(false)
+    expect(isUintStr(' 7', {})).to.equal(false)
+    expect(isUintStr('7 ', {})).to.equal(false)
   })
 })

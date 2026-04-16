@@ -10,7 +10,8 @@ import type {
 } from '../../types/internal'
 import type {Interaction} from '../common/types'
 import {
-  buildDeriveAddress,
+  buildDeriveAddressDisplay,
+  buildDeriveAddressReturn,
   buildDeriveNativeScriptHashAddSimple,
   buildDeriveNativeScriptHashFinish,
   buildDeriveNativeScriptHashInit,
@@ -28,10 +29,10 @@ import {
   buildSignMessageConfirm,
   buildSignMessageInit,
   buildSignOperationalCertificate,
-  V8AddressP1,
 } from './commandBuilder'
 import type {NativeScriptHashDisplayFormat} from '../../types/public'
 import {NativeScriptType, TxAuxiliaryDataType} from '../../types/public'
+import {serializeTransactionRaw} from './serialization/tx'
 
 export function* sendSignOperationalCertificate(
   operationalCertificate: ParsedOperationalCertificate,
@@ -42,13 +43,13 @@ export function* sendSignOperationalCertificate(
 export function* sendDeriveAddress(
   addressParams: ParsedAddressParams,
 ): Interaction<Buffer> {
-  return yield buildDeriveAddress(V8AddressP1.RETURN, addressParams)
+  return yield buildDeriveAddressReturn(addressParams)
 }
 
 export function* sendShowAddress(
   addressParams: ParsedAddressParams,
 ): Interaction<void> {
-  yield buildDeriveAddress(V8AddressP1.DISPLAY, addressParams, 0)
+  yield buildDeriveAddressDisplay(addressParams)
 }
 
 export function* sendGetExtendedPublicKey(
@@ -123,7 +124,9 @@ export function* sendSignTx(
   txHashResponse: Buffer
   witnessResponses: Buffer[]
 }> {
-  yield buildSignTxInit(request, witnessPaths)
+  const rawTx = serializeTransactionRaw(request.tx)
+
+  yield buildSignTxInit(request, witnessPaths, rawTx)
 
   let auxiliaryDataResponse: Buffer | null = null
   if (
@@ -146,7 +149,7 @@ export function* sendSignTx(
   }
 
   let txHashResponse: Buffer = Buffer.alloc(0)
-  for (const chunk of buildSignTxChunks(request.tx)) {
+  for (const chunk of buildSignTxChunks(request.tx, rawTx)) {
     txHashResponse = yield chunk
   }
 

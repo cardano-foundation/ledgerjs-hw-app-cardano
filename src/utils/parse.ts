@@ -73,12 +73,9 @@ export const isUintStr = (
 
   return (
     isString(data) &&
-    /^[0-9]*$/.test(data) &&
+    /^(0|[1-9][0-9]*)$/.test(data) &&
     // Length checks
-    data.length > 0 &&
     data.length <= max.length &&
-    // Leading zeros
-    (data.length === 1 || data[0] !== '0') &&
     // less or equal than max value
     (data.length < max.length ||
       // Note: this is string comparison!
