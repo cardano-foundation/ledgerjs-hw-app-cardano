@@ -8,7 +8,13 @@ import type {FixLenHexString} from 'types/internal'
 import {Ada, utils} from '../src/Ada'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../src/errors/index'
 import * as parseModule from '../src/utils/parse'
-import type {BIP32Path, Transaction, TransactionSigningMode} from '../src/types/public'
+import type {
+  BIP32Path,
+  SignedTransactionData,
+  Transaction,
+  TransactionOptions,
+  TransactionSigningMode,
+} from '../src/types/public'
 
 export function shouldUseSpeculos(): boolean {
   return process.env.LEDGER_TRANSPORT === 'speculos'
@@ -98,8 +104,8 @@ type SignTxRejectCase = {
   signingMode: TransactionSigningMode
   additionalWitnessPaths?: BIP32Path[]
   rejectReason: InvalidDataReason
-  errCls?: unknown
-  errMsg?: unknown
+  errCls?: new (...args: any[]) => Error
+  errMsg?: string | RegExp
   unsupportedInAppXS?: boolean
 }
 
@@ -108,9 +114,9 @@ type SignTxPositiveCase = {
   tx: Transaction
   signingMode: TransactionSigningMode
   additionalWitnessPaths?: BIP32Path[]
-  options?: unknown
+  options?: TransactionOptions
   txBody?: string
-  expectedResult: unknown
+  expectedResult: SignedTransactionData
   unsupportedInAppXS?: boolean
 }
 
@@ -216,7 +222,9 @@ export function describeSignTxRejects(
         if (correctlyDetectsUnsupportedInAppXS) {
           await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
         } else {
-          await expect(response).to.be.rejectedWith(errCls, errMsg)
+          expect(errCls, 'missing errCls').to.not.equal(undefined)
+          const expectedErrCls = errCls as new (...args: any[]) => Error
+          await expect(response).to.be.rejectedWith(expectedErrCls, errMsg)
         }
       })
     }

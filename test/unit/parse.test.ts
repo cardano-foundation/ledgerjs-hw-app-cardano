@@ -4,6 +4,7 @@ import {Int64BE, Uint64BE} from 'int64-buffer'
 import {InvalidDataReason} from '../../src/errors'
 import {parseCVote} from '../../src/parsing/cVote'
 import {parseNativeScript} from '../../src/parsing/nativeScript'
+import type {NativeScript} from '../../src/types/public'
 import {NativeScriptType} from '../../src/types/public'
 import {assert} from '../../src/utils/assert'
 import {str_to_path} from '../../src/utils/address'
@@ -102,7 +103,7 @@ describe('advancedParseTest', () => {
   })
 
   it('rejects native scripts deeper than the app limit', () => {
-    let script = {
+    let script: NativeScript = {
       type: NativeScriptType.PUBKEY_THIRD_PARTY,
       params: {
         keyHashHex: '3a55d9f68255dfbefa1efd711f82d005fae1be2e145d616c90cf0fa9',
