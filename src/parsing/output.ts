@@ -236,6 +236,12 @@ export function parseTxOutput(
   output: TxOutput,
   network: Network,
 ): ParsedOutput {
+  validate(
+    output.format == null ||
+      output.format === TxOutputFormat.ARRAY_LEGACY ||
+      output.format === TxOutputFormat.MAP_BABBAGE,
+    InvalidDataReason.OUTPUT_INVALID_FORMAT,
+  )
   const format =
     output.format === TxOutputFormat.MAP_BABBAGE
       ? TxOutputFormat.MAP_BABBAGE
