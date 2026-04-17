@@ -48,6 +48,7 @@ import {
   parseBIP32Path,
   parseHexStringOfLength,
   parseInt64_str,
+  parseBoolean,
   parseCredential,
   parseUint32_t,
   parseUint64_str,
@@ -248,11 +249,6 @@ function parseAdditionalWitnessPaths(
   )
 }
 
-function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
-  validate(typeof value === 'boolean', errorMsg)
-  return value
-}
-
 export function parseSigningMode(
   mode: TransactionSigningMode,
 ): TransactionSigningMode {
@@ -422,7 +418,13 @@ function parseTxOptions(
   options: TransactionOptions | undefined,
 ): ParsedTransactionOptions {
   return {
-    tagCborSets: options?.tagCborSets || false,
+    tagCborSets:
+      options?.tagCborSets == null
+        ? false
+        : parseBoolean(
+            options.tagCborSets,
+            InvalidDataReason.TX_OPTIONS_INVALID_TAG_CBOR_SETS,
+          ),
   }
 }
 

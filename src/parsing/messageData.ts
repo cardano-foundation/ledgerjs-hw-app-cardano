@@ -3,7 +3,7 @@ import {InvalidDataReason} from '../errors/invalidDataReason'
 import type {ParsedMessageData} from '../types/internal'
 import type {MessageData} from '../types/public'
 import {MessageAddressFieldType} from '../types/public'
-import {parseBIP32Path, parseHexString} from '../utils/parse'
+import {parseBoolean, parseBIP32Path, parseHexString} from '../utils/parse'
 import {parseAddress} from './address'
 
 // check if a non-null-terminated buffer contains printable ASCII between 32 and 126 (inclusive)
@@ -45,14 +45,24 @@ function isAscii(msg: string): boolean {
 }
 
 export function parseMessageData(data: MessageData): ParsedMessageData {
-  const preferHexDisplay = data.preferHexDisplay || false
+  const preferHexDisplay =
+    data.preferHexDisplay == null
+      ? false
+      : parseBoolean(
+          data.preferHexDisplay,
+          InvalidDataReason.MESSAGE_DATA_INVALID_PREFER_HEX_DISPLAY,
+        )
+  const hashPayload = parseBoolean(
+    data.hashPayload,
+    InvalidDataReason.MESSAGE_DATA_INVALID_HASH_PAYLOAD,
+  )
   const common = {
     signingPath: parseBIP32Path(
       data.signingPath,
       InvalidDataReason.MESSAGE_DATA_INVALID_WITNESS_PATH,
     ),
     isAscii: isAscii(data.messageHex) && !preferHexDisplay,
-    hashPayload: data.hashPayload,
+    hashPayload,
     messageHex: parseHexString(
       data.messageHex,
       InvalidDataReason.MESSAGE_DATA_INVALID_MESSAGE_HEX,

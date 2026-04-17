@@ -9,6 +9,7 @@ export enum InvalidDataReason {
   NETWORK_INVALID_PROTOCOL_MAGIC = 'invalid protocol magic',
   NETWORK_INVALID_NETWORK_ID = 'invalid network id',
   NETWORK_ID_INCLUDE_INVALID = 'invalid value for includeNetworkId',
+  TX_OPTIONS_INVALID_TAG_CBOR_SETS = 'tagCborSets must be a boolean',
 
   INPUTS_NOT_ARRAY = 'inputs not an array',
   INPUT_INVALID_TX_HASH = 'invalid tx hash in an input',
@@ -230,6 +231,8 @@ export enum InvalidDataReason {
   MESSAGE_DATA_INVALID_WITNESS_PATH = 'CIP-8 message signing: invalid witness path',
   MESSAGE_DATA_INVALID_MESSAGE_HEX = 'CIP-8 message signing: invalid message hex string',
   MESSAGE_DATA_LONG_NON_HASHED_MSG = 'CIP-8 message signing: non-hashed message too long',
+  MESSAGE_DATA_INVALID_PREFER_HEX_DISPLAY = 'CIP-8 message signing: preferHexDisplay must be a boolean',
+  MESSAGE_DATA_INVALID_HASH_PAYLOAD = 'CIP-8 message signing: hashPayload must be a boolean',
 
   CVOTE_INVALID_VOTECAST_DATA = 'invalid votecast data for CIP36 vote',
   CVOTE_INVALID_WITNESS = 'invalid witness for CIP36 vote',

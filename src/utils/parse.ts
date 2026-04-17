@@ -145,6 +145,14 @@ export function validate(
   if (!cond) throw new InvalidData(errMsg)
 }
 
+export function parseBoolean(
+  value: unknown,
+  errMsg: InvalidDataReason,
+): boolean {
+  validate(typeof value === 'boolean', errMsg)
+  return value
+}
+
 export function parseAscii(
   str: unknown,
   errMsg: InvalidDataReason,
