@@ -87,6 +87,14 @@
     "votecast",
     "VOTINGPURPOSE",
     "yoroi",
+    "fflush",
+    "logfile",
+    "pgid",
+    "PGIDS",
+    "refactorable",
+    "seproxyhal",
+    "setsid",
+    "signingmode",
     "zxvf"
   ]
 }
