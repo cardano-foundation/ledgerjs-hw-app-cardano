@@ -2,7 +2,8 @@ import type {DeviceOwnedAddress, ErrorBase, Network} from '../../../src/Ada'
 import {
   SwoCodesV7,
   SwoCodesV8,
-  DeviceStatusMessages,
+  SwoMessagesV7,
+  SwoMessagesV8,
   DeviceStatusError,
   AddressType,
 } from '../../../src/Ada'
@@ -619,12 +620,12 @@ type RejectTestCase = {
 
 const rejectErrorV7: RejectError = {
   errCls: DeviceStatusError,
-  errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
+  errMsg: SwoMessagesV7[SwoCodesV7.ERR_REJECTED_BY_POLICY],
 }
 
 const rejectErrorV8: RejectError = {
   errCls: DeviceStatusError,
-  errMsg: DeviceStatusMessages[SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+  errMsg: SwoMessagesV8[SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
 }
 
 const rejectTestCaseBase = {

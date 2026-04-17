@@ -21,8 +21,7 @@ export const SwoCodesV8 = {
   SWO_SECURITY_CONDITION_NOT_SATISFIED: 0x6982 as const,
 }
 
-// Human-readable version of errors reported by APDU protocol
-export const DeviceStatusMessages: Record<number, string> = {
+export const SwoMessagesV7: Record<number, string> = {
   [SwoCodesV7.ERR_INVALID_DATA]: 'Invalid data supplied to Ledger',
   [SwoCodesV7.ERR_INVALID_BIP_PATH]:
     'Invalid derivation path supplied to Ledger',
@@ -32,6 +31,17 @@ export const DeviceStatusMessages: Record<number, string> = {
   [SwoCodesV7.ERR_DEVICE_LOCKED]: 'Device is locked',
   [SwoCodesV7.ERR_CLA_NOT_SUPPORTED]: 'Wrong Ledger app',
   [SwoCodesV7.ERR_UNSUPPORTED_ADDRESS_TYPE]: 'Unsupported address type',
+}
+
+export const SwoMessagesV8: Record<number, string> = {
+  [SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]:
+    'Security condition not satisfied. Please consult Ledger documentation.',
+}
+
+// Kept for backwards compatibility
+export const DeviceStatusMessages: Record<number, string> = {
+  ...SwoMessagesV7,
+  ...SwoMessagesV8,
 }
 
 const GH_DEVICE_ERRORS_LINK =
