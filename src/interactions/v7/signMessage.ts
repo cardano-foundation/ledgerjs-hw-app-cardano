@@ -1,5 +1,6 @@
 import {buf_to_uint32, hex_to_buf, uint32_to_buf} from '../../utils/serialize'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../../errors'
+import {assert} from '../../utils/assert'
 import type {ParsedMessageData, Uint32_t, Version} from '../../types/internal'
 import {ED25519_SIGNATURE_LENGTH, PUBLIC_KEY_LENGTH} from '../../types/internal'
 import type {SignedMessageData} from '../../types/public'
@@ -100,6 +101,13 @@ export function* signMessageV7(
       ED25519_SIGNATURE_LENGTH + PUBLIC_KEY_LENGTH + 4 + MAX_ADDRESS_SIZE,
   })
 
+  const SIGN_MESSAGE_RESPONSE_PREFIX_LENGTH =
+    ED25519_SIGNATURE_LENGTH + PUBLIC_KEY_LENGTH + 4
+  assert(
+    confirmResponse.length >= SIGN_MESSAGE_RESPONSE_PREFIX_LENGTH,
+    'invalid v7 signMessage response length',
+  )
+
   let s = 0
   const signatureHex = confirmResponse
     .slice(s, s + ED25519_SIGNATURE_LENGTH)
@@ -111,9 +119,17 @@ export function* signMessageV7(
     .toString('hex')
   s += PUBLIC_KEY_LENGTH
 
-  const addressFieldSizeBuf = confirmResponse.slice(s, s + 4)
+  const addressFieldSize = buf_to_uint32(confirmResponse.slice(s, s + 4))
   s += 4
-  const addressFieldSize = buf_to_uint32(addressFieldSizeBuf)
+  assert(addressFieldSize > 0, 'invalid v7 signMessage address field size')
+  assert(
+    addressFieldSize <= MAX_ADDRESS_SIZE,
+    'invalid v7 signMessage address field size',
+  )
+  assert(
+    s + addressFieldSize === confirmResponse.length,
+    'invalid v7 signMessage response length',
+  )
   const addressFieldHex = confirmResponse
     .slice(s, s + addressFieldSize)
     .toString('hex')

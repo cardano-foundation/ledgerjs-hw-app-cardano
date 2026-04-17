@@ -23,8 +23,6 @@ import {
   AUXILIARY_DATA_HASH_LENGTH,
   CertificateType,
   ED25519_SIGNATURE_LENGTH,
-  PoolOwnerType,
-  RequiredSignerType,
   CredentialType,
   TX_HASH_LENGTH,
 } from '../../types/internal'
@@ -36,13 +34,11 @@ import {
   AddressType,
   CIP36VoteRegistrationFormat,
   DatumType,
-  PoolKeyType,
   TransactionSigningMode,
   TxAuxiliaryDataSupplementType,
   TxAuxiliaryDataType,
   TxOutputDestinationType,
   TxOutputFormat,
-  VoterType,
 } from '../../types/public'
 import {getVersionString} from '../../utils'
 import {assert} from '../../utils/assert'
@@ -56,6 +52,7 @@ import {
 } from '../../utils/serialize'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
+import {gatherWitnessPaths} from '../common/witnessPaths'
 import {ensureLedgerAppVersionCompatible, getCompatibility} from '../getVersion'
 import {
   serializeCVoteRegistrationDelegation,
@@ -880,128 +877,6 @@ function* signTx_getWitness(path: ValidBIP32Path): Interaction<{
   }
 }
 
-// general name, because it should work with any type if generalized
-function uniquify(witnessPaths: ValidBIP32Path[]): ValidBIP32Path[] {
-  const uniquifier: Record<string, ValidBIP32Path> = {}
-  witnessPaths.forEach((p) => {
-    uniquifier[JSON.stringify(p)] = p
-  })
-  return Object.values(uniquifier)
-}
-
-function gatherWitnessPaths(request: ParsedSigningRequest): ValidBIP32Path[] {
-  const {tx, signingMode, additionalWitnessPaths} = request
-  const witnessPaths: ValidBIP32Path[] = []
-
-  if (signingMode !== TransactionSigningMode.MULTISIG_TRANSACTION) {
-    // for multisig, all the witness paths should be given in additionalWitnessPaths
-    // because there might be several (or none) for each of the tx body elements
-
-    // input witnesses
-    for (const input of tx.inputs) {
-      if (input.path != null) {
-        witnessPaths.push(input.path)
-      }
-    }
-
-    // certificate witnesses
-    for (const cert of tx.certificates) {
-      switch (cert.type) {
-        // for CertificateType.STAKE_REGISTRATION, we do not provide the witness automatically
-        // it can be obtained via SignTransactionRequest.additionalWitnessPaths
-        case CertificateType.STAKE_REGISTRATION_CONWAY:
-        case CertificateType.STAKE_DEREGISTRATION:
-        case CertificateType.STAKE_DEREGISTRATION_CONWAY:
-        case CertificateType.STAKE_DELEGATION:
-        case CertificateType.VOTE_DELEGATION:
-          if (cert.stakeCredential.type === CredentialType.KEY_PATH) {
-            witnessPaths.push(cert.stakeCredential.path)
-          }
-          break
-
-        case CertificateType.AUTHORIZE_COMMITTEE_HOT:
-        case CertificateType.RESIGN_COMMITTEE_COLD:
-          if (cert.coldCredential.type === CredentialType.KEY_PATH) {
-            witnessPaths.push(cert.coldCredential.path)
-          }
-          break
-
-        case CertificateType.DREP_REGISTRATION:
-        case CertificateType.DREP_DEREGISTRATION:
-        case CertificateType.DREP_UPDATE:
-          if (cert.dRepCredential.type === CredentialType.KEY_PATH) {
-            witnessPaths.push(cert.dRepCredential.path)
-          }
-          break
-
-        case CertificateType.STAKE_POOL_REGISTRATION:
-          cert.pool.owners.forEach((owner) => {
-            if (owner.type === PoolOwnerType.DEVICE_OWNED) {
-              witnessPaths.push(owner.path)
-            }
-          })
-
-          if (cert.pool.poolKey.type === PoolKeyType.DEVICE_OWNED) {
-            witnessPaths.push(cert.pool.poolKey.path)
-          }
-          break
-
-        case CertificateType.STAKE_POOL_RETIREMENT:
-          witnessPaths.push(cert.path)
-          break
-
-        default:
-          // no witness path in other certificate types
-          break
-      }
-    }
-
-    // withdrawal witnesses
-    for (const withdrawal of tx.withdrawals) {
-      if (withdrawal.stakeCredential.type === CredentialType.KEY_PATH) {
-        witnessPaths.push(withdrawal.stakeCredential.path)
-      }
-    }
-
-    // required signers witnesses
-    for (const signer of tx.requiredSigners) {
-      switch (signer.type) {
-        case RequiredSignerType.PATH:
-          witnessPaths.push(signer.path)
-          break
-        default:
-          break
-      }
-    }
-
-    // collateral inputs witnesses
-    for (const collateral of tx.collateralInputs) {
-      if (collateral.path != null) {
-        witnessPaths.push(collateral.path)
-      }
-    }
-
-    // voting procedures witnesses
-    for (const voterVotes of tx.votingProcedures) {
-      switch (voterVotes.voter.type) {
-        case VoterType.COMMITTEE_KEY_PATH:
-        case VoterType.DREP_KEY_PATH:
-        case VoterType.STAKE_POOL_KEY_PATH:
-          witnessPaths.push(voterVotes.voter.keyPath)
-          break
-        default:
-          break
-      }
-    }
-  }
-
-  // Note: if anything from tx body is added here, it should be covered by tests too
-
-  additionalWitnessPaths.forEach((path) => witnessPaths.push(path))
-
-  // we do not ask for the same witness more than once
-  return uniquify(witnessPaths)
-}
 
 function hasCredentialInCertificatesPreConway(
   tx: ParsedTransaction,
