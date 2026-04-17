@@ -36,9 +36,26 @@ export async function getAda() {
 
 export function turnOffValidation() {
   const validate_mock = ImportMock.mockFunction(parseModule, 'validate')
+  const fns = [
+    'isString',
+    'isInteger',
+    'isArray',
+    'isBuffer',
+    'isHexString',
+    'isHexStringOfLength',
+    'isValidPath',
+  ] as const
+  // These tests intentionally send malformed data to the device and assert
+  // on-device rejection. Mocking only `validate()` is not enough because many
+  // parse helpers also gate malformed inputs through predicate helpers before
+  // the interaction reaches Ledger at all.
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore dynamic helper names are intentional here
+  const mocks = fns.map((fn) => ImportMock.mockFunction(parseModule, fn, true))
 
   return () => {
     validate_mock.restore()
+    mocks.forEach((mock) => mock.restore())
   }
 }
 

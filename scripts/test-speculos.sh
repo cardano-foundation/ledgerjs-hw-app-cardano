@@ -146,8 +146,8 @@ collect_failures() {
   local file="$2"
   [ -f "$file" ] || return 0
   awk -v worker="$worker" '
-    /^[[:space:]]*[0-9]+\)[[:space:]]/ {
-      sub(/^[[:space:]]*/, "", $0)
+    /\[mocha [0-9]+\][[:space:]]+[0-9]+\)[[:space:]]/ {
+      sub(/^.*\][[:space:]]+/, "", $0)
       print "- [mocha " worker "] " $0
     }
   ' "$file"
@@ -158,8 +158,8 @@ collect_process_errors() {
   local file="$2"
   [ -f "$file" ] || return 0
   awk -v worker="$worker" '
-    /Exception during run:/ {
-      sub(/^[[:space:]]*/, "", $0)
+    /\[mocha [0-9]+\][[:space:]]+Exception during run:/ {
+      sub(/^.*\][[:space:]]+/, "", $0)
       print "- [mocha " worker "] " $0
     }
   ' "$file"

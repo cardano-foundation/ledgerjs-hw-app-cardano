@@ -23,6 +23,7 @@ JS library for communication with Ledger hardware wallets running the Cardano ap
 
 - **Do NOT perform git write operations.** Read-only commands like `git diff` are fine.
 - **Do NOT install anything.**
+- **Do NOT use web search.** Work only with the local repository, sibling repositories, and local tools/files.
 - **Do NOT change the public API** (exported types and `Ada` class methods) without explicit confirmation — this is a published library with downstream consumers.
 - **Do NOT add dependencies** without explicit confirmation.
 
