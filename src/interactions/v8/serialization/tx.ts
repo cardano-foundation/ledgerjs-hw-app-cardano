@@ -55,18 +55,17 @@ import {
 } from '../../../utils/serialize'
 import {serializeCredential} from './credential'
 import {serializeAddressParams} from './addressParams'
+import {
+  AuxDataType,
+  CIP36RegistrationFormat,
+  CVoteCredentialType,
+  Included,
+  OutputDestinationType,
+  PoolRewardAccountWireType,
+  SigningMode,
+} from './wireTypes'
 
 export const MAX_SIGN_TX_CHUNK_SIZE = 250
-
-const enum Included {
-  NO = 0x01,
-  YES = 0x02,
-}
-
-const enum CVoteCredentialType {
-  KEY = 0,
-  KEY_PATH = 2,
-}
 
 function serializeIncluded(value: boolean): Buffer {
   return uint8_to_buf((value ? Included.YES : Included.NO) as Uint8_t)
@@ -78,11 +77,11 @@ function u8(value: number): Buffer {
 
 function serializeSigningMode(signingMode: TransactionSigningMode): Buffer {
   const value = {
-    [TransactionSigningMode.ORDINARY_TRANSACTION]: 3,
-    [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: 4,
-    [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: 5,
-    [TransactionSigningMode.MULTISIG_TRANSACTION]: 6,
-    [TransactionSigningMode.PLUTUS_TRANSACTION]: 7,
+    [TransactionSigningMode.ORDINARY_TRANSACTION]: SigningMode.ORDINARY_TRANSACTION,
+    [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: SigningMode.POOL_REGISTRATION_AS_OWNER,
+    [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: SigningMode.POOL_REGISTRATION_AS_OPERATOR,
+    [TransactionSigningMode.MULTISIG_TRANSACTION]: SigningMode.MULTISIG_TRANSACTION,
+    [TransactionSigningMode.PLUTUS_TRANSACTION]: SigningMode.PLUTUS_TRANSACTION,
   }[signingMode]
 
   assert(value !== undefined, 'invalid signing mode')
@@ -156,11 +155,6 @@ function serializePoolOwnerCredential(
 function serializePoolRewardAccount(
   rewardAccount: ParsedPoolRewardAccount,
 ): Buffer {
-  const enum PoolRewardAccountWireType {
-    KEY_HASH = 0,
-    KEY_PATH = 2,
-  }
-
   switch (rewardAccount.type) {
     case PoolRewardAccountType.DEVICE_OWNED:
       return Buffer.concat([
@@ -184,8 +178,8 @@ function serializeOutputDestination(
   destination: ParsedOutputDestination,
 ): Buffer {
   const destinationTypeEncoding = {
-    [TxOutputDestinationType.THIRD_PARTY]: 1,
-    [TxOutputDestinationType.DEVICE_OWNED]: 2,
+    [TxOutputDestinationType.THIRD_PARTY]: OutputDestinationType.THIRD_PARTY,
+    [TxOutputDestinationType.DEVICE_OWNED]: OutputDestinationType.DEVICE_OWNED,
   } as const
 
   switch (destination.type) {
@@ -625,9 +619,9 @@ export function serializeTxInitData(
   const includeAuxiliaryData = tx.auxiliaryData != null
   const auxiliaryDataType =
     tx.auxiliaryData?.type === TxAuxiliaryDataType.ARBITRARY_HASH
-      ? 0
+      ? AuxDataType.ARBITRARY_HASH
       : tx.auxiliaryData?.type === TxAuxiliaryDataType.CIP36_REGISTRATION
-        ? 1
+        ? AuxDataType.CVOTE_REGISTRATION
         : null
   const auxiliaryDataHash =
     tx.auxiliaryData?.type === TxAuxiliaryDataType.ARBITRARY_HASH
@@ -670,8 +664,8 @@ export function serializeTxAuxiliaryDataInit(
   params: ParsedCVoteRegistrationParams,
 ): Buffer {
   const registrationFormatEncoding = {
-    [CIP36VoteRegistrationFormat.CIP_15]: 1,
-    [CIP36VoteRegistrationFormat.CIP_36]: 2,
+    [CIP36VoteRegistrationFormat.CIP_15]: CIP36RegistrationFormat.CIP15,
+    [CIP36VoteRegistrationFormat.CIP_36]: CIP36RegistrationFormat.CIP36,
   } as const
   const delegationCount = params.delegations?.length ?? 0
   const votingKey = params.votePublicKeyPath ?? params.votePublicKey ?? null

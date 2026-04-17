@@ -16,20 +16,31 @@ import {
   uint64_to_buf,
 } from '../../../utils/serialize'
 import {serializeCredential} from './credential'
+import {NativeScriptHashDisplayFormatWire} from './wireTypes'
+
+// deriveNativeScriptHash_types.h: native_script_type_t
+const enum NativeScriptTypeWire {
+  PUBKEY = 0,
+  ALL = 1,
+  ANY = 2,
+  N_OF_K = 3,
+  INVALID_BEFORE = 4,
+  INVALID_HEREAFTER = 5,
+}
 
 const TYPE_ENCODING = {
-  [NativeScriptType.PUBKEY_DEVICE_OWNED]: 0 as Uint8_t,
-  [NativeScriptType.PUBKEY_THIRD_PARTY]: 0 as Uint8_t,
-  [NativeScriptType.ALL]: 1 as Uint8_t,
-  [NativeScriptType.ANY]: 2 as Uint8_t,
-  [NativeScriptType.N_OF_K]: 3 as Uint8_t,
-  [NativeScriptType.INVALID_BEFORE]: 4 as Uint8_t,
-  [NativeScriptType.INVALID_HEREAFTER]: 5 as Uint8_t,
+  [NativeScriptType.PUBKEY_DEVICE_OWNED]: NativeScriptTypeWire.PUBKEY as Uint8_t,
+  [NativeScriptType.PUBKEY_THIRD_PARTY]: NativeScriptTypeWire.PUBKEY as Uint8_t,
+  [NativeScriptType.ALL]: NativeScriptTypeWire.ALL as Uint8_t,
+  [NativeScriptType.ANY]: NativeScriptTypeWire.ANY as Uint8_t,
+  [NativeScriptType.N_OF_K]: NativeScriptTypeWire.N_OF_K as Uint8_t,
+  [NativeScriptType.INVALID_BEFORE]: NativeScriptTypeWire.INVALID_BEFORE as Uint8_t,
+  [NativeScriptType.INVALID_HEREAFTER]: NativeScriptTypeWire.INVALID_HEREAFTER as Uint8_t,
 } as const
 
 const DISPLAY_FORMAT_ENCODING = {
-  [NativeScriptHashDisplayFormat.BECH32]: 1 as Uint8_t,
-  [NativeScriptHashDisplayFormat.POLICY_ID]: 2 as Uint8_t,
+  [NativeScriptHashDisplayFormat.BECH32]: NativeScriptHashDisplayFormatWire.BECH32 as Uint8_t,
+  [NativeScriptHashDisplayFormat.POLICY_ID]: NativeScriptHashDisplayFormatWire.POLICY_ID as Uint8_t,
 } as const
 
 export function serializeComplexNativeScriptStart(

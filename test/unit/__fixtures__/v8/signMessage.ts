@@ -12,7 +12,7 @@ export const parsedSignMessageFixture = {
 } as ParsedMessageData
 
 export const expectedSignMessageApdusHex = [
-  `d72401001c00000002${samplePathHex}000002`,
+  `d72401001c00000002${samplePathHex}010102`,
   'd72402000600000002abcd',
   'd724030000',
 ]
