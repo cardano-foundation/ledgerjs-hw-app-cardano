@@ -1188,7 +1188,7 @@ function ensureRequestSupportedByAppVersion(
   }
 
   if (
-    request.tx.includeNetworkId !== null &&
+    request.tx.includeNetworkId &&
     !getCompatibility(version).supportsAlonzo
   ) {
     throw new DeviceVersionUnsupported(
