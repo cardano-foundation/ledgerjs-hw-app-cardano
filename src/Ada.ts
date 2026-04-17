@@ -18,7 +18,8 @@
 /* eslint-disable require-await */
 import type Transport from '@ledgerhq/hw-transport'
 
-import {SwoCodesV7, DeviceStatusError} from './errors'
+import {StatusWordV7} from './errors/deviceStatusError'
+import {DeviceStatusError} from './errors'
 import {InvalidDataReason} from './errors/invalidDataReason'
 import type {Interaction, SendParams} from './interactions/common/types'
 import {deriveAddress} from './interactions/deriveAddress'
@@ -131,7 +132,7 @@ function wrapRetryStillInCall<T extends (...args: any[]) => any>(fn: T): T {
       if (
         e &&
         e.statusCode &&
-        e.statusCode === SwoCodesV7.ERR_STILL_IN_CALL
+        e.statusCode === StatusWordV7.ERR_STILL_IN_CALL
       ) {
         // Do the retry
         return await fn(...args)

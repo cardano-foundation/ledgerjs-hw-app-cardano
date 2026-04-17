@@ -2,13 +2,13 @@ import chai, {expect} from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 
 import type Ada from '../../src/Ada'
+import {DeviceStatusError} from '../../src/Ada'
 import {
-  DeviceStatusError,
-  SwoCodesV7,
-  SwoCodesV8,
-  SwoMessagesV7,
-  SwoMessagesV8,
-} from '../../src/Ada'
+  StatusWordV7,
+  StatusWordV8,
+  StatusWordMsgV7,
+  StatusWordMsgV8,
+} from '../../src/errors/deviceStatusError'
 import {str_to_path} from '../../src/utils/address'
 import {getAda} from '../test_utils'
 import type {TestCase} from './__fixtures__/getExtendedPublicKey'
@@ -100,8 +100,8 @@ describe('getExtendedPublicKey', () => {
       const {version} = await ada.getVersion()
       rejectErrMsg =
         version.major <= 7
-          ? SwoMessagesV7[SwoCodesV7.ERR_REJECTED_BY_POLICY]
-          : SwoMessagesV8[SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]
+          ? StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]
+          : StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]
     })
 
     it('path shorter than 3 indexes', async () => {

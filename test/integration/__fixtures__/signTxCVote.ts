@@ -1,13 +1,15 @@
 import {
-  SwoCodesV7,
-  SwoCodesV8,
-  SwoMessagesV7,
-  SwoMessagesV8,
   DeviceStatusError,
   InvalidDataReason,
   TxAuxiliaryDataSupplementType,
   TxAuxiliaryDataType,
 } from '../../../src/Ada'
+import {
+  StatusWordV7,
+  StatusWordV8,
+  StatusWordMsgV7,
+  StatusWordMsgV8,
+} from '../../../src/errors/deviceStatusError'
 import {
   CIP36VoteDelegationType,
   CIP36VoteRegistrationFormat,
@@ -408,8 +410,8 @@ export const testsCVoteRegistrationRejects: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: SwoMessagesV7[SwoCodesV7.ERR_INVALID_DATA]},
-      v8: {errCls: DeviceStatusError, errMsg: SwoMessagesV8[SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_INVALID_DATA]},
+      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
     },
     rejectReason: InvalidDataReason.CVOTE_REGISTRATION_INCONSISTENT_WITH_CIP15,
   },
@@ -432,8 +434,8 @@ export const testsCVoteRegistrationRejects: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: SwoMessagesV7[SwoCodesV7.ERR_INVALID_DATA]},
-      v8: {errCls: DeviceStatusError, errMsg: SwoMessagesV8[SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_INVALID_DATA]},
+      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
     },
     rejectReason: InvalidDataReason.CVOTE_REGISTRATION_INCONSISTENT_WITH_CIP15,
   },
