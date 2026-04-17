@@ -61,70 +61,6 @@ import {parseNetwork} from './network'
 import {parseTokenBundle, parseTxOutput} from './output'
 import {parseTxAuxiliaryData} from './txAuxiliaryData'
 
-function parseCertificates(
-  certificates: Array<Certificate>,
-): Array<ParsedCertificate> {
-  validate(isArray(certificates), InvalidDataReason.CERTIFICATES_NOT_ARRAY)
-
-  const parsed = certificates.map((cert) => parseCertificate(cert))
-
-  return parsed
-}
-
-function parseWithdrawals(withdrawals: Array<Withdrawal>): Array<ParsedWithdrawal> {
-  validate(isArray(withdrawals), InvalidDataReason.WITHDRAWALS_NOT_ARRAY)
-  return withdrawals.map((withdrawal) => parseWithdrawal(withdrawal))
-}
-
-function parseCollateralInputs(inputs: Array<TxInput>): Array<ParsedInput> {
-  validate(isArray(inputs), InvalidDataReason.COLLATERAL_INPUTS_NOT_ARRAY)
-  return inputs.map((input) => parseTxInput(input))
-}
-
-function parseRequiredSigners(
-  requiredSigners: Array<RequiredSigner>,
-): Array<ParsedRequiredSigner> {
-  validate(
-    isArray(requiredSigners),
-    InvalidDataReason.REQUIRED_SIGNERS_NOT_ARRAY,
-  )
-  return requiredSigners.map((requiredSigner) =>
-    parseRequiredSigner(requiredSigner),
-  )
-}
-
-function parseReferenceInputs(inputs: Array<TxInput>): Array<ParsedInput> {
-  validate(isArray(inputs), InvalidDataReason.REFERENCE_INPUTS_NOT_ARRAY)
-  return inputs.map((input) => parseTxInput(input))
-}
-
-function parseVotingProcedures(
-  votingProcedures: Array<VoterVotes>,
-): Array<ParsedVoterVotes> {
-  validate(
-    isArray(votingProcedures),
-    InvalidDataReason.VOTING_PROCEDURES_NOT_ARRAY,
-  )
-  return votingProcedures.map((voterVotes) => parseVoterVotes(voterVotes))
-}
-
-function parseAdditionalWitnessPaths(
-  additionalWitnessPaths: Array<number[]>,
-): Array<ValidBIP32Path> {
-  validate(
-    isArray(additionalWitnessPaths),
-    InvalidDataReason.ADDITIONAL_WITNESSES_NOT_ARRAY,
-  )
-  return additionalWitnessPaths.map((path) =>
-    parseBIP32Path(path, InvalidDataReason.INVALID_PATH),
-  )
-}
-
-function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
-  validate(typeof value === 'boolean', errorMsg)
-  return value
-}
-
 function parseTxInput(input: TxInput): ParsedInput {
   const txHashHex = parseHexStringOfLength(
     input.txHashHex,
@@ -251,6 +187,70 @@ function parseVoterVotes(voterVotes: VoterVotes): ParsedVoterVotes {
     voter: parseVoter(voterVotes.voter),
     votes: voterVotes.votes.map((v) => parseVote(v)),
   }
+}
+
+function parseCertificates(
+  certificates: Array<Certificate>,
+): Array<ParsedCertificate> {
+  validate(isArray(certificates), InvalidDataReason.CERTIFICATES_NOT_ARRAY)
+
+  const parsed = certificates.map((cert) => parseCertificate(cert))
+
+  return parsed
+}
+
+function parseWithdrawals(withdrawals: Array<Withdrawal>): Array<ParsedWithdrawal> {
+  validate(isArray(withdrawals), InvalidDataReason.WITHDRAWALS_NOT_ARRAY)
+  return withdrawals.map((withdrawal) => parseWithdrawal(withdrawal))
+}
+
+function parseCollateralInputs(inputs: Array<TxInput>): Array<ParsedInput> {
+  validate(isArray(inputs), InvalidDataReason.COLLATERAL_INPUTS_NOT_ARRAY)
+  return inputs.map((input) => parseTxInput(input))
+}
+
+function parseRequiredSigners(
+  requiredSigners: Array<RequiredSigner>,
+): Array<ParsedRequiredSigner> {
+  validate(
+    isArray(requiredSigners),
+    InvalidDataReason.REQUIRED_SIGNERS_NOT_ARRAY,
+  )
+  return requiredSigners.map((requiredSigner) =>
+    parseRequiredSigner(requiredSigner),
+  )
+}
+
+function parseReferenceInputs(inputs: Array<TxInput>): Array<ParsedInput> {
+  validate(isArray(inputs), InvalidDataReason.REFERENCE_INPUTS_NOT_ARRAY)
+  return inputs.map((input) => parseTxInput(input))
+}
+
+function parseVotingProcedures(
+  votingProcedures: Array<VoterVotes>,
+): Array<ParsedVoterVotes> {
+  validate(
+    isArray(votingProcedures),
+    InvalidDataReason.VOTING_PROCEDURES_NOT_ARRAY,
+  )
+  return votingProcedures.map((voterVotes) => parseVoterVotes(voterVotes))
+}
+
+function parseAdditionalWitnessPaths(
+  additionalWitnessPaths: Array<number[]>,
+): Array<ValidBIP32Path> {
+  validate(
+    isArray(additionalWitnessPaths),
+    InvalidDataReason.ADDITIONAL_WITNESSES_NOT_ARRAY,
+  )
+  return additionalWitnessPaths.map((path) =>
+    parseBIP32Path(path, InvalidDataReason.INVALID_PATH),
+  )
+}
+
+function parseBoolean(value: unknown, errorMsg: InvalidDataReason): boolean {
+  validate(typeof value === 'boolean', errorMsg)
+  return value
 }
 
 export function parseSigningMode(

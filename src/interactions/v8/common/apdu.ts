@@ -1,4 +1,3 @@
-import {INS} from '../../common/ins'
 import type {SendParams} from '../../common/types'
 
 const CLA = 0xd7

@@ -4,7 +4,6 @@ import type {
   Uint32_t,
   Version,
   ParsedTransactionOptions,
-  Uint64_str,
 } from '../../types/internal'
 import {TransactionSigningMode} from '../../types/internal'
 import {assert} from '../../utils/assert'
