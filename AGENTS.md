@@ -23,6 +23,17 @@ See [`doc/overview.md`](doc/overview.md) for codebase architecture and [`doc/tes
 - **Do NOT change the public API** (exported types and `Ada` class methods) without explicit confirmation — this is a published library with downstream consumers.
 - **Do NOT add dependencies** without explicit confirmation.
 
+## Environment setup
+
+This repo requires a specific Node version and uses corepack for yarn:
+
+```sh
+nvm use        # switches to Node 22 per .nvmrc
+corepack enable  # enables corepack so yarn resolves via packageManager field in package.json
+```
+
+Both must be done before running any `yarn` commands, otherwise you will get the wrong Node version or a yarn version mismatch.
+
 ## Testing
 
 Run `yarn test-unit` after any change to parsing or serialization. See [`doc/testing.md`](doc/testing.md) for the full test reference.

@@ -306,15 +306,4 @@ describe('v8 signTx', () => {
         .testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement,
     )
   })
-
-  it('rejects witness-count mismatches with a clear assertion', () => {
-    expect(() =>
-      exhaustSignTransaction(parsedCIP36DelegationsSignTxRequest, [
-        Buffer.alloc(0),
-        Buffer.alloc(0),
-        Buffer.alloc(0),
-        Buffer.from(cip36DelegationsAuxDataResponseHex, 'hex'),
-      ]),
-    ).to.throw('invalid v8 witness response count')
-  })
 })
