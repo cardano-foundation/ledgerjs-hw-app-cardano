@@ -122,6 +122,11 @@ export function bech32_to_hex(str: string): string {
 
 export const DoNotRunOnLedger = 'DO NOT RUN ON LEDGER'
 
+export type RejectError = {
+  errCls: new (...args: any[]) => Error
+  errMsg: string
+}
+
 type SignTxRejectCase = {
   testName: string
   tx: Transaction
@@ -130,6 +135,7 @@ type SignTxRejectCase = {
   rejectReason: InvalidDataReason
   errCls?: new (...args: any[]) => Error
   errMsg?: string | RegExp
+  err?: {v7: RejectError; v8: RejectError}
   appVersion?: AppVersionOverride
 }
 
@@ -223,13 +229,17 @@ export function describeSignTxRejects(
         signingMode,
         errCls,
         errMsg,
+        err,
         appVersion,
       } = testCase
       it(`${testName} [${signingMode}]`, async () => {
-        if (errMsg === DoNotRunOnLedger) {
+        if (err?.v7?.errMsg === DoNotRunOnLedger) {
           return
         }
-        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
+        const {version} = await ada.getVersion()
+        const isAppXS = version.flags.isAppXS
+        const {errCls: resolvedErrCls, errMsg: resolvedErrMsg} =
+          err != null ? (version.major <= 7 ? err.v7 : err.v8) : {errCls, errMsg}
         const response = ada.signTransaction({
           tx,
           signingMode,
@@ -239,16 +249,16 @@ export function describeSignTxRejects(
         // Certain tests contain test data that cannot be properly serialized,
         // as manifested by `TypeError`s.
         // We do not expect DeviceVersionUnsupported in that case for XS app.
-        const hasTypeError = errCls === TypeError
+        const hasTypeError = resolvedErrCls === TypeError
         const correctlyDetectsUnsupportedInAppXS =
           isAppXS && (appVersion?.unsupportedInAppXS ?? false) && !hasTypeError
 
         if (correctlyDetectsUnsupportedInAppXS) {
           await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
         } else {
-          expect(errCls, 'missing errCls').to.not.equal(undefined)
-          const expectedErrCls = errCls as new (...args: any[]) => Error
-          await expect(response).to.be.rejectedWith(expectedErrCls, errMsg)
+          expect(resolvedErrCls, 'missing errCls').to.not.equal(undefined)
+          const expectedErrCls = resolvedErrCls as new (...args: any[]) => Error
+          await expect(response).to.be.rejectedWith(expectedErrCls, resolvedErrMsg)
         }
       })
     }

@@ -19,6 +19,11 @@ export const SwoCodesV7 = {
 
 export const SwoCodesV8 = {
   SWO_SECURITY_CONDITION_NOT_SATISFIED: 0x6982 as const,
+  SWO_TX_PARSING_FAIL_CANONICAL_ORDER: 0x6b3b as const,
+  SWO_TX_PARSING_FAIL_MINT: 0x6b29 as const,
+  SWO_TX_PARSING_FAIL_WITHDRAWALS: 0x6b25 as const,
+  SWO_INVALID_PROTOCOL_MAGIC: 0x6b38 as const,
+  SWO_INVALID_NETWORK_ID: 0x6b37 as const,
 }
 
 export const SwoMessagesV7: Record<number, string> = {
@@ -36,6 +41,12 @@ export const SwoMessagesV7: Record<number, string> = {
 export const SwoMessagesV8: Record<number, string> = {
   [SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]:
     'Security condition not satisfied. Please consult Ledger documentation.',
+  [SwoCodesV8.SWO_TX_PARSING_FAIL_CANONICAL_ORDER]:
+    'Transaction parsing failed due to invalid canonical ordering.',
+  [SwoCodesV8.SWO_TX_PARSING_FAIL_MINT]:
+    'Transaction parsing failed due to invalid mint field.',
+  [SwoCodesV8.SWO_TX_PARSING_FAIL_WITHDRAWALS]:
+    'Transaction parsing failed due to invalid withdrawals field.',
 }
 
 // Kept for backwards compatibility
