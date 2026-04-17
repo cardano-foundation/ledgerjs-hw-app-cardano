@@ -127,7 +127,7 @@ export function* signMessageV7(
     'invalid v7 signMessage address field size',
   )
   assert(
-    s + addressFieldSize === confirmResponse.length,
+    s + MAX_ADDRESS_SIZE === confirmResponse.length,
     'invalid v7 signMessage response length',
   )
   const addressFieldHex = confirmResponse
