@@ -21,8 +21,10 @@ export function shouldUseSpeculos(): boolean {
 }
 
 export function getTransport() {
+  const speculosApduPort = Number(process.env.SPECULOS_APDU_PORT || 9999)
+
   return shouldUseSpeculos()
-    ? SpeculosTransport.open({apduPort: 9999})
+    ? SpeculosTransport.open({apduPort: speculosApduPort})
     : TransportNodeHid.create(1000)
 }
 

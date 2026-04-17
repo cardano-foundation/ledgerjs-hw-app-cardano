@@ -81,12 +81,12 @@
     "prepublish": "yarn run clean && yarn run build",
     "run-example": "yarn ts-node -P example-node/tsconfig.json example-node/index.ts",
     "run-example-speculos": "LEDGER_TRANSPORT=speculos yarn ts-node -P example-node/tsconfig.json example-node/index.ts",
-    "device-self-test": "mocha --timeout 3600000 -r ts-node/register test/device-self-test/**/*.test.ts",
+    "device-self-test": "mocha --timeout 3600000 -r ts-node/register -r ./test/mocha.setup.ts test/device-self-test/**/*.test.ts",
     "device-self-test-speculos": "LEDGER_TRANSPORT=speculos yarn device-self-test",
     "test-all": "yarn device-self-test && yarn test-integration",
-    "test-integration": "yarn mocha --timeout 3600000 -r ts-node/register test/integration/**/*.test.ts",
+    "test-integration": "yarn mocha --timeout 3600000 -r ts-node/register -r ./test/mocha.setup.ts test/integration/**/*.test.ts",
     "test-speculos": "bash scripts/test-speculos.sh",
-    "test-unit": "yarn mocha -r ts-node/register test/unit/**/*.test.ts",
+    "test-unit": "yarn mocha -r ts-node/register -r ./test/mocha.setup.ts test/unit/**/*.test.ts",
     "//": "run single test by specifying --grep <name> parameter in test-integration"
   },
   "resolutions": {
