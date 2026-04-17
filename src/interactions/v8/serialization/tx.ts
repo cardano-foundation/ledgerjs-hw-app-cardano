@@ -612,7 +612,7 @@ export function serializeTransactionRaw(tx: ParsedTransaction): Buffer {
 export function serializeTxInitData(
   request: ParsedSigningRequest,
   witnessPaths: ValidBIP32Path[],
-  rawTx = serializeTransactionRaw(request.tx),
+  rawTx: Buffer = serializeTransactionRaw(request.tx),
 ): Buffer {
   const {tx} = request
 

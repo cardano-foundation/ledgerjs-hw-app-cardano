@@ -317,7 +317,7 @@ export function buildSignTxAuxiliaryDataDelegation(
 
 export function buildSignTxChunks(
   tx: ParsedTransaction,
-  txData = serializeTransactionRaw(tx),
+  txData: Buffer = serializeTransactionRaw(tx),
 ): SendParams[] {
   const apdus: SendParams[] = []
   let offset = 0
