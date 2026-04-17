@@ -377,7 +377,7 @@ export const shelleyTestCases: ShelleyTestCase[] = [
     addressParams: {
       type: AddressType.ENTERPRISE_KEY,
       params: {
-        spendingPath: str_to_path("1852'/1815'/101'/0/1"),
+        spendingPath: str_to_path("1852'/1815'/101'/0/1"), // WARN
       },
     },
     result: 'addr1vv6dcymepkghuyt0za9jxg5hn89art9y8yjcvhxclxdhnds25ctky',
@@ -550,7 +550,7 @@ export const shelleyTestCases: ShelleyTestCase[] = [
     addressParams: {
       type: AddressType.REWARD_KEY,
       params: {
-        stakingPath: str_to_path("1852'/1815'/101'/2/1"),
+        stakingPath: str_to_path("1852'/1815'/101'/2/1"), // WARN
       },
     },
     result: 'stake_test1up0umv478zejdvynrddaddjzcztnmm2phsqs77cghyuah6qnjw5hh',
@@ -572,7 +572,7 @@ export const shelleyTestCases: ShelleyTestCase[] = [
     addressParams: {
       type: AddressType.REWARD_KEY,
       params: {
-        stakingPath: str_to_path("1852'/1815'/300'/2/0"),
+        stakingPath: str_to_path("1852'/1815'/300'/2/0"), // WARN
       },
     },
     result: 'stake1u08h6dxajsaatnakylrd4pdhfrv7z3lkzgsq60fhvejux0gpcrd2j',
