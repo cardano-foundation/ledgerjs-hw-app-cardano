@@ -1,6 +1,7 @@
 import type {DeviceOwnedAddress, ErrorBase, Network} from '../../../src/Ada'
 import {
   SwoCodesV7,
+  SwoCodesV8,
   DeviceStatusMessages,
   DeviceStatusError,
   AddressType,
@@ -603,19 +604,32 @@ export const shelleyTestCases: ShelleyTestCase[] = [
   },
 ]
 
+type RejectError = {
+  errCls: new (...args: any[]) => ErrorBase
+  errMsg: string
+}
+
 type RejectTestCase = {
   testName: string
   network: Network
   addressParams: DeviceOwnedAddress
-  errCls: new (...args: any[]) => ErrorBase
-  errMsg: string
+  err: {v7: RejectError; v8: RejectError}
   appVersion?: AppVersionOverride
+}
+
+const rejectErrorV7: RejectError = {
+  errCls: DeviceStatusError,
+  errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
+}
+
+const rejectErrorV8: RejectError = {
+  errCls: DeviceStatusError,
+  errMsg: DeviceStatusMessages[SwoCodesV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
 }
 
 const rejectTestCaseBase = {
   network: Networks.Mainnet,
-  errCls: DeviceStatusError,
-  errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
+  err: {v7: rejectErrorV7, v8: rejectErrorV8},
 }
 
 export const rejectTestCases: RejectTestCase[] = [

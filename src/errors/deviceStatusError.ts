@@ -17,6 +17,10 @@ export const SwoCodesV7 = {
   ERR_CLA_NOT_SUPPORTED: 0x6e00 as const,
 }
 
+export const SwoCodesV8 = {
+  SWO_SECURITY_CONDITION_NOT_SATISFIED: 0x6982 as const,
+}
+
 // Human-readable version of errors reported by APDU protocol
 export const DeviceStatusMessages: Record<number, string> = {
   [SwoCodesV7.ERR_INVALID_DATA]: 'Invalid data supplied to Ledger',

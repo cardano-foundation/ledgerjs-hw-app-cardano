@@ -3,6 +3,7 @@ export {InvalidData} from './invalidData'
 export {DeviceVersionUnsupported} from './deviceUnsupported'
 export {
   SwoCodesV7,
+  SwoCodesV8,
   DeviceStatusError,
   DeviceStatusMessages,
 } from './deviceStatusError'
