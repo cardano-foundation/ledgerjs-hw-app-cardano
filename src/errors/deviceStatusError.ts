@@ -4,7 +4,7 @@ import {ErrorBase} from './errorBase'
  * Raw error codes returned by APDU protocol. Note that this is *not* an exhaustive list.
  * @category Errors
  */
-export const DeviceStatusCodes = {
+export const SwoCodesV7 = {
   ERR_STILL_IN_CALL: 0x6e04 as const, // internal
   ERR_INVALID_DATA: 0x6e07 as const,
   ERR_INVALID_BIP_PATH: 0x6e08 as const,
@@ -19,15 +19,15 @@ export const DeviceStatusCodes = {
 
 // Human-readable version of errors reported by APDU protocol
 export const DeviceStatusMessages: Record<number, string> = {
-  [DeviceStatusCodes.ERR_INVALID_DATA]: 'Invalid data supplied to Ledger',
-  [DeviceStatusCodes.ERR_INVALID_BIP_PATH]:
+  [SwoCodesV7.ERR_INVALID_DATA]: 'Invalid data supplied to Ledger',
+  [SwoCodesV7.ERR_INVALID_BIP_PATH]:
     'Invalid derivation path supplied to Ledger',
-  [DeviceStatusCodes.ERR_REJECTED_BY_USER]: 'Action rejected by user',
-  [DeviceStatusCodes.ERR_REJECTED_BY_POLICY]:
+  [SwoCodesV7.ERR_REJECTED_BY_USER]: 'Action rejected by user',
+  [SwoCodesV7.ERR_REJECTED_BY_POLICY]:
     "Action rejected by Ledger's security policy",
-  [DeviceStatusCodes.ERR_DEVICE_LOCKED]: 'Device is locked',
-  [DeviceStatusCodes.ERR_CLA_NOT_SUPPORTED]: 'Wrong Ledger app',
-  [DeviceStatusCodes.ERR_UNSUPPORTED_ADDRESS_TYPE]: 'Unsupported address type',
+  [SwoCodesV7.ERR_DEVICE_LOCKED]: 'Device is locked',
+  [SwoCodesV7.ERR_CLA_NOT_SUPPORTED]: 'Wrong Ledger app',
+  [SwoCodesV7.ERR_UNSUPPORTED_ADDRESS_TYPE]: 'Unsupported address type',
 }
 
 const GH_DEVICE_ERRORS_LINK =

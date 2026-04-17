@@ -9,7 +9,7 @@ import type {
 } from '../../../src/Ada'
 import {
   CertificateType,
-  DeviceStatusCodes,
+  SwoCodesV7,
   DeviceStatusError,
   DeviceStatusMessages,
   InvalidDataReason,
@@ -56,7 +56,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
       str_to_path("1852'/1815'/0'/2/1"),
     ],
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -72,7 +72,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
       str_to_path("1854'/1815'/0'/2/0"),
     ],
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -97,7 +97,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
       str_to_path("1854'/1815'/0'/2/0"),
     ],
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
   },
@@ -138,7 +138,7 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     additionalWitnessPaths: [],
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
   },
@@ -160,7 +160,7 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     additionalWitnessPaths: [],
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
   },
@@ -371,7 +371,7 @@ export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[]
       },
       signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
       errCls: DeviceStatusError,
-      errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+      errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
       rejectReason:
         InvalidDataReason.SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED,
     },
@@ -398,7 +398,7 @@ export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[]
       },
       signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
       errCls: DeviceStatusError,
-      errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+      errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
       rejectReason:
         InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_KEY_REQUIRED,
     },
@@ -431,7 +431,7 @@ export const stakePoolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] 
       },
       signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
       errCls: DeviceStatusError,
-      errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+      errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
       rejectReason: InvalidDataReason.LEDGER_POLICY,
     },
   ]
@@ -446,7 +446,7 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
   },
   {
@@ -458,7 +458,7 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
   },
   {
@@ -470,7 +470,7 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED,
   },
@@ -483,7 +483,7 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
   },
   {
@@ -495,7 +495,7 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
   },
   {
@@ -507,7 +507,7 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED,
   },

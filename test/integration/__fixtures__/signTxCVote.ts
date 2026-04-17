@@ -1,5 +1,5 @@
 import {
-  DeviceStatusCodes,
+  SwoCodesV7,
   DeviceStatusError,
   DeviceStatusMessages,
   InvalidDataReason,
@@ -406,7 +406,7 @@ export const testsCVoteRegistrationRejects: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.CVOTE_REGISTRATION_INCONSISTENT_WITH_CIP15,
   },
   {
@@ -428,7 +428,7 @@ export const testsCVoteRegistrationRejects: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.CVOTE_REGISTRATION_INCONSISTENT_WITH_CIP15,
   },
 ]

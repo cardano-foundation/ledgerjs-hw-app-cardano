@@ -2,7 +2,7 @@ export {ErrorBase} from './errorBase'
 export {InvalidData} from './invalidData'
 export {DeviceVersionUnsupported} from './deviceUnsupported'
 export {
-  DeviceStatusCodes,
+  SwoCodesV7,
   DeviceStatusError,
   DeviceStatusMessages,
 } from './deviceStatusError'

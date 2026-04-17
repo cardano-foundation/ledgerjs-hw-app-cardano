@@ -1,7 +1,7 @@
 import type {ErrorBase, Transaction} from '../../../src/Ada'
 import {
   CertificateType,
-  DeviceStatusCodes,
+  SwoCodesV7,
   DeviceStatusError,
   DeviceStatusMessages,
   InvalidDataReason,
@@ -154,7 +154,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -168,7 +168,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.NETWORK_INVALID_NETWORK_ID,
   },
   {
@@ -180,7 +180,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
@@ -194,7 +194,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
@@ -216,7 +216,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
@@ -239,7 +239,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
@@ -267,7 +267,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED,
   },
@@ -296,7 +296,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED,
   },
@@ -326,7 +326,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__MINT_NOT_ALLOWED,
   },
   {
@@ -356,7 +356,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__MINT_NOT_ALLOWED,
   },
   // collateral inputs
@@ -368,7 +368,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
@@ -380,7 +380,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
@@ -399,7 +399,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
@@ -419,7 +419,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
@@ -444,7 +444,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED,
   },
@@ -469,7 +469,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__REQUIRED_SIGNERS_NOT_ALLOWED,
   },
@@ -482,7 +482,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
@@ -494,7 +494,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
@@ -513,7 +513,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
@@ -533,7 +533,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
@@ -546,7 +546,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
@@ -558,7 +558,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
@@ -577,7 +577,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
@@ -597,7 +597,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
@@ -610,7 +610,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED,
   },
@@ -622,7 +622,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED,
   },
@@ -641,7 +641,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED,
   },
@@ -661,7 +661,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_INPUTS_NOT_ALLOWED,
   },
@@ -681,7 +681,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
@@ -697,7 +697,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
@@ -724,7 +724,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
@@ -751,7 +751,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
@@ -778,7 +778,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
@@ -789,7 +789,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
   },
@@ -803,7 +803,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
   },
@@ -824,7 +824,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED,
   },
@@ -842,7 +842,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED,
   },
@@ -860,7 +860,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED,
   },
@@ -878,7 +878,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__POOL_RETIREMENT_NOT_ALLOWED,
   },
@@ -1046,7 +1046,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH,
   },
@@ -1068,7 +1068,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1084,7 +1084,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__CERTIFICATE_CREDENTIAL_ONLY_AS_SCRIPT,
   },
@@ -1109,7 +1109,7 @@ export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelle
       },
       signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
       errCls: DeviceStatusError,
-      errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+      errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
       rejectReason: InvalidDataReason.LEDGER_POLICY,
     },
     // can't test the rest of the signing modes, because a previous checks catches them
@@ -1142,7 +1142,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER,
   },
   {
@@ -1162,7 +1162,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH,
   },
   {
@@ -1181,7 +1181,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1200,7 +1200,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason:
       InvalidDataReason.SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT,
   },
@@ -1220,7 +1220,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
 ]
@@ -1234,7 +1234,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'")],
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1245,7 +1245,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'")],
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1256,7 +1256,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0")],
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1267,7 +1267,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'/2/0")],
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1278,7 +1278,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1855'/1815'/0'")],
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1289,7 +1289,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'")],
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1300,7 +1300,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'")],
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1311,7 +1311,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'/0/0")],
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1322,7 +1322,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'/2/0")],
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1333,7 +1333,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1855'/1815'/0'")],
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1344,7 +1344,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1853'/1815'/0'/0'")],
     signingMode: TransactionSigningMode.MULTISIG_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1355,7 +1355,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'")],
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1366,7 +1366,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'")],
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1385,7 +1385,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1404,7 +1404,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'/0/0")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1423,7 +1423,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1442,7 +1442,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'/2/0")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1461,7 +1461,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1855'/1815'/0'")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1480,7 +1480,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1853'/1815'/0'/0'")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1498,7 +1498,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1516,7 +1516,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'/0/0")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1534,7 +1534,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1852'/1815'/0'/2/0")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1552,7 +1552,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1854'/1815'/0'/2/0")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1570,7 +1570,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [str_to_path("1855'/1815'/0'")],
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
 ]
@@ -1585,7 +1585,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
   },
   {
@@ -1597,7 +1597,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE,
   },
   {
@@ -1610,7 +1610,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
   },
   {
@@ -1623,7 +1623,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
   },
   {
@@ -1635,7 +1635,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE,
   },
   {
@@ -1649,7 +1649,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
   },
   {
@@ -1663,7 +1663,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_INVALID_DATA],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_INVALID_DATA],
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
   },
 ]
@@ -1705,7 +1705,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1742,7 +1742,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1777,7 +1777,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1815,7 +1815,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1851,7 +1851,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1898,7 +1898,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1935,7 +1935,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
@@ -1970,7 +1970,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
 ]
@@ -1984,7 +1984,7 @@ export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
   },
   {
@@ -1995,7 +1995,7 @@ export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
   },
   {
@@ -2006,7 +2006,7 @@ export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.PLUTUS_TRANSACTION,
     errCls: DeviceStatusError,
-    errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+    errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
     rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REFERENCE_SCRIPT,
   },
 ]

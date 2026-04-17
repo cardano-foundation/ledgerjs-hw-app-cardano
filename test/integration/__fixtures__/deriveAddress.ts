@@ -1,6 +1,6 @@
 import type {DeviceOwnedAddress, ErrorBase, Network} from '../../../src/Ada'
 import {
-  DeviceStatusCodes,
+  SwoCodesV7,
   DeviceStatusMessages,
   DeviceStatusError,
   AddressType,
@@ -615,7 +615,7 @@ type RejectTestCase = {
 const rejectTestCaseBase = {
   network: Networks.Mainnet,
   errCls: DeviceStatusError,
-  errMsg: DeviceStatusMessages[DeviceStatusCodes.ERR_REJECTED_BY_POLICY],
+  errMsg: DeviceStatusMessages[SwoCodesV7.ERR_REJECTED_BY_POLICY],
 }
 
 export const rejectTestCases: RejectTestCase[] = [
