@@ -18,6 +18,9 @@ const StatusWordV7 = {
 }
 
 const StatusWordV8 = {
+  // Stale-call recovery used by ledger-app-cardano v8. Same value and retry
+  // contract as v7 ERR_STILL_IN_CALL.
+  SWO_STILL_IN_CALL_RESET_DONE: 0x6e04 as const,
   SWO_SECURITY_CONDITION_NOT_SATISFIED: 0x6982 as const,
   SWO_TX_PARSING_FAIL_CANONICAL_ORDER: 0x6b3b as const,
   SWO_TX_PARSING_FAIL_MINT: 0x6b29 as const,

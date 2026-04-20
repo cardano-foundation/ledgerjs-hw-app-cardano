@@ -1,5 +1,3 @@
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
-import SpeculosTransport from '@ledgerhq/hw-transport-node-speculos'
 import * as blake2 from 'blake2'
 import {expect} from 'chai'
 import {ImportMock} from 'ts-mock-imports'
@@ -20,12 +18,18 @@ export function shouldUseSpeculos(): boolean {
   return process.env.LEDGER_TRANSPORT === 'speculos'
 }
 
-export function getTransport() {
+export async function getTransport() {
   const speculosApduPort = Number(process.env.SPECULOS_APDU_PORT || 9999)
 
-  return shouldUseSpeculos()
-    ? SpeculosTransport.open({apduPort: speculosApduPort})
-    : TransportNodeHid.create(1000)
+  if (shouldUseSpeculos()) {
+    const {default: SpeculosTransport} =
+      await import('@ledgerhq/hw-transport-node-speculos')
+    return SpeculosTransport.open({apduPort: speculosApduPort})
+  }
+
+  const {default: TransportNodeHid} =
+    await import('@ledgerhq/hw-transport-node-hid')
+  return TransportNodeHid.create(1000)
 }
 
 export async function getAda() {
@@ -233,13 +237,18 @@ export function describeSignTxRejects(
         appVersion,
       } = testCase
       it(`${testName} [${signingMode}]`, async () => {
-        if (err?.v7?.errMsg === DoNotRunOnLedger) {
-          return
-        }
         const {version} = await ada.getVersion()
         const isAppXS = version.flags.isAppXS
-        const {errCls: resolvedErrCls, errMsg: resolvedErrMsg} =
-          err != null ? (version.major <= 7 ? err.v7 : err.v8) : {errCls, errMsg}
+        let resolvedErrCls = errCls
+        let resolvedErrMsg = errMsg
+        if (err != null) {
+          const resolvedErr = version.major <= 7 ? err.v7 : err.v8
+          resolvedErrCls = resolvedErr.errCls
+          resolvedErrMsg = resolvedErr.errMsg
+        }
+        if (resolvedErrMsg === DoNotRunOnLedger) {
+          return
+        }
         const response = ada.signTransaction({
           tx,
           signingMode,
@@ -258,7 +267,10 @@ export function describeSignTxRejects(
         } else {
           expect(resolvedErrCls, 'missing errCls').to.not.equal(undefined)
           const expectedErrCls = resolvedErrCls as new (...args: any[]) => Error
-          await expect(response).to.be.rejectedWith(expectedErrCls, resolvedErrMsg)
+          await expect(response).to.be.rejectedWith(
+            expectedErrCls,
+            resolvedErrMsg,
+          )
         }
       })
     }

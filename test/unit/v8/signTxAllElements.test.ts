@@ -65,7 +65,7 @@ const {
   signTxAllElementsCertificatesOrdinary,
   signTxAllElementsPoolRegistration,
   signTxAllElementsNoCertificates,
-} = nodeRequire('../../integration/__fixtures__/signTxAllElements.ts')
+} = nodeRequire('../../integration/__fixtures__/signTxAllElements')
 
 describe('v8 signTxAllElements fixtures', () => {
   it('parses the auxiliary data fixture', () => {

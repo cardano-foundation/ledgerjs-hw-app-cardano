@@ -61,7 +61,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
     ],
     err: {
       v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
@@ -79,7 +79,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
     ],
     err: {
       v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
@@ -106,7 +106,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
     ],
     err: {
       v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
@@ -151,7 +151,7 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [],
     err: {
       v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_INVALID_DATA]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
@@ -175,7 +175,7 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
     additionalWitnessPaths: [],
     err: {
       v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,

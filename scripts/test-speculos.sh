@@ -7,6 +7,7 @@ APP_ELF="${APP_ELF:-$APP_REPO/build/stax/bin/app.elf}"
 BASE_APDU_PORT="${SPECULOS_APDU_PORT:-9999}"
 DISPLAY_MODE="headless"
 PARALLELISM=1
+SHARDING_REQUESTED=0
 SHOW_PRINTF=0
 MOCHA_ARGS=()
 
@@ -21,6 +22,7 @@ while [[ $# -gt 0 ]]; do
         echo "ERROR: -n requires a positive integer argument." >&2
         exit 1
       fi
+      SHARDING_REQUESTED=1
       PARALLELISM="$2"
       shift 2
       ;;
@@ -76,6 +78,10 @@ fi
 
 if (( PARALLELISM > ${#TEST_FILES[@]} )); then
   PARALLELISM=${#TEST_FILES[@]}
+fi
+
+if (( SHARDING_REQUESTED == 0 || PARALLELISM < 2 )); then
+  PARALLELISM=1
 fi
 
 for ((i = 0; i < PARALLELISM; i++)); do
@@ -165,15 +171,17 @@ collect_process_errors() {
   ' "$file"
 }
 
-for ((i = 0; i < PARALLELISM; i++)); do
-  shard_file="$WORK_DIR/shard-$i.txt"
-  : >"$shard_file"
-done
+if (( PARALLELISM >= 2 )); then
+  for ((i = 0; i < PARALLELISM; i++)); do
+    shard_file="$WORK_DIR/shard-$i.txt"
+    : >"$shard_file"
+  done
 
-for ((i = 0; i < ${#TEST_FILES[@]}; i++)); do
-  shard_index=$((i % PARALLELISM))
-  printf '%s\n' "${TEST_FILES[$i]}" >>"$WORK_DIR/shard-$shard_index.txt"
-done
+  for ((i = 0; i < ${#TEST_FILES[@]}; i++)); do
+    shard_index=$((i % PARALLELISM))
+    printf '%s\n' "${TEST_FILES[$i]}" >>"$WORK_DIR/shard-$shard_index.txt"
+  done
+fi
 
 echo "Running integration tests on $PARALLELISM Speculos instance(s)."
 
@@ -223,29 +231,42 @@ for ((i = 0; i < PARALLELISM; i++)); do
   done
 done
 
-for ((i = 0; i < PARALLELISM; i++)); do
-  mapfile -t SHARD_TESTS <"$WORK_DIR/shard-$i.txt"
-  if [ "${#SHARD_TESTS[@]}" -eq 0 ]; then
-    continue
-  fi
-  echo "Starting mocha[$i] with ${#SHARD_TESTS[@]} test file(s) on port $((BASE_APDU_PORT + i))."
+if (( PARALLELISM == 1 )); then
+  echo "Starting mocha[0] on port $BASE_APDU_PORT."
   setsid env \
     LEDGER_TRANSPORT=speculos \
-    SPECULOS_APDU_PORT="$((BASE_APDU_PORT + i))" \
+    SPECULOS_APDU_PORT="$BASE_APDU_PORT" \
     bash -lc '
       prefix="$1"
       logfile="$2"
       shift 2
       stdbuf -oL -eL "$@" 2>&1 | awk -v prefix="$prefix" "{print prefix \$0; fflush()}" | tee "$logfile"
-    ' _ "[mocha $i] " "$WORK_DIR/mocha-$i.log" \
-    yarn mocha \
-    --timeout 3600000 \
-    -r ts-node/register \
-    -r ./test/mocha.setup.ts \
-    "${SHARD_TESTS[@]}" \
+    ' _ "[mocha 0] " "$WORK_DIR/mocha-0.log" \
+    bash scripts/run-integration-compiled.sh \
     "${MOCHA_ARGS[@]+"${MOCHA_ARGS[@]}"}" &
   MOCHA_PGIDS+=($!)
-done
+else
+  for ((i = 0; i < PARALLELISM; i++)); do
+    mapfile -t SHARD_TESTS <"$WORK_DIR/shard-$i.txt"
+    if [ "${#SHARD_TESTS[@]}" -eq 0 ]; then
+      continue
+    fi
+    echo "Starting mocha[$i] with ${#SHARD_TESTS[@]} test file(s) on port $((BASE_APDU_PORT + i))."
+    setsid env \
+      LEDGER_TRANSPORT=speculos \
+      SPECULOS_APDU_PORT="$((BASE_APDU_PORT + i))" \
+      bash -lc '
+        prefix="$1"
+        logfile="$2"
+        shift 2
+        stdbuf -oL -eL "$@" 2>&1 | awk -v prefix="$prefix" "{print prefix \$0; fflush()}" | tee "$logfile"
+      ' _ "[mocha $i] " "$WORK_DIR/mocha-$i.log" \
+      bash scripts/run-integration-compiled.sh \
+      "${SHARD_TESTS[@]}" \
+      "${MOCHA_ARGS[@]+"${MOCHA_ARGS[@]}"}" &
+    MOCHA_PGIDS+=($!)
+  done
+fi
 
 FAILED=0
 for ((i = 0; i < ${#MOCHA_PGIDS[@]}; i++)); do

@@ -1,14 +1,14 @@
 import {createRequire} from 'module'
 
 const nodeRequire = createRequire(__filename)
-const {describeSignTxPositiveTest} = nodeRequire('../test_utils.ts')
+const {describeSignTxPositiveTest} = nodeRequire('../test_utils')
 const {
   signTxAllElementsAuxiliaryData,
   signTxAllElementsCertificatesMultisig,
   signTxAllElementsCertificatesOrdinary,
   signTxAllElementsNoCertificates,
   signTxAllElementsPoolRegistration,
-} = nodeRequire('./__fixtures__/signTxAllElements.ts')
+} = nodeRequire('./__fixtures__/signTxAllElements')
 
 describeSignTxPositiveTest(
   'signTxAllElementsPoolRegistration',

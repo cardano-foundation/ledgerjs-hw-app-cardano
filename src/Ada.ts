@@ -18,7 +18,7 @@
 /* eslint-disable require-await */
 import type Transport from '@ledgerhq/hw-transport'
 
-import {StatusWordV7} from './errors/deviceStatusError'
+import {StatusWordV7, StatusWordV8} from './errors/deviceStatusError'
 import {DeviceStatusError} from './errors'
 import {InvalidDataReason} from './errors/invalidDataReason'
 import type {Interaction, SendParams} from './interactions/common/types'
@@ -83,6 +83,22 @@ const CLA = 0xd7
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
 
+function getStatusCodeFromError(error: unknown): number | null {
+  if (error == null || typeof error !== 'object') {
+    return null
+  }
+
+  if ('statusCode' in error && typeof error.statusCode === 'number') {
+    return error.statusCode
+  }
+
+  if ('code' in error && typeof error.code === 'number') {
+    return error.code
+  }
+
+  return null
+}
+
 function wrapConvertDeviceStatusError<T extends (...args: any[]) => any>(
   fn: T,
 ): T {
@@ -91,13 +107,9 @@ function wrapConvertDeviceStatusError<T extends (...args: any[]) => any>(
     try {
       return await fn(...args)
     } catch (e: unknown) {
-      if (
-        e &&
-        typeof e === 'object' &&
-        'statusCode' in e &&
-        typeof e.statusCode === 'number'
-      ) {
-        throw new DeviceStatusError(e.statusCode)
+      const statusCode = getStatusCodeFromError(e)
+      if (statusCode != null) {
+        throw new DeviceStatusError(statusCode)
       }
       throw e
     }
@@ -132,10 +144,10 @@ function wrapRetryStillInCall<T extends (...args: any[]) => any>(fn: T): T {
     try {
       return await fn(...args)
     } catch (e: any) {
+      const statusCode = getStatusCodeFromError(e)
       if (
-        e &&
-        e.statusCode &&
-        e.statusCode === StatusWordV7.ERR_STILL_IN_CALL
+        statusCode === StatusWordV7.ERR_STILL_IN_CALL ||
+        statusCode === StatusWordV8.SWO_STILL_IN_CALL_RESET_DONE
       ) {
         // Do the retry
         return await fn(...args)
