@@ -119,8 +119,11 @@ export type SendFn = (params: SendParams) => Promise<Buffer>
 // when the device thinks it is still in a middle of previous APDU stream.
 // This happens mostly if the host aborts communication for some reason
 // leaving ledger mid-call.
-// In this case Ledger will respond by ERR_STILL_IN_CALL *and* resetting its state to
-// default. We can therefore transparently retry the request.
+// In this case Ledger will respond by ERR_STILL_IN_CALL (v7) /
+// SWO_STILL_IN_CALL_RESET_DONE (v8) *and* resetting its state to default.
+// Both apps use the same status word value (0x6e04) with the same contract,
+// so this wrapper works unchanged across versions. We can therefore
+// transparently retry the request.
 
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
 function wrapRetryStillInCall<T extends (...args: any[]) => any>(fn: T): T {

@@ -1,6 +1,10 @@
 import {ErrorBase} from './errorBase'
 
 const StatusWordV7 = {
+  // Stale-call recovery, used by both v7 (ERR_STILL_IN_CALL) and v8
+  // (SWO_STILL_IN_CALL_RESET_DONE). Same value, same contract: device has reset
+  // to idle and the host may retry the first APDU of a multi-APDU exchange once.
+  // Consumed by wrapRetryStillInCall() in Ada.ts.
   ERR_STILL_IN_CALL: 0x6e04 as const, // internal
   ERR_INVALID_DATA: 0x6e07 as const,
   ERR_INVALID_BIP_PATH: 0x6e08 as const,
