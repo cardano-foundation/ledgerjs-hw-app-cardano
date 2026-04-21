@@ -9,7 +9,7 @@ import {inputs, mainnetFeeTtl, outputs} from './txElements'
 
 export const testsAlonzo: SignTxTestCase[] = [
   {
-    testName: 'Sign tx with script data hash',
+    testName: 'Sign_tx_with_script_data_hash',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -37,7 +37,7 @@ export const testsAlonzo: SignTxTestCase[] = [
   },
   {
     // tx does not contain any Plutus elements, but should be accepted (differs only in UI)
-    testName: 'Sign tx with change output as array',
+    testName: 'Sign_tx_with_change_output_as_array',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -61,7 +61,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with datum hash in output as array',
+    testName: 'Sign_tx_with_datum_hash_in_output_as_array',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -86,7 +86,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with datum hash in output as array with tokens',
+    testName: 'Sign_tx_with_datum_hash_in_output_as_array_with_tokens',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -112,7 +112,7 @@ export const testsAlonzo: SignTxTestCase[] = [
   },
   {
     // tests the path where a warning about missing datum hash is shown on Ledger
-    testName: 'Sign tx with missing datum hash in output with tokens',
+    testName: 'Sign_tx_with_missing_datum_hash_in_output_with_tokens',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -137,7 +137,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with collateral inputs',
+    testName: 'Sign_tx_with_collateral_inputs',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -168,7 +168,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with required signers - mixed',
+    testName: 'Sign_tx_with_required_signers_mixed',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -203,7 +203,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with required signers - mixed',
+    testName: 'Sign_tx_with_required_signers_mixed',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -238,7 +238,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with mint path in a required signer',
+    testName: 'Sign_tx_with_mint_path_in_a_required_signer',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -273,7 +273,7 @@ export const testsAlonzo: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with key hash in stake credential',
+    testName: 'Sign_tx_with_key_hash_in_stake_credential',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -326,7 +326,7 @@ export const testsAlonzo: SignTxTestCase[] = [
 export const testsBabbage: SignTxTestCase[] = [
   // inline datum
   {
-    testName: 'Sign tx with short inline datum in output with tokens',
+    testName: 'Sign_tx_with_short_inline_datum_in_output_with_tokens',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -352,7 +352,7 @@ export const testsBabbage: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with long inline datum (480 B) in output',
+    testName: 'Sign_tx_with_long_inline_datum_480_B_in_output',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -378,7 +378,7 @@ export const testsBabbage: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with long inline datum (304 B) in output with tokens',
+    testName: 'Sign_tx_with_long_inline_datum_304_B_in_output_with_tokens',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -405,7 +405,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   // reference script
   {
-    testName: 'Sign tx with datum hash and short ref. script in output',
+    testName: 'Sign_tx_with_datum_hash_and_short_ref_script_in_output',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -431,7 +431,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with datum hash and ref. script (240 B) in output in Babbage format',
+      'Sign_tx_with_datum_hash_and_ref_script_240_B_in_output_in_Babbage_format',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -457,7 +457,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with datum hash and script reference (304 B) in output as map',
+      'Sign_tx_with_datum_hash_and_script_reference_304_B_in_output_as_map',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -483,7 +483,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   // various output combinations
   {
-    testName: 'Sign tx with datum hash in output with tokens in Babbage format',
+    testName: 'Sign_tx_with_datum_hash_in_output_with_tokens_in_Babbage_format',
     tx: {
       ...mainnetFeeTtl,
       network: Networks.Testnet,
@@ -508,7 +508,7 @@ export const testsBabbage: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign tx with a complex multiasset output Babbage',
+    testName: 'Sign_tx_with_a_complex_multiasset_output_Babbage',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -536,7 +536,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   // reference inputs
   {
-    testName: 'Sign tx with change output as map and multiple reference inputs',
+    testName: 'Sign_tx_with_change_output_as_map_and_multiple_reference_inputs',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -565,7 +565,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   // total collateral and collateral return output
   {
-    testName: 'Sign tx with change output as map and total collateral',
+    testName: 'Sign_tx_with_change_output_as_map_and_total_collateral',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -593,7 +593,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with change output as map and collateral output as array',
+      'Sign_tx_with_change_output_as_map_and_collateral_output_as_array',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -621,7 +621,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with change collateral output as map without total collateral',
+      'Sign_tx_with_change_collateral_output_as_map_without_total_collateral',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -650,7 +650,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with change collateral output as map with total collateral',
+      'Sign_tx_with_change_collateral_output_as_map_with_total_collateral',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -680,7 +680,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with third-party collateral output as map without total collateral',
+      'Sign_tx_with_thirdparty_collateral_output_as_map_without_total_collateral',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -709,7 +709,7 @@ export const testsBabbage: SignTxTestCase[] = [
   },
   {
     testName:
-      'Sign tx with third-party collateral output as map with total collateral',
+      'Sign_tx_with_thirdparty_collateral_output_as_map_with_total_collateral',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],

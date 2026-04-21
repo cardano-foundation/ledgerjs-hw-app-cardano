@@ -11,8 +11,7 @@ export type TestCase = {
 
 export const tests: TestCase[] = [
   {
-    testName:
-      'msg01: Should correctly sign an empty message with keyhash as address field',
+    testName: 'Sign_msg_empty_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: '',
       signingPath: str_to_path("1852'/1815'/0'/0/1"),
@@ -30,7 +29,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg02: Should correctly sign a short non-hashed ascii message with keyhash as address field',
+      'Sign_msg_short_nonhashed_ascii_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: '68656c6c6f20776f726c64', // 'hello world'
       signingPath: str_to_path("1852'/1815'/0'/0/1"),
@@ -48,7 +47,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg03: Should correctly sign a short hashed ascii message with keyhash as address field',
+      'Sign_msg_short_hashed_ascii_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: '68656c6c6f20776f726c64', // 'hello world'
       signingPath: str_to_path("1852'/1815'/0'/0/1"),
@@ -65,8 +64,7 @@ export const tests: TestCase[] = [
     },
   },
   {
-    testName:
-      'msg04: Should correctly sign a short non-hashed ascii message displayed as hex',
+    testName: 'Sign_msg_short_nonhashed_ascii_message_displayed_as_hex',
     signMessageData: {
       messageHex: '68656c6c6f20776f726c64', // 'hello world'
       signingPath: str_to_path("1852'/1815'/0'/4/0"),
@@ -85,7 +83,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg05: Should correctly sign a short non-hashed hex message with keyhash as address field',
+      'Sign_msg_short_nonhashed_hex_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: 'ff656c6c6f20776f726c64',
       signingPath: str_to_path("1853'/1815'/0'/0'"),
@@ -102,8 +100,7 @@ export const tests: TestCase[] = [
     },
   },
   {
-    testName:
-      'msg06: Should correctly sign a short hashed hex message with keyhash as address field',
+    testName: 'Sign_msg_short_hashed_hex_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: 'ff656c6c6f20776f726c64',
       signingPath: str_to_path("1853'/1815'/0'/0'"),
@@ -121,7 +118,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg07: Should correctly sign a 198 bytes long non-hashed ascii message with keyhash as address field',
+      'Sign_msg_198_bytes_long_nonhashed_ascii_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: '6869'.repeat(99),
       signingPath: str_to_path("1852'/1815'/0'/3/0"),
@@ -139,7 +136,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg08: Should correctly sign a 99 bytes long non-hashed hex message with keyhash as address field',
+      'Sign_msg_99_bytes_long_nonhashed_hex_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: 'de'.repeat(99),
       signingPath: str_to_path("1852'/1815'/0'/3/0"),
@@ -157,7 +154,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg09: Should correctly sign a 1000 bytes long hashed ascii message with keyhash as address field',
+      'Sign_msg_1000_bytes_long_hashed_ascii_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: '6869'.repeat(500),
       signingPath: str_to_path("1852'/1815'/0'/3/0"),
@@ -175,7 +172,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg10: Should correctly sign a 349 bytes long hashed hex message with keyhash as address field',
+      'Sign_msg_349_bytes_long_hashed_hex_message_with_keyhash_as_address_field',
     signMessageData: {
       messageHex: 'fa'.repeat(349),
       signingPath: str_to_path("1852'/1815'/0'/3/0"),
@@ -193,7 +190,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg11: Should correctly sign a short non-hashed hex message with base address in address field',
+      'Sign_msg_short_nonhashed_hex_message_with_base_address_in_address_field',
     signMessageData: {
       messageHex: 'deadbeef',
       signingPath: str_to_path("1852'/1815'/0'/5/0"),
@@ -219,7 +216,7 @@ export const tests: TestCase[] = [
   },
   {
     testName:
-      'msg12: Should correctly sign a short non-hashed hex message with reward address in address field',
+      'Sign_msg_short_nonhashed_hex_message_with_reward_address_in_address_field',
     signMessageData: {
       messageHex: 'deadbeef',
       signingPath: str_to_path("1852'/1815'/0'/5/0"),

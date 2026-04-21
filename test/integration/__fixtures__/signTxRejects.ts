@@ -150,7 +150,7 @@ const stakeDelegationParam: StakeDelegationParams = {
 
 export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Non-mainnet protocol magic',
+    testName: 'Non_mainnet_protocol_magic',
     tx: {
       ...shelleyBase,
       network: {
@@ -172,7 +172,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Invalid network id',
+    testName: 'Invalid_network_id',
     tx: {
       ...shelleyBase,
       network: {
@@ -194,7 +194,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.NETWORK_INVALID_NETWORK_ID,
   },
   {
-    testName: 'Pool registration (operator) - too few certificates',
+    testName: 'Pool_registration_operator_too_few_certificates',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -216,7 +216,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Pool registration (owner) - too few certificates',
+    testName: 'Pool_registration_owner_too_few_certificates',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -239,7 +239,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Pool registration (operator) - too many certificates',
+    testName: 'Pool_registration_operator_too_many_certificates',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -270,7 +270,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Pool registration (owner) - too many certificates',
+    testName: 'Pool_registration_owner_too_many_certificates',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -302,7 +302,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Pool registration (operator) - too many withdrawals',
+    testName: 'Pool_registration_operator_too_many_withdrawals',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -339,7 +339,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__WITHDRAWALS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - too many withdrawals',
+    testName: 'Pool_registration_owner_too_many_withdrawals',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -377,7 +377,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OWNER__WITHDRAWALS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (operator) - mint included',
+    testName: 'Pool_registration_operator_mint_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -415,7 +415,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__MINT_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - mint included',
+    testName: 'Pool_registration_owner_mint_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -455,7 +455,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   // collateral inputs
   {
-    testName: 'Ordinary tx - collateral inputs included',
+    testName: 'Ordinary_tx_collateral_inputs_included',
     tx: {
       ...shelleyBase,
       collateralInputs: [inputs.utxoShelley],
@@ -476,7 +476,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
   {
-    testName: 'Multisig tx - collateral inputs included',
+    testName: 'Multisig_tx_collateral_inputs_included',
     tx: {
       ...shelleyBase,
       collateralInputs: [inputs.utxoShelley],
@@ -497,7 +497,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (operator) - collateral inputs included',
+    testName: 'Pool_registration_operator_collateral_inputs_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -525,7 +525,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_INPUTS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - collateral inputs included',
+    testName: 'Pool_registration_owner_collateral_inputs_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -555,7 +555,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   // required signers
   {
-    testName: 'Pool registration (operator) - required signers included',
+    testName: 'Pool_registration_operator_required_signers_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -588,7 +588,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REQUIRED_SIGNERS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - required signers included',
+    testName: 'Pool_registration_owner_required_signers_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -623,7 +623,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   // collateral return output included
   {
-    testName: 'Ordinary tx - collateral output included',
+    testName: 'Ordinary_tx_collateral_output_included',
     tx: {
       ...shelleyBase,
       collateralOutput: outputs.externalShelleyBaseKeyhashKeyhash,
@@ -644,7 +644,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_ORDINARY__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
   {
-    testName: 'Multisig tx - collateral output included',
+    testName: 'Multisig_tx_collateral_output_included',
     tx: {
       ...shelleyBase,
       collateralOutput: outputs.externalShelleyBaseKeyhashKeyhash,
@@ -665,7 +665,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (operator) - collateral output included',
+    testName: 'Pool_registration_operator_collateral_output_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -693,7 +693,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__COLLATERAL_OUTPUT_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - collateral output included',
+    testName: 'Pool_registration_owner_collateral_output_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -723,7 +723,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   // total collateral included
   {
-    testName: 'Ordinary tx - total collateral included',
+    testName: 'Ordinary_tx_total_collateral_included',
     tx: {
       ...shelleyBase,
       totalCollateral: 8,
@@ -744,7 +744,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_ORDINARY__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
   {
-    testName: 'Multisig tx - total collateral included',
+    testName: 'Multisig_tx_total_collateral_included',
     tx: {
       ...shelleyBase,
       totalCollateral: 8,
@@ -765,7 +765,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (operator) - total collateral included',
+    testName: 'Pool_registration_operator_total_collateral_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -793,7 +793,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__TOTAL_COLLATERAL_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - total collateral included',
+    testName: 'Pool_registration_owner_total_collateral_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -823,7 +823,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
   },
   // reference inputs included
   {
-    testName: 'Ordinary tx - reference inputs included',
+    testName: 'Ordinary_tx_reference_inputs_included',
     tx: {
       ...shelleyBase,
       referenceInputs: [inputs.utxoShelley],
@@ -844,7 +844,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_ORDINARY__REFERENCE_INPUTS_NOT_ALLOWED,
   },
   {
-    testName: 'Multisig tx - reference inputs included',
+    testName: 'Multisig_tx_reference_inputs_included',
     tx: {
       ...shelleyBase,
       referenceInputs: [inputs.utxoShelley],
@@ -865,7 +865,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__REFERENCE_INPUTS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (operator) - reference inputs included',
+    testName: 'Pool_registration_operator_reference_inputs_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -893,7 +893,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_INPUTS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration (owner) - reference inputs included',
+    testName: 'Pool_registration_owner_reference_inputs_included',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -925,7 +925,7 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
 
 export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Reward address - key',
+    testName: 'Reward_address_key',
     tx: {
       ...shelleyBase,
       outputs: [
@@ -950,7 +950,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
-    testName: 'Reward address - script',
+    testName: 'Reward_address_script',
     tx: {
       ...shelleyBase,
       outputs: [
@@ -975,7 +975,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
-    testName: 'No spending path - Ordinary Tx 1',
+    testName: 'No_spending_path_Ordinary_Tx_1',
     tx: {
       ...shelleyBase,
       outputs: [
@@ -1011,7 +1011,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
-    testName: 'No spending path - Ordinary Tx 2',
+    testName: 'No_spending_path_Ordinary_Tx_2',
     tx: {
       ...shelleyBase,
       outputs: [
@@ -1047,7 +1047,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
-    testName: 'Pool operator - spending choice not path',
+    testName: 'Pool_operator_spending_choice_not_path',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1083,7 +1083,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.OUTPUT_INVALID_ADDRESS_PARAMS,
   },
   {
-    testName: 'Multisig - unconditionally',
+    testName: 'Multisig_unconditionally',
     tx: {
       ...shelleyBase,
       outputs: [outputs.internalBaseWithStakingPath],
@@ -1104,7 +1104,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED,
   },
   {
-    testName: 'Pool owner - unconditionally',
+    testName: 'Pool_owner_unconditionally',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1130,7 +1130,7 @@ export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
 
 export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Pool registration in Ordinary Tx',
+    testName: 'Pool_registration_in_Ordinary_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1157,7 +1157,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration in Multisig Tx',
+    testName: 'Pool_registration_in_Multisig_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1184,7 +1184,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED,
   },
   {
-    testName: 'Pool registration in Plutus Tx',
+    testName: 'Pool_registration_in_Plutus_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1211,7 +1211,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED,
   },
   {
-    testName: 'Pool retirement in Multisig Tx',
+    testName: 'Pool_retirement_in_Multisig_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1240,7 +1240,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
   // after this we can't really test the ledger policies from LedgerJS,
   // since we can't serialize the wrong type of certificate
   {
-    testName: 'Stake registration in Pool Registration Operator',
+    testName: 'Stake_registration_in_Pool_Registration_Operator',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1266,7 +1266,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Stake registration in Pool Registration Owner',
+    testName: 'Stake_registration_in_Pool_Registration_Owner',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1293,7 +1293,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Stake deregistration in Pool Registration Operator',
+    testName: 'Stake_deregistration_in_Pool_Registration_Operator',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1319,7 +1319,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Stake deregistration in Pool Registration Owner',
+    testName: 'Stake_deregistration_in_Pool_Registration_Owner',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1346,7 +1346,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Stake delegation in Pool Registration Operator',
+    testName: 'Stake_delegation_in_Pool_Registration_Operator',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1371,7 +1371,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
   },
   {
-    testName: 'Stake delegation in Pool Registration Owner',
+    testName: 'Stake_delegation_in_Pool_Registration_Owner',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1397,7 +1397,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
   },
   {
-    testName: 'Pool retirement in Pool Registration Operator',
+    testName: 'Pool_retirement_in_Pool_Registration_Operator',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1423,7 +1423,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
   },
   {
-    testName: 'Pool retirement in Pool Registration Owner',
+    testName: 'Pool_retirement_in_Pool_Registration_Owner',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -1453,7 +1453,7 @@ export const certificateRejectTestCases: TestCaseRejectShelley[] = [
 
 export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Script hash in Ordinary Tx',
+    testName: 'Script_hash_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1479,7 +1479,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH,
   },
   {
-    testName: 'Non-staking path in Ordinary Tx',
+    testName: 'Non_staking_path_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1509,7 +1509,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Path in Multisig Tx',
+    testName: 'Path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
       certificates: [
@@ -1539,7 +1539,7 @@ export const certificateStakingRejectTestCases: TestCaseRejectShelley[] = [
 export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelley[] =
   [
     {
-      testName: 'Non-pool cold key in Ordinary Tx',
+      testName: 'Non_pool_cold_key_in_Ordinary_Tx',
       appVersion: {unsupportedInAppXS: true},
       tx: {
         ...shelleyBase,
@@ -1572,7 +1572,7 @@ export const certificateStakePoolRetirementRejectTestCases: TestCaseRejectShelle
 
 export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Reject tx with invalid canonical ordering of withdrawals',
+    testName: 'Reject_tx_with_invalid_canonical_ordering_of_withdrawals',
     // ledgerjs cannot validate this, so this test is only meaningful for a ledger device
     tx: {
       ...mainnetFeeTtl,
@@ -1609,7 +1609,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER,
   },
   {
-    testName: 'Script hash as stake credential in Ordinary Tx',
+    testName: 'Script_hash_as_stake_credential_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
       withdrawals: [
@@ -1638,7 +1638,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.SIGN_MODE_ORDINARY__WITHDRAWAL_ONLY_AS_PATH,
   },
   {
-    testName: 'Non-staking path as stake credential in Ordinary Tx',
+    testName: 'Non_staking_path_as_stake_credential_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
       withdrawals: [
@@ -1666,7 +1666,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Staking path as stake credential in Multisig Tx',
+    testName: 'Staking_path_as_stake_credential_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
       withdrawals: [
@@ -1695,7 +1695,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_MULTISIG__WITHDRAWAL_ONLY_AS_SCRIPT,
   },
   {
-    testName: 'Non-staking path as stake credential in Plutus Tx',
+    testName: 'Non_staking_path_as_stake_credential_in_Plutus_Tx',
     tx: {
       ...shelleyBase,
       withdrawals: [
@@ -1726,7 +1726,7 @@ export const withdrawalRejectTestCases: TestCaseRejectShelley[] = [
 
 const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
   {
-    testName: 'Ordinary account path in Ordinary Tx',
+    testName: 'Ordinary_account_path_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1746,7 +1746,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig account path in Ordinary Tx',
+    testName: 'Multisig_account_path_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1766,7 +1766,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig spending path in Ordinary Tx',
+    testName: 'Multisig_spending_path_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1786,7 +1786,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig staking path in Ordinary Tx',
+    testName: 'Multisig_staking_path_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1806,7 +1806,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Mint path in Ordinary Tx',
+    testName: 'Mint_path_in_Ordinary_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1826,7 +1826,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Ordinary account path in Multisig Tx',
+    testName: 'Ordinary_account_path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1846,7 +1846,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig account path in Multisig Tx',
+    testName: 'Multisig_account_path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1866,7 +1866,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Ordinary spending path in Multisig Tx',
+    testName: 'Ordinary_spending_path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1886,7 +1886,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Ordinary staking path in Multisig Tx',
+    testName: 'Ordinary_staking_path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1906,7 +1906,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Mint path in Multisig Tx',
+    testName: 'Mint_path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1926,7 +1926,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Pool cold path in Multisig Tx',
+    testName: 'Pool_cold_path_in_Multisig_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1946,7 +1946,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Ordinary account path in Plutus Tx',
+    testName: 'Ordinary_account_path_in_Plutus_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1966,7 +1966,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig account path in Plutus Tx',
+    testName: 'Multisig_account_path_in_Plutus_Tx',
     tx: {
       ...shelleyBase,
     },
@@ -1986,7 +1986,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig account path in Pool Registration (Owner) Tx',
+    testName: 'Multisig_account_path_in_Pool_Registration_Owner_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2014,7 +2014,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Ordinary spending path in Pool Registration (Owner) Tx',
+    testName: 'Ordinary_spending_path_in_Pool_Registration_Owner_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2042,7 +2042,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig spending path in Pool Registration (Owner) Tx',
+    testName: 'Multisig_spending_path_in_Pool_Registration_Owner_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2070,7 +2070,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig staking path in Pool Registration (Owner) Tx',
+    testName: 'Multisig_staking_path_in_Pool_Registration_Owner_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2098,7 +2098,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Mint path in Pool Registration (Owner) Tx',
+    testName: 'Mint_path_in_Pool_Registration_Owner_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2126,7 +2126,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Pool cold path in Pool Registration (Owner) Tx',
+    testName: 'Pool_cold_path_in_Pool_Registration_Owner_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2154,7 +2154,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig account path in Pool Registration (Operator) Tx',
+    testName: 'Multisig_account_path_in_Pool_Registration_Operator_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2181,7 +2181,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig spending path in Pool Registration (Operator) Tx',
+    testName: 'Multisig_spending_path_in_Pool_Registration_Operator_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2208,7 +2208,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Ordinary staking path in Pool Registration (Operator) Tx',
+    testName: 'Ordinary_staking_path_in_Pool_Registration_Operator_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2235,7 +2235,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Multisig staking path in Pool Registration (Operator) Tx',
+    testName: 'Multisig_staking_path_in_Pool_Registration_Operator_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2262,7 +2262,7 @@ const witnessRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Mint path in Pool Registration (Operator) Tx',
+    testName: 'Mint_path_in_Pool_Registration_Operator_Tx',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...shelleyBase,
@@ -2307,7 +2307,7 @@ export const witnessRejectTestCases: TestCaseRejectShelley[] =
 
 export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
   {
-    testName: 'Reject tx where asset groups are not ordered',
+    testName: 'Reject_tx_where_asset_groups_are_not_ordered',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2328,7 +2328,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,
   },
   {
-    testName: 'Reject tx where asset groups are not unique',
+    testName: 'Reject_tx_where_asset_groups_are_not_unique',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2350,7 +2350,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
   },
   {
     testName:
-      'Reject tx where tokens within an asset group are not ordered - alphabetical',
+      'Reject_tx_where_tokens_within_an_asset_group_are_not_ordered_alphabetical',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2372,7 +2372,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
   },
   {
     testName:
-      'Reject tx where tokens within an asset group are not ordered - length',
+      'Reject_tx_where_tokens_within_an_asset_group_are_not_ordered_length',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2393,7 +2393,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
   },
   {
-    testName: 'Reject tx where tokens within an asset group are not unique',
+    testName: 'Reject_tx_where_tokens_within_an_asset_group_are_not_unique',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2415,7 +2415,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
   },
   {
     testName:
-      'Reject tx with mint fields with invalid canonical ordering of policies',
+      'Reject_tx_with_mint_fields_with_invalid_canonical_ordering_of_policies',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2437,7 +2437,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
   },
   {
     testName:
-      'Reject tx with mint fields with invalid canonical ordering of asset names',
+      'Reject_tx_with_mint_fields_with_invalid_canonical_ordering_of_asset_names',
     tx: {
       ...mainnetFeeTtl,
       inputs: [inputs.utxoShelley],
@@ -2461,7 +2461,7 @@ export const testsInvalidTokenBundleOrdering: TestCaseRejectShelley[] = [
 
 const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
   {
-    testName: 'Input and change output account mismatch',
+    testName: 'Input_and_change_output_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
@@ -2509,7 +2509,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Input and stake deregistration certificate account mismatch',
+    testName: 'Input_and_stake_deregistration_certificate_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
@@ -2555,7 +2555,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Input and withdrawal account mismatch',
+    testName: 'Input_and_withdrawal_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
@@ -2599,7 +2599,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Change output and stake deregistration account mismatch',
+    testName: 'Change_output_and_stake_deregistration_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
@@ -2646,7 +2646,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Change output and withdrawal account mismatch',
+    testName: 'Change_output_and_withdrawal_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
@@ -2692,7 +2692,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
   },
   {
     testName:
-      'Stake deregistration certificate and withdrawal account mismatch',
+      'Stake_deregistration_certificate_and_withdrawal_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [inputs.utxoShelley],
@@ -2747,7 +2747,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Byron to Shelley transfer input account mismatch',
+    testName: 'Byron_to_Shelley_transfer_input_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [
@@ -2793,7 +2793,7 @@ const singleAccountRejectTestCasesRaw: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Byron to Shelley transfer output account mismatch',
+    testName: 'Byron_to_Shelley_transfer_output_account_mismatch',
     tx: {
       network: Networks.Mainnet,
       inputs: [
@@ -2864,7 +2864,7 @@ export const singleAccountRejectTestCases: TestCaseRejectShelley[] =
 
 export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Collateral output with datum hash',
+    testName: 'Collateral_output_with_datum_hash',
     tx: {
       ...shelleyBase,
       collateralOutput: outputs.datumHashExternal,
@@ -2884,7 +2884,7 @@ export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
   },
   {
-    testName: 'Collateral output with inline datum',
+    testName: 'Collateral_output_with_inline_datum',
     tx: {
       ...shelleyBase,
       collateralOutput: outputs.inlineDatum480Map,
@@ -2904,7 +2904,7 @@ export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
   },
   {
-    testName: 'Collateral output with reference script',
+    testName: 'Collateral_output_with_reference_script',
     tx: {
       ...shelleyBase,
       collateralOutput: outputs.refScriptExternalMap,

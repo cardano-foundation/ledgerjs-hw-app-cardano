@@ -15,7 +15,7 @@ type ValidNativeScriptTestCase = {
 
 export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
   {
-    testName: 'PUBKEY - device owned',
+    testName: 'Native_script_PUBKEY_device_owned',
     script: {
       type: NativeScriptType.PUBKEY_DEVICE_OWNED,
       params: {
@@ -26,7 +26,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '5102a193b3d5f0c256fcc425836ffb15e7d96d3389f5e57dc6bea726',
   },
   {
-    testName: 'PUBKEY - third party',
+    testName: 'Native_script_PUBKEY_third_party',
     script: {
       type: NativeScriptType.PUBKEY_THIRD_PARTY,
       params: {
@@ -37,7 +37,8 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb',
   },
   {
-    testName: 'PUBKEY - third party (script hash displayed as policy id)',
+    testName:
+      'Native_script_PUBKEY_third_party_script_hash_displayed_as_policy_id',
     script: {
       type: NativeScriptType.PUBKEY_THIRD_PARTY,
       params: {
@@ -48,7 +49,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb',
   },
   {
-    testName: 'ALL script',
+    testName: 'Native_script_ALL_script',
     script: {
       type: NativeScriptType.ALL,
       params: {
@@ -74,7 +75,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: 'af5c2ce476a6ede1c879f7b1909d6a0b96cb2081391712d4a355cef6',
   },
   {
-    testName: 'ALL script (no subscripts)',
+    testName: 'Native_script_ALL_script_no_subscripts',
     script: {
       type: NativeScriptType.ALL,
       params: {
@@ -85,7 +86,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: 'd441227553a0f1a965fee7d60a0f724b368dd1bddbc208730fccebcf',
   },
   {
-    testName: 'ANY script',
+    testName: 'Native_script_ANY_script',
     script: {
       type: NativeScriptType.ANY,
       params: {
@@ -111,7 +112,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: 'd6428ec36719146b7b5fb3a2d5322ce702d32762b8c7eeeb797a20db',
   },
   {
-    testName: 'ANY script (no subscripts)',
+    testName: 'Native_script_ANY_script_no_subscripts',
     script: {
       type: NativeScriptType.ANY,
       params: {
@@ -122,7 +123,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '52dc3d43b6d2465e96109ce75ab61abe5e9c1d8a3c9ce6ff8a3af528',
   },
   {
-    testName: 'N_OF_K script',
+    testName: 'Native_script_N_OF_K_script',
     script: {
       type: NativeScriptType.N_OF_K,
       params: {
@@ -149,7 +150,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '78963f8baf8e6c99ed03e59763b24cf560bf12934ec3793eba83377b',
   },
   {
-    testName: 'N_OF_K script (no subscripts)',
+    testName: 'Native_script_N_OF_K_script_no_subscripts',
     script: {
       type: NativeScriptType.N_OF_K,
       params: {
@@ -161,7 +162,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '3530cc9ae7f2895111a99b7a02184dd7c0cea7424f1632d73951b1d7',
   },
   {
-    testName: 'INVALID_BEFORE script',
+    testName: 'Native_script_INVALID_BEFORE_script',
     script: {
       type: NativeScriptType.INVALID_BEFORE,
       params: {
@@ -172,7 +173,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '2a25e608a683057e32ea38b50ce8875d5b34496b393da8d25d314c4e',
   },
   {
-    testName: 'INVALID_BEFORE script (slot is a big number)',
+    testName: 'Native_script_INVALID_BEFORE_script_slot_is_a_big_number',
     script: {
       type: NativeScriptType.INVALID_BEFORE,
       params: {
@@ -183,7 +184,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: 'd2469adac494849dd27d1b344b74cc6cd5bf31fbd01c879eae84c04b',
   },
   {
-    testName: 'INVALID_HEREAFTER script',
+    testName: 'Native_script_INVALID_HEREAFTER_script',
     script: {
       type: NativeScriptType.INVALID_HEREAFTER,
       params: {
@@ -194,7 +195,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: '1620dc65993296335183f23ff2f7747268168fabbeecbf24c8a20194',
   },
   {
-    testName: 'INVALID_HEREAFTER script (slot is a big number)',
+    testName: 'Native_script_INVALID_HEREAFTER_script_slot_is_a_big_number',
     script: {
       type: NativeScriptType.INVALID_HEREAFTER,
       params: {
@@ -205,7 +206,7 @@ export const ValidNativeScriptTestCases: ValidNativeScriptTestCase[] = [
     hashHex: 'da60fa40290f93b889a88750eb141fd2275e67a1255efb9bac251005',
   },
   {
-    testName: 'Nested native scripts',
+    testName: 'Native_script_Nested_native_scripts',
     script: {
       type: NativeScriptType.ALL,
       params: {

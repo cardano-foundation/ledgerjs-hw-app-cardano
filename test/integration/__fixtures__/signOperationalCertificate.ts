@@ -12,7 +12,7 @@ export type TestCase = {
 
 export const tests: TestCase[] = [
   {
-    testName: 'Should correctly sign a basic operational certificate',
+    testName: 'Sign_opcert_should_correctly_sign_operational_certificate',
     operationalCertificate: {
       kesPublicKeyHex:
         '3d24bc547388cf2403fd978fc3d3a93d1f39acf68a9c00e40512084dc05f2822',

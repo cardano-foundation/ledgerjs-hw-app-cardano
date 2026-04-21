@@ -49,7 +49,7 @@ const txBase: Transaction = {
 
 export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'Different index',
+    testName: 'Different_index',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -70,7 +70,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'Different prefix',
+    testName: 'Different_prefix',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -91,7 +91,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.LEDGER_POLICY,
   },
   {
-    testName: 'No path given',
+    testName: 'No_path_given',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -143,7 +143,7 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
 
 export const invalidCertificates: TestCaseRejectShelley[] = [
   {
-    testName: 'pool registration with multiple path owners',
+    testName: 'pool_registration_with_multiple_path_owners',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -170,7 +170,7 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
       InvalidDataReason.SIGN_MODE_POOL_OWNER__SINGLE_DEVICE_OWNER_REQUIRED,
   },
   {
-    testName: 'pool registration with no owners',
+    testName: 'pool_registration_with_no_owners',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -201,7 +201,7 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
 export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
   // Invalid url
   {
-    testName: 'pool metadata url too long',
+    testName: 'pool_metadata_url_too_long',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -227,7 +227,7 @@ export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_URL,
   },
   {
-    testName: 'pool metadata invalid url',
+    testName: 'pool_metadata_invalid_url',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -279,7 +279,7 @@ export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
   },
   // Invalid hash
   {
-    testName: 'pool metadata invalid hash length',
+    testName: 'pool_metadata_invalid_hash_length',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -305,7 +305,7 @@ export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.POOL_REGISTRATION_METADATA_INVALID_HASH,
   },
   {
-    testName: 'pool metadata missing hash',
+    testName: 'pool_metadata_missing_hash',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -332,7 +332,7 @@ export const invalidPoolMetadataTestCases: TestCaseRejectShelley[] = [
 
 export const invalidRelayTestCases: TestCaseRejectShelley[] = [
   {
-    testName: 'SingleHostHostname missing dns',
+    testName: 'SingleHostHostname_missing_dns',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -362,7 +362,7 @@ export const invalidRelayTestCases: TestCaseRejectShelley[] = [
     rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
   },
   {
-    testName: 'MultiHost missing dns',
+    testName: 'MultiHost_missing_dns',
     appVersion: {unsupportedInAppXS: true},
     tx: {
       ...txBase,
@@ -424,7 +424,7 @@ export const invalidRelayTestCases: TestCaseRejectShelley[] = [
 export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[] =
   [
     {
-      testName: 'Path sent in for Pool Registration Owner Tx',
+      testName: 'Path_sent_in_for_Pool_Registration_Owner_Tx',
       appVersion: {unsupportedInAppXS: true},
       tx: {
         ...txBase,
@@ -460,7 +460,7 @@ export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[]
         InvalidDataReason.SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED,
     },
     {
-      testName: 'Hash sent in for Pool Registration Operator Tx',
+      testName: 'Hash_sent_in_for_Pool_Registration_Operator_Tx',
       appVersion: {unsupportedInAppXS: true},
       tx: {
         ...txBase,
