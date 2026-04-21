@@ -1,20 +1,12 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {parseSignTransactionRequest} = nodeRequire(
-  '../../src/parsing/transaction',
-)
-const {serializeTxInit} = nodeRequire(
-  '../../src/interactions/v7/serialization/txInit',
-)
-const {buildSignTxInit} = nodeRequire(
-  '../../src/interactions/v8/commandBuilder',
-)
-const {uint64_to_buf} = nodeRequire('../../src/utils/serialize')
-const {testsShelleyNoCertificates} = nodeRequire(
-  '../integration/__fixtures__/signTx',
-)
+import {buildSignTxInit} from '../../src/interactions/v8/commandBuilder'
+import {serializeTxInit} from '../../src/interactions/v7/serialization/txInit'
+import {parseSignTransactionRequest} from '../../src/parsing/transaction'
+import {parseUint64_str} from '../../src/utils/parse'
+import {uint64_to_buf} from '../../src/utils/serialize'
+import {InvalidDataReason} from '../../src/errors/index'
+import {testsShelleyNoCertificates} from '../integration/__fixtures__/signTx'
 
 const v6Version = {
   major: 6,
@@ -88,8 +80,14 @@ describe('tx options encoding', () => {
   })
 
   it('serializes the highest uint64 bit in big-endian order', () => {
-    expect(uint64_to_buf('9223372036854775808').toString('hex')).to.equal(
-      '8000000000000000',
-    )
+    expect(
+      uint64_to_buf(
+        parseUint64_str(
+          '9223372036854775808',
+          {max: '18446744073709551615'},
+          InvalidDataReason.FEE_INVALID,
+        ),
+      ).toString('hex'),
+    ).to.equal('8000000000000000')
   })
 })

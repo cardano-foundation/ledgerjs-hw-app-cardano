@@ -1,16 +1,17 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {buildSignCVoteChunks, buildSignCVoteConfirm, buildSignCVoteInit} =
-  nodeRequire('../../../src/interactions/v8/commandBuilder')
-const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
-const {sendSignCVote} = nodeRequire(
-  '../../../src/interactions/v8/commandSender',
-)
-const {expectedSignCVoteApdusHex, parsedSignCVoteFixture} = nodeRequire(
-  '../__fixtures__/v8/signCVote',
-)
+import {
+  buildSignCVoteChunks,
+  buildSignCVoteConfirm,
+  buildSignCVoteInit,
+} from '../../../src/interactions/v8/commandBuilder'
+import {serializeApdu} from '../../../src/interactions/v8/common/apdu'
+import {sendSignCVote} from '../../../src/interactions/v8/commandSender'
+import {yieldValue} from '../../test_utils'
+import {
+  expectedSignCVoteApdusHex,
+  parsedSignCVoteFixture,
+} from '../__fixtures__/v8/signCVote'
 
 describe('v8 signCVote', () => {
   it('builds the expected APDUs', () => {
@@ -21,7 +22,7 @@ describe('v8 signCVote', () => {
     ]
 
     expect(
-      apdus.map((apdu: {data: Buffer}) => serializeApdu(apdu).toString('hex')),
+      apdus.map((apdu) => serializeApdu(apdu).toString('hex')),
     ).to.deep.equal(expectedSignCVoteApdusHex)
   })
 
@@ -31,7 +32,7 @@ describe('v8 signCVote', () => {
 
     let cursor = interaction.next()
     while (!cursor.done) {
-      seen.push(serializeApdu(cursor.value).toString('hex'))
+      seen.push(serializeApdu(yieldValue(cursor)).toString('hex'))
       cursor = interaction.next(Buffer.alloc(0))
     }
 

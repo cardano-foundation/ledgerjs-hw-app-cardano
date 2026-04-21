@@ -1,16 +1,13 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
+import {signOperationalCertificate} from '../../../src/interactions/signOperationalCertificate'
+import {serializeApdu} from '../../../src/interactions/v8/common/apdu'
 import type {Version} from '../../../src/types/public'
-const nodeRequire = createRequire(__filename)
-const {signOperationalCertificate} = nodeRequire(
-  '../../../src/interactions/signOperationalCertificate',
-)
-const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
-const {
+import {yieldValue} from '../../test_utils'
+import {
   expectedSignOperationalCertificateApduHex,
   parsedOperationalCertificateFixture,
-} = nodeRequire('../__fixtures__/v8/opcert')
+} from '../__fixtures__/v8/opcert'
 
 const mkVersion = (major: number): Version => ({
   major,
@@ -30,8 +27,7 @@ describe('signOperationalCertificate dispatch', () => {
     )
 
     const first = interaction.next()
-    expect(first.done).to.equal(false)
-    expect(serializeApdu(first.value).toString('hex')).to.equal(
+    expect(serializeApdu(yieldValue(first)).toString('hex')).to.equal(
       expectedSignOperationalCertificateApduHex,
     )
   })
@@ -43,8 +39,7 @@ describe('signOperationalCertificate dispatch', () => {
     )
 
     const first = interaction.next()
-    expect(first.done).to.equal(false)
-    expect(serializeApdu(first.value).toString('hex')).to.equal(
+    expect(serializeApdu(yieldValue(first)).toString('hex')).to.equal(
       expectedSignOperationalCertificateApduHex,
     )
   })

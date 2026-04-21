@@ -30,7 +30,8 @@ Node or yarn version and produces misleading results.
 - **Validation:** All user input must be validated in `src/parsing/` before serialization or device communication.
 - **Error reasons:** Add new `InvalidDataReason` enum values for new validation failures rather than using generic messages.
 - **Test fixtures:** Add test fixtures in `test/integration/__fixtures__/` for new functionality. Tests are data-driven.
-- **Use a cheap fast model to gather context if possible (e.g. Haiku).**
+- **Run the relevant unattended yarn targets for every change:** Always run the relevant verification targets after editing code, and fix failures before finishing. For ordinary code changes, the default local workflow is `yarn prettier:check`, `yarn lint`, `yarn test-unit`, and `yarn build`. If `yarn prettier:check` fails, run `yarn prettier` and re-run the checks.
+- **Use a cheap fast mini model to gather context if possible (e.g. Haiku/Flash/5.4-mini).**
 
 ### What NOT to DO
 
@@ -42,11 +43,12 @@ Node or yarn version and produces misleading results.
 
 ## Testing
 
-Run `yarn test-unit` after any change to parsing or serialization. See [`doc/testing.md`](doc/testing.md) for the full test reference.
+Run `yarn test-unit` after any change to parsing or serialization. Before any final handoff, run every relevant unattended target for the touched area, not just the minimum one that happens to catch your change. See [`doc/testing.md`](doc/testing.md) for the full test reference.
 
 Quick reference:
 
+- `yarn prettier:check` — verify formatting
+- `yarn prettier` — apply formatting fixes
 - `yarn test-unit` — unit tests, no device needed
-- `yarn test-speculos` — integration tests against Speculos emulator
 - `yarn lint` — ESLint + Prettier
 - `yarn build` — compile TypeScript

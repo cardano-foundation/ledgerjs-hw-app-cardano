@@ -1,15 +1,11 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {buildSignOperationalCertificate} = nodeRequire(
-  '../../../src/interactions/v8/commandBuilder',
-)
-const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
-const {
+import {buildSignOperationalCertificate} from '../../../src/interactions/v8/commandBuilder'
+import {serializeApdu} from '../../../src/interactions/v8/common/apdu'
+import {
   expectedSignOperationalCertificateApduHex,
   parsedOperationalCertificateFixture,
-} = nodeRequire('../__fixtures__/v8/opcert')
+} from '../__fixtures__/v8/opcert'
 
 describe('v8 commandBuilder signOperationalCertificate', () => {
   it('builds the same APDU as the Python application_client fixture', () => {

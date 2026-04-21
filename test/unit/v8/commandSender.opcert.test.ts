@@ -1,15 +1,12 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {sendSignOperationalCertificate} = nodeRequire(
-  '../../../src/interactions/v8/commandSender',
-)
-const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
-const {
+import {serializeApdu} from '../../../src/interactions/v8/common/apdu'
+import {sendSignOperationalCertificate} from '../../../src/interactions/v8/commandSender'
+import {yieldValue} from '../../test_utils'
+import {
   expectedSignOperationalCertificateApduHex,
   parsedOperationalCertificateFixture,
-} = nodeRequire('../__fixtures__/v8/opcert')
+} from '../__fixtures__/v8/opcert'
 
 describe('v8 commandSender signOperationalCertificate', () => {
   it('yields the same APDU as the Python application_client fixture', () => {
@@ -18,14 +15,13 @@ describe('v8 commandSender signOperationalCertificate', () => {
     )
 
     const first = interaction.next()
-    expect(first.done).to.equal(false)
-    expect(serializeApdu(first.value).toString('hex')).to.equal(
+    expect(serializeApdu(yieldValue(first)).toString('hex')).to.equal(
       expectedSignOperationalCertificateApduHex,
     )
 
     const signature = Buffer.alloc(64, 0xbb)
     const done = interaction.next(signature)
-    expect(done.done).to.equal(true)
+    if (!done.done) throw new Error('expected generator to be done')
     expect(done.value.equals(signature)).to.equal(true)
   })
 })

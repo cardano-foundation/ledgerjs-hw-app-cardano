@@ -5,6 +5,7 @@ import type {FixLenHexString} from 'types/internal'
 
 import {Ada, utils} from '../src/Ada'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../src/errors/index'
+import type {SendParams} from '../src/interactions/common/types'
 import * as parseModule from '../src/utils/parse'
 import type {
   BIP32Path,
@@ -13,6 +14,13 @@ import type {
   TransactionOptions,
   TransactionSigningMode,
 } from '../src/types/public'
+
+export function yieldValue(
+  step: IteratorResult<SendParams, unknown>,
+): SendParams {
+  if (step.done) throw new Error('expected generator yield, got return')
+  return step.value
+}
 
 export function shouldUseSpeculos(): boolean {
   return process.env.LEDGER_TRANSPORT === 'speculos'

@@ -1,14 +1,11 @@
-import {createRequire} from 'module'
-
-const nodeRequire = createRequire(__filename)
-const {describeSignTxPositiveTest} = nodeRequire('../test_utils')
-const {
+import {describeSignTxPositiveTest} from '../test_utils'
+import {
   signTxAllElementsAuxiliaryData,
   signTxAllElementsCertificatesMultisig,
   signTxAllElementsCertificatesOrdinary,
   signTxAllElementsNoCertificates,
   signTxAllElementsPoolRegistration,
-} = nodeRequire('./__fixtures__/signTxAllElements')
+} from './__fixtures__/signTxAllElements'
 
 describeSignTxPositiveTest(
   'signTxAllElementsPoolRegistration',

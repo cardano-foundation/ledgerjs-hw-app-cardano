@@ -1,45 +1,40 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-import type {Version} from '../../src/types/public'
-
-const nodeRequire = createRequire(__filename)
-const {DeviceVersionUnsupported} = nodeRequire(
-  '../../src/errors/deviceUnsupported',
-)
-const {parseAddress} = nodeRequire('../../src/parsing/address')
-const {parseNativeScript} = nodeRequire('../../src/parsing/nativeScript')
-const {parseSignTransactionRequest} = nodeRequire(
-  '../../src/parsing/transaction',
-)
-const {deriveAddress} = nodeRequire('../../src/interactions/deriveAddress')
-const {deriveNativeScriptHash} = nodeRequire(
-  '../../src/interactions/deriveNativeScriptHash',
-)
-const {getExtendedPublicKeys} = nodeRequire(
-  '../../src/interactions/getExtendedPublicKeys',
-)
-const {showAddress} = nodeRequire('../../src/interactions/showAddress')
-const {signCVote} = nodeRequire('../../src/interactions/signCVote')
-const {signMessage} = nodeRequire('../../src/interactions/signMessage')
-const {signOperationalCertificate} = nodeRequire(
-  '../../src/interactions/signOperationalCertificate',
-)
-const {signTransaction} = nodeRequire('../../src/interactions/signTx')
-const {
+import {DeviceVersionUnsupported} from '../../src/errors/deviceUnsupported'
+import {deriveAddress} from '../../src/interactions/deriveAddress'
+import {deriveNativeScriptHash} from '../../src/interactions/deriveNativeScriptHash'
+import {getExtendedPublicKeys} from '../../src/interactions/getExtendedPublicKeys'
+import {showAddress} from '../../src/interactions/showAddress'
+import {signCVote} from '../../src/interactions/signCVote'
+import {signMessage} from '../../src/interactions/signMessage'
+import {signOperationalCertificate} from '../../src/interactions/signOperationalCertificate'
+import {signTransaction} from '../../src/interactions/signTx'
+import {parseAddress} from '../../src/parsing/address'
+import {parseNativeScript} from '../../src/parsing/nativeScript'
+import {parseSignTransactionRequest} from '../../src/parsing/transaction'
+import {
   AddressType,
+  CertificateType,
   NativeScriptHashDisplayFormat,
   NativeScriptType,
   TransactionSigningMode,
   TxOutputDestinationType,
   VoterType,
   VoteOption,
-} = nodeRequire('../../src/types/public')
-const {parsedOperationalCertificateFixture} = nodeRequire(
-  './__fixtures__/v8/opcert',
-)
-const {parsedSignCVoteFixture} = nodeRequire('./__fixtures__/v8/signCVote')
-const {parsedSignMessageFixture} = nodeRequire('./__fixtures__/v8/signMessage')
+} from '../../src/types/public'
+import type {
+  Certificate,
+  TxInput,
+  TxOutputAlonzo,
+  Voter,
+  Version,
+} from '../../src/types/public'
+import type {ParsedCertificate} from '../../src/types/internal'
+import {parseBIP32Path} from '../../src/utils/parse'
+import {InvalidDataReason} from '../../src/errors'
+import {parsedOperationalCertificateFixture} from './__fixtures__/v8/opcert'
+import {parsedSignCVoteFixture} from './__fixtures__/v8/signCVote'
+import {parsedSignMessageFixture} from './__fixtures__/v8/signMessage'
 
 const mkVersion = (major: number, minor = 0, isAppXS = false): Version => ({
   major,
@@ -100,18 +95,18 @@ const baseTx = {
         },
       },
       amount: 1_500_000,
-    },
+    } as TxOutputAlonzo,
   ],
   fee: 42,
   ttl: 10,
 }
 
-const voter1 = {
+const voter1: Voter = {
   type: VoterType.COMMITTEE_KEY_PATH,
   keyPath: [0x8000073c, 0x80000717, 0x80000000, 5, 0],
 }
 
-const voter2 = {
+const voter2: Voter = {
   type: VoterType.DREP_KEY_PATH,
   keyPath: [0x8000073c, 0x80000717, 0x80000000, 3, 0],
 }
@@ -207,7 +202,7 @@ const manyPoolOwnersRequest = parseSignTransactionRequest({
         txHashHex:
           '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
         outputIndex: 0,
-      },
+      } as TxInput,
     ],
     outputs: [
       {
@@ -219,7 +214,7 @@ const manyPoolOwnersRequest = parseSignTransactionRequest({
           },
         },
         amount: 1_500_000,
-      },
+      } as TxOutputAlonzo,
     ],
     certificates: [
       {
@@ -241,7 +236,7 @@ const manyPoolOwnersRequest = parseSignTransactionRequest({
             })),
           ],
         },
-      },
+      } as Certificate,
     ],
   },
   signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
@@ -265,7 +260,7 @@ const manyAssetGroupsOutput = {
       },
     ],
   })),
-}
+} as TxOutputAlonzo
 
 describe('request compatibility gating', () => {
   it('accepts parsing multiple Conway voters and rejects them only at v7 compatibility time', () => {
@@ -294,9 +289,11 @@ describe('request compatibility gating', () => {
   })
 
   it('accepts parsing more than 1000 pool owners and rejects them only at v7 compatibility time', () => {
-    expect(manyPoolOwnersRequest.tx.certificates[0].pool.owners).to.have.length(
-      1001,
-    )
+    const poolCert = manyPoolOwnersRequest.tx
+      .certificates[0] as ParsedCertificate
+    if (poolCert.type !== CertificateType.STAKE_POOL_REGISTRATION)
+      throw new Error()
+    expect(poolCert.pool.owners).to.have.length(1001)
 
     const v7Interaction = signTransaction(v7, manyPoolOwnersRequest)
     expect(() => v7Interaction.next()).to.throw(DeviceVersionUnsupported)
@@ -371,7 +368,10 @@ describe('request compatibility gating', () => {
   })
 
   it('checks vote-key extended public key support before dispatch', () => {
-    const voteKeyPath = [1694 + 0x80000000, 1815 + 0x80000000, 0x80000000, 0, 0]
+    const voteKeyPath = parseBIP32Path(
+      [1694 + 0x80000000, 1815 + 0x80000000, 0x80000000, 0, 0],
+      InvalidDataReason.INVALID_PATH,
+    )
 
     expect(() => getExtendedPublicKeys(v5, [voteKeyPath]).next()).to.throw(
       DeviceVersionUnsupported,

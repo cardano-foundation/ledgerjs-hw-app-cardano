@@ -1,7 +1,4 @@
-import {createRequire} from 'module'
-
-const nodeRequire = createRequire(__filename)
-const {describeSignTxPositiveTest} = nodeRequire('../test_utils')
-const {testsAuxiliaryData} = nodeRequire('./__fixtures__/signTxAuxiliaryData')
+import {describeSignTxPositiveTest} from '../test_utils'
+import {testsAuxiliaryData} from './__fixtures__/signTxAuxiliaryData'
 
 describeSignTxPositiveTest('signTxAuxiliaryData', testsAuxiliaryData)

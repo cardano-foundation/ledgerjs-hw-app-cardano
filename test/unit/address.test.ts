@@ -1,9 +1,7 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {bech32_decodeAddress} = nodeRequire('../../src/utils/address')
-const {InvalidDataReason} = nodeRequire('../../src/errors')
+import {InvalidDataReason} from '../../src/errors'
+import {bech32_decodeAddress} from '../../src/utils/address'
 
 describe('address utils', () => {
   it('rewraps invalid bech32 decode errors as InvalidData', () => {

@@ -1,17 +1,18 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {buildSignMessageChunks, buildSignMessageConfirm, buildSignMessageInit} =
-  nodeRequire('../../../src/interactions/v8/commandBuilder')
-const {serializeApdu} = nodeRequire('../../../src/interactions/v8/common/apdu')
-const {sendSignMessage} = nodeRequire(
-  '../../../src/interactions/v8/commandSender',
-)
-const {signMessage} = nodeRequire('../../../src/interactions/v8/signMessage')
-const {expectedSignMessageApdusHex, parsedSignMessageFixture} = nodeRequire(
-  '../__fixtures__/v8/signMessage',
-)
+import {
+  buildSignMessageChunks,
+  buildSignMessageConfirm,
+  buildSignMessageInit,
+} from '../../../src/interactions/v8/commandBuilder'
+import {serializeApdu} from '../../../src/interactions/v8/common/apdu'
+import {sendSignMessage} from '../../../src/interactions/v8/commandSender'
+import {signMessage} from '../../../src/interactions/v8/signMessage'
+import {yieldValue} from '../../test_utils'
+import {
+  expectedSignMessageApdusHex,
+  parsedSignMessageFixture,
+} from '../__fixtures__/v8/signMessage'
 
 describe('v8 signMessage', () => {
   it('builds the expected APDUs', () => {
@@ -22,7 +23,7 @@ describe('v8 signMessage', () => {
     ]
 
     expect(
-      apdus.map((apdu: {data: Buffer}) => serializeApdu(apdu).toString('hex')),
+      apdus.map((apdu) => serializeApdu(apdu).toString('hex')),
     ).to.deep.equal(expectedSignMessageApdusHex)
   })
 
@@ -32,7 +33,7 @@ describe('v8 signMessage', () => {
 
     let cursor = interaction.next()
     while (!cursor.done) {
-      seen.push(serializeApdu(cursor.value).toString('hex'))
+      seen.push(serializeApdu(yieldValue(cursor)).toString('hex'))
       cursor = interaction.next(Buffer.alloc(0))
     }
 
@@ -48,7 +49,7 @@ describe('v8 signMessage', () => {
     let cursor = interaction.next()
     while (!cursor.done) {
       const response =
-        serializeApdu(cursor.value).toString('hex') ===
+        serializeApdu(yieldValue(cursor)).toString('hex') ===
         expectedSignMessageApdusHex[expectedSignMessageApdusHex.length - 1]
           ? Buffer.concat([
               Buffer.alloc(64, 0x11),
@@ -76,7 +77,7 @@ describe('v8 signMessage', () => {
     let cursor = interaction.next()
     while (!cursor.done) {
       if (
-        serializeApdu(cursor.value).toString('hex') ===
+        serializeApdu(yieldValue(cursor)).toString('hex') ===
         expectedSignMessageApdusHex[expectedSignMessageApdusHex.length - 1]
       ) {
         expect(() =>

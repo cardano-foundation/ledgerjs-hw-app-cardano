@@ -1,13 +1,11 @@
 import {expect} from 'chai'
-import {createRequire} from 'module'
 
-const nodeRequire = createRequire(__filename)
-const {serializeTransactionRaw} = nodeRequire(
-  '../../../src/interactions/v8/serialization/tx',
-)
-const {sendSignTx} = nodeRequire('../../../src/interactions/v8/commandSender')
-const {signTransaction} = nodeRequire('../../../src/interactions/v8/signTx')
-const {
+import {serializeApdu} from '../../../src/interactions/v8/common/apdu'
+import {sendSignTx} from '../../../src/interactions/v8/commandSender'
+import {yieldValue} from '../../test_utils'
+import {serializeTransactionRaw} from '../../../src/interactions/v8/serialization/tx'
+import {signTransaction} from '../../../src/interactions/v8/signTx'
+import {
   alonzoExpectedChunkApdusHex,
   alonzoExpectedInitApduHex,
   alonzoExpectedWitnessApdusHex,
@@ -48,7 +46,8 @@ const {
   serializeBuiltChunkApdusHex,
   serializeBuiltInitApduHex,
   serializeBuiltWitnessApdusHex,
-} = nodeRequire('../__fixtures__/v8/signTx')
+} from '../__fixtures__/v8/signTx'
+import {testsCVoteRegistrationCIP36} from '../../../test/integration/__fixtures__/signTxCVote'
 
 function exhaustSender(
   request: typeof parsedAlonzoTrezorSignTxRequest,
@@ -60,13 +59,7 @@ function exhaustSender(
 
   let step = interaction.next()
   for (let i = 0; !step.done; i++) {
-    yieldedHex.push(
-      step.value
-        ? nodeRequire('../../../src/interactions/v8/common/apdu')
-            .serializeApdu(step.value)
-            .toString('hex')
-        : '',
-    )
+    yieldedHex.push(serializeApdu(yieldValue(step)).toString('hex'))
     step = interaction.next(responses[i] ?? Buffer.alloc(0))
   }
 
@@ -302,8 +295,7 @@ describe('v8 signTx', () => {
     ])
 
     expect(result.auxiliaryDataSupplement).to.deep.equal(
-      nodeRequire('../../../test/integration/__fixtures__/signTxCVote')
-        .testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement,
+      testsCVoteRegistrationCIP36[5].expectedResult.auxiliaryDataSupplement,
     )
   })
 })

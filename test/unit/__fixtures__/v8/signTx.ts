@@ -411,17 +411,17 @@ export const alonzoExpectedWitnessPaths =
   parsedAlonzoTrezorSignTxRequest.additionalWitnessPaths
 
 export const babbagePlutusExpectedWitnessPaths = [
-  parsedBabbagePlutusSignTxRequest.tx.inputs[0].path as number[],
+  parsedBabbagePlutusSignTxRequest.tx.inputs[0].path!,
 ]
 
 export const babbageOrdinaryExpectedWitnessPaths = [
-  parsedBabbageOrdinarySignTxRequest.tx.inputs[0].path as number[],
+  parsedBabbageOrdinarySignTxRequest.tx.inputs[0].path!,
 ]
 export const cip36VoteKeyHexExpectedWitnessPaths = [
-  parsedCIP36VoteKeyHexSignTxRequest.tx.inputs[0].path as number[],
+  parsedCIP36VoteKeyHexSignTxRequest.tx.inputs[0].path!,
 ]
 export const cip36DelegationsExpectedWitnessPaths = [
-  parsedCIP36DelegationsSignTxRequest.tx.inputs[0].path as number[],
+  parsedCIP36DelegationsSignTxRequest.tx.inputs[0].path!,
 ]
 
 export function serializeBuiltInitApduHex(
