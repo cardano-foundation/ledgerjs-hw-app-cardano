@@ -46,6 +46,7 @@ import {
 import {unreachable} from '../utils/assert'
 import {
   isArray,
+  isObject,
   parseBIP32Path,
   parseHexStringOfLength,
   parseInt64_str,
@@ -64,6 +65,7 @@ import {parseTokenBundle, parseTxOutput} from './output'
 import {parseTxAuxiliaryData} from './txAuxiliaryData'
 
 function parseTxInput(input: TxInput): ParsedInput {
+  validate(isObject(input), InvalidDataReason.INPUT_INVALID_TX_HASH)
   const txHashHex = parseHexStringOfLength(
     input.txHashHex,
     TX_HASH_LENGTH,
@@ -84,6 +86,7 @@ function parseTxInput(input: TxInput): ParsedInput {
 }
 
 function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
+  validate(isObject(params), InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT)
   return {
     amount: parseCoin(
       params.amount,
@@ -99,6 +102,7 @@ function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
 function parseRequiredSigner(
   requiredSigner: RequiredSigner,
 ): ParsedRequiredSigner {
+  validate(isObject(requiredSigner), InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE)
   switch (requiredSigner.type) {
     case TxRequiredSignerType.PATH:
       return {
@@ -124,6 +128,7 @@ function parseRequiredSigner(
 
 function parseVoter(voter: Voter): ParsedVoter {
   const errMsg = InvalidDataReason.VOTER_INVALID
+  validate(isObject(voter), errMsg)
   switch (voter.type) {
     case VoterType.COMMITTEE_KEY_HASH:
     case VoterType.DREP_KEY_HASH:
@@ -174,6 +179,9 @@ function parseVoteOption(voteOption: VoteOption): VoteOption {
 }
 
 function parseVote(vote: Vote): ParsedVote {
+  validate(isObject(vote), InvalidDataReason.GOV_ACTION_ID_INVALID)
+  validate(isObject(vote.govActionId), InvalidDataReason.GOV_ACTION_ID_INVALID)
+  validate(isObject(vote.votingProcedure), InvalidDataReason.VOTING_PROCEDURE_INVALID)
   return {
     govActionId: {
       txHashHex: parseHexStringOfLength(
@@ -197,6 +205,7 @@ function parseVote(vote: Vote): ParsedVote {
 }
 
 function parseVoterVotes(voterVotes: VoterVotes): ParsedVoterVotes {
+  validate(isObject(voterVotes), InvalidDataReason.VOTER_VOTES_NOT_ARRAY)
   validate(isArray(voterVotes.votes), InvalidDataReason.VOTER_VOTES_NOT_ARRAY)
   return {
     voter: parseVoter(voterVotes.voter),

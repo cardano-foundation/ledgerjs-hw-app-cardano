@@ -67,6 +67,7 @@ export enum InvalidDataReason {
   CERTIFICATE_SUPERFLUOUS_POOL_KEY_HASH = 'superfluous pool key hash in a certificate',
   CERTIFICATE_INVALID_DEPOSIT = 'one of the certificates contains an invalid deposit',
   CERTIFICATE_INVALID_DREP = 'one of the certificates contains an invalid DRep',
+  ANCHOR_INVALID = 'invalid anchor object',
   ANCHOR_INVALID_URL = 'anchor with an invalid URL',
   ANCHOR_INVALID_HASH = 'anchor with an invalid data hash',
 
@@ -150,8 +151,10 @@ export enum InvalidDataReason {
   VOTING_PROCEDURES_NOT_ARRAY = 'voting procedures not an array',
   VOTER_VOTES_NOT_ARRAY = "voter's votes not an array",
   VOTER_INVALID = 'invalid voter in voting procedures',
+  GOV_ACTION_ID_INVALID = 'invalid governance action id object',
   GOV_ACTION_ID_INVALID_TX_HASH = 'invalid governance action id tx hash',
   GOV_ACTION_ID_INVALID_INDEX = 'invalid governance action id index',
+  VOTING_PROCEDURE_INVALID = 'invalid voting procedure object',
   VOTING_PROCEDURE_INVALID_VOTE_OPTION = 'invalid vote option in a voting procedure',
   VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTERS = 'there must be exactly 1 voter in voting procedures',
   VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTES = 'there must be exactly 1 voting procedure per voter',

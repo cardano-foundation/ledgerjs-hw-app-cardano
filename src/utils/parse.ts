@@ -43,6 +43,9 @@ export const isArray = (data: unknown): data is Array<unknown> =>
 
 export const isBuffer = (data: unknown): data is Buffer => Buffer.isBuffer(data)
 
+export const isObject = (data: unknown): data is Record<string, unknown> =>
+  data != null && typeof data === 'object' && !Array.isArray(data)
+
 export const isUint32 = (data: unknown): data is Uint32_t =>
   isInteger(data) && data >= 0 && data <= 4294967295
 
@@ -292,6 +295,7 @@ export function parseCredential(
   credential: CredentialParams,
   errMsg: InvalidDataReason,
 ): ParsedCredential {
+  validate(isObject(credential), errMsg)
   switch (credential.type) {
     case CredentialParamsType.KEY_PATH:
       return {
@@ -322,6 +326,7 @@ export function parseCredential(
 }
 
 export function parseAnchor(params: AnchorParams): ParsedAnchor | null {
+  validate(isObject(params), InvalidDataReason.ANCHOR_INVALID)
   const url = parseAscii(params.url, InvalidDataReason.ANCHOR_INVALID_URL)
   // Additional length check
   validate(url.length <= MAX_URL_LENGTH, InvalidDataReason.ANCHOR_INVALID_URL)
