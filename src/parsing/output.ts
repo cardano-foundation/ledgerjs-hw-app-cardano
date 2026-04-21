@@ -108,7 +108,9 @@ function parseAssetGroup<T>(
     compareHexByCanonicalAssetOrdering,
   )
   validate(
-    JSON.stringify(assetNamesHex) === JSON.stringify(sortedAssetNames),
+    assetNamesHex.every(
+      (assetNameHex, index) => assetNameHex === sortedAssetNames[index],
+    ),
     InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,
   )
 
@@ -142,7 +144,9 @@ export function parseTokenBundle<T>(
     InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_NOT_UNIQUE,
   )
 
-  const sortedPolicyIds = [...policyIds].sort()
+  const sortedPolicyIds = [...policyIds].sort(
+    compareHexByCanonicalAssetOrdering,
+  )
   validate(
     policyIds.every((policyId, index) => policyId === sortedPolicyIds[index]),
     InvalidDataReason.MULTIASSET_INVALID_TOKEN_BUNDLE_ORDERING,

@@ -2,6 +2,7 @@ import basex from 'base-x'
 import {bech32} from 'bech32'
 
 import {InvalidData, InvalidDataReason} from '../errors'
+import {TESTNET_NETWORK_ID} from '../networkConstants'
 import {AddressType, HARDENED} from '../types/public'
 import {assert} from '../utils/assert'
 import {isBuffer, isString, parseIntFromStr, validate} from './parse'
@@ -10,16 +11,13 @@ const BASE58_ALPHABET =
   '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(BASE58_ALPHABET)
 
-const TESTNET_NETWORK_ID = 0x00
 const MAX_HUMAN_ADDRESS_LENGTH = 150 // see addressUtilsShelley.h in ledger-app-cardano
 
 function parseBIP32Index(str: string, errMsg: InvalidDataReason): number {
-  let base = 0
-  if (str.endsWith("'")) {
-    str = str.slice(0, -1)
-    base = HARDENED
-  }
-  const i = parseIntFromStr(str, errMsg)
+  const isHardened = str.endsWith("'")
+  const base = isHardened ? HARDENED : 0
+  const indexStr = isHardened ? str.slice(0, -1) : str
+  const i = parseIntFromStr(indexStr, errMsg)
   validate(i >= 0, errMsg)
   validate(i < HARDENED, errMsg)
   return base + i
@@ -86,11 +84,14 @@ export function bech32_encodeAddress(data: Buffer): string {
   )
 }
 
-export function bech32_decodeAddress(data: string): Buffer {
+export function bech32_decodeAddress(
+  data: string,
+  errMsg: InvalidDataReason = InvalidDataReason.OUTPUT_INVALID_ADDRESS,
+): Buffer {
   try {
     const {words} = bech32.decode(data, MAX_HUMAN_ADDRESS_LENGTH)
     return Buffer.from(bech32.fromWords(words))
   } catch {
-    throw new InvalidData(InvalidDataReason.OUTPUT_INVALID_ADDRESS)
+    throw new InvalidData(errMsg)
   }
 }

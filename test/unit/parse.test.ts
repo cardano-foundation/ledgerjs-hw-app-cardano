@@ -1,5 +1,4 @@
 import {expect} from 'chai'
-import {Int64BE, Uint64BE} from 'int64-buffer'
 
 import {InvalidDataReason} from '../../src/errors'
 import {parseCVote} from '../../src/parsing/cVote'
@@ -16,6 +15,7 @@ import {
 import {assert} from '../../src/utils/assert'
 import {str_to_path} from '../../src/utils/address'
 import {isUintStr, parseInt64_str, parseUint64_str} from '../../src/utils/parse'
+import {int64_to_buf, uint64_to_buf} from '../../src/utils/serialize'
 
 type BasicParseTest = {
   signed: boolean
@@ -101,14 +101,31 @@ describe('basicParseTest', () => {
   for (const {signed, numberString} of basicParseTests) {
     // eslint-disable-next-line no-console
     console.log(`parsing ${numberString} (${signed ? 'signed' : 'unsigned'})`)
-    const objectRepresentation = signed
-      ? new Int64BE(numberString, 10)
-      : new Uint64BE(numberString, 10)
-    const bufferRep = objectRepresentation.toBuffer()
+    const bufferRep = Buffer.alloc(8)
+    if (signed) {
+      bufferRep.writeBigInt64BE(BigInt(numberString), 0)
+    } else {
+      bufferRep.writeBigUInt64BE(BigInt(numberString), 0)
+    }
 
     assert(bufferRep.length === 8, 'invalid binary length')
 
-    expect(objectRepresentation.toString()).to.equal(numberString)
+    const serialized = signed
+      ? int64_to_buf(
+          parseInt64_str(
+            numberString,
+            {},
+            InvalidDataReason.INPUT_INVALID_TX_HASH,
+          ),
+        )
+      : uint64_to_buf(
+          parseUint64_str(
+            numberString,
+            {},
+            InvalidDataReason.INPUT_INVALID_TX_HASH,
+          ),
+        )
+    expect(serialized.equals(bufferRep)).to.equal(true)
   }
 })
 

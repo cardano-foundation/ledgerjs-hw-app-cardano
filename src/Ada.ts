@@ -19,7 +19,7 @@
 import type Transport from '@ledgerhq/hw-transport'
 
 import {StatusWordV7, StatusWordV8} from './errors/deviceStatusError'
-import {DeviceStatusError} from './errors'
+import {DeviceStatusError, ErrorBase} from './errors'
 import {InvalidDataReason} from './errors/invalidDataReason'
 import type {Interaction, SendParams} from './interactions/common/types'
 import {deriveAddress} from './interactions/deriveAddress'
@@ -43,6 +43,7 @@ import {
 } from './parsing/nativeScript'
 import {parseOperationalCertificate} from './parsing/operationalCertificate'
 import {parseSignTransactionRequest} from './parsing/transaction'
+import {MAINNET_NETWORK_ID, TESTNET_NETWORK_ID} from './networkConstants'
 import type {
   ParsedAddressParams,
   ParsedCVote,
@@ -82,8 +83,6 @@ export * from './types/public'
 
 const CLA = 0xd7
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
-
 function getStatusCodeFromError(error: unknown): number | null {
   if (error == null || typeof error !== 'object') {
     return null
@@ -93,6 +92,8 @@ function getStatusCodeFromError(error: unknown): number | null {
     return error.statusCode
   }
 
+  // DeviceStatusError uses `.code`, and wrapRetryStillInCall() operates on the
+  // post-conversion error path where transport errors have already been mapped.
   if ('code' in error && typeof error.code === 'number') {
     return error.code
   }
@@ -100,21 +101,29 @@ function getStatusCodeFromError(error: unknown): number | null {
   return null
 }
 
-function wrapConvertDeviceStatusError<T extends (...args: any[]) => any>(
-  fn: T,
-): T {
-  // @ts-ignore
-  return async (...args) => {
+function wrap<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  handler: (error: unknown, ...args: TArgs) => Promise<TResult>,
+): (...args: TArgs) => Promise<TResult> {
+  return async (...args: TArgs): Promise<TResult> => {
     try {
       return await fn(...args)
-    } catch (e: unknown) {
-      const statusCode = getStatusCodeFromError(e)
-      if (statusCode != null) {
-        throw new DeviceStatusError(statusCode)
-      }
-      throw e
+    } catch (error: unknown) {
+      return await handler(error, ...args)
     }
   }
+}
+
+function wrapConvertDeviceStatusError<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+): (...args: TArgs) => Promise<TResult> {
+  return wrap(fn, async (e: unknown, ..._args: TArgs) => {
+    const statusCode = getStatusCodeFromError(e)
+    if (statusCode != null) {
+      throw new DeviceStatusError(statusCode)
+    }
+    throw e
+  })
 }
 
 /**
@@ -139,26 +148,33 @@ export type SendFn = (params: SendParams) => Promise<Buffer>
 // transparently retry the request.
 
 // Note though that only the *first* request in an multi-APDU exchange should be retried.
-function wrapRetryStillInCall<T extends (...args: any[]) => any>(fn: T): T {
-  // @ts-ignore
-  return async (...args: any) => {
-    try {
-      return await fn(...args)
-    } catch (e: any) {
-      const statusCode = getStatusCodeFromError(e)
-      if (
-        statusCode === StatusWordV7.ERR_STILL_IN_CALL ||
-        statusCode === StatusWordV8.SWO_STILL_IN_CALL_RESET_DONE
-      ) {
-        // Do the retry
+function wrapRetryStillInCall<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+): (...args: TArgs) => Promise<TResult> {
+  return wrap(fn, async (e: unknown, ...args: TArgs) => {
+    const statusCode = getStatusCodeFromError(e)
+    if (
+      statusCode === StatusWordV7.ERR_STILL_IN_CALL ||
+      statusCode === StatusWordV8.SWO_STILL_IN_CALL_RESET_DONE
+    ) {
+      try {
         return await fn(...args)
+      } catch (retryError: unknown) {
+        const retryStatusCode = getStatusCodeFromError(retryError)
+        if (
+          retryStatusCode === StatusWordV7.ERR_STILL_IN_CALL ||
+          retryStatusCode === StatusWordV8.SWO_STILL_IN_CALL_RESET_DONE
+        ) {
+          throw new ErrorBase(
+            'Ledger app seems to be in an unexpected irrecoverable state. Please reopen the Cardano app and retry.',
+          )
+        }
+        throw retryError
       }
-      throw e
     }
-  }
+    throw e
+  })
 }
-
-/* eslint-enable @typescript-eslint/no-explicit-any,@typescript-eslint/ban-ts-comment */
 
 async function interact<T>(
   interaction: Interaction<T>,
@@ -288,7 +304,7 @@ export class Ada {
   /**
    * Get several public keys; one for each of the specified BIP 32 path.
    *
-   * @param paths The paths. A path must begin with `44'/1815'/account'` or `1852'/1815'/account'`, and may be up to 10 indexes long.
+   * @param paths The paths. A path must begin with `44'/1815'/account'` or `1852'/1815'/account'`, and may be at most 5 indexes long.
    * @returns The extended public keys (i.e. with chaincode) for the given paths.
    *
    * @example
@@ -592,13 +608,13 @@ export default Ada
  * Default Cardano networks
  * @see [[Network]]
  */
-export const Networks = {
+export const Networks: {Mainnet: Network; Testnet: Network} = {
   Mainnet: {
-    networkId: 0x01,
+    networkId: MAINNET_NETWORK_ID,
     protocolMagic: 764824073,
-  } as Network,
+  },
   Testnet: {
-    networkId: 0x00,
+    networkId: TESTNET_NETWORK_ID,
     protocolMagic: 1097911063,
-  } as Network,
+  },
 }

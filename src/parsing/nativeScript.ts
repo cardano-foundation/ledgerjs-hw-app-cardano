@@ -12,6 +12,7 @@ import {
   validate,
 } from '../utils/parse'
 
+// Must match MAX_SCRIPT_DEPTH in the device app.
 const MAX_NATIVE_SCRIPT_DEPTH = 11
 
 export function parseNativeScript(

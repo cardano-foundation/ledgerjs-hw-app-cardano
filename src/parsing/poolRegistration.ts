@@ -50,16 +50,12 @@ import {
   parseCoin,
 } from '../utils/parse'
 import {
+  POOL_MARGIN_DENOMINATOR_MAX_STR,
   POOL_REGISTRATION_OWNERS_MAX,
   POOL_REGISTRATION_RELAYS_MAX,
 } from './constants'
 
 function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
-  const POOL_MARGIN_DENOMINATOR_MAX_STR = '1 000 000 000 000 000 000'.replace(
-    /[ ]/g,
-    '',
-  )
-
   const marginDenominator = parseUint64_str(
     params.denominator,
     {max: POOL_MARGIN_DENOMINATOR_MAX_STR},
@@ -68,6 +64,9 @@ function parseMargin(params: PoolRegistrationParams['margin']): ParsedMargin {
 
   const marginNumerator = parseUint64_str(
     params.numerator,
+    // parseUint64_str delegates max-bound comparison to isUintStr, which first
+    // compares length and only falls back to lexicographic comparison for
+    // equal-length decimal strings.
     {max: marginDenominator},
     InvalidDataReason.POOL_REGISTRATION_INVALID_MARGIN,
   )

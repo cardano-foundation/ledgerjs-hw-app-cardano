@@ -1,5 +1,3 @@
-import {Int64BE, Uint64BE} from 'int64-buffer'
-
 import type {
   FixLenHexString,
   HexString,
@@ -61,9 +59,8 @@ export function buf_to_uint32(data: Buffer): Uint32_t {
 export function uint64_to_buf(value: Uint64_str): Buffer {
   assert(isUint64str(value), 'invalid uint64_str')
 
-  const data = new Uint64BE(value, 10).toBuffer()
-  assert(data.length === 8, 'invalid data length')
-
+  const data = Buffer.alloc(8)
+  data.writeBigUInt64BE(BigInt(value), 0)
   return data
 }
 
@@ -79,9 +76,8 @@ export function uint64Number_to_buf(value: number): Buffer {
 export function int64_to_buf(value: Int64_str): Buffer {
   assert(isInt64str(value), 'invalid int64_str')
 
-  const data = new Int64BE(value, 10).toBuffer()
-  assert(data.length === 8, 'invalid data length')
-
+  const data = Buffer.alloc(8)
+  data.writeBigInt64BE(BigInt(value), 0)
   return data
 }
 

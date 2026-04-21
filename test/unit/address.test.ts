@@ -9,4 +9,13 @@ describe('address utils', () => {
       InvalidDataReason.OUTPUT_INVALID_ADDRESS,
     )
   })
+
+  it('allows callers to override the bech32 decode error reason', () => {
+    expect(() =>
+      bech32_decodeAddress(
+        'definitely-not-bech32',
+        InvalidDataReason.ADDRESS_INVALID_REWARD_ADDRESS,
+      ),
+    ).to.throw(InvalidDataReason.ADDRESS_INVALID_REWARD_ADDRESS)
+  })
 })

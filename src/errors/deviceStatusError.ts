@@ -9,6 +9,8 @@ const StatusWordV7 = {
   ERR_INVALID_DATA: 0x6e07 as const,
   ERR_INVALID_BIP_PATH: 0x6e08 as const,
   ERR_REJECTED_BY_USER: 0x6e09 as const,
+  // v7 status words intentionally continue at 0x6e10; the device app uses
+  // decimal-like numbering here (see app-cardano/common.h).
   ERR_REJECTED_BY_POLICY: 0x6e10 as const,
   ERR_DEVICE_LOCKED: 0x6e11 as const,
   ERR_UNSUPPORTED_ADDRESS_TYPE: 0x6e12 as const,
@@ -204,7 +206,7 @@ const StatusWordMsgV8: Record<number, string> = {
   [StatusWordV8.SWO_NATIVE_SCRIPT_PARSING_FAIL_NESTING]:
     'Native script parsing failed: invalid nesting depth.',
   [StatusWordV8.SWO_NATIVE_SCRIPT_PARSING_FAIL_TIMELOCK]:
-    'Native script parsing failed: invalid timelock.',
+    'Native script parsing failed: invalid time lock.',
   [StatusWordV8.SWO_NATIVE_SCRIPT_PARSING_FAIL_DEPTH_UNSUPPORTED]:
     'Native script parsing failed: nesting depth exceeds supported limit.',
   [StatusWordV8.SWO_NATIVE_SCRIPT_PARSING_FAIL_SCRIPT_COUNT]:

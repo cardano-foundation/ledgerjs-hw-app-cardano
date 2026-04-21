@@ -49,7 +49,7 @@ const mkVersion = (major: number, minor = 0, isAppXS = false): Version => ({
 const v5 = mkVersion(5)
 const v7 = mkVersion(7, 1)
 const v7Xs = mkVersion(7, 1, true)
-const v7Messageless = mkVersion(7, 0)
+const v7WithoutMessageSigning = mkVersion(7, 0)
 const v8 = mkVersion(8)
 
 const byronAddressParams = parseAddress(
@@ -382,7 +382,7 @@ describe('request compatibility gating', () => {
 
   it('checks message signing support before dispatch', () => {
     expect(() =>
-      signMessage(v7Messageless, parsedSignMessageFixture).next(),
+      signMessage(v7WithoutMessageSigning, parsedSignMessageFixture).next(),
     ).to.throw(DeviceVersionUnsupported)
 
     expect(signMessage(v8, parsedSignMessageFixture).next().done).to.equal(
