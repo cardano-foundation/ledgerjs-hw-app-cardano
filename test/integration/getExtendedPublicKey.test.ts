@@ -13,11 +13,11 @@ import {str_to_path} from '../../src/utils/address'
 import {getAda} from '../test_utils'
 import type {TestCase} from './__fixtures__/getExtendedPublicKey'
 import {
-  testsCVoteKeys,
-  testsByron,
-  testsColdKeys,
-  testsShelleyUnusual,
-  testsShelleyUsual,
+  testsCVoteKeysUnusual,
+  testsByronPath,
+  testsColdCase,
+  testsShelleyUnusualPaths,
+  testsShelleyUsualPaths,
 } from './__fixtures__/getExtendedPublicKey'
 chai.use(chaiAsPromised)
 
@@ -33,32 +33,26 @@ describe('getExtendedPublicKey', () => {
   })
 
   describe('Should successfully get a single extended public key', () => {
-    const test = async (tests: TestCase[]) => {
-      for (const {path, expected} of tests) {
-        const response = await ada.getExtendedPublicKey({
-          path: str_to_path(path),
-        })
+    const test = async ({path, expected}: TestCase) => {
+      const response = await ada.getExtendedPublicKey({
+        path: str_to_path(path),
+      })
 
-        expect(response.publicKeyHex).to.equal(expected.publicKey)
-        expect(response.chainCodeHex).to.equal(expected.chainCode)
-      }
+      expect(response.publicKeyHex).to.equal(expected.publicKey)
+      expect(response.chainCodeHex).to.equal(expected.chainCode)
     }
 
-    it('get a single extended public key --- byron', async () => {
-      await test(testsByron)
-    })
-    it('get a single extended public key --- shelley usual', async () => {
-      await test(testsShelleyUsual)
-    })
-    it('get a single extended public key --- shelley unusual', async () => {
-      await test(testsShelleyUnusual)
-    })
-    it('get a single extended public key --- cold keys', async () => {
-      await test(testsColdKeys)
-    })
-    it('get a single extended public key --- vote keys', async () => {
-      await test(testsCVoteKeys)
-    })
+    for (const testCase of [
+      ...testsByronPath,
+      ...testsShelleyUsualPaths,
+      ...testsShelleyUnusualPaths,
+      ...testsColdCase,
+      ...testsCVoteKeysUnusual,
+    ]) {
+      it(testCase.name, async () => {
+        await test(testCase)
+      })
+    }
   })
 
   describe('Should successfully get several extended public keys', () => {
@@ -76,19 +70,19 @@ describe('getExtendedPublicKey', () => {
 
     it('starting with a usual one', async () => {
       await test([
-        ...testsByron,
-        ...testsShelleyUsual,
-        ...testsColdKeys,
-        ...testsCVoteKeys,
+        ...testsByronPath,
+        ...testsShelleyUsualPaths,
+        ...testsColdCase,
+        ...testsCVoteKeysUnusual,
       ])
     })
 
     it('starting with an unusual one', async () => {
       await test([
-        ...testsShelleyUnusual,
-        ...testsByron,
-        ...testsColdKeys,
-        ...testsShelleyUsual,
+        ...testsShelleyUnusualPaths,
+        ...testsByronPath,
+        ...testsColdCase,
+        ...testsShelleyUsualPaths,
       ])
     })
   })

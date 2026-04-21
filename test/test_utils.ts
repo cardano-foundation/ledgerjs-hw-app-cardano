@@ -201,16 +201,13 @@ export function describeSignTxRejects(
       assertSignTxRejectCase(testCase)
       const {testName, tx, additionalWitnessPaths, signingMode, rejectReason} =
         testCase
-      // eslint-disable-next-line prefer-arrow-callback
-      it(`${testName} [${signingMode}]`, async function () {
-        if (rejectReason === InvalidDataReason.LEDGER_POLICY) {
-          this.skip()
-        }
-        if (
-          rejectReason === InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER
-        ) {
-          this.skip()
-        }
+      if (
+        rejectReason === InvalidDataReason.LEDGER_POLICY ||
+        rejectReason === InvalidDataReason.INVALID_DATA_SUPPLIED_TO_LEDGER
+      ) {
+        continue
+      }
+      it(`${testName} [${signingMode}]`, async () => {
         const response = ada.signTransaction({
           tx,
           signingMode,

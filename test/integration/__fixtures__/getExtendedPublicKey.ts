@@ -1,11 +1,13 @@
 export type TestCase = {
+  name: string
   path: string
   expected: {publicKey: string; chainCode: string; _privateKey?: string}
 }
 
-export const testsByron: TestCase[] = [
+export const testsByronPath: TestCase[] = [
   // Byron
   {
+    name: 'Export_pubkey_byron_path_1',
     path: "44'/1815'/1'",
     expected: {
       publicKey:
@@ -17,6 +19,7 @@ export const testsByron: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_byron_path_2',
     path: "44'/1815'/1'/0/55'",
     expected: {
       publicKey:
@@ -28,6 +31,7 @@ export const testsByron: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_byron_path_3',
     path: "44'/1815'/1'/0/12'",
     expected: {
       publicKey:
@@ -40,9 +44,10 @@ export const testsByron: TestCase[] = [
   },
 ]
 
-export const testsShelleyUsual: TestCase[] = [
+export const testsShelleyUsualPaths: TestCase[] = [
   // Shelley
   {
+    name: 'Export_pubkey_shelley_usual_path_0',
     path: "1852'/1815'/4'",
     expected: {
       publicKey:
@@ -52,6 +57,7 @@ export const testsShelleyUsual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_usual_path_1',
     path: "1852'/1815'/0'/0/1",
     expected: {
       publicKey:
@@ -61,6 +67,7 @@ export const testsShelleyUsual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_usual_path_2',
     path: "1852'/1815'/0'/2/0",
     expected: {
       publicKey:
@@ -70,6 +77,7 @@ export const testsShelleyUsual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_usual_path_3',
     path: "1852'/1815'/0'/2/1001",
     expected: {
       publicKey:
@@ -79,6 +87,7 @@ export const testsShelleyUsual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_usual_path_4',
     path: "1852'/1815'/0'/3/0",
     expected: {
       publicKey:
@@ -88,6 +97,7 @@ export const testsShelleyUsual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_usual_path_5',
     path: "1852'/1815'/0'/4/0",
     expected: {
       publicKey:
@@ -97,6 +107,7 @@ export const testsShelleyUsual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_usual_path_6',
     path: "1852'/1815'/1'/5/0",
     expected: {
       publicKey:
@@ -107,8 +118,9 @@ export const testsShelleyUsual: TestCase[] = [
   },
 ]
 
-export const testsShelleyUnusual: TestCase[] = [
+export const testsShelleyUnusualPaths: TestCase[] = [
   {
+    name: 'Export_pubkey_shelley_unusual_path_1',
     path: "1852'/1815'/101'",
     expected: {
       publicKey:
@@ -118,6 +130,7 @@ export const testsShelleyUnusual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_unusual_path_2',
     path: "1852'/1815'/100'/0/1000001'",
     expected: {
       publicKey:
@@ -127,6 +140,7 @@ export const testsShelleyUnusual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_unusual_path_3',
     path: "1852'/1815'/0'/2/1000001",
     expected: {
       publicKey:
@@ -136,6 +150,7 @@ export const testsShelleyUnusual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_unusual_path_4',
     path: "1852'/1815'/101'/3/0",
     expected: {
       publicKey:
@@ -145,6 +160,7 @@ export const testsShelleyUnusual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_unusual_path_5',
     path: "1852'/1815'/101'/4/0",
     expected: {
       publicKey:
@@ -154,6 +170,7 @@ export const testsShelleyUnusual: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_shelley_unusual_path_6',
     path: "1852'/1815'/101'/5/0",
     expected: {
       publicKey:
@@ -164,8 +181,9 @@ export const testsShelleyUnusual: TestCase[] = [
   },
 ]
 
-export const testsColdKeys: TestCase[] = [
+export const testsColdCase: TestCase[] = [
   {
+    name: 'Export_pubkey_cold_case',
     path: "1853'/1815'/0'/0'",
     expected: {
       publicKey:
@@ -176,8 +194,9 @@ export const testsColdKeys: TestCase[] = [
   },
 ]
 
-export const testsCVoteKeys: TestCase[] = [
+export const testsCVoteKeysUnusual: TestCase[] = [
   {
+    name: 'Export_pubkey_CVote_keys_path_1',
     path: "1694'/1815'/0'/0/1",
     expected: {
       publicKey:
@@ -187,6 +206,7 @@ export const testsCVoteKeys: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_CVote_keys_path_2',
     path: "1694'/1815'/100'",
     expected: {
       publicKey:
@@ -196,6 +216,7 @@ export const testsCVoteKeys: TestCase[] = [
     },
   },
   {
+    name: 'Export_pubkey_CVote_keys_path_3',
     path: "1694'/1815'/101'",
     expected: {
       publicKey:

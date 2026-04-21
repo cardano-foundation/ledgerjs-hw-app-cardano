@@ -84,9 +84,9 @@ export function bech32_encodeAddress(data: Buffer): string {
   )
 }
 
-export function bech32_decodeAddress(
+function decodeBech32AddressWithReason(
   data: string,
-  errMsg: InvalidDataReason = InvalidDataReason.OUTPUT_INVALID_ADDRESS,
+  errMsg: InvalidDataReason,
 ): Buffer {
   try {
     const {words} = bech32.decode(data, MAX_HUMAN_ADDRESS_LENGTH)
@@ -94,4 +94,11 @@ export function bech32_decodeAddress(
   } catch {
     throw new InvalidData(errMsg)
   }
+}
+
+export function bech32_decodeAddress(data: string): Buffer {
+  return decodeBech32AddressWithReason(
+    data,
+    InvalidDataReason.OUTPUT_INVALID_ADDRESS,
+  )
 }
