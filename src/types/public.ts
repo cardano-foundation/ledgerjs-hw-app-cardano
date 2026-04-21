@@ -1898,8 +1898,9 @@ export type SignTransactionRequest = {
    * Ledger has certain limitations (see [[TransactionSigningMode]] in detail) due to which
    * it cannot sign arbitrary combination of all transaction features.
    * The mode specifies which use-case the user want to use and triggers additional validation on `tx` field.
+   * If omitted, the mode is inferred from the transaction contents and witness paths.
    */
-  signingMode: TransactionSigningMode
+  signingMode?: TransactionSigningMode
   /**
    * Additional witness paths that are not gathered from the transaction body, eg. mint witnesses
    */

@@ -164,6 +164,7 @@ export enum InvalidDataReason {
   DONATION_NOT_VALID = 'treasury donation not valid',
 
   SIGN_MODE_UNKNOWN = 'unknown signing mode',
+  CANNOT_DETERMINE_TX_SIGNING_MODE = 'cannot determine signing mode automatically',
 
   SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED = 'pool registration not allowed in TransactionSigningMode.ORDINARY_TRANSACTION',
   SIGN_MODE_ORDINARY__CERTIFICATE_STAKE_CREDENTIAL_ONLY_AS_PATH = 'certificate stake credential must be given as a staking path in TransactionSigningMode.ORDINARY_TRANSACTION',

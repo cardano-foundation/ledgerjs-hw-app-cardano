@@ -35,6 +35,7 @@ import type {
   Withdrawal,
 } from '../types/public'
 import {
+  HARDENED,
   VoterType,
   PoolKeyType,
   PoolOwnerType,
@@ -43,7 +44,7 @@ import {
   TxRequiredSignerType,
   VoteOption,
 } from '../types/public'
-import {unreachable} from '../utils/assert'
+import {assert, unreachable} from '../utils/assert'
 import {
   isArray,
   isObject,
@@ -295,6 +296,282 @@ export function parseSigningMode(
   }
 }
 
+function hasPlutusFields(tx: ParsedTransaction): boolean {
+  // These fields are Plutus-only in the current device policy, so any one of
+  // them is enough to resolve AUTO to PLUTUS immediately.
+  return (
+    tx.scriptDataHashHex != null ||
+    tx.collateralInputs.length > 0 ||
+    tx.collateralOutput != null ||
+    tx.totalCollateral != null ||
+    tx.referenceInputs.length > 0
+  )
+}
+
+function inferPoolRegistrationSigningMode(
+  tx: ParsedTransaction,
+): TransactionSigningMode | null {
+  // Pool registration owner/operator modes are only possible when a pool
+  // registration certificate is present. Otherwise this helper has no signal.
+  const poolRegistrationCertificates = tx.certificates.filter(
+    (certificate) =>
+      certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
+  )
+
+  if (poolRegistrationCertificates.length === 0) {
+    return null
+  }
+
+  if (tx.certificates.length !== 1) {
+    // Pool owner/operator modes are only uniquely identifiable when the
+    // transaction has exactly one certificate and that certificate is the pool
+    // registration itself. Once other certificates are present, AUTO cannot
+    // tell whether pool-specific signing should still apply or whether the
+    // transaction belongs to a different mode entirely.
+    throw new InvalidData(
+      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
+    )
+  }
+
+  // there is only one certificate, and it is pool registration
+  const certificate = poolRegistrationCertificates[0]
+  // In the parsed JS model, DEVICE_OWNED owner corresponds to a path owner on
+  // the device side, while THIRD_PARTY corresponds to a hash owner.
+  const deviceOwnedOwnerCount = certificate.pool.owners.filter(
+    (owner) => owner.type === PoolOwnerType.DEVICE_OWNED,
+  ).length
+
+  // Owner mode is the unique shape "third-party pool key + exactly one
+  // device-owned owner".
+  if (
+    certificate.pool.poolKey.type === PoolKeyType.THIRD_PARTY &&
+    deviceOwnedOwnerCount === 1
+  ) {
+    return TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
+  }
+
+  // Operator mode is the unique shape "device-owned pool key + no
+  // device-owned owners".
+  if (
+    certificate.pool.poolKey.type === PoolKeyType.DEVICE_OWNED &&
+    deviceOwnedOwnerCount === 0
+  ) {
+    return TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
+  }
+
+  // Any other pool-registration shape is not unique enough for AUTO to choose
+  // between owner and operator modes.
+  throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
+}
+
+function inferOrdinaryOrMultisigFromTx(
+  tx: ParsedTransaction,
+):
+  | TransactionSigningMode.ORDINARY_TRANSACTION
+  | TransactionSigningMode.MULTISIG_TRANSACTION
+  | null {
+  let mode:
+    | TransactionSigningMode.ORDINARY_TRANSACTION
+    | TransactionSigningMode.MULTISIG_TRANSACTION
+    | null = null
+
+  const commitMode = (
+    newMode:
+      | TransactionSigningMode.ORDINARY_TRANSACTION
+      | TransactionSigningMode.MULTISIG_TRANSACTION,
+  ) => {
+    // The first ordinary/multisig signal commits the mode.
+    if (mode == null) {
+      mode = newMode
+      return
+    }
+
+    // Repeating the same signal is consistent and changes nothing.
+    if (mode === newMode) {
+      return
+    }
+
+    // TODO: When unrestricted transaction signing is added, mixed ordinary and
+    // multisig requirements should resolve to that mode instead of failing here.
+    // These signals are mutually exclusive across the supported modes, so
+    // conflicting signals mean AUTO cannot choose a unique mode.
+    throw new InvalidData(
+      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
+    )
+  }
+
+  const commitCredentialMode = (credentialType: CredentialType) => {
+    // For AUTO purposes, KEY_PATH implies ordinary mode and SCRIPT_HASH implies
+    // multisig mode. KEY_HASH is not a useful signal here.
+    if (credentialType === CredentialType.KEY_PATH) {
+      commitMode(TransactionSigningMode.ORDINARY_TRANSACTION)
+      return
+    }
+
+    if (credentialType === CredentialType.SCRIPT_HASH) {
+      commitMode(TransactionSigningMode.MULTISIG_TRANSACTION)
+    }
+  }
+
+  // Witnessed inputs imply ordinary mode because multisig transactions do not
+  // witness spent UTxOs via input.path.
+  if (tx.inputs.some((input) => input.path != null)) {
+    commitMode(TransactionSigningMode.ORDINARY_TRANSACTION)
+  }
+
+  // Device-owned outputs imply ordinary mode because multisig mode requires all
+  // outputs to be third-party addresses.
+  if (
+    tx.outputs.some(
+      (output) =>
+        output.destination.type === TxOutputDestinationType.DEVICE_OWNED,
+    )
+  ) {
+    commitMode(TransactionSigningMode.ORDINARY_TRANSACTION)
+  }
+
+  for (const certificate of tx.certificates) {
+    switch (certificate.type) {
+      case CertificateType.STAKE_REGISTRATION:
+      case CertificateType.STAKE_REGISTRATION_CONWAY:
+      case CertificateType.STAKE_DEREGISTRATION:
+      case CertificateType.STAKE_DEREGISTRATION_CONWAY:
+      case CertificateType.STAKE_DELEGATION:
+      case CertificateType.VOTE_DELEGATION:
+        // Staking-style credentials are direct ordinary-vs-multisig signals.
+        commitCredentialMode(certificate.stakeCredential.type)
+        break
+      case CertificateType.AUTHORIZE_COMMITTEE_HOT:
+      case CertificateType.RESIGN_COMMITTEE_COLD:
+        commitCredentialMode(certificate.coldCredential.type)
+        break
+      case CertificateType.DREP_REGISTRATION:
+      case CertificateType.DREP_DEREGISTRATION:
+      case CertificateType.DREP_UPDATE:
+        commitCredentialMode(certificate.dRepCredential.type)
+        break
+      case CertificateType.STAKE_POOL_RETIREMENT:
+        // Pool retirement is not allowed in multisig mode, so its presence is
+        // enough to commit to ordinary mode.
+        commitMode(TransactionSigningMode.ORDINARY_TRANSACTION)
+        break
+      default:
+        // Other certificate kinds do not help distinguish ordinary vs multisig.
+        break
+    }
+  }
+
+  // Withdrawals use the same credential distinction as certificates.
+  for (const withdrawal of tx.withdrawals) {
+    commitCredentialMode(withdrawal.stakeCredential.type)
+  }
+
+  for (const voterVotes of tx.votingProcedures) {
+    switch (voterVotes.voter.type) {
+      case VoterType.COMMITTEE_KEY_PATH:
+      case VoterType.DREP_KEY_PATH:
+      case VoterType.STAKE_POOL_KEY_PATH:
+        // Path-based Conway voters belong to ordinary mode.
+        commitMode(TransactionSigningMode.ORDINARY_TRANSACTION)
+        break
+      case VoterType.COMMITTEE_SCRIPT_HASH:
+      case VoterType.DREP_SCRIPT_HASH:
+        // Script-hash Conway voters belong to multisig mode.
+        commitMode(TransactionSigningMode.MULTISIG_TRANSACTION)
+        break
+      default:
+        // No other voter kind distinguishes ordinary from multisig here.
+        break
+    }
+  }
+
+  return mode
+}
+
+function inferOrdinaryOrMultisigFromWitnessPaths(
+  additionalWitnessPaths: ValidBIP32Path[],
+):
+  | TransactionSigningMode.ORDINARY_TRANSACTION
+  | TransactionSigningMode.MULTISIG_TRANSACTION
+  | null {
+  let hasOrdinaryWitnessPath = false
+  let hasMultisigWitnessPath = false
+
+  for (const path of additionalWitnessPaths) {
+    const purpose = path[0] - HARDENED
+
+    // 1852' paths are ordinary payment/staking paths, 1854' paths are
+    // multisig payment/staking paths. Other purposes, such as 1855' mint
+    // witnesses, do not distinguish the signing mode and are ignored here.
+    if (purpose === 1852) {
+      hasOrdinaryWitnessPath = true
+    } else if (purpose === 1854) {
+      hasMultisigWitnessPath = true
+    }
+  }
+
+  if (hasOrdinaryWitnessPath && hasMultisigWitnessPath) {
+    // TODO: When unrestricted transaction signing is added, mixed ordinary and
+    // multisig witness requirements should resolve to that mode instead of
+    // failing here.
+    throw new InvalidData(
+      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
+    )
+  }
+
+  if (hasOrdinaryWitnessPath) {
+    return TransactionSigningMode.ORDINARY_TRANSACTION
+  }
+
+  if (hasMultisigWitnessPath) {
+    return TransactionSigningMode.MULTISIG_TRANSACTION
+  }
+
+  return null
+}
+
+function inferSigningMode(
+  tx: ParsedTransaction,
+  additionalWitnessPaths: ValidBIP32Path[],
+): TransactionSigningMode {
+  // Pool registration must win before the generic modes because the dedicated
+  // pool modes have stricter transaction-shape requirements than ordinary,
+  // multisig, or Plutus.
+  const poolRegistrationMode = inferPoolRegistrationSigningMode(tx)
+  if (poolRegistrationMode != null) {
+    return poolRegistrationMode
+  }
+
+  // Plutus signals are unambiguous and do not need witness-path inspection.
+  if (hasPlutusFields(tx)) {
+    return TransactionSigningMode.PLUTUS_TRANSACTION
+  }
+
+  const txMode = inferOrdinaryOrMultisigFromTx(tx)
+  const witnessMode = inferOrdinaryOrMultisigFromWitnessPaths(
+    additionalWitnessPaths,
+  )
+
+  if (txMode != null && witnessMode != null && txMode !== witnessMode) {
+    // TODO: When unrestricted transaction signing is added, mixed ordinary and
+    // multisig requirements should resolve to that mode instead of failing here.
+    // Body-derived and witness-derived signals must agree on a unique
+    // ordinary-vs-multisig interpretation.
+    throw new InvalidData(
+      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
+    )
+  }
+
+  // Witness paths are only a fallback for otherwise body-ambiguous ordinary vs
+  // multisig transactions.
+  const mode = txMode ?? witnessMode
+  if (mode != null) {
+    return mode
+  }
+
+  throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
+}
+
 export function parseTransaction(tx: Transaction): ParsedTransaction {
   const network = parseNetwork(tx.network)
   // inputs
@@ -453,12 +730,14 @@ export function parseSignTransactionRequest(
   request: SignTransactionRequest,
 ): ParsedSigningRequest {
   const tx = parseTransaction(request.tx)
-  const signingMode = parseSigningMode(request.signingMode)
-  const options = parseTxOptions(request.options)
-
   const additionalWitnessPaths = parseAdditionalWitnessPaths(
     request.additionalWitnessPaths ?? [],
   )
+  const signingMode =
+    request.signingMode != null
+      ? parseSigningMode(request.signingMode)
+      : inferSigningMode(tx, additionalWitnessPaths)
+  const options = parseTxOptions(request.options)
 
   // Additional restrictions based on signing mode
   switch (signingMode) {
