@@ -230,20 +230,26 @@ function parsePoolRelayParams(relayParams: Relay): ParsedPoolRelay {
   switch (relayParams.type) {
     case RelayType.SINGLE_HOST_IP_ADDR: {
       const params = relayParams.params as SingleHostIpAddrRelayParams
+      const ipv4 =
+        'ipv4' in params && params.ipv4 != null
+          ? parseIPv4(params.ipv4, InvalidDataReason.RELAY_INVALID_IPV4)
+          : null
+      const ipv6 =
+        'ipv6' in params && params.ipv6 != null
+          ? parseIPv6(params.ipv6, InvalidDataReason.RELAY_INVALID_IPV6)
+          : null
+      validate(
+        ipv4 != null || ipv6 != null,
+        InvalidDataReason.RELAY_SINGLE_HOST_IP_MISSING_BOTH_ADDRESSES,
+      )
       return {
         type: RelayType.SINGLE_HOST_IP_ADDR,
         port:
           'portNumber' in params && params.portNumber != null
             ? parsePort(params.portNumber, InvalidDataReason.RELAY_INVALID_PORT)
             : null,
-        ipv4:
-          'ipv4' in params && params.ipv4 != null
-            ? parseIPv4(params.ipv4, InvalidDataReason.RELAY_INVALID_IPV4)
-            : null,
-        ipv6:
-          'ipv6' in params && params.ipv6 != null
-            ? parseIPv6(params.ipv6, InvalidDataReason.RELAY_INVALID_IPV6)
-            : null,
+        ipv4,
+        ipv6,
       }
     }
     case RelayType.SINGLE_HOST_HOSTNAME: {

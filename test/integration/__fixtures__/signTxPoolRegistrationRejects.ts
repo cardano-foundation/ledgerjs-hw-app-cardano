@@ -5,6 +5,7 @@ import type {
   MultiHostRelayParams,
   PoolMetadataParams,
   SingleHostHostnameRelayParams,
+  SingleHostIpAddrRelayParams,
   Transaction,
 } from '../../../src/Ada'
 import {
@@ -373,6 +374,36 @@ export const invalidRelayTestCases: TestCaseRejectShelley[] = [
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason: InvalidDataReason.RELAY_INVALID_DNS,
+  },
+  {
+    testName: 'SingleHostIP missing both ipv4 and ipv6',
+    appVersion: {unsupportedInAppXS: true},
+    tx: {
+      ...txBase,
+      certificates: [
+        {
+          type: CertificateType.STAKE_POOL_REGISTRATION,
+          params: {
+            ...defaultPoolRegistration,
+            relays: [
+              {
+                type: RelayType.SINGLE_HOST_IP_ADDR,
+                params: {
+                  portNumber: 3000,
+                } as SingleHostIpAddrRelayParams,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+    err: {
+      v7: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
+    },
+    rejectReason:
+      InvalidDataReason.RELAY_SINGLE_HOST_IP_MISSING_BOTH_ADDRESSES,
   },
 ]
 

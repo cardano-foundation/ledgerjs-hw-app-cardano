@@ -97,6 +97,7 @@ export enum InvalidDataReason {
   RELAY_INVALID_IPV4 = 'invalid ipv4 in a relay in a pool registration certificate',
   RELAY_INVALID_IPV6 = 'invalid ipv6 in a relay in a pool registration certificate',
   RELAY_INVALID_DNS = 'invalid dns record in a relay in a pool registration certificate',
+  RELAY_SINGLE_HOST_IP_MISSING_BOTH_ADDRESSES = 'single host IP relay must have at least one of ipv4 or ipv6',
 
   POOL_REGISTRATION_METADATA_INVALID_URL = 'invalid metadata in a pool registration certificate= invalid url',
   POOL_REGISTRATION_METADATA_INVALID_HASH = 'invalid metadata in a pool registration certificate= invalid hash',
