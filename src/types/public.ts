@@ -738,7 +738,7 @@ export type SingleHostIpAddrRelayParams = {
   ipv4?: string | null
   /**
    * IPv6 address of the relay.
-   * Should be in *fully expanded* string format, e.g. `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"`
+   * Should be in standard IPv6 string format, e.g. `"2001:db8::1"` or `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"`
    * */
   ipv6?: string | null
 }

@@ -38,7 +38,6 @@ import {
   PoolRewardAccountType,
 } from '../types/public'
 import {
-  isHexStringOfLength,
   isString,
   isUint8,
   isUint16,
@@ -50,7 +49,6 @@ import {
   validate,
   parseCoin,
 } from '../utils/parse'
-import {hex_to_buf} from '../utils/serialize'
 import {
   POOL_REGISTRATION_OWNERS_MAX,
   POOL_REGISTRATION_RELAYS_MAX,
@@ -200,12 +198,80 @@ function parseIPv4(ipv4: string, errMsg: InvalidDataReason): Buffer {
   return ipBytes
 }
 
-// FIXME(ppershing): This is terrible and wrong implementation
+function parseIPv6Section(
+  section: string,
+  allowEmbeddedIPv4: boolean,
+  errMsg: InvalidDataReason,
+): Buffer[] {
+  if (section === '') return []
+
+  const parts = section.split(':')
+  validate(
+    parts.every((part) => part.length > 0),
+    errMsg,
+  )
+
+  return parts.map((part, index) => {
+    const isEmbeddedIPv4 = part.includes('.')
+    validate(
+      !isEmbeddedIPv4 || (allowEmbeddedIPv4 && index === parts.length - 1),
+      errMsg,
+    )
+
+    if (isEmbeddedIPv4) {
+      return parseIPv4(part, errMsg)
+    }
+
+    validate(/^[0-9a-fA-F]{1,4}$/.test(part), errMsg)
+    const group = parseInt(part, 16)
+    const groupBytes = Buffer.alloc(2)
+    groupBytes.writeUInt16BE(group, 0)
+    return groupBytes
+  })
+}
+
 function parseIPv6(ipv6: string, errMsg: InvalidDataReason): Buffer {
   validate(isString(ipv6), errMsg)
-  const ipHex = ipv6.split(':').join('')
-  validate(isHexStringOfLength(ipHex, 16), errMsg)
-  return hex_to_buf(ipHex)
+
+  const doubleColonIndex = ipv6.indexOf('::')
+  const hasCompression = doubleColonIndex !== -1
+  validate(
+    !hasCompression || doubleColonIndex === ipv6.lastIndexOf('::'),
+    errMsg,
+  )
+
+  const [leftSection, rightSection = ''] = hasCompression
+    ? ipv6.split('::')
+    : [ipv6]
+
+  const leftChunks = parseIPv6Section(leftSection, !hasCompression, errMsg)
+  const rightChunks = hasCompression
+    ? parseIPv6Section(rightSection, true, errMsg)
+    : []
+
+  const leftLengthInWords = leftChunks.reduce(
+    (sum, chunk) => sum + chunk.length / 2,
+    0,
+  )
+  const rightLengthInWords = rightChunks.reduce(
+    (sum, chunk) => sum + chunk.length / 2,
+    0,
+  )
+
+  validate(leftLengthInWords + rightLengthInWords <= 8, errMsg)
+
+  if (hasCompression) {
+    const missingWords = 8 - leftLengthInWords - rightLengthInWords
+    validate(missingWords > 0, errMsg)
+    return Buffer.concat([
+      ...leftChunks,
+      Buffer.alloc(missingWords * 2),
+      ...rightChunks,
+    ])
+  }
+
+  validate(leftLengthInWords === 8, errMsg)
+  return Buffer.concat(leftChunks)
 }
 
 function parseDnsName(

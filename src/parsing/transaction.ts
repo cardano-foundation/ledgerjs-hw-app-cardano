@@ -44,7 +44,7 @@ import {
   TxRequiredSignerType,
   VoteOption,
 } from '../types/public'
-import {assert, unreachable} from '../utils/assert'
+import {unreachable} from '../utils/assert'
 import {
   isArray,
   isObject,
@@ -328,9 +328,7 @@ function inferPoolRegistrationSigningMode(
     // registration itself. Once other certificates are present, AUTO cannot
     // tell whether pool-specific signing should still apply or whether the
     // transaction belongs to a different mode entirely.
-    throw new InvalidData(
-      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
-    )
+    throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
   // there is only one certificate, and it is pool registration
@@ -395,9 +393,7 @@ function inferOrdinaryOrMultisigFromTx(
     // multisig requirements should resolve to that mode instead of failing here.
     // These signals are mutually exclusive across the supported modes, so
     // conflicting signals mean AUTO cannot choose a unique mode.
-    throw new InvalidData(
-      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
-    )
+    throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
   const commitCredentialMode = (credentialType: CredentialType) => {
@@ -514,9 +510,7 @@ function inferOrdinaryOrMultisigFromWitnessPaths(
     // TODO: When unrestricted transaction signing is added, mixed ordinary and
     // multisig witness requirements should resolve to that mode instead of
     // failing here.
-    throw new InvalidData(
-      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
-    )
+    throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
   if (hasOrdinaryWitnessPath) {
@@ -557,9 +551,7 @@ function inferSigningMode(
     // multisig requirements should resolve to that mode instead of failing here.
     // Body-derived and witness-derived signals must agree on a unique
     // ordinary-vs-multisig interpretation.
-    throw new InvalidData(
-      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
-    )
+    throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
   // Witness paths are only a fallback for otherwise body-ambiguous ordinary vs
