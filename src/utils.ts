@@ -6,7 +6,7 @@ import {
 import type {Version} from './types/public'
 import {assert} from './utils/assert'
 import {isArray, isBuffer, isInteger} from './utils/parse'
-import {buf_to_hex, buf_to_uint16, hex_to_buf} from './utils/serialize'
+import {buf_to_hex, buf_to_uint16} from './utils/serialize'
 
 const sum = (arr: Array<number>) => arr.reduce((x, y) => x + y, 0)
 
@@ -44,8 +44,6 @@ export function stripRetcodeFromResponse(response: Buffer): Buffer {
 }
 
 export default {
-  // reexporting for tests
-  hex_to_buf,
   buf_to_hex,
 
   assert,

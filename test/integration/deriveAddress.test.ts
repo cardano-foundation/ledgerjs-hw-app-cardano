@@ -1,6 +1,5 @@
 import chai, {expect} from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import type {HexString} from '../../src/types/internal'
 
 import type {Ada} from '../../src/Ada'
 import {DeviceVersionUnsupported, utils} from '../../src/Ada'
@@ -14,7 +13,7 @@ import {
 chai.use(chaiAsPromised)
 
 const address_hex_to_base58 = (addressHex: string) =>
-  utils.base58_encode(utils.hex_to_buf(addressHex as HexString))
+  utils.base58_encode(Buffer.from(addressHex, 'hex'))
 
 describe('deriveAddress', () => {
   let ada: Ada = {} as Ada
@@ -66,7 +65,7 @@ describe('deriveAddress', () => {
         })
 
         expect(
-          utils.bech32_encodeAddress(utils.hex_to_buf(addressHex as HexString)),
+          utils.bech32_encodeAddress(Buffer.from(addressHex, 'hex')),
         ).to.equal(expectedResult)
       })
     }

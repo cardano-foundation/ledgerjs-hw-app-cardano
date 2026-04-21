@@ -75,7 +75,7 @@
     "build": "yarn tsc -p src/tsconfig.json --removeComments",
     "build-with-comments": "yarn tsc -p src/tsconfig.json",
     "build:flowtypes": "yarn build-with-comments && find . -type f -not -path './node_modules/*' -not -path './example-node/*' -name '*.d.ts' -exec sh -c 'yarn flowgen --add-flow-header --no-inexact $1 -o ${1%.*.*}.js.flow' _ '{}' \\;",
-    "flow": "flow --show-all-errors dist/",
+    "flow": "flow check --show-all-errors dist/",
     "gen-docs": "yarn typedoc",
     "prepack": "yarn build:flowtypes && yarn flow && yarn build",
     "prepublish": "yarn run clean && yarn run build",
