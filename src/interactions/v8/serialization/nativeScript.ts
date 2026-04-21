@@ -29,18 +29,23 @@ const enum NativeScriptTypeWire {
 }
 
 const TYPE_ENCODING = {
-  [NativeScriptType.PUBKEY_DEVICE_OWNED]: NativeScriptTypeWire.PUBKEY as Uint8_t,
+  [NativeScriptType.PUBKEY_DEVICE_OWNED]:
+    NativeScriptTypeWire.PUBKEY as Uint8_t,
   [NativeScriptType.PUBKEY_THIRD_PARTY]: NativeScriptTypeWire.PUBKEY as Uint8_t,
   [NativeScriptType.ALL]: NativeScriptTypeWire.ALL as Uint8_t,
   [NativeScriptType.ANY]: NativeScriptTypeWire.ANY as Uint8_t,
   [NativeScriptType.N_OF_K]: NativeScriptTypeWire.N_OF_K as Uint8_t,
-  [NativeScriptType.INVALID_BEFORE]: NativeScriptTypeWire.INVALID_BEFORE as Uint8_t,
-  [NativeScriptType.INVALID_HEREAFTER]: NativeScriptTypeWire.INVALID_HEREAFTER as Uint8_t,
+  [NativeScriptType.INVALID_BEFORE]:
+    NativeScriptTypeWire.INVALID_BEFORE as Uint8_t,
+  [NativeScriptType.INVALID_HEREAFTER]:
+    NativeScriptTypeWire.INVALID_HEREAFTER as Uint8_t,
 } as const
 
 const DISPLAY_FORMAT_ENCODING = {
-  [NativeScriptHashDisplayFormat.BECH32]: NativeScriptHashDisplayFormatWire.BECH32 as Uint8_t,
-  [NativeScriptHashDisplayFormat.POLICY_ID]: NativeScriptHashDisplayFormatWire.POLICY_ID as Uint8_t,
+  [NativeScriptHashDisplayFormat.BECH32]:
+    NativeScriptHashDisplayFormatWire.BECH32 as Uint8_t,
+  [NativeScriptHashDisplayFormat.POLICY_ID]:
+    NativeScriptHashDisplayFormatWire.POLICY_ID as Uint8_t,
 } as const
 
 export function serializeComplexNativeScriptStart(
@@ -74,12 +79,18 @@ export function serializeSimpleNativeScript(
     case NativeScriptType.PUBKEY_DEVICE_OWNED:
       return Buffer.concat([
         uint8_to_buf(TYPE_ENCODING[script.type]),
-        serializeCredential({type: CredentialType.KEY_PATH, path: script.params.path}),
+        serializeCredential({
+          type: CredentialType.KEY_PATH,
+          path: script.params.path,
+        }),
       ])
     case NativeScriptType.PUBKEY_THIRD_PARTY:
       return Buffer.concat([
         uint8_to_buf(TYPE_ENCODING[script.type]),
-        serializeCredential({type: CredentialType.KEY_HASH, keyHashHex: script.params.keyHashHex}),
+        serializeCredential({
+          type: CredentialType.KEY_HASH,
+          keyHashHex: script.params.keyHashHex,
+        }),
       ])
     case NativeScriptType.INVALID_BEFORE:
     case NativeScriptType.INVALID_HEREAFTER:

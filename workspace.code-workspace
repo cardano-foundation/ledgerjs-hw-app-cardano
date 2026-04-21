@@ -1,14 +1,14 @@
 {
   "folders": [
     {
-      "path": "."
-    }
+      "path": ".",
+    },
   ],
   "settings": {
     "editor.formatOnSave": true,
     "typescript.tsdk": "node_modules/typescript/lib",
     "search.exclude": {
-      "**/.yarn/releases": true
-    }
-  }
+      "**/.yarn/releases": true,
+    },
+  },
 }

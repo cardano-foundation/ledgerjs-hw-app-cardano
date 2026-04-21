@@ -104,7 +104,9 @@ function parseAssetGroup<T>(
     InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_NOT_UNIQUE,
   )
 
-  const sortedAssetNames = [...assetNamesHex].sort(compareHexByCanonicalAssetOrdering)
+  const sortedAssetNames = [...assetNamesHex].sort(
+    compareHexByCanonicalAssetOrdering,
+  )
   validate(
     JSON.stringify(assetNamesHex) === JSON.stringify(sortedAssetNames),
     InvalidDataReason.MULTIASSET_INVALID_ASSET_GROUP_ORDERING,

@@ -43,6 +43,7 @@ The codebase contains two interaction architectures. **v8 is the only active arc
 **v7** (`src/interactions/v7/`): supports app version 7, which runs only on the discontinued Ledger Nano S. As of 2026 the Nano S is no longer sold and Ledger no longer supports it. The v7 code path exists solely for users who have not yet upgraded their app to v8. It is a maintenance target only — monolithic per-operation files where staging, serialization, and response parsing are all inline (`signTx.ts` is ~1500 lines). Do not imitate for new work, and do not invest in refactoring it.
 
 **v8** (`src/interactions/v8/`): supports all current devices and app versions. Split into three layers:
+
 - `commandBuilder.ts` — pure: domain objects → APDU descriptors. No I/O.
 - `commandSender.ts` — sequences the APDU exchange using builder output.
 - per-operation files — interpret responses, collect results.

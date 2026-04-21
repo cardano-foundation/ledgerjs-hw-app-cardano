@@ -102,7 +102,10 @@ function parseWithdrawal(params: Withdrawal): ParsedWithdrawal {
 function parseRequiredSigner(
   requiredSigner: RequiredSigner,
 ): ParsedRequiredSigner {
-  validate(isObject(requiredSigner), InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE)
+  validate(
+    isObject(requiredSigner),
+    InvalidDataReason.UNKNOWN_REQUIRED_SIGNER_TYPE,
+  )
   switch (requiredSigner.type) {
     case TxRequiredSignerType.PATH:
       return {
@@ -181,7 +184,10 @@ function parseVoteOption(voteOption: VoteOption): VoteOption {
 function parseVote(vote: Vote): ParsedVote {
   validate(isObject(vote), InvalidDataReason.GOV_ACTION_ID_INVALID)
   validate(isObject(vote.govActionId), InvalidDataReason.GOV_ACTION_ID_INVALID)
-  validate(isObject(vote.votingProcedure), InvalidDataReason.VOTING_PROCEDURE_INVALID)
+  validate(
+    isObject(vote.votingProcedure),
+    InvalidDataReason.VOTING_PROCEDURE_INVALID,
+  )
   return {
     govActionId: {
       txHashHex: parseHexStringOfLength(
@@ -223,7 +229,9 @@ function parseCertificates(
   return parsed
 }
 
-function parseWithdrawals(withdrawals: Array<Withdrawal>): Array<ParsedWithdrawal> {
+function parseWithdrawals(
+  withdrawals: Array<Withdrawal>,
+): Array<ParsedWithdrawal> {
   validate(isArray(withdrawals), InvalidDataReason.WITHDRAWALS_NOT_ARRAY)
   return withdrawals.map((withdrawal) => parseWithdrawal(withdrawal))
 }

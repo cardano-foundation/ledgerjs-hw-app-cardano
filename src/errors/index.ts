@@ -1,8 +1,5 @@
 export {ErrorBase} from './errorBase'
 export {InvalidData} from './invalidData'
 export {DeviceVersionUnsupported} from './deviceUnsupported'
-export {
-  DeviceStatusError,
-  DeviceStatusMessages,
-} from './deviceStatusError'
+export {DeviceStatusError, DeviceStatusMessages} from './deviceStatusError'
 export {InvalidDataReason} from './invalidDataReason'

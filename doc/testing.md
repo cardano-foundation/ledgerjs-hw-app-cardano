@@ -11,6 +11,7 @@ yarn test-unit
 ```
 
 What they cover:
+
 - `address.test.ts`, `parse.test.ts` — address encoding and parser utilities
 - `txOptionsEncoding.test.ts` — transaction options encoding
 - `v8/` — v8 APDU command builder and sender behavior, per-operation dispatch:

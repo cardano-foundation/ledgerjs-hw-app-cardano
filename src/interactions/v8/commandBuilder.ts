@@ -152,15 +152,13 @@ export function buildSignCVoteChunks(cVote: ParsedCVote): SendParams[] {
 
   while (cursor < payload.length) {
     const chunk = payload.substring(cursor, cursor + maxPayloadSize)
-    apdus.push(
-      {
-        ins: INS.SIGN_CIP36_VOTE,
-        p1: V8CVoteP1.CHUNK,
-        p2: V8P2_UNUSED,
-        data: hex_to_buf(chunk as typeof cVote.voteCastDataHex),
-        expectedResponseLength: 0,
-      },
-    )
+    apdus.push({
+      ins: INS.SIGN_CIP36_VOTE,
+      p1: V8CVoteP1.CHUNK,
+      p2: V8P2_UNUSED,
+      data: hex_to_buf(chunk as typeof cVote.voteCastDataHex),
+      expectedResponseLength: 0,
+    })
     cursor += maxPayloadSize
   }
 
@@ -198,18 +196,16 @@ export function buildSignMessageChunks(
   while (offset < messageBytes.length) {
     const size = Math.min(MAX_CIP8_MSG_CHUNK_SIZE, messageBytes.length - offset)
     const chunkData = messageBytes.slice(offset, offset + size)
-    apdus.push(
-      {
-        ins: INS.SIGN_MESSAGE,
-        p1: V8MessageP1.CHUNK,
-        p2: V8P2_UNUSED,
-        data: Buffer.concat([
-          uint32_to_buf(chunkData.length as Uint32_t),
-          chunkData,
-        ]),
-        expectedResponseLength: 0,
-      },
-    )
+    apdus.push({
+      ins: INS.SIGN_MESSAGE,
+      p1: V8MessageP1.CHUNK,
+      p2: V8P2_UNUSED,
+      data: Buffer.concat([
+        uint32_to_buf(chunkData.length as Uint32_t),
+        chunkData,
+      ]),
+      expectedResponseLength: 0,
+    })
     offset += size
   }
 
@@ -327,16 +323,13 @@ export function buildSignTxChunks(
     const chunkData = txData.slice(offset, offset + size)
     offset += size
 
-    apdus.push(
-      {
-        ins: INS.SIGN_TX,
-        p1: offset < txData.length ? V8TxP1.CHUNK : V8TxP1.CONFIRM,
-        p2: V8P2_UNUSED,
-        data: chunkData,
-        expectedResponseLength:
-          offset < txData.length ? 0 : TX_HASH_LENGTH,
-      },
-    )
+    apdus.push({
+      ins: INS.SIGN_TX,
+      p1: offset < txData.length ? V8TxP1.CHUNK : V8TxP1.CONFIRM,
+      p2: V8P2_UNUSED,
+      data: chunkData,
+      expectedResponseLength: offset < txData.length ? 0 : TX_HASH_LENGTH,
+    })
   }
 
   return apdus

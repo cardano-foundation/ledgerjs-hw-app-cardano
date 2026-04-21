@@ -61,7 +61,10 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
       str_to_path("1852'/1815'/0'/2/1"),
     ],
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason: InvalidDataReason.LEDGER_POLICY,
@@ -79,7 +82,10 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
       str_to_path("1854'/1815'/0'/2/0"),
     ],
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason: InvalidDataReason.LEDGER_POLICY,
@@ -106,7 +112,10 @@ export const poolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] = [
       str_to_path("1854'/1815'/0'/2/0"),
     ],
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason:
@@ -151,7 +160,10 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     additionalWitnessPaths: [],
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_INVALID_DATA]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_INVALID_DATA],
+      },
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason:
@@ -175,7 +187,10 @@ export const invalidCertificates: TestCaseRejectShelley[] = [
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     additionalWitnessPaths: [],
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
     rejectReason:
@@ -402,8 +417,7 @@ export const invalidRelayTestCases: TestCaseRejectShelley[] = [
       v7: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
       v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
     },
-    rejectReason:
-      InvalidDataReason.RELAY_SINGLE_HOST_IP_MISSING_BOTH_ADDRESSES,
+    rejectReason: InvalidDataReason.RELAY_SINGLE_HOST_IP_MISSING_BOTH_ADDRESSES,
   },
 ]
 
@@ -432,8 +446,15 @@ export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[]
       },
       signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
       err: {
-        v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-        v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+        v7: {
+          errCls: DeviceStatusError,
+          errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+        },
+        v8: {
+          errCls: DeviceStatusError,
+          errMsg:
+            StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+        },
       },
       rejectReason:
         InvalidDataReason.SIGN_MODE_POOL_OWNER__THIRD_PARTY_POOL_KEY_REQUIRED,
@@ -461,8 +482,15 @@ export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[]
       },
       signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
       err: {
-        v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-        v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+        v7: {
+          errCls: DeviceStatusError,
+          errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+        },
+        v8: {
+          errCls: DeviceStatusError,
+          errMsg:
+            StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+        },
       },
       rejectReason:
         InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_KEY_REQUIRED,
@@ -496,8 +524,15 @@ export const stakePoolRegistrationOwnerRejectTestCases: TestCaseRejectShelley[] 
       },
       signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
       err: {
-        v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-        v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+        v7: {
+          errCls: DeviceStatusError,
+          errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+        },
+        v8: {
+          errCls: DeviceStatusError,
+          errMsg:
+            StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+        },
       },
       rejectReason: InvalidDataReason.LEDGER_POLICY,
     },
@@ -513,8 +548,15 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
+      v8: {
+        errCls: DeviceStatusError,
+        errMsg:
+          StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+      },
     },
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
   },
@@ -527,8 +569,15 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
+      v8: {
+        errCls: DeviceStatusError,
+        errMsg:
+          StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+      },
     },
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DATUM_NOT_ALLOWED,
   },
@@ -541,8 +590,15 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
+      v8: {
+        errCls: DeviceStatusError,
+        errMsg:
+          StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+      },
     },
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OPERATOR__REFERENCE_SCRIPT_NOT_ALLOWED,
@@ -556,8 +612,15 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
+      v8: {
+        errCls: DeviceStatusError,
+        errMsg:
+          StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+      },
     },
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
   },
@@ -570,8 +633,15 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
+      v8: {
+        errCls: DeviceStatusError,
+        errMsg:
+          StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+      },
     },
     rejectReason: InvalidDataReason.SIGN_MODE_POOL_OWNER__DATUM_NOT_ALLOWED,
   },
@@ -584,8 +654,15 @@ export const outputRejectTestCases: TestCaseRejectShelley[] = [
     },
     signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
     err: {
-      v7: {errCls: DeviceStatusError, errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY]},
-      v8: {errCls: DeviceStatusError, errMsg: StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]},
+      v7: {
+        errCls: DeviceStatusError,
+        errMsg: StatusWordMsgV7[StatusWordV7.ERR_REJECTED_BY_POLICY],
+      },
+      v8: {
+        errCls: DeviceStatusError,
+        errMsg:
+          StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+      },
     },
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_OWNER__REFERENCE_SCRIPT_NOT_ALLOWED,

@@ -22,6 +22,7 @@ import type {
   StakeDelegationParams,
   StakeDeregistrationParams,
   StakeRegistrationParams,
+  VoteOption,
 } from '../../../src/types/public'
 import {
   PoolKeyType,
@@ -30,7 +31,6 @@ import {
   CredentialParamsType,
   TransactionSigningMode,
   VoterType,
-  VoteOption,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
 import {bech32_to_hex, DoNotRunOnLedger} from '../../test_utils'

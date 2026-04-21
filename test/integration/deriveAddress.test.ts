@@ -73,7 +73,13 @@ describe('deriveAddress', () => {
   }).timeout(60000)
 
   describe('Should reject address derive', () => {
-    for (const {testName, network, addressParams, err, appVersion} of rejectTestCases) {
+    for (const {
+      testName,
+      network,
+      addressParams,
+      err,
+      appVersion,
+    } of rejectTestCases) {
       it(testName, async () => {
         const {version} = await ada.getVersion()
         const isAppXS = version.flags.isAppXS
@@ -121,7 +127,13 @@ describe('deriveAddress', () => {
   }).timeout(60000)
 
   describe('Should reject address show', () => {
-    for (const {testName, network, addressParams, err, appVersion} of rejectTestCases) {
+    for (const {
+      testName,
+      network,
+      addressParams,
+      err,
+      appVersion,
+    } of rejectTestCases) {
       it(testName, async () => {
         const {version} = await ada.getVersion()
         const isAppXS = version.flags.isAppXS

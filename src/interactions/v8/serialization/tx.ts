@@ -77,10 +77,14 @@ function u8(value: number): Buffer {
 
 function serializeSigningMode(signingMode: TransactionSigningMode): Buffer {
   const value = {
-    [TransactionSigningMode.ORDINARY_TRANSACTION]: SigningMode.ORDINARY_TRANSACTION,
-    [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: SigningMode.POOL_REGISTRATION_AS_OWNER,
-    [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: SigningMode.POOL_REGISTRATION_AS_OPERATOR,
-    [TransactionSigningMode.MULTISIG_TRANSACTION]: SigningMode.MULTISIG_TRANSACTION,
+    [TransactionSigningMode.ORDINARY_TRANSACTION]:
+      SigningMode.ORDINARY_TRANSACTION,
+    [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]:
+      SigningMode.POOL_REGISTRATION_AS_OWNER,
+    [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]:
+      SigningMode.POOL_REGISTRATION_AS_OPERATOR,
+    [TransactionSigningMode.MULTISIG_TRANSACTION]:
+      SigningMode.MULTISIG_TRANSACTION,
     [TransactionSigningMode.PLUTUS_TRANSACTION]: SigningMode.PLUTUS_TRANSACTION,
   }[signingMode]
 

@@ -2,11 +2,19 @@ import {expect} from 'chai'
 import {createRequire} from 'module'
 
 const nodeRequire = createRequire(__filename)
-const {parseSignTransactionRequest} = nodeRequire('../../src/parsing/transaction')
-const {serializeTxInit} = nodeRequire('../../src/interactions/serialization/txInit')
-const {buildSignTxInit} = nodeRequire('../../src/interactions/v8/commandBuilder')
+const {parseSignTransactionRequest} = nodeRequire(
+  '../../src/parsing/transaction',
+)
+const {serializeTxInit} = nodeRequire(
+  '../../src/interactions/serialization/txInit',
+)
+const {buildSignTxInit} = nodeRequire(
+  '../../src/interactions/v8/commandBuilder',
+)
 const {uint64_to_buf} = nodeRequire('../../src/utils/serialize')
-const {testsShelleyNoCertificates} = nodeRequire('../integration/__fixtures__/signTx')
+const {testsShelleyNoCertificates} = nodeRequire(
+  '../integration/__fixtures__/signTx',
+)
 
 const v6Version = {
   major: 6,
@@ -26,14 +34,16 @@ describe('tx options encoding', () => {
   const requestWithoutTag = parseSignTransactionRequest({
     tx: testsShelleyNoCertificates[0].tx,
     signingMode: testsShelleyNoCertificates[0].signingMode,
-    additionalWitnessPaths: testsShelleyNoCertificates[0].additionalWitnessPaths,
+    additionalWitnessPaths:
+      testsShelleyNoCertificates[0].additionalWitnessPaths,
     options: testsShelleyNoCertificates[0].options,
   })
 
   const requestWithTag = parseSignTransactionRequest({
     tx: testsShelleyNoCertificates[1].tx,
     signingMode: testsShelleyNoCertificates[1].signingMode,
-    additionalWitnessPaths: testsShelleyNoCertificates[1].additionalWitnessPaths,
+    additionalWitnessPaths:
+      testsShelleyNoCertificates[1].additionalWitnessPaths,
     options: testsShelleyNoCertificates[1].options,
   })
 
@@ -65,9 +75,7 @@ describe('tx options encoding', () => {
       v7ConwayVersion,
     )
 
-    expect(withoutTag.slice(0, 8).toString('hex')).to.equal(
-      '0000000000000000',
-    )
+    expect(withoutTag.slice(0, 8).toString('hex')).to.equal('0000000000000000')
     expect(withTag.slice(0, 8).toString('hex')).to.equal('0000000000000001')
   })
 
@@ -75,9 +83,7 @@ describe('tx options encoding', () => {
     const withoutTag = buildSignTxInit(requestWithoutTag, []).data
     const withTag = buildSignTxInit(requestWithTag, []).data
 
-    expect(withoutTag.slice(0, 8).toString('hex')).to.equal(
-      '0000000000000000',
-    )
+    expect(withoutTag.slice(0, 8).toString('hex')).to.equal('0000000000000000')
     expect(withTag.slice(0, 8).toString('hex')).to.equal('0000000000000001')
   })
 

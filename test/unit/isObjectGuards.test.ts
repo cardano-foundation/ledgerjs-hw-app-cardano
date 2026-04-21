@@ -8,11 +8,16 @@ import {
   VoterType,
   VoteOption,
 } from '../../src/types/public'
-import type {AnchorParams, CredentialParams, Transaction} from '../../src/types/public'
+import type {
+  AnchorParams,
+  CredentialParams,
+  Transaction,
+} from '../../src/types/public'
 
 const VALID_TX_HASH =
   '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7'
-const VALID_KEY_HASH = 'a700088326a60dfcfb63bc7a90a3078c4594e9a062b6a69e6b67c190'
+const VALID_KEY_HASH =
+  'a700088326a60dfcfb63bc7a90a3078c4594e9a062b6a69e6b67c190'
 const VALID_PATH = [0x80000000 + 1852, 0x80000000 + 1815, 0x80000000 + 0, 0, 0]
 
 const baseTx: Transaction = {
@@ -68,9 +73,9 @@ describe('isObject guards', () => {
 
   describe('parseAnchor', () => {
     it('throws InvalidData on null', () => {
-      expect(() =>
-        parseAnchor(null as unknown as AnchorParams),
-      ).to.throw(InvalidDataReason.ANCHOR_INVALID)
+      expect(() => parseAnchor(null as unknown as AnchorParams)).to.throw(
+        InvalidDataReason.ANCHOR_INVALID,
+      )
     })
 
     it('throws InvalidData on non-object', () => {
@@ -83,7 +88,8 @@ describe('isObject guards', () => {
       expect(() =>
         parseAnchor({
           url: 'https://example.com',
-          hashHex: '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
+          hashHex:
+            '1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef',
         }),
       ).not.to.throw()
     })
@@ -105,7 +111,9 @@ describe('isObject guards', () => {
       expect(() =>
         parseTransaction({
           ...baseTx,
-          withdrawals: [null as unknown as NonNullable<Transaction['withdrawals']>[0]],
+          withdrawals: [
+            null as unknown as NonNullable<Transaction['withdrawals']>[0],
+          ],
         }),
       ).to.throw(InvalidDataReason.WITHDRAWAL_INVALID_AMOUNT)
     })
@@ -116,7 +124,9 @@ describe('isObject guards', () => {
       expect(() =>
         parseTransaction({
           ...baseTx,
-          votingProcedures: [null as unknown as NonNullable<Transaction['votingProcedures']>[0]],
+          votingProcedures: [
+            null as unknown as NonNullable<Transaction['votingProcedures']>[0],
+          ],
         }),
       ).to.throw(InvalidDataReason.VOTER_VOTES_NOT_ARRAY)
     })
@@ -146,7 +156,7 @@ describe('isObject guards', () => {
           votingProcedures: [
             {
               ...baseVoterVotes,
-              votes: [null as unknown as typeof baseVoterVotes.votes[0]],
+              votes: [null as unknown as (typeof baseVoterVotes.votes)[0]],
             },
           ],
         }),
@@ -163,7 +173,8 @@ describe('isObject guards', () => {
               votes: [
                 {
                   ...baseVoterVotes.votes[0],
-                  govActionId: null as unknown as typeof baseVoterVotes.votes[0]['govActionId'],
+                  govActionId:
+                    null as unknown as (typeof baseVoterVotes.votes)[0]['govActionId'],
                 },
               ],
             },
@@ -182,7 +193,8 @@ describe('isObject guards', () => {
               votes: [
                 {
                   ...baseVoterVotes.votes[0],
-                  votingProcedure: null as unknown as typeof baseVoterVotes.votes[0]['votingProcedure'],
+                  votingProcedure:
+                    null as unknown as (typeof baseVoterVotes.votes)[0]['votingProcedure'],
                 },
               ],
             },

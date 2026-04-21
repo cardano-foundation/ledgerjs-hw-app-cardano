@@ -877,7 +877,6 @@ function* signTx_getWitness(path: ValidBIP32Path): Interaction<{
   }
 }
 
-
 function hasCredentialInCertificatesPreConway(
   tx: ParsedTransaction,
   credentialType: CredentialType,

@@ -39,6 +39,7 @@ Both must be done before running any `yarn` commands, otherwise you will get the
 Run `yarn test-unit` after any change to parsing or serialization. See [`doc/testing.md`](doc/testing.md) for the full test reference.
 
 Quick reference:
+
 - `yarn test-unit` — unit tests, no device needed
 - `yarn test-speculos` — integration tests against Speculos emulator
 - `yarn lint` — ESLint + Prettier

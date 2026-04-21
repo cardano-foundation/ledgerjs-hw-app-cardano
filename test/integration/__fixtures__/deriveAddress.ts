@@ -1,8 +1,5 @@
 import type {DeviceOwnedAddress, ErrorBase, Network} from '../../../src/Ada'
-import {
-  DeviceStatusError,
-  AddressType,
-} from '../../../src/Ada'
+import {DeviceStatusError, AddressType} from '../../../src/Ada'
 import {
   StatusWordV7,
   StatusWordV8,
