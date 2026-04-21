@@ -6,7 +6,7 @@ const {parseSignTransactionRequest} = nodeRequire(
   '../../src/parsing/transaction',
 )
 const {serializeTxInit} = nodeRequire(
-  '../../src/interactions/serialization/txInit',
+  '../../src/interactions/v7/serialization/txInit',
 )
 const {buildSignTxInit} = nodeRequire(
   '../../src/interactions/v8/commandBuilder',

@@ -1,4 +1,8 @@
-import {DRepType, CredentialType, CertificateType} from '../../../types/internal'
+import {
+  DRepType,
+  CredentialType,
+  CertificateType,
+} from '../../../types/internal'
 import type {
   ParsedCertificate,
   ParsedDRep,

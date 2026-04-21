@@ -10,15 +10,16 @@ See [`doc/overview.md`](doc/overview.md) for codebase architecture and [`doc/tes
 
 ## Tooling setup
 
-**Before any `yarn` command, run the repo's required Node/corepack setup first.**
+**MANDATORY: run these two commands before EVERY yarn invocation, without exception.**
 
 ```sh
 nvm use         # switches to Node 22 per .nvmrc
 corepack enable # enables the yarn version declared in package.json
 ```
 
-If you skip this, `yarn` commands may fail with the wrong Node version or the
-wrong yarn version.
+Do NOT skip this step. Do NOT assume the environment is already set up. Do NOT run
+any `yarn` command without running these first. Skipping them silently uses the wrong
+Node or yarn version and produces misleading results.
 
 ## Workflow
 

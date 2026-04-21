@@ -1,7 +1,15 @@
 import type {Version} from '../../../types/public'
 import {MessageAddressFieldType} from '../../../types/public'
-import type {ParsedMessageData, Uint32_t, Uint8_t} from '../../../types/internal'
-import {path_to_buf, uint32_to_buf, uint8_to_buf} from '../../../utils/serialize'
+import type {
+  ParsedMessageData,
+  Uint32_t,
+  Uint8_t,
+} from '../../../types/internal'
+import {
+  path_to_buf,
+  uint32_to_buf,
+  uint8_to_buf,
+} from '../../../utils/serialize'
 import {serializeAddressParams} from './addressParams'
 
 export function serializeMessageDataInit(
