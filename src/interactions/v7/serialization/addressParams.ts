@@ -20,7 +20,7 @@ import {
   uint8_to_buf,
   uint32_to_buf,
 } from '../../../utils/serialize'
-import {getCompatibility} from '../../getVersion'
+import {getCompatibility} from '../../../validation/deviceCapabilities'
 
 function serializeSpendingDataSource(dataSource: SpendingDataSource): Buffer {
   switch (dataSource.type) {

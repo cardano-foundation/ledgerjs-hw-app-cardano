@@ -3,7 +3,7 @@ import type {Serial} from '../types/public'
 import utils from '../utils'
 import {INS} from './common/ins'
 import type {Interaction, SendParams} from './common/types'
-import {ensureLedgerAppVersionCompatible} from './getVersion'
+import {ensureLedgerAppVersionCompatible} from '../validation/deviceCapabilities'
 
 const send = (params: {
   p1: number

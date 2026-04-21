@@ -13,7 +13,7 @@ import {
   uint32_to_buf,
   uint64Number_to_buf,
 } from '../../../utils/serialize'
-import {getCompatibility} from '../../getVersion'
+import {getCompatibility} from '../../../validation/deviceCapabilities'
 
 const _serializeSigningMode = (mode: TransactionSigningMode): Buffer => {
   const value = {

@@ -17,7 +17,7 @@ import {
   uint32_to_buf,
   serializeCoin,
 } from '../../../utils/serialize'
-import {getCompatibility} from '../../getVersion'
+import {getCompatibility} from '../../../validation/deviceCapabilities'
 import {serializeAddressParams} from './addressParams'
 
 // should be the same as in the Ledger app

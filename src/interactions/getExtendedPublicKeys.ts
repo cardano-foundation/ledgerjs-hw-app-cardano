@@ -2,7 +2,7 @@ import type {ValidBIP32Path, Version} from '../types/internal'
 import type {ExtendedPublicKey} from '../types/public'
 import {ensureExtendedPublicKeysSupported} from '../validation/requestCompatibility'
 import type {Interaction} from './common/types'
-import {isV7App} from './getVersion'
+import {isV7App} from '../validation/deviceCapabilities'
 import {getExtendedPublicKeysV7} from './v7/getExtendedPublicKeys'
 import {getExtendedPublicKeys as getExtendedPublicKeysV8} from './v8/getExtendedPublicKeys'
 

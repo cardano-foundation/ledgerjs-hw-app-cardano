@@ -6,7 +6,7 @@ import type {
 } from '../types/public'
 import {ensureNativeScriptHashDerivationSupported} from '../validation/requestCompatibility'
 import type {Interaction} from './common/types'
-import {isV7App} from './getVersion'
+import {isV7App} from '../validation/deviceCapabilities'
 import {deriveNativeScriptHash as deriveNativeScriptHashV7} from './v7/deriveNativeScriptHash'
 import {deriveNativeScriptHash as deriveNativeScriptHashV8} from './v8/deriveNativeScriptHash'
 

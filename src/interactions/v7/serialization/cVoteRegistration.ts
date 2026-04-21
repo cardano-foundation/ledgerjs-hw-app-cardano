@@ -1,4 +1,4 @@
-import {getCompatibility} from '../../../interactions/getVersion'
+import {getCompatibility} from '../../../validation/deviceCapabilities'
 import type {
   CVotePublicKey,
   ParsedCVoteDelegation,

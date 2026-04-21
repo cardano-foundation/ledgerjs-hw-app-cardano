@@ -2,15 +2,6 @@ import type {Version} from '../types/internal'
 import {INS} from './common/ins'
 import type {Interaction, SendParams} from './common/types'
 
-export {
-  ensureLedgerAppVersionCompatible,
-  getCompatibility,
-  isLedgerAppVersionAtLeast,
-  isLedgerAppVersionAtMost,
-  isV7App,
-  isV8App,
-} from '../validation/deviceCapabilities'
-
 const send = (params: {
   p1: number
   p2: number

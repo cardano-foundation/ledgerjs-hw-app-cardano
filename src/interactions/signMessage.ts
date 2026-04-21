@@ -2,7 +2,7 @@ import type {ParsedMessageData} from '../types/internal'
 import type {SignedMessageData, Version} from '../types/public'
 import {ensureMessageSigningSupported} from '../validation/requestCompatibility'
 import type {Interaction} from './common/types'
-import {isV7App} from './getVersion'
+import {isV7App} from '../validation/deviceCapabilities'
 import {signMessageV7} from './v7/signMessage'
 import {signMessage as signMessageV8} from './v8/signMessage'
 

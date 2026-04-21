@@ -27,7 +27,7 @@ import {
   serializeCoin,
   serializeAnchor,
 } from '../../../utils/serialize'
-import {getCompatibility} from '../../getVersion'
+import {getCompatibility} from '../../../validation/deviceCapabilities'
 import type {SerializeTokenAmountFn} from '../../signTx'
 
 export function serializeTxInput(input: ParsedInput): Buffer {

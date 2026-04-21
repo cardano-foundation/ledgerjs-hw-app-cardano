@@ -15,7 +15,7 @@ import {
   serializeCoin,
   serializeAnchor,
 } from '../../../utils/serialize'
-import {getCompatibility} from '../../getVersion'
+import {getCompatibility} from '../../../validation/deviceCapabilities'
 
 export function serializeDRep(dRep: ParsedDRep): Buffer {
   switch (dRep.type) {

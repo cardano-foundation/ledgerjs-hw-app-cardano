@@ -46,7 +46,7 @@ import {
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
 import {gatherWitnessPaths} from '../common/witnessPaths'
-import {getCompatibility} from '../getVersion'
+import {getCompatibility} from '../../validation/deviceCapabilities'
 import {
   serializeCVoteRegistrationDelegation,
   serializeCVoteRegistrationInit,

@@ -2,7 +2,7 @@ import type {ParsedAddressParams, Version} from '../types/internal'
 import type {DerivedAddress} from '../types/public'
 import {ensureAddressDerivationSupported} from '../validation/requestCompatibility'
 import type {Interaction} from './common/types'
-import {isV7App} from './getVersion'
+import {isV7App} from '../validation/deviceCapabilities'
 import {deriveAddressV7} from './v7/deriveAddress'
 import {deriveAddress as deriveAddressV8} from './v8/deriveAddress'
 

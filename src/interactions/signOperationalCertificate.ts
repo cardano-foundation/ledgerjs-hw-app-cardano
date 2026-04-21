@@ -2,7 +2,7 @@ import type {ParsedOperationalCertificate, Version} from '../types/internal'
 import type {OperationalCertificateSignature} from '../types/public'
 import {ensureOperationalCertificateSigningSupported} from '../validation/requestCompatibility'
 import type {Interaction} from './common/types'
-import {isV7App} from './getVersion'
+import {isV7App} from '../validation/deviceCapabilities'
 import {signOperationalCertificateV7} from './v7/signOperationalCertificate'
 import {signOperationalCertificate as signOperationalCertificateV8} from './v8/signOperationalCertificate'
 
