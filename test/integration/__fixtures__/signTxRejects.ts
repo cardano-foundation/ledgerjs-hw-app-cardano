@@ -2,6 +2,7 @@ import type {Transaction} from '../../../src/Ada'
 import {
   CertificateType,
   DeviceStatusError,
+  InvalidData,
   InvalidDataReason,
   Networks,
   AddressType,
@@ -2952,6 +2953,16 @@ export const votingProcedureRejectTestCases: TestCaseRejectShelley[] = [
       ],
     },
     signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    err: {
+      v7: {
+        errCls: InvalidData,
+        errMsg: InvalidDataReason.VOTING_PROCEDURE_INVALID_VOTE_OPTION,
+      },
+      v8: {
+        errCls: InvalidData,
+        errMsg: InvalidDataReason.VOTING_PROCEDURE_INVALID_VOTE_OPTION,
+      },
+    },
     rejectReason: InvalidDataReason.VOTING_PROCEDURE_INVALID_VOTE_OPTION,
   },
 ]

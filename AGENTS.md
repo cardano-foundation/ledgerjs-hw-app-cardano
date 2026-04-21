@@ -2,7 +2,23 @@
 
 JS library for communication with Ledger hardware wallets running the Cardano app.
 
+Terminology: this repository is `ledgerjs`, not the Ledger SDK. In this codebase,
+"SDK" should refer only to Ledger's underlying app/library terminology when
+that distinction is necessary.
+
 See [`doc/overview.md`](doc/overview.md) for codebase architecture and [`doc/testing.md`](doc/testing.md) for how to run tests.
+
+## Tooling setup
+
+**Before any `yarn` command, run the repo's required Node/corepack setup first.**
+
+```sh
+nvm use         # switches to Node 22 per .nvmrc
+corepack enable # enables the yarn version declared in package.json
+```
+
+If you skip this, `yarn` commands may fail with the wrong Node version or the
+wrong yarn version.
 
 ## Workflow
 
@@ -22,17 +38,6 @@ See [`doc/overview.md`](doc/overview.md) for codebase architecture and [`doc/tes
 - **Do NOT use web search.** Work only with the local repository, sibling repositories, and local tools/files.
 - **Do NOT change the public API** (exported types and `Ada` class methods) without explicit confirmation — this is a published library with downstream consumers.
 - **Do NOT add dependencies** without explicit confirmation.
-
-## Environment setup
-
-This repo requires a specific Node version and uses corepack for yarn:
-
-```sh
-nvm use        # switches to Node 22 per .nvmrc
-corepack enable  # enables corepack so yarn resolves via packageManager field in package.json
-```
-
-Both must be done before running any `yarn` commands, otherwise you will get the wrong Node version or a yarn version mismatch.
 
 ## Testing
 

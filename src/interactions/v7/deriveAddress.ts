@@ -1,11 +1,7 @@
-import {DeviceVersionUnsupported} from '../../errors'
-import {getVersionString} from '../../utils'
 import type {ParsedAddressParams, Version} from '../../types/internal'
-import {AddressType} from '../../types/public'
 import type {DerivedAddress} from '../../types/public'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
-import {ensureLedgerAppVersionCompatible, getCompatibility} from '../getVersion'
 import {serializeAddressParams} from '../serialization/addressParams'
 
 const send = (params: {
@@ -15,30 +11,10 @@ const send = (params: {
   expectedResponseLength?: number
 }): SendParams => ({ins: INS.DERIVE_ADDRESS, ...params})
 
-export function ensureAddressDerivationSupportedByAppVersionV7(
-  version: Version,
-  addressParams: ParsedAddressParams,
-): void {
-  ensureLedgerAppVersionCompatible(version)
-
-  if (
-    addressParams.type === AddressType.BYRON &&
-    !getCompatibility(version).supportsByronAddressDerivation
-  ) {
-    throw new DeviceVersionUnsupported(
-      `Byron address parameters not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-}
-
 export function* deriveAddressV7(
   version: Version,
   addressParams: ParsedAddressParams,
 ): Interaction<DerivedAddress> {
-  ensureAddressDerivationSupportedByAppVersionV7(version, addressParams)
-
   const P1_RETURN = 0x01
   const P2_UNUSED = 0x00
 

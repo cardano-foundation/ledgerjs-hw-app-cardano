@@ -394,16 +394,6 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
 
   // voting procedures
   const votingProcedures = parseVotingProcedures(tx.votingProcedures ?? [])
-  validate(
-    votingProcedures.length <= 1,
-    InvalidDataReason.VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTERS,
-  )
-  for (const voterVotes of votingProcedures) {
-    validate(
-      voterVotes.votes.length === 1,
-      InvalidDataReason.VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTES,
-    )
-  }
 
   // treasury
   const treasury =

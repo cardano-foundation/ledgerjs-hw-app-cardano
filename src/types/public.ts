@@ -1280,6 +1280,14 @@ export type DeviceCompatibility = {
    */
   supportsConway: boolean
   /**
+   * Whether we support multiple voters in transaction voting procedures
+   */
+  supportsMultipleVoters: boolean
+  /**
+   * Whether we support multiple votes within a single voter entry
+   */
+  supportsMultipleVotesPerVoter: boolean
+  /**
    * Whether we support CIP-8 message signing
    */
   supportsMessageSigning: boolean

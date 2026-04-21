@@ -1,28 +1,11 @@
-import {DeviceVersionUnsupported} from '../../errors'
 import type {Uint32_t, ValidBIP32Path, Version} from '../../types/internal'
 import {EXTENDED_PUBLIC_KEY_LENGTH} from '../../types/internal'
 import type {ExtendedPublicKey} from '../../types/public'
-import {HARDENED} from '../../types/public'
-import {chunkBy, getVersionString} from '../../utils'
+import {chunkBy} from '../../utils'
 import {assert} from '../../utils/assert'
 import {path_to_buf, uint32_to_buf} from '../../utils/serialize'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
-import {ensureLedgerAppVersionCompatible, getCompatibility} from '../getVersion'
-
-function ensureLedgerAppVersionCompatibleForPaths(
-  version: Version,
-  paths: Array<ValidBIP32Path>,
-): void {
-  const voteKeysPresent = paths.some((path) => path[0] === 1694 + HARDENED)
-  if (voteKeysPresent && !getCompatibility(version).supportsCIP36Vote) {
-    throw new DeviceVersionUnsupported(
-      `CIP36 vote keys not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-}
 
 const send = (params: {
   p1: number
@@ -35,9 +18,6 @@ export function* getExtendedPublicKeysV7(
   version: Version,
   paths: Array<ValidBIP32Path>,
 ): Interaction<Array<ExtendedPublicKey>> {
-  ensureLedgerAppVersionCompatible(version)
-  ensureLedgerAppVersionCompatibleForPaths(version, paths)
-
   const enum P1 {
     INIT = 0x00,
     NEXT_KEY = 0x01,

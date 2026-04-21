@@ -1,12 +1,9 @@
-import {DeviceVersionUnsupported} from '../../errors'
 import type {ParsedCVote, Uint32_t, Version} from '../../types/internal'
 import {ED25519_SIGNATURE_LENGTH} from '../../types/internal'
 import type {SignedCIP36VoteData} from '../../types/public'
-import {getVersionString} from '../../utils'
 import {hex_to_buf, path_to_buf, uint32_to_buf} from '../../utils/serialize'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
-import {getCompatibility} from '../getVersion'
 
 const send = (params: {
   p1: number
@@ -19,14 +16,6 @@ export function* signCVoteV7(
   version: Version,
   cVote: ParsedCVote,
 ): Interaction<SignedCIP36VoteData> {
-  if (!getCompatibility(version).supportsCIP36Vote) {
-    throw new DeviceVersionUnsupported(
-      `CIP36 voting not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-
   const enum P1 {
     STAGE_INIT = 0x01,
     STAGE_CHUNK = 0x02,

@@ -1,4 +1,3 @@
-import {DeviceVersionUnsupported} from '../errors'
 import type {
   ParsedComplexNativeScript,
   ParsedNativeScript,
@@ -11,14 +10,10 @@ import type {
   Version,
 } from '../types/public'
 import {NativeScriptType} from '../types/public'
-import {getVersionString} from '../utils'
+import {ensureNativeScriptHashDerivationSupported} from '../validation/requestCompatibility'
 import {INS} from './common/ins'
 import type {Interaction, SendParams} from './common/types'
-import {
-  ensureLedgerAppVersionCompatible,
-  getCompatibility,
-  isV8App,
-} from './getVersion'
+import {isV8App} from './getVersion'
 import {
   serializeComplexNativeScriptStart,
   serializeSimpleNativeScript,
@@ -108,28 +103,15 @@ function* deriveNativeScriptHash_finishWholeNativeScript(
   }
 }
 
-function ensureScriptHashDerivationSupportedByAppVersion(
-  version: Version,
-): void {
-  if (!getCompatibility(version).supportsNativeScriptHashDerivation) {
-    throw new DeviceVersionUnsupported(
-      `Native script hash derivation not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-}
-
 export function* deriveNativeScriptHash(
   version: Version,
   script: ParsedNativeScript,
   displayFormat: NativeScriptHashDisplayFormat,
 ): Interaction<NativeScriptHash> {
-  ensureLedgerAppVersionCompatible(version)
+  ensureNativeScriptHashDerivationSupported(version, script)
   if (isV8App(version)) {
     return yield* deriveNativeScriptHashV8(version, script, displayFormat)
   }
-  ensureScriptHashDerivationSupportedByAppVersion(version)
 
   yield* deriveNativeScriptHash_addScript(script)
   const {scriptHashHex} =

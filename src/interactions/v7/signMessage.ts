@@ -1,13 +1,11 @@
 import {buf_to_uint32, hex_to_buf, uint32_to_buf} from '../../utils/serialize'
-import {DeviceVersionUnsupported, InvalidDataReason} from '../../errors'
+import {InvalidDataReason} from '../../errors'
 import {assert} from '../../utils/assert'
 import type {ParsedMessageData, Uint32_t, Version} from '../../types/internal'
 import {ED25519_SIGNATURE_LENGTH, PUBLIC_KEY_LENGTH} from '../../types/internal'
 import type {SignedMessageData} from '../../types/public'
-import {getVersionString} from '../../utils'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
-import {getCompatibility} from '../getVersion'
 import {serializeMessageDataInit} from '../serialization/messageData'
 import {validate} from '../../utils/parse'
 
@@ -22,14 +20,6 @@ export function* signMessageV7(
   version: Version,
   msgData: ParsedMessageData,
 ): Interaction<SignedMessageData> {
-  if (!getCompatibility(version).supportsMessageSigning) {
-    throw new DeviceVersionUnsupported(
-      `CIP-8 message signing not supported by Ledger app version ${getVersionString(
-        version,
-      )}.`,
-    )
-  }
-
   const enum P1 {
     STAGE_INIT = 0x01,
     STAGE_CHUNK = 0x02,
