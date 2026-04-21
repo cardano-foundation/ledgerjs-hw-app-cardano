@@ -84,7 +84,8 @@
     "device-self-test": "mocha --timeout 3600000 -r ts-node/register -r ./test/mocha.setup.ts test/device-self-test/**/*.test.ts",
     "device-self-test-speculos": "LEDGER_TRANSPORT=speculos yarn device-self-test",
     "test-all": "yarn device-self-test && yarn test-integration",
-    "test-integration": "bash scripts/run-integration-compiled.sh",
+    "test-integration": "mocha --timeout 3600000 -r ts-node/register -r ./test/mocha.setup.ts test/integration/**/*.test.ts",
+    "test-integration-parallel": "bash scripts/run-integration-compiled.sh",
     "test-speculos": "bash scripts/test-speculos.sh",
     "test-unit": "yarn mocha -r ts-node/register -r ./test/mocha.setup.ts test/unit/**/*.test.ts",
     "//": "run single test by specifying --grep <name> parameter in test-integration"

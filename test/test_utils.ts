@@ -315,11 +315,9 @@ export function describeSignTxPositiveTest(
       } = testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (!txBody) {
-          // eslint-disable-next-line no-console
-          console.log(`WARNING --- No tx body given: ${testName}`)
+          expect.fail(`No tx body given for fixture: ${testName}`)
         } else if (hashTxBody(txBody) !== expectedResult.txHashHex) {
-          // eslint-disable-next-line no-console
-          console.log(`WARNING --- Tx body hash mismatch: ${testName}`)
+          expect.fail(`Tx body hash mismatch for fixture: ${testName}`)
         }
         const isAppXS = (await ada.getVersion()).version.flags.isAppXS
         const response = ada.signTransaction({

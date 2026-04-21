@@ -236,14 +236,11 @@ if (( PARALLELISM == 1 )); then
   setsid env \
     LEDGER_TRANSPORT=speculos \
     SPECULOS_APDU_PORT="$BASE_APDU_PORT" \
-    bash -lc '
-      prefix="$1"
-      logfile="$2"
-      shift 2
-      stdbuf -oL -eL "$@" 2>&1 | awk -v prefix="$prefix" "{print prefix \$0; fflush()}" | tee "$logfile"
-    ' _ "[mocha 0] " "$WORK_DIR/mocha-0.log" \
-    bash scripts/run-integration-compiled.sh \
-    "${MOCHA_ARGS[@]+"${MOCHA_ARGS[@]}"}" &
+    node_modules/.bin/mocha --timeout 3600000 --color \
+    -r ts-node/register -r ./test/mocha.setup.ts \
+    "test/integration/**/*.test.ts" \
+    "${MOCHA_ARGS[@]+"${MOCHA_ARGS[@]}"}" \
+    2>&1 | tee "$WORK_DIR/mocha-0.log" &
   MOCHA_PGIDS+=($!)
 else
   for ((i = 0; i < PARALLELISM; i++)); do
