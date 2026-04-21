@@ -23,6 +23,7 @@ import {
   singleAccountRejectTestCases,
   testsInvalidTokenBundleOrdering,
   transactionInitRejectTestCases,
+  votingProcedureRejectTestCases,
   withdrawalRejectTestCases,
   witnessRejectTestCases,
 } from './__fixtures__/signTxRejects'
@@ -93,4 +94,8 @@ describeSignTxRejects(
 describeSignTxRejects(
   'signTxCollateralOutputRejects',
   collateralOutputRejectTestCases,
+)
+describeSignTxRejects(
+  'signTxVotingProcedureRejects',
+  votingProcedureRejectTestCases,
 )

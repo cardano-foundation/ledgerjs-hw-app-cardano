@@ -29,6 +29,8 @@ import {
   PoolRewardAccountType,
   CredentialParamsType,
   TransactionSigningMode,
+  VoterType,
+  VoteOption,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
 import {bech32_to_hex, DoNotRunOnLedger} from '../../test_utils'
@@ -2919,5 +2921,37 @@ export const collateralOutputRejectTestCases: TestCaseRejectShelley[] = [
       },
     },
     rejectReason: InvalidDataReason.COLLATERAL_INPUT_CONTAINS_REFERENCE_SCRIPT,
+  },
+]
+
+export const votingProcedureRejectTestCases: TestCaseRejectShelley[] = [
+  {
+    testName: 'Invalid vote option (out of range)',
+    tx: {
+      ...shelleyBase,
+      votingProcedures: [
+        {
+          voter: {
+            type: VoterType.DREP_KEY_PATH,
+            keyPath: str_to_path("1852'/1815'/0'/3/0"),
+          },
+          votes: [
+            {
+              govActionId: {
+                txHashHex:
+                  '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+                govActionIndex: 0,
+              },
+              votingProcedure: {
+                vote: 99 as unknown as VoteOption,
+                anchor: null,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    rejectReason: InvalidDataReason.VOTING_PROCEDURE_INVALID_VOTE_OPTION,
   },
 ]

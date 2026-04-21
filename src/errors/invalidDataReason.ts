@@ -152,6 +152,7 @@ export enum InvalidDataReason {
   VOTER_INVALID = 'invalid voter in voting procedures',
   GOV_ACTION_ID_INVALID_TX_HASH = 'invalid governance action id tx hash',
   GOV_ACTION_ID_INVALID_INDEX = 'invalid governance action id index',
+  VOTING_PROCEDURE_INVALID_VOTE_OPTION = 'invalid vote option in a voting procedure',
   VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTERS = 'there must be exactly 1 voter in voting procedures',
   VOTING_PROCEDURES_INVALID_NUMBER_OF_VOTES = 'there must be exactly 1 voting procedure per voter',
 

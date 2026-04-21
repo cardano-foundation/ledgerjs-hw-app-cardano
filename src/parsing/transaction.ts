@@ -41,6 +41,7 @@ import {
   TransactionSigningMode,
   TxOutputDestinationType,
   TxRequiredSignerType,
+  VoteOption,
 } from '../types/public'
 import {unreachable} from '../utils/assert'
 import {
@@ -159,6 +160,19 @@ function parseVoter(voter: Voter): ParsedVoter {
   }
 }
 
+function parseVoteOption(voteOption: VoteOption): VoteOption {
+  switch (voteOption) {
+    case VoteOption.NO:
+    case VoteOption.YES:
+    case VoteOption.ABSTAIN:
+      return voteOption
+    default:
+      throw new InvalidData(
+        InvalidDataReason.VOTING_PROCEDURE_INVALID_VOTE_OPTION,
+      )
+  }
+}
+
 function parseVote(vote: Vote): ParsedVote {
   return {
     govActionId: {
@@ -173,7 +187,7 @@ function parseVote(vote: Vote): ParsedVote {
       ),
     },
     votingProcedure: {
-      vote: vote.votingProcedure.vote,
+      vote: parseVoteOption(vote.votingProcedure.vote),
       anchor:
         vote.votingProcedure.anchor == null
           ? null
