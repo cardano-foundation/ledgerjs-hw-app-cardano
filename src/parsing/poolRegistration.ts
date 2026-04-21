@@ -281,8 +281,6 @@ function parseDnsName(
   validate(isString(dnsName), errMsg)
   validate(dnsName.length <= MAX_DNS_NAME_LENGTH, errMsg)
   validate(dnsName.length > 0, errMsg)
-  // eslint-disable-next-line no-control-regex
-  validate(/^[\x00-\x7F]*$/.test(dnsName), errMsg)
   validate(
     dnsName
       .split('')

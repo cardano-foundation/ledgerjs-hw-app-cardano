@@ -14,7 +14,7 @@ import {
   PoolRewardAccountType,
   RelayType,
 } from '../../../types/internal'
-import {assert, unreachable} from '../../../utils/assert'
+import {unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
@@ -32,24 +32,6 @@ const SignTxIncluded = Object.freeze({
 
 export function serializePoolInitialParams(pool: ParsedPoolParams): Buffer {
   return Buffer.concat([
-    uint32_to_buf(pool.owners.length as Uint32_t),
-    uint32_to_buf(pool.relays.length as Uint32_t),
-  ])
-}
-
-export function serializePoolInitialParamsLegacy(
-  pool: ParsedPoolParams,
-): Buffer {
-  return Buffer.concat([
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    serializePoolKeyLegacy(pool.poolKey),
-    hex_to_buf(pool.vrfHashHex),
-    serializeCoin(pool.pledge),
-    serializeCoin(pool.cost),
-    uint64_to_buf(pool.margin.numerator),
-    uint64_to_buf(pool.margin.denominator),
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    serializePoolRewardAccountLegacy(pool.rewardAccount),
     uint32_to_buf(pool.owners.length as Uint32_t),
     uint32_to_buf(pool.relays.length as Uint32_t),
   ])
@@ -85,14 +67,6 @@ export function serializePoolKey(key: ParsedPoolKey): Buffer {
     default:
       unreachable(key)
   }
-}
-
-export function serializePoolKeyLegacy(key: ParsedPoolKey): Buffer {
-  assert(
-    key.type === PoolKeyType.THIRD_PARTY,
-    'invalid pool key type for legacy Ledger version',
-  )
-  return hex_to_buf(key.hashHex)
 }
 
 export function serializePoolOwner(owner: ParsedPoolOwner): Buffer {
@@ -141,16 +115,6 @@ export function serializePoolRewardAccount(
     default:
       unreachable(rewardAccount)
   }
-}
-
-export function serializePoolRewardAccountLegacy(
-  rewardAccount: ParsedPoolRewardAccount,
-): Buffer {
-  assert(
-    rewardAccount.type === PoolRewardAccountType.THIRD_PARTY,
-    'invalid pool reward account type for legacy Ledger version',
-  )
-  return hex_to_buf(rewardAccount.rewardAccountHex)
 }
 
 export function serializePoolRelay(relay: ParsedPoolRelay): Buffer {

@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [7.1.0](TBD) - [TBD]
+## [8.0.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v7.1.4...v8.0.1) - [April 21st 2025]
+
+### Removed
+
+- dropped v7 support for the legacy pool registration owner witness flow used by Ledger app versions 2.1-2.3
+
+
+## [7.1.4](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v7.0.1...v7.1.4) - [September 15th 2024]
 
 Message signing (CIP-8)
 
@@ -15,7 +22,7 @@ Message signing (CIP-8)
 - support for message signing (CIP-8, CIP-30)
 
 
-## [7.0.1](TBD) - [TBD]
+## [7.0.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v7.0.0...v7.0.1) - [February 1st 2024]
 
 ### Changed
 

@@ -59,7 +59,6 @@ import {
 import {
   serializeFinancials,
   serializePoolInitialParams,
-  serializePoolInitialParamsLegacy,
   serializePoolKey,
   serializePoolMetadata,
   serializePoolOwner,
@@ -373,63 +372,6 @@ function* signTx_addStakePoolRegistrationCertificate(
   })
 }
 
-function* signTx_addStakePoolRegistrationCertificateLegacy(
-  certificate: ParsedCertificate,
-): Interaction<void> {
-  assert(
-    certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
-    'invalid certificate type',
-  )
-
-  const enum P2 {
-    POOL_PARAMS = 0x30,
-    OWNERS = 0x31,
-    RELAYS = 0x32,
-    METADATA = 0x33,
-    CONFIRMATION = 0x34,
-  }
-
-  const pool = certificate.pool
-  yield send({
-    p1: P1.STAGE_CERTIFICATES,
-    p2: P2.POOL_PARAMS,
-    data: serializePoolInitialParamsLegacy(pool),
-    expectedResponseLength: 0,
-  })
-
-  for (const owner of pool.owners) {
-    yield send({
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.OWNERS,
-      data: serializePoolOwner(owner),
-      expectedResponseLength: 0,
-    })
-  }
-
-  for (const relay of pool.relays) {
-    yield send({
-      p1: P1.STAGE_CERTIFICATES,
-      p2: P2.RELAYS,
-      data: serializePoolRelay(relay),
-      expectedResponseLength: 0,
-    })
-  }
-
-  yield send({
-    p1: P1.STAGE_CERTIFICATES,
-    p2: P2.METADATA,
-    data: serializePoolMetadata(pool.metadata),
-    expectedResponseLength: 0,
-  })
-
-  yield send({
-    p1: P1.STAGE_CERTIFICATES,
-    p2: P2.CONFIRMATION,
-    data: Buffer.alloc(0),
-    expectedResponseLength: 0,
-  })
-}
-
 function* signTx_addCertificate(
   certificate: ParsedCertificate,
   version: Version,
@@ -446,17 +388,7 @@ function* signTx_addCertificate(
 
   // additional data for pool certificate
   if (certificate.type === CertificateType.STAKE_POOL_REGISTRATION) {
-    if (getCompatibility(version).supportsPoolRegistrationAsOperator) {
-      yield* signTx_addStakePoolRegistrationCertificate(certificate)
-    } else {
-      // TODO since version 4.0.0 of the Ledger app, pool registration owner witness
-      // is checked against the pool owner in the certificate
-      // after that version is tested and widespread, we want to drop support
-      // for the previous unsafe version (since 2.4) and the unsafe legacy version (since 2.1 or so)
-      // When the support for unsafe version is gone,
-      // the following legacy serialization should be removed, too.
-      yield* signTx_addStakePoolRegistrationCertificateLegacy(certificate)
-    }
+    yield* signTx_addStakePoolRegistrationCertificate(certificate)
   }
 }
 
