@@ -1,26 +1,26 @@
-import {DeviceVersionUnsupported} from '../../errors'
-import {InvalidDataReason} from '../../errors/invalidDataReason'
+import {DeviceVersionUnsupported} from '../../../errors'
+import {InvalidDataReason} from '../../../errors/invalidDataReason'
 import type {
   ParsedAddressParams,
   SpendingDataSource,
   StakingDataSource,
   Uint8_t,
   Version,
-} from '../../types/internal'
+} from '../../../types/internal'
 import {
   SpendingDataSourceType,
   AddressType,
   StakingDataSourceType,
-} from '../../types/internal'
-import {getVersionString} from '../../utils'
-import {assert, unreachable} from '../../utils/assert'
+} from '../../../types/internal'
+import {getVersionString} from '../../../utils'
+import {assert, unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
   uint8_to_buf,
   uint32_to_buf,
-} from '../../utils/serialize'
-import {getCompatibility} from '../getVersion'
+} from '../../../utils/serialize'
+import {getCompatibility} from '../../getVersion'
 
 function serializeSpendingDataSource(dataSource: SpendingDataSource): Buffer {
   switch (dataSource.type) {

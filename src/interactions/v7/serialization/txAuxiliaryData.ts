@@ -1,7 +1,7 @@
-import type {ParsedTxAuxiliaryData, Uint8_t} from '../../types/internal'
-import {TxAuxiliaryDataType} from '../../types/internal'
-import {unreachable} from '../../utils/assert'
-import {hex_to_buf, uint8_to_buf} from '../../utils/serialize'
+import type {ParsedTxAuxiliaryData, Uint8_t} from '../../../types/internal'
+import {TxAuxiliaryDataType} from '../../../types/internal'
+import {unreachable} from '../../../utils/assert'
+import {hex_to_buf, uint8_to_buf} from '../../../utils/serialize'
 
 export function serializeTxAuxiliaryData(
   auxiliaryData: ParsedTxAuxiliaryData,

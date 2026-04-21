@@ -7,14 +7,14 @@ import type {
   ParsedPoolRewardAccount,
   Uint8_t,
   Uint32_t,
-} from '../../types/internal'
+} from '../../../types/internal'
 import {
   PoolKeyType,
   PoolOwnerType,
   PoolRewardAccountType,
   RelayType,
-} from '../../types/internal'
-import {assert, unreachable} from '../../utils/assert'
+} from '../../../types/internal'
+import {assert, unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
@@ -23,7 +23,7 @@ import {
   uint32_to_buf,
   uint64_to_buf,
   serializeCoin,
-} from '../../utils/serialize'
+} from '../../../utils/serialize'
 
 const SignTxIncluded = Object.freeze({
   SIGN_TX_INCLUDED_NO: 1,

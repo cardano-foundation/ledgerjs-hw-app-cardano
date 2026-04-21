@@ -19,8 +19,9 @@ interactions/
     ins.ts               — APDU instruction byte constants
     types.ts             — Interaction<T> generator type and SendParams
     witnessPaths.ts      — gatherWitnessPaths + uniquify (shared by v7 and v8 signTx)
-  serialization/         — legacy shared serialization helpers (used by v7)
+  serialization/         — serialization helpers shared between v7 and v8 (currently: nativeScript.ts only)
   v7/                    — v7 app interaction implementations (legacy; maintenance only)
+    serialization/       — v7-only serialization helpers
   v8/
     commandBuilder.ts    — pure functions: domain objects → SendParams (APDU descriptors)
     commandSender.ts     — generator functions: sequences APDU exchanges
@@ -49,6 +50,8 @@ The codebase contains two interaction architectures. **v8 is the only active arc
 - per-operation files — interpret responses, collect results.
 
 New work must follow the v8 layering. **Avoid touching v7 code.** If a bug fix or feature strictly requires a v7 change, make the smallest possible edit and nothing more — no refactoring, no structural improvements.
+
+**XS flag:** The device version response includes an `isAppXS` flag indicating a memory-constrained build of the v7 app (Nano S XS). This flag is only relevant to v7: it triggers `applyV7XsCompatibilityAdjustments` which downgrades certain `DeviceCompatibility` feature flags. No v8 XS variant exists — all v8 devices return `isAppXS = false` and the flag is ignored for v8.
 
 ## Validation rule
 

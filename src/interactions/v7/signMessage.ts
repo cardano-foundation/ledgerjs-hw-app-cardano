@@ -6,7 +6,7 @@ import {ED25519_SIGNATURE_LENGTH, PUBLIC_KEY_LENGTH} from '../../types/internal'
 import type {SignedMessageData} from '../../types/public'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
-import {serializeMessageDataInit} from '../serialization/messageData'
+import {serializeMessageDataInit} from './serialization/messageData'
 import {validate} from '../../utils/parse'
 
 const send = (params: {

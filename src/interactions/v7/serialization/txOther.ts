@@ -1,5 +1,5 @@
-import {VoterType} from '../../types/public'
-import {InvalidDataReason} from '../../errors/invalidDataReason'
+import {VoterType} from '../../../types/public'
+import {InvalidDataReason} from '../../../errors/invalidDataReason'
 import type {
   Int64_str,
   ParsedAssetGroup,
@@ -14,9 +14,9 @@ import type {
   Version,
   ParsedVoterVotes,
   ParsedVoter,
-} from '../../types/internal'
-import {RequiredSignerType, CredentialType} from '../../types/internal'
-import {assert, unreachable} from '../../utils/assert'
+} from '../../../types/internal'
+import {RequiredSignerType, CredentialType} from '../../../types/internal'
+import {assert, unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
@@ -26,9 +26,9 @@ import {
   uint64_to_buf,
   serializeCoin,
   serializeAnchor,
-} from '../../utils/serialize'
-import {getCompatibility} from '../getVersion'
-import type {SerializeTokenAmountFn} from '../signTx'
+} from '../../../utils/serialize'
+import {getCompatibility} from '../../getVersion'
+import type {SerializeTokenAmountFn} from '../../signTx'
 
 export function serializeTxInput(input: ParsedInput): Buffer {
   return Buffer.concat([

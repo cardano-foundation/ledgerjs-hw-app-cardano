@@ -1,11 +1,11 @@
-import {DRepType, CredentialType, CertificateType} from '../../types/internal'
+import {DRepType, CredentialType, CertificateType} from '../../../types/internal'
 import type {
   ParsedCertificate,
   ParsedDRep,
   Version,
   Uint8_t,
-} from '../../types/internal'
-import {assert, unreachable} from '../../utils/assert'
+} from '../../../types/internal'
+import {assert, unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
@@ -14,8 +14,8 @@ import {
   uint64_to_buf,
   serializeCoin,
   serializeAnchor,
-} from '../../utils/serialize'
-import {getCompatibility} from '../getVersion'
+} from '../../../utils/serialize'
+import {getCompatibility} from '../../getVersion'
 
 export function serializeDRep(dRep: ParsedDRep): Buffer {
   switch (dRep.type) {

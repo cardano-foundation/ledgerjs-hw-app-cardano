@@ -55,7 +55,7 @@ import {
   serializeCVoteRegistrationStakingPath,
   serializeCVoteRegistrationVoteKey,
   serializeCVoteRegistrationVotingPurpose,
-} from '../serialization/cVoteRegistration'
+} from './serialization/cVoteRegistration'
 import {
   serializeFinancials,
   serializePoolInitialParams,
@@ -65,10 +65,10 @@ import {
   serializePoolOwner,
   serializePoolRelay,
   serializePoolRewardAccount,
-} from '../serialization/poolRegistrationCertificate'
-import {serializeTxAuxiliaryData} from '../serialization/txAuxiliaryData'
-import {serializeTxCertificate} from '../serialization/txCertificate'
-import {serializeTxInit} from '../serialization/txInit'
+} from './serialization/poolRegistrationCertificate'
+import {serializeTxAuxiliaryData} from './serialization/txAuxiliaryData'
+import {serializeTxCertificate} from './serialization/txCertificate'
+import {serializeTxInit} from './serialization/txInit'
 import {
   serializeAssetGroup,
   serializeMintBasicParams,
@@ -80,13 +80,13 @@ import {
   serializeTxWithdrawal,
   serializeTxWitnessRequest,
   serializeVoterVotes,
-} from '../serialization/txOther'
+} from './serialization/txOther'
 import {
   MAX_CHUNK_SIZE,
   serializeTxOutputBasicParams,
   serializeTxOutputDatum,
   serializeTxOutputRefScript,
-} from '../serialization/txOutput'
+} from './serialization/txOutput'
 
 // the numerical values are meaningless, we try to keep them backwards-compatible
 const enum P1 {

@@ -4,16 +4,16 @@ import type {
   Uint32_t,
   Version,
   ParsedTransactionOptions,
-} from '../../types/internal'
-import {TransactionSigningMode} from '../../types/internal'
-import {assert} from '../../utils/assert'
+} from '../../../types/internal'
+import {TransactionSigningMode} from '../../../types/internal'
+import {assert} from '../../../utils/assert'
 import {
   serializeOptionFlag,
   uint8_to_buf,
   uint32_to_buf,
   uint64Number_to_buf,
-} from '../../utils/serialize'
-import {getCompatibility} from '../getVersion'
+} from '../../../utils/serialize'
+import {getCompatibility} from '../../getVersion'
 
 const _serializeSigningMode = (mode: TransactionSigningMode): Buffer => {
   const value = {

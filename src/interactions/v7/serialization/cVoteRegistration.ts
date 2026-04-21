@@ -1,4 +1,4 @@
-import {getCompatibility} from '../../interactions/getVersion'
+import {getCompatibility} from '../../../interactions/getVersion'
 import type {
   CVotePublicKey,
   ParsedCVoteDelegation,
@@ -8,14 +8,14 @@ import type {
   Uint32_t,
   Uint64_str,
   ValidBIP32Path,
-} from '../../types/internal'
-import type {Version} from '../../types/public'
+} from '../../../types/internal'
+import type {Version} from '../../../types/public'
 import {
   TxOutputDestinationType,
   CIP36VoteDelegationType,
   CIP36VoteRegistrationFormat,
-} from '../../types/public'
-import {assert, unreachable} from '../../utils/assert'
+} from '../../../types/public'
+import {assert, unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   path_to_buf,
@@ -23,7 +23,7 @@ import {
   uint8_to_buf,
   uint32_to_buf,
   uint64_to_buf,
-} from '../../utils/serialize'
+} from '../../../utils/serialize'
 import {serializeAddressParams} from './addressParams'
 import {serializeTxOutputDestination} from './txOutput'
 

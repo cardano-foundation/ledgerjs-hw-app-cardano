@@ -1,7 +1,7 @@
 import type {ParsedAddressParams, Version} from '../../types/internal'
 import {INS} from '../common/ins'
 import type {Interaction, SendParams} from '../common/types'
-import {serializeAddressParams} from '../serialization/addressParams'
+import {serializeAddressParams} from './serialization/addressParams'
 
 const send = (params: {
   p1: number

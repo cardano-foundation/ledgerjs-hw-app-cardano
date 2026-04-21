@@ -5,19 +5,19 @@ import type {
   ParsedOutputDestination,
   Uint8_t,
   Uint32_t,
-} from '../../types/internal'
-import {TxOutputDestinationType} from '../../types/internal'
-import type {Version} from '../../types/public'
-import {DatumType} from '../../types/public'
-import {unreachable} from '../../utils/assert'
+} from '../../../types/internal'
+import {TxOutputDestinationType} from '../../../types/internal'
+import type {Version} from '../../../types/public'
+import {DatumType} from '../../../types/public'
+import {unreachable} from '../../../utils/assert'
 import {
   hex_to_buf,
   serializeOptionFlag,
   uint8_to_buf,
   uint32_to_buf,
   serializeCoin,
-} from '../../utils/serialize'
-import {getCompatibility} from '../getVersion'
+} from '../../../utils/serialize'
+import {getCompatibility} from '../../getVersion'
 import {serializeAddressParams} from './addressParams'
 
 // should be the same as in the Ledger app
