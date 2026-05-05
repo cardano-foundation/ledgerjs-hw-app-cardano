@@ -1,6 +1,5 @@
 .yarn/
-README.md
-CHANGELOG.md
+*.md
 docs
 docs_generated/
 .vscode
