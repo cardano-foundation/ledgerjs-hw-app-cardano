@@ -1,5 +1,14 @@
 import {ErrorBase} from './errorBase'
 
+// Shared message constants to ensure consistency between v7 and v8
+const MSG_DEVICE_LOCKED = 'Device is locked'
+const MSG_ACTION_REJECTED_BY_USER = 'Action rejected by user on device.'
+const MSG_ACTION_DENIED_BY_POLICY =
+  "Action denied by app's security policy, maybe wrong transaction signing mode?"
+const MSG_APP_NOT_SELECTED = 'App not selected on device.'
+const MSG_FUNCTION_NOT_SUPPORTED =
+  'Function not supported, is the Cardano app active on the device?'
+
 const StatusWordV7 = {
   // Stale-call recovery, used by both v7 (ERR_STILL_IN_CALL) and v8
   // (SWO_STILL_IN_CALL_RESET_DONE). Same value, same contract: device has reset
@@ -17,6 +26,15 @@ const StatusWordV7 = {
 
   // Not thrown by ledger-app-cardano itself but other apps
   ERR_CLA_NOT_SUPPORTED: 0x6e00 as const,
+
+  // v7-only: malformed APDU request header
+  ERR_MALFORMED_REQUEST_HEADER: 0x6e01 as const,
+
+  // Firmware-level status: device locked (screensaver mode)
+  SWO_SEC_PIN_15: 0x5515 as const,
+
+  // ISO 7816: function not supported (can be returned by firmware)
+  SWO_FUNCTION_NOT_SUPPORTED: 0x6a81 as const,
 }
 
 const StatusWordV8 = {
@@ -24,7 +42,20 @@ const StatusWordV8 = {
   // contract as v7 ERR_STILL_IN_CALL.
   SWO_STILL_IN_CALL_RESET_DONE: 0x6e04 as const,
 
+  // Firmware-level status: device locked (screensaver mode)
+  SWO_SEC_PIN_15: 0x5515 as const,
+
+  // User rejected the action on device (ISO 7816 SWO_CONDITIONS_NOT_SATISFIED)
+  SWO_CONDITIONS_NOT_SATISFIED: 0x6985 as const,
+
+  // Security policy denial (ISO 7816 SWO_SECURITY_CONDITION_NOT_SATISFIED)
   SWO_SECURITY_CONDITION_NOT_SATISFIED: 0x6982 as const,
+
+  // App not selected on device (ISO 7816 range, used by v8 app via SDK)
+  ERR_MALFORMED_REQUEST_HEADER: 0x6e01 as const,
+
+  // ISO 7816: function not supported (can be returned by firmware)
+  SWO_FUNCTION_NOT_SUPPORTED: 0x6a81 as const,
 
   // TX structure
   SWO_INVALID_TX_LENGTH: 0x6b00 as const,
@@ -110,17 +141,23 @@ const StatusWordMsgV7: Record<number, string> = {
   [StatusWordV7.ERR_INVALID_DATA]: 'Invalid data supplied to Ledger',
   [StatusWordV7.ERR_INVALID_BIP_PATH]:
     'Invalid derivation path supplied to Ledger',
-  [StatusWordV7.ERR_REJECTED_BY_USER]: 'Action rejected by user',
-  [StatusWordV7.ERR_REJECTED_BY_POLICY]:
-    "Action rejected by Ledger's security policy",
-  [StatusWordV7.ERR_DEVICE_LOCKED]: 'Device is locked',
+  [StatusWordV7.ERR_REJECTED_BY_USER]: MSG_ACTION_REJECTED_BY_USER,
+  [StatusWordV7.ERR_REJECTED_BY_POLICY]: MSG_ACTION_DENIED_BY_POLICY,
+  [StatusWordV7.ERR_DEVICE_LOCKED]: MSG_DEVICE_LOCKED,
   [StatusWordV7.ERR_CLA_NOT_SUPPORTED]: 'Wrong Ledger app',
   [StatusWordV7.ERR_UNSUPPORTED_ADDRESS_TYPE]: 'Unsupported address type',
+  [StatusWordV7.ERR_MALFORMED_REQUEST_HEADER]: MSG_APP_NOT_SELECTED,
+  [StatusWordV7.SWO_SEC_PIN_15]: MSG_DEVICE_LOCKED,
+  [StatusWordV7.SWO_FUNCTION_NOT_SUPPORTED]: MSG_FUNCTION_NOT_SUPPORTED,
 }
 
 const StatusWordMsgV8: Record<number, string> = {
+  [StatusWordV8.SWO_CONDITIONS_NOT_SATISFIED]: MSG_ACTION_REJECTED_BY_USER,
+  [StatusWordV8.SWO_SEC_PIN_15]: MSG_DEVICE_LOCKED,
   [StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED]:
-    'Security condition not satisfied.',
+    MSG_ACTION_DENIED_BY_POLICY,
+  [StatusWordV8.ERR_MALFORMED_REQUEST_HEADER]: MSG_APP_NOT_SELECTED,
+  [StatusWordV8.SWO_FUNCTION_NOT_SUPPORTED]: MSG_FUNCTION_NOT_SUPPORTED,
 
   // TX structure
   [StatusWordV8.SWO_INVALID_TX_LENGTH]:
