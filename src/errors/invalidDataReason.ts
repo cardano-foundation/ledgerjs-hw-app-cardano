@@ -12,6 +12,7 @@ export enum InvalidDataReason {
   TX_OPTIONS_INVALID_TAG_CBOR_SETS = 'tagCborSets must be a boolean',
 
   INPUTS_NOT_ARRAY = 'inputs not an array',
+  INPUTS_EMPTY = 'transaction must contain at least one input',
   INPUT_INVALID_TX_HASH = 'invalid tx hash in an input',
   INPUT_INVALID_PATH = 'invalid input path',
   INPUT_INVALID_UTXO_INDEX = 'invalid input utxo index',
@@ -226,6 +227,8 @@ export enum InvalidDataReason {
 
   SIGN_MODE_PLUTUS__DEVICE_OWNED_ADDRESS_NOT_ALLOWED = 'outputs given by path not allowed in TransactionSigningMode.PLUTUS_TRANSACTION',
   SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED = 'pool registration not allowed in TransactionSigningMode.PLUTUS_TRANSACTION',
+
+  SIGN_MODE_UNRESTRICTED__POOL_REGISTRATION_NOT_ALLOWED = 'pool registration not allowed in TransactionSigningMode.UNRESTRICTED_TRANSACTION',
 
   ADDITIONAL_WITNESSES_NOT_ARRAY = 'additional witnesses not an array',
 

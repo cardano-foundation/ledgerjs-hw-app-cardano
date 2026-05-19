@@ -99,8 +99,6 @@ const basePoolRegistrationParams: PoolRegistrationParams = {
 
 describe('basicParseTest', () => {
   for (const {signed, numberString} of basicParseTests) {
-    // eslint-disable-next-line no-console
-    console.log(`parsing ${numberString} (${signed ? 'signed' : 'unsigned'})`)
     const bufferRep = Buffer.alloc(8)
     if (signed) {
       bufferRep.writeBigInt64BE(BigInt(numberString), 0)

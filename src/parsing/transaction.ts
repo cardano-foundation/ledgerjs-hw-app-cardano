@@ -290,6 +290,7 @@ export function parseSigningMode(
     case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
     case TransactionSigningMode.MULTISIG_TRANSACTION:
     case TransactionSigningMode.PLUTUS_TRANSACTION:
+    case TransactionSigningMode.UNRESTRICTED_TRANSACTION:
       return mode
     default:
       throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
@@ -389,10 +390,9 @@ function inferOrdinaryOrMultisigFromTx(
       return
     }
 
-    // TODO: When unrestricted transaction signing is added, mixed ordinary and
-    // multisig requirements should resolve to that mode instead of failing here.
-    // These signals are mutually exclusive across the supported modes, so
-    // conflicting signals mean AUTO cannot choose a unique mode.
+    // Unrestricted mode is explicitly requested by the user (requires expert
+    // mode on device) and must never be auto-inferred.  Conflicting ordinary
+    // vs. multisig signals are therefore still unrecoverable here.
     throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
@@ -507,9 +507,8 @@ function inferOrdinaryOrMultisigFromWitnessPaths(
   }
 
   if (hasOrdinaryWitnessPath && hasMultisigWitnessPath) {
-    // TODO: When unrestricted transaction signing is added, mixed ordinary and
-    // multisig witness requirements should resolve to that mode instead of
-    // failing here.
+    // Unrestricted mode is explicitly requested by the user (requires expert
+    // mode on device) and must never be auto-inferred.
     throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
@@ -547,10 +546,10 @@ function inferSigningMode(
   )
 
   if (txMode != null && witnessMode != null && txMode !== witnessMode) {
-    // TODO: When unrestricted transaction signing is added, mixed ordinary and
-    // multisig requirements should resolve to that mode instead of failing here.
-    // Body-derived and witness-derived signals must agree on a unique
-    // ordinary-vs-multisig interpretation.
+    // Unrestricted mode is explicitly requested by the user (requires expert
+    // mode on device) and must never be auto-inferred.  Body-derived and
+    // witness-derived signals must agree on a unique ordinary-vs-multisig
+    // interpretation.
     throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
   }
 
@@ -568,6 +567,7 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
   const network = parseNetwork(tx.network)
   // inputs
   validate(isArray(tx.inputs), InvalidDataReason.INPUTS_NOT_ARRAY)
+  validate(tx.inputs.length > 0, InvalidDataReason.INPUTS_EMPTY)
   const inputs = tx.inputs.map((inp) => parseTxInput(inp))
 
   // outputs
@@ -1177,6 +1177,19 @@ export function parseSignTransactionRequest(
             certificate.type !== CertificateType.STAKE_POOL_REGISTRATION,
         ),
         InvalidDataReason.SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED,
+      )
+
+      break
+    }
+
+    case TransactionSigningMode.UNRESTRICTED_TRANSACTION: {
+      // pool registrations require dedicated modes
+      validate(
+        tx.certificates.every(
+          (certificate) =>
+            certificate.type !== CertificateType.STAKE_POOL_REGISTRATION,
+        ),
+        InvalidDataReason.SIGN_MODE_UNRESTRICTED__POOL_REGISTRATION_NOT_ALLOWED,
       )
 
       break

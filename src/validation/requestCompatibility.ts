@@ -184,6 +184,13 @@ export function ensureSignTxRequestSupported(
     unsupported(version, 'Plutus transactions')
   }
 
+  if (
+    request.signingMode === TransactionSigningMode.UNRESTRICTED_TRANSACTION &&
+    !compatibility.supportsUnrestrictedTransaction
+  ) {
+    unsupported(version, 'Unrestricted transactions')
+  }
+
   const isOutputByron = (o: ParsedOutput | null) =>
     o != null &&
     o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&

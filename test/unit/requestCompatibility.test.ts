@@ -389,4 +389,19 @@ describe('request compatibility gating', () => {
       false,
     )
   })
+
+  it('checks unrestricted transaction mode support before dispatch', () => {
+    const unrestrictedRequest = parseSignTransactionRequest({
+      tx: baseTx,
+      signingMode: TransactionSigningMode.UNRESTRICTED_TRANSACTION,
+    })
+
+    expect(() => signTransaction(v7, unrestrictedRequest).next()).to.throw(
+      DeviceVersionUnsupported,
+    )
+
+    const v8Interaction = signTransaction(v8, unrestrictedRequest)
+    const first = v8Interaction.next()
+    expect(first.done).to.equal(false)
+  })
 })

@@ -55,6 +55,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
       supportsMultipleVoters: true,
       supportsMultipleVotesPerVoter: true,
       supportsMessageSigning: true,
+      supportsUnrestrictedTransaction: true,
     }
   }
 
@@ -113,6 +114,7 @@ export function getCompatibility(version: Version): DeviceCompatibility {
       supportsMultipleVoters: false,
       supportsMultipleVotesPerVoter: false,
       supportsMessageSigning: v7_1,
+      supportsUnrestrictedTransaction: false,
     },
     version.flags.isAppXS,
   )

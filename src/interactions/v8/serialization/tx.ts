@@ -86,6 +86,8 @@ function serializeSigningMode(signingMode: TransactionSigningMode): Buffer {
     [TransactionSigningMode.MULTISIG_TRANSACTION]:
       SigningMode.MULTISIG_TRANSACTION,
     [TransactionSigningMode.PLUTUS_TRANSACTION]: SigningMode.PLUTUS_TRANSACTION,
+    [TransactionSigningMode.UNRESTRICTED_TRANSACTION]:
+      SigningMode.UNRESTRICTED_TRANSACTION,
   }[signingMode]
 
   assert(value !== undefined, 'invalid signing mode')

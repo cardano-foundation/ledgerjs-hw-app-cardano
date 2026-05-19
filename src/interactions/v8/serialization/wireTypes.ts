@@ -32,6 +32,7 @@ export const enum SigningMode {
   POOL_REGISTRATION_AS_OPERATOR = 5,
   MULTISIG_TRANSACTION = 6,
   PLUTUS_TRANSACTION = 7,
+  UNRESTRICTED_TRANSACTION = 9,
 }
 
 // tx_output_types.h: tx_output_destination_type_t

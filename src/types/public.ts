@@ -1291,6 +1291,10 @@ export type DeviceCompatibility = {
    * Whether we support CIP-8 message signing
    */
   supportsMessageSigning: boolean
+  /**
+   * Whether we support unrestricted transaction signing mode (app v8+)
+   */
+  supportsUnrestrictedTransaction: boolean
 }
 
 /**
@@ -1872,6 +1876,24 @@ export enum TransactionSigningMode {
    * - *must not* contain a pool registration certificate
    */
   PLUTUS_TRANSACTION = 'plutus_transaction',
+
+  /**
+   * Represents an unrestricted transaction with relaxed safety constraints.
+   *
+   * Available only on app v8+ with expert mode enabled on the device.
+   * Unlike other modes, there are almost no client-side restrictions:
+   * the device shows all transaction elements and trusts the expert user to review.
+   *
+   * The transaction
+   * - *must not* contain a pool registration certificate
+   *
+   * All other structurally valid fields (collateral inputs, collateral return outputs
+   * without datum or reference script, reference inputs, required signers, any credential
+   * type, all voter types, cross-account outputs, etc.) are allowed.
+   *
+   * This mode must be explicitly requested; it is never auto-inferred.
+   */
+  UNRESTRICTED_TRANSACTION = 'unrestricted_transaction',
 }
 
 export type TransactionOptions = {

@@ -16,17 +16,20 @@ import {
 import {getCompatibility} from '../../../validation/deviceCapabilities'
 
 const _serializeSigningMode = (mode: TransactionSigningMode): Buffer => {
-  const value = {
-    [TransactionSigningMode.ORDINARY_TRANSACTION]: 3 as Uint8_t,
-    [TransactionSigningMode.POOL_REGISTRATION_AS_OWNER]: 4 as Uint8_t,
-    [TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR]: 5 as Uint8_t,
-    [TransactionSigningMode.MULTISIG_TRANSACTION]: 6 as Uint8_t,
-    [TransactionSigningMode.PLUTUS_TRANSACTION]: 7 as Uint8_t,
-  }[mode]
-
-  assert(value !== undefined, 'Invalid signing mode')
-
-  return uint8_to_buf(value)
+  switch (mode) {
+    case TransactionSigningMode.ORDINARY_TRANSACTION:
+      return uint8_to_buf(3 as Uint8_t)
+    case TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
+      return uint8_to_buf(4 as Uint8_t)
+    case TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+      return uint8_to_buf(5 as Uint8_t)
+    case TransactionSigningMode.MULTISIG_TRANSACTION:
+      return uint8_to_buf(6 as Uint8_t)
+    case TransactionSigningMode.PLUTUS_TRANSACTION:
+      return uint8_to_buf(7 as Uint8_t)
+    default:
+      assert(false, 'Invalid signing mode')
+  }
 }
 
 const enum OptionFlags {
