@@ -4,6 +4,7 @@ import {ImportMock} from 'ts-mock-imports'
 import type {FixLenHexString} from 'types/internal'
 
 import {Ada, utils} from '../src/Ada'
+import {isV7App} from '../src/validation/deviceCapabilities'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../src/errors/index'
 import type {SendParams} from '../src/interactions/common/types'
 import * as parseModule from '../src/utils/parse'
@@ -160,6 +161,7 @@ type SignTxPositiveCase = {
   txBody?: string
   expectedResult: SignedTransactionData
   appVersion?: AppVersionOverride
+  requiresExpertMode?: boolean
 }
 
 function assertSignTxRejectCase(
@@ -309,6 +311,7 @@ export function describeSignTxPositiveTest(
         txBody,
         expectedResult,
         appVersion,
+        requiresExpertMode,
       } = testCase
       it(`${testName} [${signingMode}]`, async () => {
         if (!txBody) {
@@ -316,18 +319,35 @@ export function describeSignTxPositiveTest(
         } else if (hashTxBody(txBody) !== expectedResult.txHashHex) {
           expect.fail(`Tx body hash mismatch for fixture: ${testName}`)
         }
-        const isAppXS = (await ada.getVersion()).version.flags.isAppXS
-        const response = ada.signTransaction({
-          tx,
-          signingMode,
-          additionalWitnessPaths,
-          options,
-        })
+        const {version} = await ada.getVersion()
+        const isAppXS = version.flags.isAppXS
 
-        if (isAppXS && (appVersion?.unsupportedInAppXS ?? false)) {
+        if (isV7App(version) && (appVersion?.supportedSinceV8 ?? false)) {
+          const response = ada.signTransaction({tx, signingMode})
           await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
-        } else {
-          expect(await response).to.deep.equal(expectedResult)
+          return
+        }
+
+        if (requiresExpertMode) {
+          await ada.debugSetSettings({expertMode: true})
+        }
+        try {
+          const response = ada.signTransaction({
+            tx,
+            signingMode,
+            additionalWitnessPaths,
+            options,
+          })
+
+          if (isAppXS && (appVersion?.unsupportedInAppXS ?? false)) {
+            await expect(response).to.be.rejectedWith(DeviceVersionUnsupported)
+          } else {
+            expect(await response).to.deep.equal(expectedResult)
+          }
+        } finally {
+          if (requiresExpertMode) {
+            await ada.debugSetSettings({expertMode: false}).catch(() => {})
+          }
         }
       })
     }

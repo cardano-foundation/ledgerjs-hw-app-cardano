@@ -34,6 +34,7 @@ export type SignTxTestCase = {
   txAuxiliaryData?: string
   expectedResult: SignedTransactionData
   appVersion?: AppVersionOverride
+  requiresExpertMode?: boolean
 }
 
 export const testsByron: SignTxTestCase[] = [
@@ -677,7 +678,8 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
   },
   {
     testName: 'Sign_tx_unrestricted_with_pool_retirement_combined_with_stake_registration',
-    appVersion: {unsupportedInAppXS: true},
+    appVersion: {unsupportedInAppXS: true, supportedSinceV8: true},
+    requiresExpertMode: true,
     tx: {
       ...shelleyBase,
       inputs: [

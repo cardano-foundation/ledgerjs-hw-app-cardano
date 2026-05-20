@@ -29,6 +29,11 @@ import {getSerial} from './interactions/getSerial'
 import {getVersion} from './interactions/getVersion'
 import {getCompatibility} from './validation/deviceCapabilities'
 import {runTests} from './interactions/runTests'
+import {
+  debugSetSettings,
+  type ConfirmedDebugSettings,
+  type DebugSettings,
+} from './interactions/debugSetSettings'
 import {showAddress} from './interactions/showAddress'
 import {signCVote} from './interactions/signCVote'
 import {signOperationalCertificate} from './interactions/signOperationalCertificate'
@@ -220,6 +225,7 @@ export class Ada {
       'signMessage',
       'signCIP36Vote',
       'runTests',
+      'debugSetSettings',
       'deriveNativeScriptHash',
     ]
     this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
@@ -299,6 +305,21 @@ export class Ada {
   *_runTests(): Interaction<void> {
     const version = yield* getVersion()
     return yield* runTests(version)
+  }
+
+  /**
+   * Sets device settings directly via APDU (DEBUG app build only).
+   * Returns the confirmed settings written to NVM.
+   */
+  async debugSetSettings(
+    settings: DebugSettings,
+  ): Promise<ConfirmedDebugSettings> {
+    return interact(this._debugSetSettings(settings), this._send)
+  }
+
+  /** @ignore */
+  *_debugSetSettings(settings: DebugSettings): Interaction<ConfirmedDebugSettings> {
+    return yield* debugSetSettings(settings)
   }
 
   /**
