@@ -675,6 +675,61 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
       auxiliaryDataSupplement: null,
     },
   },
+  {
+    testName: 'Sign_tx_unrestricted_with_pool_retirement_combined_with_stake_registration',
+    appVersion: {unsupportedInAppXS: true},
+    tx: {
+      ...shelleyBase,
+      inputs: [
+        {
+          txHashHex:
+            '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+          outputIndex: 0,
+          path: str_to_path("1852'/1815'/0'/0/0"),
+        },
+      ],
+      certificates: [
+        {
+          type: CertificateType.STAKE_POOL_RETIREMENT,
+          params: {
+            poolKeyPath: str_to_path("1853'/1815'/0'/0'"),
+            retirementEpoch: '10',
+          },
+        },
+        {
+          type: CertificateType.STAKE_REGISTRATION,
+          params: {
+            stakeCredential: {
+              type: CredentialParamsType.KEY_PATH,
+              keyPath: str_to_path("1852'/1815'/0'/2/0"),
+            },
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.UNRESTRICTED_TRANSACTION,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a04828304581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b70a82008200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
+    expectedResult: {
+      // WARNING: only as computed by ledger, not verified with cardano-cli
+      txHashHex:
+        '70aea83c8e5e9a3e0ec92860d5bd4750c34911193f092a96b9da6906d6ea6247',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '8212cdabe1be514fdc21e02a2b405ce284ebbce0208a5c2b289dac662bf87fb4c2d18237c66761e285d78ee76cc26b7517718e641174d69f49737a49e9482607',
+        },
+        {
+          path: str_to_path("1853'/1815'/0'/0'"),
+          witnessSignatureHex:
+            '9386c2545e2671497daf95db93be1386690a4f884547a60f2913ef8a9e61486ba068d7477e1cd712f8d9cc20778d9e71b72eda96c9394c2f3111c61803f9a70d',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
 ]
 
 export const testsConwayWithCertificates: SignTxTestCase[] = [
