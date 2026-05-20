@@ -1,6 +1,7 @@
 import {describeSignTxPositiveTest} from '../test_utils'
 import {
   signTxAllElementsAuxiliaryData,
+  signTxAllElementsCombinedCertificates,
   signTxAllElementsCertificatesMultisig,
   signTxAllElementsCertificatesOrdinary,
   signTxAllElementsNoCertificates,
@@ -20,6 +21,11 @@ describeSignTxPositiveTest(
 describeSignTxPositiveTest(
   'signTxAllElementsCertificatesOrdinary',
   signTxAllElementsCertificatesOrdinary,
+)
+
+describeSignTxPositiveTest(
+  'signTxAllElementsCombinedCertificates',
+  signTxAllElementsCombinedCertificates,
 )
 
 describeSignTxPositiveTest(

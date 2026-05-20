@@ -166,6 +166,31 @@ export type ParsedCertificate =
       dRep: ParsedDRep
     }
   | {
+      type: CertificateType.STAKE_POOL_AND_DREP_DELEGATION
+      stakeCredential: ParsedCredential
+      poolKeyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+      dRep: ParsedDRep
+    }
+  | {
+      type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL
+      stakeCredential: ParsedCredential
+      poolKeyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+      deposit: Uint64_str
+    }
+  | {
+      type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP
+      stakeCredential: ParsedCredential
+      dRep: ParsedDRep
+      deposit: Uint64_str
+    }
+  | {
+      type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP
+      stakeCredential: ParsedCredential
+      poolKeyHashHex: FixLenHexString<typeof KEY_HASH_LENGTH>
+      dRep: ParsedDRep
+      deposit: Uint64_str
+    }
+  | {
       type: CertificateType.AUTHORIZE_COMMITTEE_HOT
       coldCredential: ParsedCredential
       hotCredential: ParsedCredential

@@ -62,6 +62,14 @@ function parseDeposit(deposit: bigint_like): Uint64_str {
   return parseCoin(deposit, InvalidDataReason.CERTIFICATE_INVALID_DEPOSIT)
 }
 
+function parsePoolKeyHash(poolKeyHashHex: string) {
+  return parseHexStringOfLength(
+    poolKeyHashHex,
+    KEY_HASH_LENGTH,
+    InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
+  )
+}
+
 export function parseCertificate(cert: Certificate): ParsedCertificate {
   switch (cert.type) {
     case CertificateType.STAKE_REGISTRATION:
@@ -92,11 +100,7 @@ export function parseCertificate(cert: Certificate): ParsedCertificate {
           cert.params.stakeCredential,
           InvalidDataReason.CERTIFICATE_INVALID_STAKE_CREDENTIAL,
         ),
-        poolKeyHashHex: parseHexStringOfLength(
-          cert.params.poolKeyHashHex,
-          KEY_HASH_LENGTH,
-          InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
-        ),
+        poolKeyHashHex: parsePoolKeyHash(cert.params.poolKeyHashHex),
       }
     }
     case CertificateType.VOTE_DELEGATION: {
@@ -110,6 +114,60 @@ export function parseCertificate(cert: Certificate): ParsedCertificate {
           cert.params.dRep,
           InvalidDataReason.CERTIFICATE_INVALID_DREP,
         ),
+      }
+    }
+    case CertificateType.STAKE_POOL_AND_DREP_DELEGATION: {
+      return {
+        type: cert.type,
+        stakeCredential: parseCredential(
+          cert.params.stakeCredential,
+          InvalidDataReason.CERTIFICATE_INVALID_STAKE_CREDENTIAL,
+        ),
+        poolKeyHashHex: parsePoolKeyHash(cert.params.poolKeyHashHex),
+        dRep: parseDRep(
+          cert.params.dRep,
+          InvalidDataReason.CERTIFICATE_INVALID_DREP,
+        ),
+      }
+    }
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL: {
+      return {
+        type: cert.type,
+        stakeCredential: parseCredential(
+          cert.params.stakeCredential,
+          InvalidDataReason.CERTIFICATE_INVALID_STAKE_CREDENTIAL,
+        ),
+        poolKeyHashHex: parsePoolKeyHash(cert.params.poolKeyHashHex),
+        deposit: parseDeposit(cert.params.deposit),
+      }
+    }
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP: {
+      return {
+        type: cert.type,
+        stakeCredential: parseCredential(
+          cert.params.stakeCredential,
+          InvalidDataReason.CERTIFICATE_INVALID_STAKE_CREDENTIAL,
+        ),
+        dRep: parseDRep(
+          cert.params.dRep,
+          InvalidDataReason.CERTIFICATE_INVALID_DREP,
+        ),
+        deposit: parseDeposit(cert.params.deposit),
+      }
+    }
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP: {
+      return {
+        type: cert.type,
+        stakeCredential: parseCredential(
+          cert.params.stakeCredential,
+          InvalidDataReason.CERTIFICATE_INVALID_STAKE_CREDENTIAL,
+        ),
+        poolKeyHashHex: parsePoolKeyHash(cert.params.poolKeyHashHex),
+        dRep: parseDRep(
+          cert.params.dRep,
+          InvalidDataReason.CERTIFICATE_INVALID_DREP,
+        ),
+        deposit: parseDeposit(cert.params.deposit),
       }
     }
     case CertificateType.AUTHORIZE_COMMITTEE_HOT: {

@@ -37,6 +37,10 @@ export function gatherWitnessPaths(
         case CertificateType.STAKE_DEREGISTRATION_CONWAY:
         case CertificateType.STAKE_DELEGATION:
         case CertificateType.VOTE_DELEGATION:
+        case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+        case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+        case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+        case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
           if (cert.stakeCredential.type === CredentialType.KEY_PATH) {
             witnessPaths.push(cert.stakeCredential.path)
           }

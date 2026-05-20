@@ -434,6 +434,10 @@ function inferOrdinaryOrMultisigFromTx(
       case CertificateType.STAKE_DEREGISTRATION_CONWAY:
       case CertificateType.STAKE_DELEGATION:
       case CertificateType.VOTE_DELEGATION:
+      case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+      case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+      case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+      case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
         // Staking-style credentials are direct ordinary-vs-multisig signals.
         commitCredentialMode(certificate.stakeCredential.type)
         break
@@ -752,6 +756,10 @@ export function parseSignTransactionRequest(
             case CertificateType.STAKE_DEREGISTRATION_CONWAY:
             case CertificateType.STAKE_DELEGATION:
             case CertificateType.VOTE_DELEGATION:
+            case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+            case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+            case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+            case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
               return (
                 certificate.stakeCredential.type === CredentialType.KEY_PATH
               )
@@ -872,6 +880,10 @@ export function parseSignTransactionRequest(
             case CertificateType.STAKE_DEREGISTRATION_CONWAY:
             case CertificateType.STAKE_DELEGATION:
             case CertificateType.VOTE_DELEGATION:
+            case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+            case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+            case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+            case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
               return (
                 certificate.stakeCredential.type === CredentialType.SCRIPT_HASH
               )

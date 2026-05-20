@@ -97,6 +97,26 @@ export enum CertificateType {
    */
   VOTE_DELEGATION = 9,
   /**
+   * Stake pool and vote delegation certificate
+   * @see [[StakePoolAndDRepDelegationParams]]
+   */
+  STAKE_POOL_AND_DREP_DELEGATION = 10,
+  /**
+   * Stake key registration with stake pool delegation certificate
+   * @see [[AccountRegistrationDelegationToStakePoolParams]]
+   */
+  ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL = 11,
+  /**
+   * Stake key registration with vote delegation certificate
+   * @see [[AccountRegistrationDelegationToDRepParams]]
+   */
+  ACCOUNT_REGISTRATION_DELEGATION_TO_DREP = 12,
+  /**
+   * Stake key registration with stake pool and vote delegation certificate
+   * @see [[AccountRegistrationDelegationToStakePoolAndDRepParams]]
+   */
+  ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP = 13,
+  /**
    * Authorize constitutional committee member hot certificate
    * @see [[AuthorizeCommitteeParams]]
    */
@@ -1014,6 +1034,90 @@ export type VoteDelegationParams = {
 }
 
 /**
+ * Stake pool and vote delegation certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type StakePoolAndDRepDelegationParams = {
+  /**
+   * Id of the staking entity that wants to delegate
+   */
+  stakeCredential: CredentialParams
+  /**
+   * Pool ID user wants to delegate to
+   */
+  poolKeyHashHex: string
+  /**
+   * DRep to delegate to
+   */
+  dRep: DRepParams
+}
+
+/**
+ * Stake key registration with stake pool delegation certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type AccountRegistrationDelegationToStakePoolParams = {
+  /**
+   * Id of the staking entity / reward account that wants to register and delegate
+   */
+  stakeCredential: CredentialParams
+  /**
+   * Pool ID user wants to delegate to
+   */
+  poolKeyHashHex: string
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
+}
+
+/**
+ * Stake key registration with vote delegation certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type AccountRegistrationDelegationToDRepParams = {
+  /**
+   * Id of the staking entity / reward account that wants to register and delegate
+   */
+  stakeCredential: CredentialParams
+  /**
+   * DRep to delegate to
+   */
+  dRep: DRepParams
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
+}
+
+/**
+ * Stake key registration with stake pool and vote delegation certificate parameters
+ * @category Shelley
+ * @see [[Certificate]]
+ * */
+export type AccountRegistrationDelegationToStakePoolAndDRepParams = {
+  /**
+   * Id of the staking entity / reward account that wants to register and delegate
+   */
+  stakeCredential: CredentialParams
+  /**
+   * Pool ID user wants to delegate to
+   */
+  poolKeyHashHex: string
+  /**
+   * DRep to delegate to
+   */
+  dRep: DRepParams
+  /**
+   * Deposit (in Lovelace).
+   */
+  deposit: bigint_like
+}
+
+/**
  * Authorize committee hot key certificate parameters
  * @category Shelley
  * @see [[Certificate]]
@@ -1127,6 +1231,22 @@ export type Certificate =
   | {
       type: CertificateType.VOTE_DELEGATION
       params: VoteDelegationParams
+    }
+  | {
+      type: CertificateType.STAKE_POOL_AND_DREP_DELEGATION
+      params: StakePoolAndDRepDelegationParams
+    }
+  | {
+      type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL
+      params: AccountRegistrationDelegationToStakePoolParams
+    }
+  | {
+      type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP
+      params: AccountRegistrationDelegationToDRepParams
+    }
+  | {
+      type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP
+      params: AccountRegistrationDelegationToStakePoolAndDRepParams
     }
   | {
       type: CertificateType.AUTHORIZE_COMMITTEE_HOT

@@ -406,6 +406,35 @@ function serializeCertificate(certificate: ParsedCertificate): Buffer {
         serializeCredential(certificate.stakeCredential),
         serializeDRep(certificate.dRep),
       ])
+    case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+      return Buffer.concat([
+        uint8_to_buf(certificate.type as Uint8_t),
+        serializeCredential(certificate.stakeCredential),
+        hex_to_buf(certificate.poolKeyHashHex),
+        serializeDRep(certificate.dRep),
+      ])
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+      return Buffer.concat([
+        uint8_to_buf(certificate.type as Uint8_t),
+        serializeCredential(certificate.stakeCredential),
+        hex_to_buf(certificate.poolKeyHashHex),
+        uint64_to_buf(certificate.deposit),
+      ])
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+      return Buffer.concat([
+        uint8_to_buf(certificate.type as Uint8_t),
+        serializeCredential(certificate.stakeCredential),
+        serializeDRep(certificate.dRep),
+        uint64_to_buf(certificate.deposit),
+      ])
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
+      return Buffer.concat([
+        uint8_to_buf(certificate.type as Uint8_t),
+        serializeCredential(certificate.stakeCredential),
+        hex_to_buf(certificate.poolKeyHashHex),
+        serializeDRep(certificate.dRep),
+        uint64_to_buf(certificate.deposit),
+      ])
     case CertificateType.AUTHORIZE_COMMITTEE_HOT:
       return Buffer.concat([
         uint8_to_buf(certificate.type as Uint8_t),

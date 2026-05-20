@@ -236,6 +236,19 @@ export function ensureSignTxRequestSupported(
     unsupported(version, 'Pool registration certificate')
   }
 
+  const hasCombinedCertificate = request.tx.certificates.some(
+    (c) =>
+      c.type === CertificateType.STAKE_POOL_AND_DREP_DELEGATION ||
+      c.type ===
+        CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL ||
+      c.type === CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP ||
+      c.type ===
+        CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP,
+  )
+  if (hasCombinedCertificate && isV7App(version)) {
+    unsupported(version, 'Combined certificate')
+  }
+
   if (isV7App(version)) {
     const hasTooManyPoolOwners = request.tx.certificates.some(
       (c) =>
@@ -273,6 +286,10 @@ export function ensureSignTxRequestSupported(
     CertificateType.STAKE_REGISTRATION_CONWAY,
     CertificateType.STAKE_DEREGISTRATION_CONWAY,
     CertificateType.VOTE_DELEGATION,
+    CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
+    CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL,
+    CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP,
+    CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP,
     CertificateType.AUTHORIZE_COMMITTEE_HOT,
     CertificateType.RESIGN_COMMITTEE_COLD,
     CertificateType.DREP_REGISTRATION,

@@ -85,6 +85,10 @@ export function serializeTxCertificatePreMultisig(
     case CertificateType.STAKE_REGISTRATION_CONWAY:
     case CertificateType.STAKE_DEREGISTRATION_CONWAY:
     case CertificateType.VOTE_DELEGATION:
+    case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
     case CertificateType.AUTHORIZE_COMMITTEE_HOT:
     case CertificateType.RESIGN_COMMITTEE_COLD:
     case CertificateType.DREP_REGISTRATION:
@@ -181,6 +185,13 @@ export function serializeTxCertificate(
         path_to_buf(certificate.path),
         uint64_to_buf(certificate.retirementEpoch),
       ])
+    }
+    case CertificateType.STAKE_POOL_AND_DREP_DELEGATION:
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL:
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP:
+    case CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP: {
+      assert(false, 'Combined certificates in v7 serialization')
+      break
     }
     default:
       unreachable(certificate)

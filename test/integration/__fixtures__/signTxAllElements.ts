@@ -22,6 +22,7 @@ import type {SignTxTestCase} from './signTx'
 import {inputs, outputs, shelleyBase} from './txElements'
 
 const stakePath = str_to_path("1852'/1815'/0'/2/0")
+const poolRetirementPath = str_to_path("1853'/1815'/0'/1'")
 const dRepPath = str_to_path("1852'/1815'/0'/3/0")
 const committeeColdPath = str_to_path("1852'/1815'/0'/4/0")
 const committeeHotPath = str_to_path("1852'/1815'/0'/5/0")
@@ -403,6 +404,146 @@ export const signTxAllElementsCertificatesOrdinary: SignTxTestCase[] = [
           path: str_to_path("1852'/1815'/0'/3/0"),
           witnessSignatureHex:
             '2fd679a7e09cac2474f66d7aaaafaa85b5045e23f38768e5fa3be47bb6f9904abe05cfe115ea875f5cd75a373f6028f2706fe931890ac0f7f0cc08fe8031a80b',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const signTxAllElementsCombinedCertificates: SignTxTestCase[] = [
+  {
+    testName: 'signTxAllElementsCombinedCertificates minimal_coverage_v8',
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a049082008200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c82018200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c83078200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1183088200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1183028200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49738304581c8e00cd50efb2c15b548abeced2bce0ec4ee445a6954d762aa301d13f182a83098200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1830e8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba68200581cd098c6a0a621f3343abe55877ee88fd5a83363e3c7887b3c48839092830f8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba682782768747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c65416e63686f7258201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef84108200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a11382782768747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c65416e63686f7258201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef83118200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a11383128200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a182782768747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c65416e63686f7258201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef840a8200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49738200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1840b8200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49731a000f4240840c8200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a11a000f4240850d8200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb49738200581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a11a000f4240',
+    tx: {
+      ...shelleyBase,
+      certificates: [
+        {
+          type: CertificateType.STAKE_REGISTRATION,
+          params: {stakeCredential: keyPathCredential(stakePath)},
+        },
+        {
+          type: CertificateType.STAKE_DEREGISTRATION,
+          params: {stakeCredential: keyPathCredential(stakePath)},
+        },
+        {
+          type: CertificateType.STAKE_REGISTRATION_CONWAY,
+          params: {stakeCredential: keyPathCredential(stakePath), deposit: 17},
+        },
+        {
+          type: CertificateType.STAKE_DEREGISTRATION_CONWAY,
+          params: {stakeCredential: keyPathCredential(stakePath), deposit: 17},
+        },
+        {
+          type: CertificateType.STAKE_DELEGATION,
+          params: {
+            stakeCredential: keyPathCredential(stakePath),
+            poolKeyHashHex,
+          },
+        },
+        {
+          type: CertificateType.STAKE_POOL_RETIREMENT,
+          params: {
+            poolKeyPath: poolRetirementPath,
+            retirementEpoch: 42,
+          },
+        },
+        {
+          type: CertificateType.VOTE_DELEGATION,
+          params: {
+            stakeCredential: keyPathCredential(stakePath),
+            dRep: {type: DRepParamsType.KEY_PATH, keyPath: dRepPath},
+          },
+        },
+        {
+          type: CertificateType.AUTHORIZE_COMMITTEE_HOT,
+          params: {
+            coldCredential: keyPathCredential(committeeColdPath),
+            hotCredential: keyPathCredential(committeeHotPath),
+          },
+        },
+        {
+          type: CertificateType.RESIGN_COMMITTEE_COLD,
+          params: {
+            coldCredential: keyPathCredential(committeeColdPath),
+            anchor,
+          },
+        },
+        {
+          type: CertificateType.DREP_REGISTRATION,
+          params: {
+            dRepCredential: keyPathCredential(dRepPath),
+            deposit: 19,
+            anchor,
+          },
+        },
+        {
+          type: CertificateType.DREP_DEREGISTRATION,
+          params: {dRepCredential: keyPathCredential(dRepPath), deposit: 19},
+        },
+        {
+          type: CertificateType.DREP_UPDATE,
+          params: {dRepCredential: keyPathCredential(dRepPath), anchor},
+        },
+        {
+          type: CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
+          params: {
+            stakeCredential: keyPathCredential(stakePath),
+            poolKeyHashHex,
+            dRep: {type: DRepParamsType.KEY_PATH, keyPath: dRepPath},
+          },
+        },
+        {
+          type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL,
+          params: {
+            stakeCredential: keyPathCredential(stakePath),
+            poolKeyHashHex,
+            deposit: 1000000,
+          },
+        },
+        {
+          type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP,
+          params: {
+            stakeCredential: keyPathCredential(stakePath),
+            dRep: {type: DRepParamsType.KEY_PATH, keyPath: dRepPath},
+            deposit: 1000000,
+          },
+        },
+        {
+          type: CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP,
+          params: {
+            stakeCredential: keyPathCredential(stakePath),
+            poolKeyHashHex,
+            dRep: {type: DRepParamsType.KEY_PATH, keyPath: dRepPath},
+            deposit: 1000000,
+          },
+        },
+      ],
+    } as SignTxTestCase['tx'],
+    expectedResult: {
+      txHashHex: '1'.repeat(64),
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex: '2'.repeat(128),
+        },
+        {
+          path: stakePath,
+          witnessSignatureHex: '3'.repeat(128),
+        },
+        {
+          path: poolRetirementPath,
+          witnessSignatureHex: '4'.repeat(128),
+        },
+        {
+          path: committeeColdPath,
+          witnessSignatureHex: '5'.repeat(128),
+        },
+        {
+          path: dRepPath,
+          witnessSignatureHex: '6'.repeat(128),
         },
       ],
       auxiliaryDataSupplement: null,

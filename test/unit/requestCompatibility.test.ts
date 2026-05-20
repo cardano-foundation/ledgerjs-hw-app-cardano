@@ -1,6 +1,5 @@
 import {expect} from 'chai'
 
-import {DeviceVersionUnsupported} from '../../src/errors/deviceUnsupported'
 import {deriveAddress} from '../../src/interactions/deriveAddress'
 import {deriveNativeScriptHash} from '../../src/interactions/deriveNativeScriptHash'
 import {getExtendedPublicKeys} from '../../src/interactions/getExtendedPublicKeys'
@@ -31,10 +30,11 @@ import type {
 } from '../../src/types/public'
 import type {ParsedCertificate} from '../../src/types/internal'
 import {parseBIP32Path} from '../../src/utils/parse'
-import {InvalidDataReason} from '../../src/errors'
+import {DeviceVersionUnsupported, InvalidDataReason} from '../../src/errors'
 import {parsedOperationalCertificateFixture} from './__fixtures__/v8/opcert'
 import {parsedSignCVoteFixture} from './__fixtures__/v8/signCVote'
 import {parsedSignMessageFixture} from './__fixtures__/v8/signMessage'
+import {signTxAllElementsCombinedCertificates} from '../integration/__fixtures__/signTxAllElements'
 
 const mkVersion = (major: number, minor = 0, isAppXS = false): Version => ({
   major,
@@ -299,6 +299,24 @@ describe('request compatibility gating', () => {
     expect(() => v7Interaction.next()).to.throw(DeviceVersionUnsupported)
 
     const v8Interaction = signTransaction(v8, manyPoolOwnersRequest)
+    const first = v8Interaction.next()
+    expect(first.done).to.equal(false)
+  })
+
+  it('accepts parsing combined certificates and rejects them only at v7 compatibility time', () => {
+    const fixture = signTxAllElementsCombinedCertificates[0]
+    const request = parseSignTransactionRequest({
+      tx: fixture.tx,
+      signingMode: fixture.signingMode,
+      additionalWitnessPaths: fixture.additionalWitnessPaths,
+    })
+
+    expect(request.tx.certificates).to.have.length(16)
+
+    const v7Interaction = signTransaction(v7, request)
+    expect(() => v7Interaction.next()).to.throw(DeviceVersionUnsupported)
+
+    const v8Interaction = signTransaction(v8, request)
     const first = v8Interaction.next()
     expect(first.done).to.equal(false)
   })
