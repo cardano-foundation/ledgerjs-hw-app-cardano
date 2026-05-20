@@ -6,4 +6,6 @@ export type SendParams = {
   expectedResponseLength?: number
 }
 
+export type SendFn = (params: SendParams) => Promise<Buffer>
+
 export type Interaction<RetValue> = Generator<SendParams, RetValue, Buffer>

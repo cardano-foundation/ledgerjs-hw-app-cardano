@@ -677,7 +677,8 @@ export const testsShelleyWithCertificates: SignTxTestCase[] = [
     },
   },
   {
-    testName: 'Sign_tx_unrestricted_with_pool_retirement_combined_with_stake_registration',
+    testName:
+      'Sign_tx_unrestricted_with_pool_retirement_combined_with_stake_registration',
     appVersion: {unsupportedInAppXS: true, supportedSinceV8: true},
     requiresExpertMode: true,
     tx: {

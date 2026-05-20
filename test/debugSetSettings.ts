@@ -1,5 +1,5 @@
-import {INS} from './common/ins'
-import type {Interaction, SendParams} from './common/types'
+import {INS} from '../src/interactions/common/ins'
+import type {Interaction, SendParams} from '../src/interactions/common/types'
 
 export type DebugSettings = {
   expertMode: boolean

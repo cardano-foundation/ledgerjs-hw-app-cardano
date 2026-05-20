@@ -6,14 +6,18 @@ import type {FixLenHexString} from 'types/internal'
 import {Ada, utils} from '../src/Ada'
 import {isV7App} from '../src/validation/deviceCapabilities'
 import {DeviceVersionUnsupported, InvalidDataReason} from '../src/errors/index'
+import {interact} from '../src/interactions/common/interact'
 import type {SendParams} from '../src/interactions/common/types'
+import {getVersionString} from '../src/utils'
 import * as parseModule from '../src/utils/parse'
+import {debugSetSettings, type DebugSettings} from './debugSetSettings'
 import type {
   BIP32Path,
   SignedTransactionData,
   Transaction,
   TransactionOptions,
   TransactionSigningMode,
+  Version,
 } from '../src/types/public'
 
 export function yieldValue(
@@ -45,6 +49,18 @@ export async function getAda() {
   const transport = await getTransport()
 
   return new Ada(transport)
+}
+
+function setDebugSettings(ada: Ada, version: Version, settings: DebugSettings) {
+  if (isV7App(version)) {
+    throw new DeviceVersionUnsupported(
+      `Debug settings APDU is not supported by Ledger app version ${getVersionString(
+        version,
+      )}.`,
+    )
+  }
+
+  return interact(debugSetSettings(settings), ada._send)
 }
 
 export function turnOffValidation() {
@@ -329,7 +345,7 @@ export function describeSignTxPositiveTest(
         }
 
         if (requiresExpertMode) {
-          await ada.debugSetSettings({expertMode: true})
+          await setDebugSettings(ada, version, {expertMode: true})
         }
         try {
           const response = ada.signTransaction({
@@ -346,7 +362,9 @@ export function describeSignTxPositiveTest(
           }
         } finally {
           if (requiresExpertMode) {
-            await ada.debugSetSettings({expertMode: false}).catch(() => {})
+            await setDebugSettings(ada, version, {expertMode: false}).catch(
+              () => undefined,
+            )
           }
         }
       })

@@ -21,7 +21,8 @@ import type Transport from '@ledgerhq/hw-transport'
 import {StatusWordV7, StatusWordV8} from './errors/deviceStatusError'
 import {DeviceStatusError, ErrorBase} from './errors'
 import {InvalidDataReason} from './errors/invalidDataReason'
-import type {Interaction, SendParams} from './interactions/common/types'
+import {interact} from './interactions/common/interact'
+import type {Interaction, SendFn, SendParams} from './interactions/common/types'
 import {deriveAddress} from './interactions/deriveAddress'
 import {deriveNativeScriptHash} from './interactions/deriveNativeScriptHash'
 import {getExtendedPublicKeys} from './interactions/getExtendedPublicKeys'
@@ -29,11 +30,6 @@ import {getSerial} from './interactions/getSerial'
 import {getVersion} from './interactions/getVersion'
 import {getCompatibility} from './validation/deviceCapabilities'
 import {runTests} from './interactions/runTests'
-import {
-  debugSetSettings,
-  type ConfirmedDebugSettings,
-  type DebugSettings,
-} from './interactions/debugSetSettings'
 import {showAddress} from './interactions/showAddress'
 import {signCVote} from './interactions/signCVote'
 import {signOperationalCertificate} from './interactions/signOperationalCertificate'
@@ -140,7 +136,7 @@ function wrapConvertDeviceStatusError<TArgs extends unknown[], TResult>(
  */
 
 /** @ignore */
-export type SendFn = (params: SendParams) => Promise<Buffer>
+export type {SendFn}
 
 // It can happen that we try to send a message to the device
 // when the device thinks it is still in a middle of previous APDU stream.
@@ -181,21 +177,11 @@ function wrapRetryStillInCall<TArgs extends unknown[], TResult>(
   })
 }
 
-async function interact<T>(
+function interactWithDevice<T>(
   interaction: Interaction<T>,
   send: SendFn,
 ): Promise<T> {
-  let cursor = interaction.next()
-  let first = true
-  while (!cursor.done) {
-    const apdu = cursor.value
-    const res = first
-      ? await wrapRetryStillInCall(send)(apdu)
-      : await send(apdu)
-    first = false
-    cursor = interaction.next(res)
-  }
-  return cursor.value
+  return interact(interaction, send, wrapRetryStillInCall(send))
 }
 
 /**
@@ -225,7 +211,6 @@ export class Ada {
       'signMessage',
       'signCIP36Vote',
       'runTests',
-      'debugSetSettings',
       'deriveNativeScriptHash',
     ]
     this.transport.decorateAppAPIMethods(this, methods, scrambleKey)
@@ -264,7 +249,7 @@ export class Ada {
    *
    */
   async getVersion(): Promise<GetVersionResponse> {
-    const version = await interact(this._getVersion(), this._send)
+    const version = await interactWithDevice(this._getVersion(), this._send)
     return {version, compatibility: getCompatibility(version)}
   }
 
@@ -285,7 +270,7 @@ export class Ada {
    *
    */
   async getSerial(): Promise<GetSerialResponse> {
-    return interact(this._getSerial(), this._send)
+    return interactWithDevice(this._getSerial(), this._send)
   }
 
   /** @ignore */
@@ -298,28 +283,13 @@ export class Ada {
    * Runs unit tests on the device (DEVEL app build only)
    */
   async runTests(): Promise<void> {
-    return interact(this._runTests(), this._send)
+    return interactWithDevice(this._runTests(), this._send)
   }
 
   /** @ignore */
   *_runTests(): Interaction<void> {
     const version = yield* getVersion()
     return yield* runTests(version)
-  }
-
-  /**
-   * Sets device settings directly via APDU (DEBUG app build only).
-   * Returns the confirmed settings written to NVM.
-   */
-  async debugSetSettings(
-    settings: DebugSettings,
-  ): Promise<ConfirmedDebugSettings> {
-    return interact(this._debugSetSettings(settings), this._send)
-  }
-
-  /** @ignore */
-  *_debugSetSettings(settings: DebugSettings): Interaction<ConfirmedDebugSettings> {
-    return yield* debugSetSettings(settings)
   }
 
   /**
@@ -343,7 +313,7 @@ export class Ada {
       parseBIP32Path(path, InvalidDataReason.INVALID_PATH),
     )
 
-    return interact(this._getExtendedPublicKeys(parsed), this._send)
+    return interactWithDevice(this._getExtendedPublicKeys(parsed), this._send)
   }
 
   /** @ignore */
@@ -374,7 +344,7 @@ export class Ada {
   }: DeriveAddressRequest): Promise<DeriveAddressResponse> {
     const parsedParams = parseAddress(network, address)
 
-    return interact(this._deriveAddress(parsedParams), this._send)
+    return interactWithDevice(this._deriveAddress(parsedParams), this._send)
   }
 
   /** @ignore */
@@ -392,7 +362,7 @@ export class Ada {
   async showAddress({network, address}: ShowAddressRequest): Promise<void> {
     const parsedParams = parseAddress(network, address)
 
-    return interact(this._showAddress(parsedParams), this._send)
+    return interactWithDevice(this._showAddress(parsedParams), this._send)
   }
 
   /** @ignore */
@@ -406,7 +376,7 @@ export class Ada {
   ): Promise<SignTransactionResponse> {
     const parsedRequest = parseSignTransactionRequest(request)
 
-    return interact(this._signTx(parsedRequest), this._send)
+    return interactWithDevice(this._signTx(parsedRequest), this._send)
   }
 
   /** @ignore */
@@ -420,7 +390,7 @@ export class Ada {
   ): Promise<SignOperationalCertificateResponse> {
     const parsedOperationalCertificate = parseOperationalCertificate(request)
 
-    return interact(
+    return interactWithDevice(
       this._signOperationalCertificate(parsedOperationalCertificate),
       this._send,
     )
@@ -437,7 +407,7 @@ export class Ada {
   async signMessage(request: SignMessageRequest): Promise<SignMessageResponse> {
     const parsedMsgData = parseMessageData(request)
 
-    return interact(this._signMessage(parsedMsgData), this._send)
+    return interactWithDevice(this._signMessage(parsedMsgData), this._send)
   }
 
   /** @ignore */
@@ -451,7 +421,7 @@ export class Ada {
   ): Promise<SignCIP36VoteResponse> {
     const parsedCVote = parseCVote(request)
 
-    return interact(this._signCIP36Vote(parsedCVote), this._send)
+    return interactWithDevice(this._signCIP36Vote(parsedCVote), this._send)
   }
 
   /** @ignore */
@@ -473,7 +443,7 @@ export class Ada {
     const parsedDisplayFormat =
       parseNativeScriptHashDisplayFormat(displayFormat)
 
-    return interact(
+    return interactWithDevice(
       this._deriveNativeScriptHash(parsedScript, parsedDisplayFormat),
       this._send,
     )
