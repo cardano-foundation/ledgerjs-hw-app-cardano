@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [8.0.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v7.1.4...v8.0.1) - [April 21st 2025]
+## [8.0.0] - [2026]
+
+### Added
+
+- support for Ledger Cardano app v8 (UI redesign, allows multiple votes per voter)
+- support for combined certificates in transactions
+- support for unrestricted signing mode
 
 ### Removed
 

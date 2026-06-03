@@ -524,27 +524,33 @@ export const signTxAllElementsCombinedCertificates: SignTxTestCase[] = [
       ],
     } as SignTxTestCase['tx'],
     expectedResult: {
-      txHashHex: 'b3a34e61830daae31aafa26c1d5a363bd7e86f7d37f031e1ddaa881f3bf35940',
+      txHashHex:
+        'b3a34e61830daae31aafa26c1d5a363bd7e86f7d37f031e1ddaa881f3bf35940',
       witnesses: [
         {
           path: str_to_path("1852'/1815'/0'/0/0"),
-          witnessSignatureHex: 'fd9fa79656e587d18c56df957f68fcf62a6404a691d9b29c5507ab973aadadba5b1f4d438ecf1f755f3d1891bca64a4f42d5b20f39b07eb73d3f842243adac09',
+          witnessSignatureHex:
+            'fd9fa79656e587d18c56df957f68fcf62a6404a691d9b29c5507ab973aadadba5b1f4d438ecf1f755f3d1891bca64a4f42d5b20f39b07eb73d3f842243adac09',
         },
         {
           path: stakePath,
-          witnessSignatureHex: '4f4a2283b7061742dc9bd7ffa4e7f301db7f87d4b31a34bc1c188beff7ccb67bfb1c453cc0c46e61f3c8a25b4ca99cba2a3fa2bcf0c0069206c95b6eea3b2202',
+          witnessSignatureHex:
+            '4f4a2283b7061742dc9bd7ffa4e7f301db7f87d4b31a34bc1c188beff7ccb67bfb1c453cc0c46e61f3c8a25b4ca99cba2a3fa2bcf0c0069206c95b6eea3b2202',
         },
         {
           path: poolRetirementPath,
-          witnessSignatureHex: 'c73e5a35237a873a66aece7f2bf77236812a5ef7bb10f141c28c8c0d1d4d5f7846fbf8e94f476345f3f1ebd94213672471701e6298c9d9cbd70a9e32d73ec507',
+          witnessSignatureHex:
+            'c73e5a35237a873a66aece7f2bf77236812a5ef7bb10f141c28c8c0d1d4d5f7846fbf8e94f476345f3f1ebd94213672471701e6298c9d9cbd70a9e32d73ec507',
         },
         {
           path: committeeColdPath,
-          witnessSignatureHex: 'd6b1c7caf997af96ff082ea082e8bc388c2a22e82999e1040f54f088fd99b0b50aeb09c1f7536b6aaf18c4c003fa63e0c4788f74e308b98d0d0e7da8e8deb608',
+          witnessSignatureHex:
+            'd6b1c7caf997af96ff082ea082e8bc388c2a22e82999e1040f54f088fd99b0b50aeb09c1f7536b6aaf18c4c003fa63e0c4788f74e308b98d0d0e7da8e8deb608',
         },
         {
           path: dRepPath,
-          witnessSignatureHex: '0cf57ea5835ff2a8bb8939711d2c8ca620f25ddf64b18b71e9e0baab6c70c3108c28d8b917f89d33010cca73ea330fced0147602b455c1b859a2c39e97fb8b0e',
+          witnessSignatureHex:
+            '0cf57ea5835ff2a8bb8939711d2c8ca620f25ddf64b18b71e9e0baab6c70c3108c28d8b917f89d33010cca73ea330fced0147602b455c1b859a2c39e97fb8b0e',
         },
       ],
       auxiliaryDataSupplement: null,
