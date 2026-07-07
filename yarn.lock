@@ -862,6 +862,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/devices@npm:8.14.2":
+  version: 8.14.2
+  resolution: "@ledgerhq/devices@npm:8.14.2"
+  dependencies:
+    "@ledgerhq/errors": "npm:^6.34.1"
+    "@ledgerhq/logs": "npm:^6.17.0"
+    rxjs: "npm:7.8.2"
+    semver: "npm:7.7.3"
+  checksum: 10c0/843f9d68421c054ef4db38f03ec433e1dcabb0a04e53a86f335055a676361f0ffe29c668311005543629317972415acd00120996e9e6d3517410769543084368
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/errors@npm:^6.31.0":
   version: 6.31.0
   resolution: "@ledgerhq/errors@npm:6.31.0"
@@ -869,32 +881,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.33.0":
-  version: 6.33.0
-  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:6.33.0"
+"@ledgerhq/errors@npm:^6.34.1":
+  version: 6.35.0
+  resolution: "@ledgerhq/errors@npm:6.35.0"
+  checksum: 10c0/2fa533a8555e80dcbf7dae28cfab2b1602644a0dc408283069f771e2f2aa4c9e011a2c875c2f1224ce37e40ebed368be5bf41d4318f6ef1793aa078dbbcc70f7
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.35.2":
+  version: 6.35.2
+  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:6.35.2"
   dependencies:
-    "@ledgerhq/devices": "npm:8.12.0"
-    "@ledgerhq/errors": "npm:^6.31.0"
-    "@ledgerhq/hw-transport": "npm:6.34.0"
-    "@ledgerhq/logs": "npm:^6.16.0"
+    "@ledgerhq/devices": "npm:8.14.2"
+    "@ledgerhq/errors": "npm:^6.34.1"
+    "@ledgerhq/hw-transport": "npm:6.35.2"
+    "@ledgerhq/logs": "npm:^6.17.0"
     node-hid: "npm:2.1.2"
-  checksum: 10c0/8d99228ac829961fe5cc3c773b8c430e51f777ad44a8a278104e3da9dd1ce02e8a100e27158172602073ec9c2d53b23cf03b683b971bdca40ded48d7daafbde7
+  checksum: 10c0/a42148e7178a1526ea3df3b271e58e01e306c9c95ba5c544305b4731e273b8e774226bd9d5d76c6e45b1f60cc12b489846c81242115d551f85415ea586c68eb9
   languageName: node
   linkType: hard
 
 "@ledgerhq/hw-transport-node-hid@npm:^6.29.3":
-  version: 6.32.0
-  resolution: "@ledgerhq/hw-transport-node-hid@npm:6.32.0"
+  version: 6.33.2
+  resolution: "@ledgerhq/hw-transport-node-hid@npm:6.33.2"
   dependencies:
-    "@ledgerhq/devices": "npm:8.12.0"
-    "@ledgerhq/errors": "npm:^6.31.0"
-    "@ledgerhq/hw-transport": "npm:6.34.0"
-    "@ledgerhq/hw-transport-node-hid-noevents": "npm:^6.33.0"
-    "@ledgerhq/logs": "npm:^6.16.0"
+    "@ledgerhq/devices": "npm:8.14.2"
+    "@ledgerhq/errors": "npm:^6.34.1"
+    "@ledgerhq/hw-transport": "npm:6.35.2"
+    "@ledgerhq/hw-transport-node-hid-noevents": "npm:^6.35.2"
+    "@ledgerhq/logs": "npm:^6.17.0"
     lodash: "npm:^4.17.21"
     node-hid: "npm:2.1.2"
     usb: "npm:2.9.0"
-  checksum: 10c0/2e7bc3077ff191ecbf15da6d8ec12bba909f75c9a53eed41b7ab4832a298c0cf04c42fa1f69ef79615506a9a6b632c3191b751c5905021f0c53485b141030008
+  checksum: 10c0/b7f9d779cba0391a8bc3de959319d45688a927c6c05ad33e8de3fe5c3f718b60ca890bf52a27d2d116004bbd953e8454068666d8f3bc74639bb6944b73a2f38a
   languageName: node
   linkType: hard
 
@@ -922,10 +941,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-transport@npm:6.35.2":
+  version: 6.35.2
+  resolution: "@ledgerhq/hw-transport@npm:6.35.2"
+  dependencies:
+    "@ledgerhq/devices": "npm:8.14.2"
+    "@ledgerhq/errors": "npm:^6.34.1"
+    "@ledgerhq/logs": "npm:^6.17.0"
+    events: "npm:^3.3.0"
+  checksum: 10c0/700a169548a5e3c0a5973c806b845deb208f6e69a0dcc637e02a693941252ff710017f3a5e6e0539326bf4a93ce4ed5dd9eee435eda5ed24ae4ed0885a3e55e4
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/logs@npm:^6.16.0":
   version: 6.16.0
   resolution: "@ledgerhq/logs@npm:6.16.0"
   checksum: 10c0/f2af7231c578bda193348c2aa23c396967812d542d331628780eebc354363862e99415a9f83a50d3de68668305bd699772c2db469befc7f6931873b94832c0fe
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/logs@npm:^6.17.0":
+  version: 6.17.0
+  resolution: "@ledgerhq/logs@npm:6.17.0"
+  checksum: 10c0/3f90895048b04dd79a916a87cde6ec4b28d60b059d865697a1429d83af54e17066a113de17c52c91bd638b3d9bf2df0c196ea783119f0d18869923dbc6d973e8
   languageName: node
   linkType: hard
 
