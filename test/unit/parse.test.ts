@@ -1,11 +1,17 @@
 import {expect} from 'chai'
 
 import {InvalidDataReason} from '../../src/errors'
+import {parseCertificate} from '../../src/parsing/certificate'
 import {parseCVote} from '../../src/parsing/cVote'
 import {parseNativeScript} from '../../src/parsing/nativeScript'
 import {parsePoolParams} from '../../src/parsing/poolRegistration'
-import type {NativeScript, PoolRegistrationParams} from '../../src/types/public'
+import type {
+  NativeScript,
+  PoolRegistrationParams,
+  PoolRetirementParams,
+} from '../../src/types/public'
 import {
+  CertificateType,
   NativeScriptType,
   PoolKeyType,
   PoolOwnerType,
@@ -195,6 +201,26 @@ describe('advancedParseTest', () => {
         witnessPath: [0x80000000, 0x80000000, 0x80000000, 0, 0],
       }),
     ).to.throw(InvalidDataReason.CVOTE_INVALID_VOTECAST_DATA)
+  })
+
+  it('rejects a pool retirement with neither or both pool key forms', () => {
+    const poolKeyPath = str_to_path("1853'/1815'/0'/0'")
+    const poolKeyHash =
+      'f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973'
+    // the public type forbids both cases at compile time; JS callers can still send them
+    const invalidParams = [
+      {retirementEpoch: 10},
+      {poolKeyPath, poolKeyHash, retirementEpoch: 10},
+    ] as unknown as PoolRetirementParams[]
+
+    for (const params of invalidParams) {
+      expect(() =>
+        parseCertificate({
+          type: CertificateType.STAKE_POOL_RETIREMENT,
+          params,
+        }),
+      ).to.throw(InvalidDataReason.POOL_RETIREMENT_INVALID_POOL_KEY)
+    }
   })
 
   it('accepts canonical uint strings and rejects non-canonical ones', () => {

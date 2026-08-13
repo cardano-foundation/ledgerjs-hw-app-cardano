@@ -138,6 +138,7 @@ export const Networks = {
 type AppVersionNumber = {major: number; minor: number}
 
 export const APP_V8_0: AppVersionNumber = {major: 8, minor: 0}
+export const APP_V8_1: AppVersionNumber = {major: 8, minor: 1}
 
 export type AppVersionOverride = {
   unsupportedInAppXS?: boolean // defaults to false

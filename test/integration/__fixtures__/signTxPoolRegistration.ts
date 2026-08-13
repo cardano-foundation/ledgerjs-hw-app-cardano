@@ -22,6 +22,7 @@ import {
 } from '../../../src/Ada'
 import {TransactionSigningMode} from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
+import {APP_V8_1} from '../../test_utils'
 import type {SignTxTestCase} from './signTx'
 
 export const inputs: Record<
@@ -252,7 +253,9 @@ export const certificates: Record<
   | 'poolRegistrationWrongMargin'
   | 'poolRegistrationOperatorNoOwnersNoRelays'
   | 'poolRegistrationOperatorMultipleOwnersAllRelays'
-  | 'poolRegistrationOperatorOneOwnerOperatorNoRelays',
+  | 'poolRegistrationOperatorOneOwnerOperatorNoRelays'
+  | 'poolRegistrationPayerNoOwnersNoRelays'
+  | 'poolRegistrationPayerMultipleOwnersAllRelays',
   Certificate
 > = {
   // for negative tests
@@ -359,6 +362,24 @@ export const certificates: Record<
     params: {
       ...defaultPoolRegistration,
       poolKey: poolKeys.poolKeyPath,
+      poolOwners: poolOwnerVariationSet.twoHashOwners,
+      relays: relayVariationSet.allRelays,
+    },
+  },
+  poolRegistrationPayerNoOwnersNoRelays: {
+    type: CertificateType.STAKE_POOL_REGISTRATION,
+    params: {
+      ...defaultPoolRegistration,
+      poolKey: poolKeys.poolKeyHash,
+      poolOwners: poolOwnerVariationSet.noOwners,
+      relays: relayVariationSet.noRelays,
+    },
+  },
+  poolRegistrationPayerMultipleOwnersAllRelays: {
+    type: CertificateType.STAKE_POOL_REGISTRATION,
+    params: {
+      ...defaultPoolRegistration,
+      poolKey: poolKeys.poolKeyHash,
       poolOwners: poolOwnerVariationSet.twoHashOwners,
       relays: relayVariationSet.allRelays,
     },
@@ -663,6 +684,116 @@ export const poolRegistrationOperatorTestCases: SignTxTestCase[] = [
           path: str_to_path("1853'/1815'/0'/0'"),
           witnessSignatureHex:
             '8957a7768bc9389cd7ab6fa3b3e2fa089785715a5298f9cb38abf99a6e0da5bef734c4862ca7948fb69575ccb9ed8ae1d92cc971742f674632f6f03e22c5b103',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const poolRegistrationPayerTestCases: SignTxTestCase[] = [
+  {
+    testName:
+      'Sign_tx_Witness_pool_registration_as_payer_with_no_owners_and_no_relays',
+    appVersion: {unsupportedInAppXS: true, supportedSince: APP_V8_1},
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [certificates.poolRegistrationPayerNoOwnersNoRelays],
+    },
+    signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_PAYER,
+    additionalWitnessPaths: [],
+    // Same tx shape/hash as the pool-registration-payer fixture already verified
+    // on the firmware/Python side (ledger-app-cardano signTx.py) -- payer never
+    // holds the cold key, so the pool key is given as a hash, unlike operator's
+    // path. The only witness is the payment key, exactly like operator's payment
+    // witness (same path, same tx hash there too -> identical signature reused
+    // below).
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad808082782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb',
+    expectedResult: {
+      txHashHex:
+        '873f16bfaf7a928810c58a26416ec832c615eb0df7faf2dccbf072969d779803',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          // Confirmed against a real Speculos run and cross-checked against
+          // crypto_mock_data.h's mock signature table for this exact
+          // (path, message) pair in ledger-app-cardano -- both agree.
+          witnessSignatureHex:
+            'c1aecdec784dce0c9f000452b9d64badb33695d61d35e3e30266b7953652b13779547fcc7da791ba8aab667c6e57578fffd3e1903b4e19a6e52ce35155b2cc01',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+  {
+    testName:
+      'Sign_tx_Witness_pool_registration_as_payer_with_multiple_owners_and_all_relays',
+    appVersion: {unsupportedInAppXS: true, supportedSince: APP_V8_1},
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [certificates.poolRegistrationPayerMultipleOwnersAllRelays],
+    },
+    signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_PAYER,
+    additionalWitnessPaths: [],
+    // Same tx as the app test case with the same name (ledger-app-cardano signTx.py)
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad581c0bd5d796f5e54866a14300ec2a18d706f7461b8f0502cc2a182bc88d848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb',
+    expectedResult: {
+      txHashHex:
+        'c6dda9bb23f58799c52122892f961febaadea918116400e2eb44099f2709164b',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '1c32476c4ce86e98031ccf7a3c50e3867821dbef045cd17fcc0091d481645e8360f24695f09728f5772edc34c0e4bd4d6b41abed57a4060125b979fb39c6670b',
+        },
+      ],
+      auxiliaryDataSupplement: null,
+    },
+  },
+]
+
+export const poolRetirementPayerTestCases: SignTxTestCase[] = [
+  {
+    testName: 'Sign_tx_Witness_pool_retirement_as_payer_multiple_certificates',
+    appVersion: {unsupportedInAppXS: true, supportedSince: APP_V8_1},
+    tx: {
+      ...txBase,
+      inputs: [inputs.utxoWithPath0],
+      certificates: [
+        {
+          type: CertificateType.STAKE_POOL_RETIREMENT,
+          params: {
+            poolKeyHash:
+              '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
+            retirementEpoch: '42',
+          },
+        },
+        {
+          type: CertificateType.STAKE_POOL_RETIREMENT,
+          params: {
+            poolKeyHash:
+              'f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973',
+            retirementEpoch: '43',
+          },
+        },
+      ],
+    },
+    signingMode: TransactionSigningMode.POOL_RETIREMENT_AS_PAYER,
+    additionalWitnessPaths: [],
+    txBody:
+      'a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04828304581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad182a8304581cf61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973182b',
+    expectedResult: {
+      txHashHex:
+        '89da89560abaebb177e34e62e3eb89e10aab381315188121d3335f200b2393a4',
+      witnesses: [
+        {
+          path: str_to_path("1852'/1815'/0'/0/0"),
+          witnessSignatureHex:
+            '0301816748952f4ba690b7e7f34e5426b67f7ef4020cd1643c89fca33725d7aad5c3b7db428053ff01b5e3dd6092cd33ed3875a695b82bc2570425eb3f4dfb0d',
         },
       ],
       auxiliaryDataSupplement: null,

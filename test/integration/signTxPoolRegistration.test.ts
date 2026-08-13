@@ -5,6 +5,8 @@ import {describeSignTxPositiveTest, describeSignTxRejects} from '../test_utils'
 import {
   poolRegistrationOperatorTestCases,
   poolRegistrationOwnerTestCases,
+  poolRegistrationPayerTestCases,
+  poolRetirementPayerTestCases,
 } from './__fixtures__/signTxPoolRegistration'
 import {
   invalidCertificates,
@@ -24,6 +26,14 @@ describeSignTxPositiveTest(
 describeSignTxPositiveTest(
   'signTxPoolRegistrationOK_Operator',
   poolRegistrationOperatorTestCases,
+)
+describeSignTxPositiveTest(
+  'signTxPoolRegistrationOK_Payer',
+  poolRegistrationPayerTestCases,
+)
+describeSignTxPositiveTest(
+  'signTxPoolRetirementOK_Payer',
+  poolRetirementPayerTestCases,
 )
 
 describeSignTxRejects(

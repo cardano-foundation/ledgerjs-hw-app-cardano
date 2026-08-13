@@ -1,7 +1,8 @@
 import {expect} from 'chai'
 
 import type Ada from '../../src/Ada'
-import {getAda} from '../test_utils'
+import {isLedgerAppVersionAtLeast} from '../../src/validation/deviceCapabilities'
+import {APP_V8_1, getAda} from '../test_utils'
 
 describe('getVersion', () => {
   let ada: Ada = {} as Ada
@@ -17,6 +18,11 @@ describe('getVersion', () => {
   it('Should correctly get the semantic version of device', async () => {
     const {version, compatibility} = await ada.getVersion()
     const isV8 = version.major >= 8
+    const isV8_1 = isLedgerAppVersionAtLeast(
+      version,
+      APP_V8_1.major,
+      APP_V8_1.minor,
+    )
     const isAppXS = version.flags.isAppXS
 
     expect(version.major).to.be.oneOf([7, 8])
@@ -47,6 +53,8 @@ describe('getVersion', () => {
       supportsMultipleVotesPerVoter: isV8,
       supportsMessageSigning: true,
       supportsUnrestrictedTransaction: isV8,
+      supportsPoolRegistrationAsPayer: isV8_1,
+      supportsPoolRetirementAsPayer: isV8_1,
     })
   })
 })

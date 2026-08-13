@@ -216,6 +216,152 @@ describe('sign tx signing mode inference', () => {
     )
   })
 
+  it('infers pool payer mode from a single pool registration certificate', () => {
+    const parsed = parseSignTransactionRequest({
+      tx: {
+        ...baseTx,
+        certificates: [
+          {
+            type: CertificateType.STAKE_POOL_REGISTRATION,
+            params: {
+              poolKey: {
+                type: PoolKeyType.THIRD_PARTY,
+                params: {
+                  keyHashHex:
+                    '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
+                },
+              },
+              vrfKeyHashHex:
+                '0123456789012345678901234567890123456789012345678901234567890123',
+              pledge: 0,
+              cost: 0,
+              margin: {
+                numerator: 0,
+                denominator: 1,
+              },
+              rewardAccount: {
+                type: PoolRewardAccountType.THIRD_PARTY,
+                params: {
+                  rewardAccountHex:
+                    'f123456789012345678901234567890123456789012345678901234567',
+                },
+              },
+              poolOwners: [],
+              relays: [],
+            },
+          },
+        ],
+      },
+    })
+
+    expect(parsed.signingMode).to.equal(
+      TransactionSigningMode.POOL_REGISTRATION_AS_PAYER,
+    )
+  })
+
+  it('infers pool retirement payer mode from a hash pool key', () => {
+    const parsed = parseSignTransactionRequest({
+      tx: {
+        ...baseTx,
+        certificates: [
+          {
+            type: CertificateType.STAKE_POOL_RETIREMENT,
+            params: {
+              poolKeyHash:
+                '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
+              retirementEpoch: 42,
+            },
+          },
+        ],
+      },
+    })
+
+    expect(parsed.signingMode).to.equal(
+      TransactionSigningMode.POOL_RETIREMENT_AS_PAYER,
+    )
+  })
+
+  it('infers ordinary mode from a path pool key retirement', () => {
+    const parsed = parseSignTransactionRequest({
+      tx: {
+        ...baseTx,
+        certificates: [
+          {
+            type: CertificateType.STAKE_POOL_RETIREMENT,
+            params: {
+              poolKeyPath: [0x8000073d, 0x80000717, 0x80000000, 0x80000000],
+              retirementEpoch: 42,
+            },
+          },
+        ],
+      },
+    })
+
+    expect(parsed.signingMode).to.equal(
+      TransactionSigningMode.ORDINARY_TRANSACTION,
+    )
+  })
+
+  it('throws when path and hash pool key retirements are mixed', () => {
+    expectInvalidData(
+      () =>
+        parseSignTransactionRequest({
+          tx: {
+            ...baseTx,
+            certificates: [
+              {
+                type: CertificateType.STAKE_POOL_RETIREMENT,
+                params: {
+                  poolKeyPath: [0x8000073d, 0x80000717, 0x80000000, 0x80000000],
+                  retirementEpoch: 42,
+                },
+              },
+              {
+                type: CertificateType.STAKE_POOL_RETIREMENT,
+                params: {
+                  poolKeyHash:
+                    '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
+                  retirementEpoch: 42,
+                },
+              },
+            ],
+          },
+        }),
+      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
+    )
+  })
+
+  it('throws when a hash pool key retirement has another certificate', () => {
+    expectInvalidData(
+      () =>
+        parseSignTransactionRequest({
+          tx: {
+            ...baseTx,
+            certificates: [
+              {
+                type: CertificateType.STAKE_POOL_RETIREMENT,
+                params: {
+                  poolKeyHash:
+                    '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
+                  retirementEpoch: 42,
+                },
+              },
+              {
+                type: CertificateType.STAKE_REGISTRATION,
+                params: {
+                  stakeCredential: {
+                    type: CredentialParamsType.KEY_PATH,
+                    keyPath: [0x8000073c, 0x80000717, 0x80000000, 2, 0],
+                  },
+                },
+              },
+            ],
+          },
+        }),
+      InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE,
+    )
+  })
+
   it('throws when the mode cannot be determined automatically', () => {
     expectInvalidData(
       () =>

@@ -27,7 +27,7 @@ import {
   TransactionSigningMode,
 } from '../../../src/types/public'
 import {str_to_path} from '../../../src/utils/address'
-import {DoNotRunOnLedger} from '../../test_utils'
+import {APP_V8_1, DoNotRunOnLedger} from '../../test_utils'
 import {
   certificates,
   defaultPoolRegistration,
@@ -494,6 +494,37 @@ export const stakePoolRegistrationPoolIdRejectTestCases: TestCaseRejectShelley[]
       },
       rejectReason:
         InvalidDataReason.SIGN_MODE_POOL_OPERATOR__DEVICE_OWNED_POOL_KEY_REQUIRED,
+    },
+    {
+      testName: 'Path_sent_in_for_Pool_Registration_Payer_Tx',
+      appVersion: {unsupportedInAppXS: true, supportedSince: APP_V8_1},
+      tx: {
+        ...txBase,
+        certificates: [
+          {
+            type: CertificateType.STAKE_POOL_REGISTRATION,
+            params: {
+              ...defaultPoolRegistration,
+              poolKey: {
+                type: PoolKeyType.DEVICE_OWNED,
+                params: {
+                  path: str_to_path("1853'/1815'/0'/0'"),
+                },
+              },
+            },
+          },
+        ],
+      },
+      signingMode: TransactionSigningMode.POOL_REGISTRATION_AS_PAYER,
+      err: {
+        v8: {
+          errCls: DeviceStatusError,
+          errMsg:
+            StatusWordMsgV8[StatusWordV8.SWO_SECURITY_CONDITION_NOT_SATISFIED],
+        },
+      },
+      rejectReason:
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__THIRD_PARTY_POOL_KEY_REQUIRED,
     },
   ]
 
