@@ -88,6 +88,10 @@ function serializeSigningMode(signingMode: TransactionSigningMode): Buffer {
     [TransactionSigningMode.PLUTUS_TRANSACTION]: SigningMode.PLUTUS_TRANSACTION,
     [TransactionSigningMode.UNRESTRICTED_TRANSACTION]:
       SigningMode.UNRESTRICTED_TRANSACTION,
+    [TransactionSigningMode.POOL_REGISTRATION_AS_PAYER]:
+      SigningMode.POOL_REGISTRATION_AS_PAYER,
+    [TransactionSigningMode.POOL_RETIREMENT_AS_PAYER]:
+      SigningMode.POOL_RETIREMENT_AS_PAYER,
   }[signingMode]
 
   assert(value !== undefined, 'invalid signing mode')
@@ -474,10 +478,9 @@ function serializeCertificate(certificate: ParsedCertificate): Buffer {
     case CertificateType.STAKE_POOL_RETIREMENT:
       return Buffer.concat([
         uint8_to_buf(certificate.type as Uint8_t),
-        serializeCredential({
-          type: CredentialType.KEY_PATH,
-          path: certificate.path,
-        }),
+        serializeCredential(
+          serializePoolKeyCredential(certificate.poolCredential),
+        ),
         uint64_to_buf(certificate.retirementEpoch),
       ])
     default:

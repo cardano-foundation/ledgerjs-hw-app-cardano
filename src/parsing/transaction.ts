@@ -41,6 +41,7 @@ import {
   PoolOwnerType,
   TransactionSigningMode,
   TxOutputDestinationType,
+  TxAuxiliaryDataType,
   TxRequiredSignerType,
   VoteOption,
 } from '../types/public'
@@ -291,6 +292,8 @@ export function parseSigningMode(
     case TransactionSigningMode.MULTISIG_TRANSACTION:
     case TransactionSigningMode.PLUTUS_TRANSACTION:
     case TransactionSigningMode.UNRESTRICTED_TRANSACTION:
+    case TransactionSigningMode.POOL_REGISTRATION_AS_PAYER:
+    case TransactionSigningMode.POOL_RETIREMENT_AS_PAYER:
       return mode
     default:
       throw new InvalidData(InvalidDataReason.SIGN_MODE_UNKNOWN)
@@ -358,9 +361,53 @@ function inferPoolRegistrationSigningMode(
     return TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
   }
 
+  // Payer mode is the unique shape "third-party pool key + no device-owned
+  // owners" -- the payer holds neither the pool's own credential nor any
+  // owner's.
+  if (
+    certificate.pool.poolKey.type === PoolKeyType.THIRD_PARTY &&
+    deviceOwnedOwnerCount === 0
+  ) {
+    return TransactionSigningMode.POOL_REGISTRATION_AS_PAYER
+  }
+
   // Any other pool-registration shape is not unique enough for AUTO to choose
-  // between owner and operator modes.
+  // between owner, operator and payer modes.
   throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
+}
+
+function inferPoolRetirementSigningMode(
+  tx: ParsedTransaction,
+): TransactionSigningMode | null {
+  const retirementCertificates = tx.certificates.filter(
+    (certificate) => certificate.type === CertificateType.STAKE_POOL_RETIREMENT,
+  )
+
+  if (retirementCertificates.length === 0) {
+    return null
+  }
+
+  const hashPoolKeyCount = retirementCertificates.filter(
+    (certificate) =>
+      certificate.poolCredential.type === PoolKeyType.THIRD_PARTY,
+  ).length
+
+  if (hashPoolKeyCount === 0) {
+    return null
+  }
+
+  // A hash-form pool key is only signable in payer mode, which requires all of
+  // them to be hashes.
+  if (hashPoolKeyCount !== retirementCertificates.length) {
+    throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
+  }
+
+  // Payer mode allows several retirement certificates, but no other kinds.
+  if (tx.certificates.length !== retirementCertificates.length) {
+    throw new InvalidData(InvalidDataReason.CANNOT_DETERMINE_TX_SIGNING_MODE)
+  }
+
+  return TransactionSigningMode.POOL_RETIREMENT_AS_PAYER
 }
 
 function inferOrdinaryOrMultisigFromTx(
@@ -537,6 +584,11 @@ function inferSigningMode(
   const poolRegistrationMode = inferPoolRegistrationSigningMode(tx)
   if (poolRegistrationMode != null) {
     return poolRegistrationMode
+  }
+
+  const poolRetirementMode = inferPoolRetirementSigningMode(tx)
+  if (poolRetirementMode != null) {
+    return poolRetirementMode
   }
 
   // Plutus signals are unambiguous and do not need witness-path inspection.
@@ -793,6 +845,19 @@ export function parseSignTransactionRequest(
           }
         }),
         InvalidDataReason.SIGN_MODE_ORDINARY__CERTIFICATE_DREP_CREDENTIAL_ONLY_AS_PATH,
+      )
+      validate(
+        tx.certificates.every((certificate) => {
+          switch (certificate.type) {
+            case CertificateType.STAKE_POOL_RETIREMENT:
+              return (
+                certificate.poolCredential.type === PoolKeyType.DEVICE_OWNED
+              )
+            default:
+              return true
+          }
+        }),
+        InvalidDataReason.SIGN_MODE_ORDINARY__POOL_RETIREMENT_POOL_KEY_ONLY_AS_PATH,
       )
 
       // withdrawals as paths
@@ -1181,6 +1246,231 @@ export function parseSignTransactionRequest(
       break
     }
 
+    case TransactionSigningMode.POOL_REGISTRATION_AS_PAYER: {
+      // Mirrors POOL_REGISTRATION_AS_OPERATOR's restrictions -- the payer's tx
+      // body must stay just as narrowly scoped, since owners/operator may add
+      // their own witness to this same tx body afterwards. The only semantic
+      // difference from operator is the pool key: the payer never holds the
+      // cold key, so it must be given as a hash, never a path.
+
+      // no datum in outputs
+      validate(
+        tx.outputs.every((out) => out.datum == null),
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__DATUM_NOT_ALLOWED,
+      )
+      // no reference script in outputs
+      validate(
+        tx.outputs.every((out) => out.referenceScriptHex == null),
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__REFERENCE_SCRIPT_NOT_ALLOWED,
+      )
+
+      // only a single certificate that is pool registration
+      validate(
+        tx.certificates.length === 1,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
+      )
+      tx.certificates.forEach((certificate) => {
+        validate(
+          certificate.type === CertificateType.STAKE_POOL_REGISTRATION,
+          InvalidDataReason.SIGN_MODE_POOL_PAYER__SINGLE_POOL_REG_CERTIFICATE_REQUIRED,
+        )
+        validate(
+          certificate.pool.poolKey.type === PoolKeyType.THIRD_PARTY,
+          InvalidDataReason.SIGN_MODE_POOL_PAYER__THIRD_PARTY_POOL_KEY_REQUIRED,
+        )
+        validate(
+          certificate.pool.owners.filter(
+            (o) => o.type === PoolOwnerType.DEVICE_OWNED,
+          ).length === 0,
+          InvalidDataReason.SIGN_MODE_POOL_PAYER__DEVICE_OWNED_POOL_OWNER_NOT_ALLOWED,
+        )
+      })
+
+      // cannot have withdrawal in the tx
+      validate(
+        tx.withdrawals.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__WITHDRAWALS_NOT_ALLOWED,
+      )
+
+      // cannot have mint in the tx
+      validate(
+        tx.mint == null,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__MINT_NOT_ALLOWED,
+      )
+
+      // cannot have script data hash in the tx
+      validate(
+        tx.scriptDataHashHex == null,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__SCRIPT_DATA_HASH_NOT_ALLOWED,
+      )
+
+      // cannot have collateralInputs in the tx
+      validate(
+        tx.collateralInputs.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__COLLATERAL_INPUTS_NOT_ALLOWED,
+      )
+
+      // cannot have required signers in the tx
+      validate(
+        tx.requiredSigners.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__REQUIRED_SIGNERS_NOT_ALLOWED,
+      )
+
+      // cannot have collateral output in the tx
+      validate(
+        tx.collateralOutput == null,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__COLLATERAL_OUTPUT_NOT_ALLOWED,
+      )
+
+      // cannot have total collateral in the tx
+      validate(
+        tx.totalCollateral == null,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__TOTAL_COLLATERAL_NOT_ALLOWED,
+      )
+
+      // cannot have reference inputs in the tx
+      validate(
+        tx.referenceInputs.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__REFERENCE_INPUTS_NOT_ALLOWED,
+      )
+
+      // cannot have voting procedures in the tx
+      validate(
+        tx.votingProcedures.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__VOTING_PROCEDURES_NOT_ALLOWED,
+      )
+
+      // cannot have treasury in the tx
+      validate(
+        tx.treasury == null,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__TREASURY_NOT_ALLOWED,
+      )
+
+      // cannot have donation in the tx
+      validate(
+        tx.donation == null,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__DONATION_NOT_ALLOWED,
+      )
+
+      // a CIP-36 registration is signed with a staking key,
+      // but the payer witnesses only its payment keys
+      validate(
+        tx.auxiliaryData?.type !== TxAuxiliaryDataType.CIP36_REGISTRATION,
+        InvalidDataReason.SIGN_MODE_POOL_PAYER__CIP36_REGISTRATION_NOT_ALLOWED,
+      )
+
+      break
+    }
+
+    case TransactionSigningMode.POOL_RETIREMENT_AS_PAYER: {
+      // The payer holds neither the pool's cold key nor any other credential in
+      // this transaction, so the pool key must be given as a hash. Unlike
+      // registration's payer mode, retirement certificates carry no
+      // witness-shareable credential, so several of them may be combined here.
+
+      // no datum in outputs
+      validate(
+        tx.outputs.every((out) => out.datum == null),
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__DATUM_NOT_ALLOWED,
+      )
+      // no reference script in outputs
+      validate(
+        tx.outputs.every((out) => out.referenceScriptHex == null),
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__REFERENCE_SCRIPT_NOT_ALLOWED,
+      )
+
+      // only pool retirement certificates, each with a hash pool key
+      validate(
+        tx.certificates.length > 0,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__ONLY_POOL_RETIREMENT_CERTIFICATES_ALLOWED,
+      )
+      tx.certificates.forEach((certificate) => {
+        validate(
+          certificate.type === CertificateType.STAKE_POOL_RETIREMENT,
+          InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__ONLY_POOL_RETIREMENT_CERTIFICATES_ALLOWED,
+        )
+        validate(
+          certificate.poolCredential.type === PoolKeyType.THIRD_PARTY,
+          InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__POOL_KEY_HASH_REQUIRED,
+        )
+      })
+
+      // cannot have withdrawal in the tx
+      validate(
+        tx.withdrawals.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__WITHDRAWALS_NOT_ALLOWED,
+      )
+
+      // cannot have mint in the tx
+      validate(
+        tx.mint == null,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__MINT_NOT_ALLOWED,
+      )
+
+      // cannot have script data hash in the tx
+      validate(
+        tx.scriptDataHashHex == null,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__SCRIPT_DATA_HASH_NOT_ALLOWED,
+      )
+
+      // cannot have collateralInputs in the tx
+      validate(
+        tx.collateralInputs.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__COLLATERAL_INPUTS_NOT_ALLOWED,
+      )
+
+      // cannot have required signers in the tx
+      validate(
+        tx.requiredSigners.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__REQUIRED_SIGNERS_NOT_ALLOWED,
+      )
+
+      // cannot have collateral output in the tx
+      validate(
+        tx.collateralOutput == null,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__COLLATERAL_OUTPUT_NOT_ALLOWED,
+      )
+
+      // cannot have total collateral in the tx
+      validate(
+        tx.totalCollateral == null,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__TOTAL_COLLATERAL_NOT_ALLOWED,
+      )
+
+      // cannot have reference inputs in the tx
+      validate(
+        tx.referenceInputs.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__REFERENCE_INPUTS_NOT_ALLOWED,
+      )
+
+      // cannot have voting procedures in the tx
+      validate(
+        tx.votingProcedures.length === 0,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__VOTING_PROCEDURES_NOT_ALLOWED,
+      )
+
+      // cannot have treasury in the tx
+      validate(
+        tx.treasury == null,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__TREASURY_NOT_ALLOWED,
+      )
+
+      // cannot have donation in the tx
+      validate(
+        tx.donation == null,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__DONATION_NOT_ALLOWED,
+      )
+
+      // a CIP-36 registration is signed with a staking key,
+      // but the payer witnesses only its payment keys
+      validate(
+        tx.auxiliaryData?.type !== TxAuxiliaryDataType.CIP36_REGISTRATION,
+        InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__CIP36_REGISTRATION_NOT_ALLOWED,
+      )
+
+      break
+    }
+
     case TransactionSigningMode.PLUTUS_TRANSACTION: {
       // pool registrations not allowed to be combined with Plutus
       validate(
@@ -1189,6 +1479,21 @@ export function parseSignTransactionRequest(
             certificate.type !== CertificateType.STAKE_POOL_REGISTRATION,
         ),
         InvalidDataReason.SIGN_MODE_PLUTUS__POOL_REGISTRATION_NOT_ALLOWED,
+      )
+      // pool retirement pool key given by path; the hash form belongs to
+      // TransactionSigningMode.POOL_RETIREMENT_AS_PAYER
+      validate(
+        tx.certificates.every((certificate) => {
+          switch (certificate.type) {
+            case CertificateType.STAKE_POOL_RETIREMENT:
+              return (
+                certificate.poolCredential.type === PoolKeyType.DEVICE_OWNED
+              )
+            default:
+              return true
+          }
+        }),
+        InvalidDataReason.SIGN_MODE_PLUTUS__POOL_RETIREMENT_POOL_KEY_ONLY_AS_PATH,
       )
 
       break
@@ -1202,6 +1507,21 @@ export function parseSignTransactionRequest(
             certificate.type !== CertificateType.STAKE_POOL_REGISTRATION,
         ),
         InvalidDataReason.SIGN_MODE_UNRESTRICTED__POOL_REGISTRATION_NOT_ALLOWED,
+      )
+      // pool retirement pool key given by path; the hash form belongs to
+      // TransactionSigningMode.POOL_RETIREMENT_AS_PAYER
+      validate(
+        tx.certificates.every((certificate) => {
+          switch (certificate.type) {
+            case CertificateType.STAKE_POOL_RETIREMENT:
+              return (
+                certificate.poolCredential.type === PoolKeyType.DEVICE_OWNED
+              )
+            default:
+              return true
+          }
+        }),
+        InvalidDataReason.SIGN_MODE_UNRESTRICTED__POOL_RETIREMENT_POOL_KEY_ONLY_AS_PATH,
       )
 
       break

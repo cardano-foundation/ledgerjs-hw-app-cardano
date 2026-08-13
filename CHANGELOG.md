@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+Pool payer signing modes
+
+### Added
+
+- support for pool registration and pool retirement payer signing modes, where a third party pays the fee and, for a new pool, the pool deposit (requires Ledger app v8.1)
+- pool key hash in pool retirement certificates (only in the pool retirement payer signing mode)
+
+### Changed
+
+- pool retirement certificates take either `poolKeyPath` or `poolKeyHash`, not both
+- signing mode inference returns `POOL_REGISTRATION_AS_PAYER` for a pool registration with a third-party pool key and no device-owned owners, and `POOL_RETIREMENT_AS_PAYER` for pool retirements with pool key hashes
+
+
 ## [8.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v8.0.0...v8.1.0) - [October 1st 2026]
 
 ### Removed

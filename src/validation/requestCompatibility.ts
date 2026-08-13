@@ -191,6 +191,20 @@ export function ensureSignTxRequestSupported(
     unsupported(version, 'Unrestricted transactions')
   }
 
+  if (
+    request.signingMode === TransactionSigningMode.POOL_REGISTRATION_AS_PAYER &&
+    !compatibility.supportsPoolRegistrationAsPayer
+  ) {
+    unsupported(version, 'Pool registration as payer')
+  }
+
+  if (
+    request.signingMode === TransactionSigningMode.POOL_RETIREMENT_AS_PAYER &&
+    !compatibility.supportsPoolRetirementAsPayer
+  ) {
+    unsupported(version, 'Pool retirement as payer')
+  }
+
   const isOutputByron = (o: ParsedOutput | null) =>
     o != null &&
     o.destination.type === TxOutputDestinationType.DEVICE_OWNED &&

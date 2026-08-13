@@ -2,6 +2,7 @@ import {
   DRepType,
   CredentialType,
   CertificateType,
+  PoolKeyType,
 } from '../../../types/internal'
 import type {
   ParsedCertificate,
@@ -76,9 +77,14 @@ export function serializeTxCertificatePreMultisig(
       return Buffer.concat([uint8_to_buf(certificate.type as Uint8_t)])
     }
     case CertificateType.STAKE_POOL_RETIREMENT: {
+      // v7 has no payer mode, so the pool key is always device-owned here
+      assert(
+        certificate.poolCredential.type === PoolKeyType.DEVICE_OWNED,
+        'invalid pool retirement pool key',
+      )
       return Buffer.concat([
         uint8_to_buf(certificate.type as Uint8_t),
-        path_to_buf(certificate.path),
+        path_to_buf(certificate.poolCredential.path),
         uint64_to_buf(certificate.retirementEpoch),
       ])
     }
@@ -180,9 +186,14 @@ export function serializeTxCertificate(
       return Buffer.concat([uint8_to_buf(certificate.type as Uint8_t)])
     }
     case CertificateType.STAKE_POOL_RETIREMENT: {
+      // v7 has no payer mode, so the pool key is always device-owned here
+      assert(
+        certificate.poolCredential.type === PoolKeyType.DEVICE_OWNED,
+        'invalid pool retirement pool key',
+      )
       return Buffer.concat([
         uint8_to_buf(certificate.type as Uint8_t),
-        path_to_buf(certificate.path),
+        path_to_buf(certificate.poolCredential.path),
         uint64_to_buf(certificate.retirementEpoch),
       ])
     }

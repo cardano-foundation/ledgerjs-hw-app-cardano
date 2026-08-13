@@ -6,10 +6,21 @@ import {
   SCRIPT_HASH_LENGTH,
   CertificateType,
   KEY_HASH_LENGTH,
+  PoolKeyType,
 } from '../types/internal'
-import type {ParsedCertificate, ParsedDRep, Uint64_str} from '../types/internal'
+import type {
+  ParsedCertificate,
+  ParsedDRep,
+  ParsedPoolKey,
+  Uint64_str,
+} from '../types/internal'
 import {DRepParamsType} from '../types/public'
-import type {Certificate, bigint_like, DRepParams} from '../types/public'
+import type {
+  BIP32Path,
+  Certificate,
+  bigint_like,
+  DRepParams,
+} from '../types/public'
 import {
   parseBIP32Path,
   parseHexStringOfLength,
@@ -17,6 +28,7 @@ import {
   parseUint64_str,
   parseAnchor,
   parseCoin,
+  validate,
 } from '../utils/parse'
 import {parsePoolParams} from './poolRegistration'
 
@@ -68,6 +80,33 @@ function parsePoolKeyHash(poolKeyHashHex: string) {
     KEY_HASH_LENGTH,
     InvalidDataReason.CERTIFICATE_INVALID_POOL_KEY_HASH,
   )
+}
+
+function parsePoolRetirementPoolKey(
+  poolKeyPath: BIP32Path | undefined,
+  poolKeyHash: string | undefined,
+): ParsedPoolKey {
+  validate(
+    (poolKeyPath == null) !== (poolKeyHash == null),
+    InvalidDataReason.POOL_RETIREMENT_INVALID_POOL_KEY,
+  )
+  if (poolKeyPath != null) {
+    return {
+      type: PoolKeyType.DEVICE_OWNED,
+      path: parseBIP32Path(
+        poolKeyPath,
+        InvalidDataReason.CERTIFICATE_INVALID_PATH,
+      ),
+    }
+  }
+  return {
+    type: PoolKeyType.THIRD_PARTY,
+    hashHex: parseHexStringOfLength(
+      poolKeyHash as string,
+      KEY_HASH_LENGTH,
+      InvalidDataReason.POOL_RETIREMENT_INVALID_POOL_KEY,
+    ),
+  }
 }
 
 export function parseCertificate(cert: Certificate): ParsedCertificate {
@@ -236,9 +275,9 @@ export function parseCertificate(cert: Certificate): ParsedCertificate {
     case CertificateType.STAKE_POOL_RETIREMENT: {
       return {
         type: cert.type,
-        path: parseBIP32Path(
+        poolCredential: parsePoolRetirementPoolKey(
           cert.params.poolKeyPath,
-          InvalidDataReason.CERTIFICATE_INVALID_PATH,
+          cert.params.poolKeyHash,
         ),
         retirementEpoch: parseUint64_str(
           cert.params.retirementEpoch,
