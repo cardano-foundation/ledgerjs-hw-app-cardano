@@ -4,8 +4,6 @@
 
 JS library for communication with Ledger Hardware Wallets running the [Cardano ADA Ledger Application](https://github.com/cardano-foundation/ledger-app-cardano).
 
-Note: this project comes with both [Typescript](https://www.typescriptlang.org/) and [Flow](https://flow.org/) type definitions, but only the Typescript ones are checked for correctness.
-
 See [`doc/overview.md`](doc/overview.md) for architecture and [`doc/testing.md`](doc/testing.md) for how to run tests.
 
 ### Example code

@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Removed
+
+- Flow type definitions (`*.js.flow`) are no longer shipped with the package; only TypeScript type definitions are provided
+
+
 ## [8.0.0] - [2026]
 
 ### Added
