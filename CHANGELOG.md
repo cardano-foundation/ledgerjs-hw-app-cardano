@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [8.0.1](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v8.0.0...v8.0.1) - [October 1st 2026]
+
+### Removed
+
+- Flow type definitions (`*.js.flow`) are no longer shipped with the package; only TypeScript type definitions are provided
+
+
 ## [8.0.0] - [2026]
 
 ### Added
