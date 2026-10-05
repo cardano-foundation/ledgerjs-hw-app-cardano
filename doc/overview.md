@@ -3,7 +3,7 @@
 ## Related repositories
 
 - **This library** (`ledgerjs-cardano-shelley`) — JS/TS SDK for communicating with the Cardano Ledger app.
-- **`../ledger-app-cardano`** — device-side Cardano app (C). The wire protocol implemented here is defined there.
+- **`../ledger-app-cardano-dev`** — device-side Cardano app (C). The wire protocol implemented here is defined there.
 - **`../cardano-hw-interop-lib`** — shared Cardano data types used in tests and parsing.
 
 ## Source layout (`src/`)
