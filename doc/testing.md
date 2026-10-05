@@ -47,10 +47,10 @@ yarn device-self-test-speculos
 
 ## Speculos setup
 
-`yarn test-speculos` uses Speculos from the sibling repo `../ledger-app-cardano`. The default elf is `../ledger-app-cardano/build/stax/bin/app.elf`. Set up the venv once:
+`yarn test-speculos` uses Speculos from the sibling repo `../ledger-app-cardano-dev`. The default elf is `../ledger-app-cardano-dev/build/stax/bin/app.elf`. To use a different app repo, set `APP_REPO=/path/to/app-repo`; both the elf and venv paths are derived from it. Set up the venv once:
 
 ```bash
-cd ../ledger-app-cardano
+cd ../ledger-app-cardano-dev
 python3 -m venv tests/venv
 source tests/venv/bin/activate
 pip install -r tests/requirements.txt

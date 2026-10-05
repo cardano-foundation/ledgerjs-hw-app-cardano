@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_REPO="$SCRIPT_DIR/../../ledger-app-cardano"
+APP_REPO="${APP_REPO:-$SCRIPT_DIR/../../ledger-app-cardano-dev}"
 APP_ELF="${APP_ELF:-$APP_REPO/build/stax/bin/app.elf}"
 BASE_APDU_PORT="${SPECULOS_APDU_PORT:-9999}"
 DISPLAY_MODE="headless"
@@ -57,7 +57,7 @@ VENV="$APP_REPO/tests/venv/bin/activate"
 if ! command -v speculos &>/dev/null; then
   if [ ! -f "$VENV" ]; then
     echo "ERROR: speculos not found on PATH and venv not found at: $VENV" >&2
-    echo "Set up the venv in ledger-app-cardano first (see its doc/testing.md)." >&2
+    echo "Set up the venv in $APP_REPO first (see its doc/testing.md), or set APP_REPO." >&2
     exit 1
   fi
   # shellcheck source=/dev/null
