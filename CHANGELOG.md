@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased]
+## [8.2.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v8.1.0...v8.2.0) - [November 24th 2026]
 
 Pool payer signing modes
 
