@@ -19,6 +19,7 @@ Pool payer signing modes
 
 - pool retirement certificates take either `poolKeyPath` or `poolKeyHash`, not both
 - signing mode inference returns `POOL_REGISTRATION_AS_PAYER` for a pool registration with a third-party pool key and no device-owned owners, and `POOL_RETIREMENT_AS_PAYER` for pool retirements with pool key hashes
+- unknown transaction fields with a value are rejected instead of silently dropped
 
 
 ## [8.1.0](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano/compare/v8.0.0...v8.1.0) - [October 1st 2026]

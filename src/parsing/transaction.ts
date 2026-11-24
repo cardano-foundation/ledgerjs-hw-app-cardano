@@ -66,6 +66,16 @@ import {parseNetwork} from './network'
 import {parseTokenBundle, parseTxOutput} from './output'
 import {parseTxAuxiliaryData} from './txAuxiliaryData'
 
+// Fails to compile if a Transaction field has no ParsedTransaction counterpart
+// (or the reverse).
+type EqualTxKeys = keyof Transaction extends keyof ParsedTransaction
+  ? keyof ParsedTransaction extends keyof Transaction
+    ? true
+    : false
+  : false
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- compile-time check only
+const _sameTxKeys: EqualTxKeys = true
+
 function parseTxInput(input: TxInput): ParsedInput {
   validate(isObject(input), InvalidDataReason.INPUT_INVALID_TX_HASH)
   const txHashHex = parseHexStringOfLength(
@@ -620,82 +630,113 @@ function inferSigningMode(
 }
 
 export function parseTransaction(tx: Transaction): ParsedTransaction {
-  const network = parseNetwork(tx.network)
+  const {
+    network: txNetwork,
+    inputs: txInputs,
+    outputs: txOutputs,
+    fee: txFee,
+    ttl: txTtl,
+    certificates: txCertificates,
+    withdrawals: txWithdrawals,
+    auxiliaryData: txAuxiliaryData,
+    validityIntervalStart: txValidityIntervalStart,
+    mint: txMint,
+    scriptDataHashHex: txScriptDataHashHex,
+    collateralInputs: txCollateralInputs,
+    requiredSigners: txRequiredSigners,
+    includeNetworkId: txIncludeNetworkId,
+    collateralOutput: txCollateralOutput,
+    totalCollateral: txTotalCollateral,
+    referenceInputs: txReferenceInputs,
+    votingProcedures: txVotingProcedures,
+    treasury: txTreasury,
+    donation: txDonation,
+    ...rest
+  } = tx
+  // Reject an unknown field with a value, so that the device does not sign a
+  // body without it. Runtime values can have fields the type does not allow.
+  const unknownFields: Record<string, never> = rest
+  validate(
+    Object.values(unknownFields).every((value) => value == null),
+    InvalidDataReason.TX_UNKNOWN_FIELD,
+  )
+
+  const network = parseNetwork(txNetwork)
   // inputs
-  validate(isArray(tx.inputs), InvalidDataReason.INPUTS_NOT_ARRAY)
-  validate(tx.inputs.length > 0, InvalidDataReason.INPUTS_EMPTY)
-  const inputs = tx.inputs.map((inp) => parseTxInput(inp))
+  validate(isArray(txInputs), InvalidDataReason.INPUTS_NOT_ARRAY)
+  validate(txInputs.length > 0, InvalidDataReason.INPUTS_EMPTY)
+  const inputs = txInputs.map((inp) => parseTxInput(inp))
 
   // outputs
-  validate(isArray(tx.outputs), InvalidDataReason.OUTPUTS_NOT_ARRAY)
-  const outputs = tx.outputs.map((o) => parseTxOutput(o, tx.network))
+  validate(isArray(txOutputs), InvalidDataReason.OUTPUTS_NOT_ARRAY)
+  const outputs = txOutputs.map((o) => parseTxOutput(o, txNetwork))
 
   // fee
-  const fee = parseCoin(tx.fee, InvalidDataReason.FEE_INVALID)
+  const fee = parseCoin(txFee, InvalidDataReason.FEE_INVALID)
 
   //  ttl
   const ttl =
-    tx.ttl == null
+    txTtl == null
       ? null
-      : parseUint64_str(tx.ttl, {}, InvalidDataReason.TTL_INVALID)
+      : parseUint64_str(txTtl, {}, InvalidDataReason.TTL_INVALID)
 
   // certificates
-  const certificates = parseCertificates(tx.certificates ?? [])
+  const certificates = parseCertificates(txCertificates ?? [])
 
   // withdrawals
   // we can't check here, but withdrawal map keys (derived from stake credentials) should be in CBOR canonical ordering
-  const withdrawals = parseWithdrawals(tx.withdrawals ?? [])
+  const withdrawals = parseWithdrawals(txWithdrawals ?? [])
 
   // auxiliary data
   const auxiliaryData =
-    tx.auxiliaryData == null
+    txAuxiliaryData == null
       ? null
-      : parseTxAuxiliaryData(network, tx.auxiliaryData)
+      : parseTxAuxiliaryData(network, txAuxiliaryData)
 
   // validity start
   const validityIntervalStart =
-    tx.validityIntervalStart == null
+    txValidityIntervalStart == null
       ? null
       : parseUint64_str(
-          tx.validityIntervalStart,
+          txValidityIntervalStart,
           {},
           InvalidDataReason.VALIDITY_INTERVAL_START_INVALID,
         )
 
   // mint instructions
   const mint =
-    tx.mint == null ? null : parseTokenBundle(tx.mint, false, parseInt64_str)
+    txMint == null ? null : parseTokenBundle(txMint, false, parseInt64_str)
 
   // script data hash hex
   const scriptDataHashHex =
-    tx.scriptDataHashHex == null
+    txScriptDataHashHex == null
       ? null
       : parseHexStringOfLength(
-          tx.scriptDataHashHex,
+          txScriptDataHashHex,
           SCRIPT_DATA_HASH_LENGTH,
           InvalidDataReason.SCRIPT_DATA_HASH_WRONG_LENGTH,
         )
 
   // collateral inputs
-  const collateralInputs = parseCollateralInputs(tx.collateralInputs ?? [])
+  const collateralInputs = parseCollateralInputs(txCollateralInputs ?? [])
 
   // required signers
-  const requiredSigners = parseRequiredSigners(tx.requiredSigners ?? [])
+  const requiredSigners = parseRequiredSigners(txRequiredSigners ?? [])
 
   // include network ID
   const includeNetworkId =
-    tx.includeNetworkId == null
+    txIncludeNetworkId == null
       ? false
       : parseBoolean(
-          tx.includeNetworkId,
+          txIncludeNetworkId,
           InvalidDataReason.NETWORK_ID_INCLUDE_INVALID,
         )
 
   // collateral output
   const collateralOutput =
-    tx.collateralOutput == null
+    txCollateralOutput == null
       ? null
-      : parseTxOutput(tx.collateralOutput, tx.network)
+      : parseTxOutput(txCollateralOutput, txNetwork)
   validate(
     collateralOutput?.datum == null,
     InvalidDataReason.COLLATERAL_INPUT_CONTAINS_DATUM,
@@ -707,31 +748,31 @@ export function parseTransaction(tx: Transaction): ParsedTransaction {
 
   // total collateral
   const totalCollateral =
-    tx.totalCollateral == null
+    txTotalCollateral == null
       ? null
       : parseCoin(
-          tx.totalCollateral,
+          txTotalCollateral,
           InvalidDataReason.TOTAL_COLLATERAL_NOT_VALID,
         )
 
   // reference inputs
-  const referenceInputs = parseReferenceInputs(tx.referenceInputs ?? [])
+  const referenceInputs = parseReferenceInputs(txReferenceInputs ?? [])
 
   // voting procedures
-  const votingProcedures = parseVotingProcedures(tx.votingProcedures ?? [])
+  const votingProcedures = parseVotingProcedures(txVotingProcedures ?? [])
 
   // treasury
   const treasury =
-    tx.treasury == null
+    txTreasury == null
       ? null
-      : parseCoin(tx.treasury, InvalidDataReason.TREASURY_NOT_VALID)
+      : parseCoin(txTreasury, InvalidDataReason.TREASURY_NOT_VALID)
 
   // donation
   const donation =
-    tx.donation == null
+    txDonation == null
       ? null
       : parseUint64_str(
-          tx.donation,
+          txDonation,
           {min: '1', max: MAX_LOVELACE_SUPPLY_STR},
           InvalidDataReason.DONATION_NOT_VALID,
         )

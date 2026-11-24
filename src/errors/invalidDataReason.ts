@@ -10,6 +10,7 @@ export enum InvalidDataReason {
   NETWORK_INVALID_NETWORK_ID = 'invalid network id',
   NETWORK_ID_INCLUDE_INVALID = 'invalid value for includeNetworkId',
   TX_OPTIONS_INVALID_TAG_CBOR_SETS = 'tagCborSets must be a boolean',
+  TX_UNKNOWN_FIELD = 'unknown transaction field',
 
   INPUTS_NOT_ARRAY = 'inputs not an array',
   INPUTS_EMPTY = 'transaction must contain at least one input',

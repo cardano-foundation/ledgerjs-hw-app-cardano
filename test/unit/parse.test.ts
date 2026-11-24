@@ -5,10 +5,12 @@ import {parseCertificate} from '../../src/parsing/certificate'
 import {parseCVote} from '../../src/parsing/cVote'
 import {parseNativeScript} from '../../src/parsing/nativeScript'
 import {parsePoolParams} from '../../src/parsing/poolRegistration'
+import {parseSignTransactionRequest} from '../../src/parsing/transaction'
 import type {
   NativeScript,
   PoolRegistrationParams,
   PoolRetirementParams,
+  Transaction,
 } from '../../src/types/public'
 import {
   CertificateType,
@@ -17,11 +19,13 @@ import {
   PoolOwnerType,
   PoolRewardAccountType,
   RelayType,
+  TransactionSigningMode,
 } from '../../src/types/public'
 import {assert} from '../../src/utils/assert'
 import {str_to_path} from '../../src/utils/address'
 import {isUintStr, parseInt64_str, parseUint64_str} from '../../src/utils/parse'
 import {int64_to_buf, uint64_to_buf} from '../../src/utils/serialize'
+import {shelleyBase} from '../integration/__fixtures__/txElements'
 
 type BasicParseTest = {
   signed: boolean
@@ -316,6 +320,29 @@ describe('advancedParseTest', () => {
           ],
         }),
       ).to.throw(InvalidDataReason.RELAY_INVALID_IPV6)
+    }
+  })
+
+  it('accepts unknown transaction fields with an undefined or null value', () => {
+    const signingMode = TransactionSigningMode.ORDINARY_TRANSACTION
+    const parsed = parseSignTransactionRequest({signingMode, tx: shelleyBase})
+
+    for (const value of [undefined, null]) {
+      const tx = {...shelleyBase, unknownField: value} as Transaction
+      expect(parseSignTransactionRequest({signingMode, tx})).to.deep.equal(
+        parsed,
+      )
+    }
+  })
+
+  it('rejects unknown transaction fields with a value', () => {
+    const signingMode = TransactionSigningMode.ORDINARY_TRANSACTION
+    // the public type forbids unknown fields; JS callers can still send them
+    for (const value of [false, 0, '', [], {}, [{e0: 1}]]) {
+      const tx = {...shelleyBase, unknownField: value} as Transaction
+      expect(() => parseSignTransactionRequest({signingMode, tx})).to.throw(
+        InvalidDataReason.TX_UNKNOWN_FIELD,
+      )
     }
   })
 })

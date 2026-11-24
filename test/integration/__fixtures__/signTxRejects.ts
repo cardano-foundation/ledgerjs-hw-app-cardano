@@ -993,6 +993,21 @@ export const transactionInitRejectTestCases: TestCaseRejectShelley[] = [
     rejectReason:
       InvalidDataReason.SIGN_MODE_POOL_RETIREMENT_PAYER__CIP36_REGISTRATION_NOT_ALLOWED,
   },
+  {
+    testName: 'Unknown transaction field',
+    tx: {
+      ...shelleyBase,
+      unknownField: [],
+    } as Transaction,
+    signingMode: TransactionSigningMode.ORDINARY_TRANSACTION,
+    err: {
+      // ledgerjs drops the unknown field when validation is off, so there is
+      // no on-device rejection to test (the _JS test covers the ledgerjs check)
+      v7: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
+      v8: {errCls: DeviceStatusError, errMsg: DoNotRunOnLedger},
+    },
+    rejectReason: InvalidDataReason.TX_UNKNOWN_FIELD,
+  },
 ]
 
 export const addressParamsRejectTestCases: TestCaseRejectShelley[] = [
