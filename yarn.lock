@@ -860,6 +860,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/devices@npm:8.16.0":
+  version: 8.16.0
+  resolution: "@ledgerhq/devices@npm:8.16.0"
+  dependencies:
+    semver: "npm:7.7.3"
+  checksum: 10c0/cdd3c5620d980a82193302f185e9adb7644414928d27cb8f0d4184ddceab8413e97536d80b6d4f2496942c4508aa49afba32d4f9a0d2dad0648c57532e6a33e2
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/errors@npm:^6.31.0":
   version: 6.31.0
   resolution: "@ledgerhq/errors@npm:6.31.0"
@@ -867,32 +876,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.33.0":
-  version: 6.33.0
-  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:6.33.0"
+"@ledgerhq/errors@npm:^6.37.0":
+  version: 6.37.0
+  resolution: "@ledgerhq/errors@npm:6.37.0"
+  checksum: 10c0/8943569bec9640d7af14498491fc254857a3ec3bf21e841cf51b8bfe7fe9192838e1c854dad646c5264e020b1411df5fca26fc720dab31de539f2712ce6ed217
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.36.0":
+  version: 6.36.0
+  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:6.36.0"
   dependencies:
-    "@ledgerhq/devices": "npm:8.12.0"
-    "@ledgerhq/errors": "npm:^6.31.0"
-    "@ledgerhq/hw-transport": "npm:6.34.0"
-    "@ledgerhq/logs": "npm:^6.16.0"
+    "@ledgerhq/devices": "npm:8.16.0"
+    "@ledgerhq/errors": "npm:^6.37.0"
+    "@ledgerhq/hw-transport": "npm:6.35.5"
+    "@ledgerhq/logs": "npm:^6.17.0"
     node-hid: "npm:2.1.2"
-  checksum: 10c0/8d99228ac829961fe5cc3c773b8c430e51f777ad44a8a278104e3da9dd1ce02e8a100e27158172602073ec9c2d53b23cf03b683b971bdca40ded48d7daafbde7
+  checksum: 10c0/d005f73ac4848609e95d6f13ed9b6f5e3925a992b0038714dfb1e2863dca30ea0b04ee82eb2f53a5dfe8d9642eefaeca6ce80d082c066d7808a661696096110c
   languageName: node
   linkType: hard
 
 "@ledgerhq/hw-transport-node-hid@npm:^6.29.3":
-  version: 6.32.0
-  resolution: "@ledgerhq/hw-transport-node-hid@npm:6.32.0"
+  version: 6.33.5
+  resolution: "@ledgerhq/hw-transport-node-hid@npm:6.33.5"
   dependencies:
-    "@ledgerhq/devices": "npm:8.12.0"
-    "@ledgerhq/errors": "npm:^6.31.0"
-    "@ledgerhq/hw-transport": "npm:6.34.0"
-    "@ledgerhq/hw-transport-node-hid-noevents": "npm:^6.33.0"
-    "@ledgerhq/logs": "npm:^6.16.0"
+    "@ledgerhq/devices": "npm:8.16.0"
+    "@ledgerhq/errors": "npm:^6.37.0"
+    "@ledgerhq/hw-transport": "npm:6.35.5"
+    "@ledgerhq/hw-transport-node-hid-noevents": "npm:^6.36.0"
+    "@ledgerhq/logs": "npm:^6.17.0"
     lodash: "npm:^4.17.21"
     node-hid: "npm:2.1.2"
     usb: "npm:2.9.0"
-  checksum: 10c0/2e7bc3077ff191ecbf15da6d8ec12bba909f75c9a53eed41b7ab4832a298c0cf04c42fa1f69ef79615506a9a6b632c3191b751c5905021f0c53485b141030008
+  checksum: 10c0/545d5c768e587a1e4a5babed6db1de8859641539ef4c06197e85f7ecbbed0f29568cd4d83e9d4e9faca0cf5ddd27be83e5b95ca0ed113a5a32df5f2e6e57b766
   languageName: node
   linkType: hard
 
@@ -920,10 +936,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-transport@npm:6.35.5":
+  version: 6.35.5
+  resolution: "@ledgerhq/hw-transport@npm:6.35.5"
+  dependencies:
+    "@ledgerhq/devices": "npm:8.16.0"
+    "@ledgerhq/errors": "npm:^6.37.0"
+    "@ledgerhq/logs": "npm:^6.17.0"
+    events: "npm:^3.3.0"
+  checksum: 10c0/bdf2eb0fabde179de2fe0a82a543bc8e60e7f21e0e7532e1e449e6137d449c79638ebebce371f5da92418349f43cac68c134f0c40a25c29c7d2e9f43e39f8b82
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/logs@npm:^6.16.0":
   version: 6.16.0
   resolution: "@ledgerhq/logs@npm:6.16.0"
   checksum: 10c0/f2af7231c578bda193348c2aa23c396967812d542d331628780eebc354363862e99415a9f83a50d3de68668305bd699772c2db469befc7f6931873b94832c0fe
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/logs@npm:^6.17.0":
+  version: 6.20.0
+  resolution: "@ledgerhq/logs@npm:6.20.0"
+  checksum: 10c0/0f1a446d745c577c45d6ff4c38ce976aa2fecadbf4832334d108888f6eee492cda1096921a3267ec403c903afaecf27b9eff1711666f9be8e75ee769e055fe41
   languageName: node
   linkType: hard
 
